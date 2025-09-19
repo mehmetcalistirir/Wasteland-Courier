@@ -42,7 +42,7 @@
     <UnityVersion>6000.1.3f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\Mehmed\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.1.2\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\Mehmed\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.1.3\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.3f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.3f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.3f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Weapon\UIController.cs" />
     <Compile Include="Assets\Scripts\Managers\DayNightCycle.cs" />
     <Compile Include="Assets\Scripts\Caravan\CaravanIndicator.cs" />
+    <Compile Include="Assets\Scripts\Player\FootstepPlayer.cs" />
     <Compile Include="Assets\Scripts\Caravan\CaravanInventory.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponBullet.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerCollector.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Assets\Scripts\Weapon\WeaponData.cs" />
     <Compile Include="Assets\Scripts\NPC\TradeOffer.cs" />
     <Compile Include="Assets\Scripts\Menu\CreditsAutoScroll.cs" />
+    <Compile Include="Assets\Scripts\Weapon\WeaponDurability.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemyWanderDriver.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponPart.cs" />
     <Compile Include="Assets\Scripts\Menu\LevelSelectMenu.cs" />

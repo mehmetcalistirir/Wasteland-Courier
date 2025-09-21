@@ -5,14 +5,53 @@ using UnityEngine.InputSystem;
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pausePanel;
+    public GameObject settingsPanel;
+    public static bool IsPaused { get; private set; }
 
-    private bool isPaused = false;
+    private PlayerInput playerInput;
+    private bool isInSettings = false;
+
+    public static PauseMenu Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    void Start()
+    {
+        playerInput = GetComponent<PlayerInput>();
+    }
 
     void Update()
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            if (isPaused)
+            // Crafting panel açıksa → kapat
+            if (WeaponCraftingSystem.IsCraftingOpen)
+            {
+                WeaponCraftingSystem.Instance.ToggleCraftingPanel();
+                Time.timeScale = 1f;
+                return;
+            }
+
+            // Trade panel açıksa → kapat
+            if (NPCInteraction.IsTradeOpen)
+            {
+                NPCInteraction.Instance.CloseTradePanel();
+                Time.timeScale = 1f;
+                return;
+            }
+
+            // Ayarlardayken ESC → pause menüsüne dön
+            if (isInSettings)
+            {
+                CloseSettings();
+                return;
+            }
+
+            // Pause toggle
+            if (IsPaused)
                 ResumeGame();
             else
                 PauseGame();
@@ -21,26 +60,40 @@ public class PauseMenu : MonoBehaviour
 
     public void PauseGame()
     {
-        isPaused = true;
+        IsPaused = true;
         pausePanel.SetActive(true);
-        Time.timeScale = 0f; // Oyunu durdur
+        settingsPanel.SetActive(false);
+        Time.timeScale = 0f;
     }
 
     public void ResumeGame()
     {
-        isPaused = false;
+        IsPaused = false;
         pausePanel.SetActive(false);
-        Time.timeScale = 1f; // Oyunu devam ettir
+        settingsPanel.SetActive(false);
+        isInSettings = false;
+        Time.timeScale = 1f;
+    }
+
+    public void OpenSettings()
+    {
+        pausePanel.SetActive(false);
+        settingsPanel.SetActive(true);
+        isInSettings = true;
+        Debug.Log("⚙️ Ayarlar paneli açıldı.");
+    }
+
+    public void CloseSettings()
+    {
+        settingsPanel.SetActive(false);
+        pausePanel.SetActive(true);
+        isInSettings = false;
+        Debug.Log("⬅️ Ayarlardan çıkıldı, Pause menüsüne dönüldü.");
     }
 
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
-    }
-
-    public void OpenSettings()
-    {
-        Debug.Log("⚙️ Ayarlar henüz eklenmedi.");
     }
 }

@@ -18,7 +18,7 @@ public class ResourceSpawner : MonoBehaviour
     void Start()
     {
         // Resources adlı GameObject'i bul
-        GameObject container = GameObject.Find("Resources");
+        GameObject container = GameObject.Find("Resources(Silme)");
         if (container != null)
         {
             resourceParent = container.transform;

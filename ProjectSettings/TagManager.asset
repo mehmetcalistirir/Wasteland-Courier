@@ -21,7 +21,7 @@ TagManager:
   - Enemy
   - Resource
   - Build
-  - 
+  - Animal
   - 
   - 
   - 
@@ -48,7 +48,7 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Darkness
+  - name: Shadows
     uniqueID: 2706341657
     locked: 0
   m_RenderingLayers:

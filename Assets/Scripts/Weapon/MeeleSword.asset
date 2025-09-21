@@ -13,9 +13,17 @@ MonoBehaviour:
   m_Name: MeeleSword
   m_EditorClassIdentifier: 
   weaponName: Meele Sword
+  weaponIcon: {fileID: 1284973499873244234, guid: 171cdb54c30d9b8488cfe2c488492715, type: 3}
   isAutomatic: 0
   fireRate: 0.5
-  reloadTime: 1.5
   damage: 10
   clipSize: 0
   maxAmmoCapacity: 0
+  reloadTime: 1.5
+  attackRange: 1.5
+  isShotgun: 0
+  pelletsPerShot: 3
+  pelletSpreadAngle: 8
+  shotgunCooldown: 2.5
+  isSniper: 0
+  sniperCooldown: 3

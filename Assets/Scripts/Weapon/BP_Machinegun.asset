@@ -12,24 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5661faa13df877545a4e1110bce1977f, type: 3}
   m_Name: BP_Machinegun
   m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}
   weaponName: Machinegun
   description: 
   weaponIcon: {fileID: 564439294832975815, guid: 7a62928c4b4846140a4fd9b6aa1fdda1, type: 3}
+  weaponData: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}
   weaponSlotIndexToUnlock: 0
   requiredStone: 0
   requiredWood: 0
   requiredScrapMetal: 0
   requiredParts:
   - partType: 0
-    amount: 1
+    amount: 0
   - partType: 1
-    amount: 1
+    amount: 0
   - partType: 2
-    amount: 1
+    amount: 0
   - partType: 3
-    amount: 1
+    amount: 0
   - partType: 4
-    amount: 1
+    amount: 0
   - partType: 5
-    amount: 1
+    amount: 0

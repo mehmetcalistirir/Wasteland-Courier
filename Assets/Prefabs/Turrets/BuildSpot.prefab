@@ -108,7 +108,7 @@ RectTransform:
   m_Father: {fileID: 5946678729930466033}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -162,7 +162,6 @@ GameObject:
   - component: {fileID: 2728586274504377749}
   - component: {fileID: 295582064850213262}
   - component: {fileID: 2584694091972607958}
-  - component: {fileID: 48721341129554578}
   m_Layer: 8
   m_Name: BuildSpot
   m_TagString: Untagged
@@ -180,7 +179,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -14.23, y: 0.68, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 165864623426958895}
@@ -229,7 +228,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: 1
   m_Sprite: {fileID: 6091923662387195225, guid: 2fefe615d6a20eb4e8d41d30b3c08be4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -301,19 +300,6 @@ MonoBehaviour:
   buildTime: 2
   progressBar: {fileID: 7890812608410297602}
   progressCanvas: {fileID: 4697144083639564778}
---- !u!114 &48721341129554578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 981657813928387134}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8876f339876d1a42be02a65a0530f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  yOffset: 0
 --- !u!1 &4697144083639564778
 GameObject:
   m_ObjectHideFlags: 0
@@ -342,8 +328,8 @@ RectTransform:
   m_GameObject: {fileID: 4697144083639564778}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 0.006, y: 0.01, z: 0.01}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 239301642737084435}
   m_Father: {fileID: 7218651524788334576}
@@ -351,7 +337,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1461, y: 1300}
+  m_SizeDelta: {x: 500, y: 795}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &3847725933420644278
 Canvas:
@@ -374,7 +360,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!114 &5051424862482880836
 MonoBehaviour:

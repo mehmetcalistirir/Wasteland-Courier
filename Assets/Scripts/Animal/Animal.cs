@@ -4,6 +4,18 @@ using UnityEngine.UI;
 
 public class Animal : MonoBehaviour
 {
+
+  private Animator animator;
+    private Vector2 lastMoveDir = Vector2.down; // idle yönü için
+
+
+[Header("Animation Direction")]
+public float dirDeadzone = 0.15f;   // çok küçük x/y titreşimlerini yok say
+public float axisHysteresis = 0.10f; // eksenler arası geçişte yapışkanlık (0.05-0.15 iyi)
+
+// Son seçilen animasyon yönünü tut (sağ/sol/yukarı/aşağı)
+private Vector2 lastAnimDir = Vector2.down;
+
     public string animalType = "Geyik";
     public int maxHealth = 3;
     public float moveSpeed = 2f;
@@ -29,8 +41,19 @@ public class Animal : MonoBehaviour
     private float nightBehaviorTimer;
     private bool isNight;
 
+    [Header("Flee Tuning")]
+    public float minScareCooldown = 0.5f; // spam önlemek için
+    private float lastScareTime = -999f;
+
+    private Vector2? fleeFromPoint = null;   // tehdit noktası (silah sesi/mermi)
+    private float tempFleeMultiplier = 1f;
+    private Coroutine fleeTimerCo;
+
     void Start()
     {
+
+        animator = GetComponent<Animator>();
+        if (animator == null) Debug.LogError("[Animal] Animator bileşeni bulunamadı!");
         currentHealth = maxHealth;
         detectionRadius = baseDetectionRadius;
         PickNewRoamTarget();
@@ -50,23 +73,99 @@ public class Animal : MonoBehaviour
     }
 
     void Update()
-    {
-        DetectThreats();
+{
+    DetectThreats();
 
-        switch (currentState)
-        {
-            case AnimalState.Roaming:
-            case AnimalState.NightRoaming:
-                Roam();
-                break;
-            case AnimalState.Fleeing:
-                Flee();
-                break;
-            case AnimalState.Sleeping:
-                // Uyuyan hayvan hareketsiz kalır
-                break;
-        }
+    switch (currentState)
+    {
+        case AnimalState.Roaming:
+        case AnimalState.NightRoaming:
+            Roam();
+            break;
+
+        case AnimalState.Fleeing:
+            Flee();
+            break;
+
+        case AnimalState.Sleeping:
+            // sadece uyurken idle'a zorla
+            UpdateAnimator(Vector2.zero, 0f);
+            break;
     }
+}
+
+     void OnEnable()
+    {
+        AnimalSoundEmitter.OnSound += OnSoundHeard;
+    }
+
+    void OnDisable()
+    {
+        AnimalSoundEmitter.OnSound -= OnSoundHeard;
+    }
+
+    private void OnSoundHeard(SoundEvent s)
+    {
+        // Uzaksa veya uyuyor ve duyması istenmiyorsa (istersen burada Sleep'e istisna koyabilirsin)
+        if (Vector2.Distance(transform.position, s.position) > s.radius) return;
+
+        // Gece/gündüz fark etmeksizin panik
+        Scare(s.position, s.fleeDuration, s.speedMultiplier);
+    }
+
+    private Vector2 GetAnimCardinalDir(Vector2 dir)
+{
+    if (dir.sqrMagnitude < 0.0001f) return lastAnimDir;
+
+    float ax = Mathf.Abs(dir.x);
+    float ay = Mathf.Abs(dir.y);
+
+    // eksen seçimini biraz yapışkan yap
+    bool preferX = ax > ay + axisHysteresis;
+    bool preferY = ay > ax + axisHysteresis;
+
+    Vector2 target;
+    if (preferX || (!preferY && lastAnimDir.y != 0))
+        target = new Vector2(dir.x >= 0f ? 1f : -1f, 0f);
+    else if (preferY || (!preferX && lastAnimDir.x != 0))
+        target = new Vector2(0f, dir.y >= 0f ? 1f : -1f);
+    else
+        target = (ax >= ay) ? new Vector2(dir.x >= 0f ? 1f : -1f, 0f)
+                            : new Vector2(0f, dir.y >= 0f ? 1f : -1f);
+
+    if (Mathf.Abs(dir.x) < dirDeadzone && lastAnimDir.x != 0f) target = lastAnimDir;
+    if (Mathf.Abs(dir.y) < dirDeadzone && lastAnimDir.y != 0f) target = lastAnimDir;
+
+    return target;
+}
+
+    public void Scare(Vector2 fromPosition, float duration, float speedMult)
+    {
+        if (Time.time - lastScareTime < minScareCooldown) return;
+        lastScareTime = Time.time;
+
+        fleeFromPoint = fromPosition;
+        tempFleeMultiplier = Mathf.Max(speedMult, 1f);
+        currentState = AnimalState.Fleeing;
+
+        if (fleeTimerCo != null) StopCoroutine(fleeTimerCo);
+        fleeTimerCo = StartCoroutine(StopFleeAfter(duration));
+    }
+
+    private System.Collections.IEnumerator StopFleeAfter(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        fleeFromPoint = null;
+        tempFleeMultiplier = 1f;
+
+        // Panik sonrası rutinine dön
+        if (isNight) EnterNightMode();
+        else currentState = AnimalState.Roaming;
+
+        PickNewRoamTarget();
+        fleeTimerCo = null;
+    }
+
 
     void DetectThreats()
     {
@@ -102,26 +201,67 @@ public class Animal : MonoBehaviour
             PickNewRoamTarget();
         }
 
-        Vector2 direction = (roamTarget - (Vector2)transform.position).normalized;
-        transform.Translate(direction * moveSpeed * Time.deltaTime);
+        Vector2 dir = (roamTarget - (Vector2)transform.position).normalized;
+        MoveWithAnim(dir, moveSpeed);
     }
 
     void Flee()
     {
-        if (threatTarget == null)
-        {
-            if (isNight)
-                EnterNightMode();
-            else
-                currentState = AnimalState.Roaming;
+        // Öncelik: canlı tehdit -> tehdit hedefi (Player/Enemy)
+        // Yoksa: en son duyulan/gelinen tehdit noktası
+        Vector2 source;
 
+        if (threatTarget != null)
+        {
+            source = threatTarget.position;
+        }
+        else if (fleeFromPoint.HasValue)
+        {
+            source = fleeFromPoint.Value;
+        }
+        else
+        {
+            // Güvenli geri dönüş
+            if (isNight) { EnterNightMode(); } else { currentState = AnimalState.Roaming; }
             PickNewRoamTarget();
+            UpdateAnimator(Vector2.zero, 0f); // güvenli
             return;
         }
 
-        Vector2 direction = ((Vector2)transform.position - (Vector2)threatTarget.position).normalized;
-        transform.Translate(direction * moveSpeed * fleeSpeedMultiplier * Time.deltaTime);
+        Vector2 dir = ((Vector2)transform.position - source).normalized;
+        float speed = moveSpeed * fleeSpeedMultiplier * tempFleeMultiplier;
+        MoveWithAnim(dir, speed);
     }
+
+    private void MoveWithAnim(Vector2 dir, float speed)
+{
+    if (dir.sqrMagnitude > 0.0001f)
+        transform.Translate(dir * speed * Time.deltaTime);
+
+    Vector2 animDir = GetAnimCardinalDir(dir);     // <-- kritik
+    UpdateAnimator(animDir, speed);
+}
+
+    private void UpdateAnimator(Vector2 animDir, float speed)
+{
+    if (animator == null) return;
+
+    bool isMovingNow = animDir.sqrMagnitude > 0.0001f && speed > 0.01f;
+    animator.SetBool("isMoving", isMovingNow);
+
+    if (isMovingNow)
+    {
+        animator.SetFloat("MoveX", animDir.x);  // -1,0,1
+        animator.SetFloat("MoveY", animDir.y);  // -1,0,1
+        lastMoveDir = animDir;
+        lastAnimDir = animDir;
+    }
+    else
+    {
+        animator.SetFloat("MoveX", lastMoveDir.x);
+        animator.SetFloat("MoveY", lastMoveDir.y);
+    }
+}
 
     void PickNewRoamTarget()
     {
@@ -139,13 +279,18 @@ public class Animal : MonoBehaviour
             hpFillImage.fillAmount = fillValue;
         }
 
+        // ❗ Vurulduysa, saldırı yönünü bilmiyorsak bile rastgele uzağa kaç
+        if (!fleeFromPoint.HasValue && threatTarget == null)
+        {
+            // küçük bir ofsetle bulunduğu yerden ters yöne hedef seç
+            Vector2 away = (Vector2)transform.position + Random.insideUnitCircle.normalized * 2f;
+            Scare(away, 3f, 2.0f);
+        }
+
         if (currentHealth <= 0)
         {
             DropLoot();
-
-            if (hpBarInstance != null)
-                Destroy(hpBarInstance);
-
+            if (hpBarInstance != null) Destroy(hpBarInstance);
             Destroy(gameObject);
         }
     }

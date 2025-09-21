@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
 using TMPro;
 
 public class NoteTrigger : MonoBehaviour
@@ -11,6 +9,7 @@ public class NoteTrigger : MonoBehaviour
 
     private bool isPlayerNearby = false;
     private StoryNote currentNote;
+    private int currentIndex = 0; // sırayla ya da rastgele
 
     void OnTriggerEnter2D(Collider2D other)
     {
@@ -19,16 +18,22 @@ public class NoteTrigger : MonoBehaviour
             currentNote = GetComponent<StoryNote>();
             isPlayerNearby = true;
 
-            if (notePanel != null && currentNote != null)
+            if (notePanel != null && currentNote != null && currentNote.noteTexts.Length > 0)
             {
                 notePanel.SetActive(true);
-                noteTextUI.text = currentNote.noteText;
 
-                if (currentNote.radioClip != null && audioSource != null)
+                // İstersen sırayla:
+                string text = currentNote.noteTexts[currentIndex];
+                noteTextUI.text = text;
+
+                if (currentNote.radioClips != null && currentNote.radioClips.Length > currentIndex && audioSource != null)
                 {
-                    audioSource.clip = currentNote.radioClip;
+                    audioSource.clip = currentNote.radioClips[currentIndex];
                     audioSource.Play();
                 }
+
+                // sıradakine geç (loop)
+                currentIndex = (currentIndex + 1) % currentNote.noteTexts.Length;
             }
         }
     }
@@ -38,13 +43,8 @@ public class NoteTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNearby = false;
-            currentNote = null;
-
-            if (notePanel != null)
-                notePanel.SetActive(false);
-
-            if (audioSource != null)
-                audioSource.Stop();
+            notePanel.SetActive(false);
+            if (audioSource != null) audioSource.Stop();
         }
     }
 }

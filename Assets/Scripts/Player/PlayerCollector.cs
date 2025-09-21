@@ -1,25 +1,44 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class PlayerCollector : MonoBehaviour
 {
     public float collectRange = 1.5f;
+    private List<Resource> highlightedResources = new List<Resource>();
 
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        // Önceki vurguları kaldır
+        foreach (var res in highlightedResources)
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, collectRange);
-            foreach (var hit in hits)
+            if (res != null)
+                res.Highlight(false);
+        }
+        highlightedResources.Clear();
+
+        // Yeni yakındaki kaynakları bul
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, collectRange);
+        foreach (var hit in hits)
+        {
+            Resource res = hit.GetComponent<Resource>();
+            if (res != null)
             {
-                Resource res = hit.GetComponent<Resource>();
+                res.Highlight(true);
+                highlightedResources.Add(res);
+            }
+        }
+
+        // E tuşu ile toplama
+        if (Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            foreach (var res in highlightedResources)
+            {
                 if (res != null)
                 {
                     res.Collect();
                     break;
                 }
-
-
             }
         }
     }

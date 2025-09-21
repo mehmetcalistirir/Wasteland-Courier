@@ -42,7 +42,7 @@
     <UnityVersion>6000.1.3f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\Mehmed\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.1.2\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\Mehmed\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.1.3\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.3f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.3f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.3f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
@@ -50,64 +50,89 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Storyline\NoteTrigger.cs" />
     <Compile Include="Assets\Scripts\Animal\AnimalState.cs" />
+    <Compile Include="Assets\Scripts\Caravan\CaravanInteraction.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerWeapon.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\Menu\SettingsMenuOrigin.cs" />
     <Compile Include="Assets\Scripts\Resources\Resource.cs" />
     <Compile Include="Assets\Scripts\Turrets\BuildSpot.cs" />
     <Compile Include="Assets\Scripts\Animal\Animal.cs" />
     <Compile Include="Assets\Scripts\Resources\ResourceSpawner.cs" />
+    <Compile Include="Assets\Scripts\Enemies\EnemyHitbox.cs" />
+    <Compile Include="Assets\Scripts\Managers\DamagePopUp.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponSlotUI.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponCraftingSystem.cs" />
     <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
     <Compile Include="Assets\Scripts\UI\InventoryUI.cs" />
     <Compile Include="Assets\Scripts\Weapon\UIController.cs" />
     <Compile Include="Assets\Scripts\Managers\DayNightCycle.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerShooter.cs" />
+    <Compile Include="Assets\Scripts\Caravan\CaravanIndicator.cs" />
+    <Compile Include="Assets\Scripts\Player\FootstepPlayer.cs" />
     <Compile Include="Assets\Scripts\Caravan\CaravanInventory.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponBullet.cs" />
-    <Compile Include="Assets\Scripts\UI\CaravanHealth.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerCollector.cs" />
+    <Compile Include="Assets\Scripts\Campfire\CampfireCooking.cs" />
+    <Compile Include="Assets\Scripts\Turrets\TurretBullet.cs" />
+    <Compile Include="Assets\Scripts\Managers\EnemyManager.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponAim.cs" />
-    <Compile Include="Assets\Scripts\Fuel\CaravanInteraction.cs" />
-    <Compile Include="Assets\Scripts\Player\ScrapPile.cs" />
+    <Compile Include="Assets\Scripts\Audio\MusicManager.cs" />
+    <Compile Include="Assets\Scripts\Menu\CreditsBuilder.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponPartsUI.cs" />
+    <Compile Include="Assets\Scripts\Enemies\SoundEmitter.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerInventory.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemyType.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerViewMask.cs" />
+    <Compile Include="Assets\Scripts\Campfire\CampfireInteraction.cs" />
+    <Compile Include="Assets\Scripts\Managers\GameStateManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\SettingsLoader.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponDataHolder.cs" />
     <Compile Include="Assets\Scripts\Turrets\Turret.cs" />
     <Compile Include="Assets\Scripts\Caravan\CraftingStation.cs" />
+    <Compile Include="Assets\Scripts\Resources\ScrapPile.cs" />
     <Compile Include="Assets\Scripts\NPC\NPCInteraction.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerYSort.cs" />
+    <Compile Include="Assets\Scripts\Managers\SaveSystem.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponBlueprint.cs" />
     <Compile Include="Assets\Scripts\Fuel\FuelPickup.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponSlotManager.cs" />
     <Compile Include="Assets\Scripts\Resources\GoldPickup.cs" />
     <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
+    <Compile Include="Assets\Scripts\Managers\WanderArea.cs" />
     <Compile Include="Assets\Scripts\Weapon\BluePrintUI.cs" />
     <Compile Include="Assets\Scripts\Resources\BlueprintPickup.cs" />
+    <Compile Include="Assets\Scripts\Caravan\CaravanHealth.cs" />
     <Compile Include="Assets\Scripts\Weapon\RequirementLineUI.cs" />
     <Compile Include="Assets\Scripts\Menu\PauseMenu.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponPartType.cs" />
+    <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
+    <Compile Include="Assets\Scripts\Managers\CloudShadowMover.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponInventory.cs" />
-    <Compile Include="Assets\Scripts\Turrets\Bullet.cs" />
     <Compile Include="Assets\Scripts\NPC\TradeOfferButton.cs" />
     <Compile Include="Assets\Scripts\Storyline\StoryNote.cs" />
+    <Compile Include="Assets\Scripts\UI\XPDisplay.cs" />
+    <Compile Include="Assets\Scripts\Audio\AudioManager.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponHolder.cs" />
-    <Compile Include="Assets\Scripts\UI\CaravanIndicator.cs" />
-    <Compile Include="Assets\Scripts\Player\XPDisplay.cs" />
-    <Compile Include="Assets\Scripts\Weapon\BlueprintManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\DamagePopUpManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerStats.cs" />
     <Compile Include="Assets\Scripts\Turrets\TurretLevelData.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerHealthUI.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponSlotButton.cs" />
-    <Compile Include="Assets\Scripts\UI\TribeUIFunctions.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponData.cs" />
     <Compile Include="Assets\Scripts\NPC\TradeOffer.cs" />
+    <Compile Include="Assets\Scripts\Menu\CreditsAutoScroll.cs" />
+    <Compile Include="Assets\Scripts\Weapon\WeaponDurability.cs" />
+    <Compile Include="Assets\Scripts\Enemies\EnemyWanderDriver.cs" />
     <Compile Include="Assets\Scripts\Weapon\WeaponPart.cs" />
+    <Compile Include="Assets\Scripts\Menu\LevelSelectMenu.cs" />
     <Compile Include="Assets\PlayerControls.cs" />
+    <Compile Include="Assets\Scripts\Managers\LightController.cs" />
+    <Compile Include="Assets\Scripts\Animal\AnimalSoundEmitter.cs" />
+    <Compile Include="Assets\Scripts\Weapon\PartRequirement.cs" />
+    <Compile Include="Assets\Scripts\Menu\Intro\MultiImageIntroController .cs" />
     <Compile Include="Assets\Scripts\Fuel\FuelSpawner.cs" />
     <Compile Include="Assets\Scripts\Resources\ResourceType.cs" />
+    <Compile Include="Assets\Scripts\Managers\GameSceneBootstrap.cs" />
+    <Compile Include="Assets\Scripts\Managers\SpawnZoneManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -1131,6 +1156,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.Rider.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="NavMeshPlus">
+      <HintPath>Library\ScriptAssemblies\NavMeshPlus.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="PsdPlugin">
       <HintPath>Library\ScriptAssemblies\PsdPlugin.dll</HintPath>
       <Private>False</Private>
@@ -1155,8 +1184,8 @@
       <HintPath>Library\ScriptAssemblies\Unity.2D.IK.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.2D.IK.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.2D.IK.Runtime.dll</HintPath>
+    <Reference Include="NavMeshPlusEditor">
+      <HintPath>Library\ScriptAssemblies\NavMeshPlusEditor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Cinemachine.Editor">
@@ -1165,6 +1194,10 @@
     </Reference>
     <Reference Include="Unity.2D.SpriteShape.Runtime">
       <HintPath>Library\ScriptAssemblies\Unity.2D.SpriteShape.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.IK.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.2D.IK.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime.Shared">

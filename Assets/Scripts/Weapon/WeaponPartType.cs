@@ -1,9 +1,9 @@
 public enum WeaponPartType
 {
-    Barrel,         // Namlu
-    Magazine,       // Þarjör
-    Handguard,      // El kundaðý
-    Grip,           // Tabanca kabzasý
-    Trigger,        // Tetik
-    TriggerGuard    // Tetik korkuluðu
+    Barrel,
+    Magazine,
+    Handguard,
+    Grip,
+    Trigger,
+    TriggerGuard
 }

@@ -16,8 +16,12 @@ MonoBehaviour:
   weaponIcon: {fileID: 1275589539659018210, guid: 44be8ddb925998240a0597efb288fd56, type: 3}
   isAutomatic: 0
   fireRate: 2
-  damage: 0
-  clipSize: 0
-  maxAmmoCapacity: 0
+  damage: 20
+  clipSize: 7
+  maxAmmoCapacity: 14
   reloadTime: 1.5
   attackRange: 1.5
+  isShotgun: 1
+  pelletsPerShot: 3
+  pelletSpreadAngle: 20
+  shotgunCooldown: 2.5

@@ -1,3 +1,4 @@
+// DayNightCycle.cs
 using UnityEngine;
 
 public class DayNightCycle : MonoBehaviour
@@ -6,63 +7,77 @@ public class DayNightCycle : MonoBehaviour
     public float nightDuration = 30f;
     private float timer = 0f;
 
-    private bool isDay = true;
-    public GameObject[] enemyPrefabs; // Inspector'dan atanır
+    public LightController lightController;
+    public ResourceSpawner spawner;
+    public EnemyManager enemyManager;
 
-    public ResourceSpawner spawner;  // Kaynak spawn sistemi
     [Range(0f, 1f)]
-    public float regenerationRatio = 0.5f; // Sabah kaynakların ne kadarı yenilensin
+    public float regenerationRatio = 0.5f;
 
-    public Transform[] spawnPoints; // Düşman spawn noktaları
+    private bool isDay = true;
 
-    void Start()
+    // ✅ SAHNE HER AÇILDIĞINDA ÇAĞRILACAK
+    void Awake()
     {
-        isDay = true;
-        timer = dayDuration;
+        ResetCycle();
+    }
+
+    // (İstersen OnEnable’da da güvenceye alabilirsin)
+    void OnEnable()
+    {
+        // ResetCycle();  // Awake yetmiyorsa bunu da aç
     }
 
     void Update()
     {
         timer -= Time.deltaTime;
-
-        if (timer <= 0)
+        if (timer <= 0f)
         {
             isDay = !isDay;
+            timer = isDay ? dayDuration : nightDuration;
 
-            if (isDay)
-            {
-                Debug.Log("☀️ Sabah oldu - Kaynaklar yenileniyor");
-                spawner.RegenerateResources(regenerationRatio);
-                SetAnimalsNightState(false);
-                timer = dayDuration;
-            }
-            else
-            {
-                Debug.Log("🌙 Gece başladı - Düşmanlar geliyor!");
-                SpawnEnemies();
-                SetAnimalsNightState(true);
-                timer = nightDuration;
-            }
+            if (isDay) HandleDayStart();
+            else       HandleNightStart();
         }
     }
-    void SetAnimalsNightState(bool isNight)
+
+    // ✅ YENİ: Baştan kurulum
+    public void ResetCycle()
     {
-        Animal[] allAnimals = FindObjectsOfType<Animal>();
-        foreach (var animal in allAnimals)
-        {
-            animal.SetNight(isNight);
-        }
+        isDay = true;
+        timer = dayDuration;
+
+        // Gündüz başlangıç durumunu tüm sistemlere uygula
+        lightController?.SetDay(true);
+        spawner?.RegenerateResources(0f);      // İstersen 0f; açılışta respawn yapma
+        enemyManager?.ResetDayCount();         // Gece sayacını sıfırla
+
+        SetAnimalsNightState(false);
+
+        // MusicManager sahneler arası yaşıyorsa (DontDestroyOnLoad), ilk state’i bildir
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.SetDay(true);
     }
 
-
-
-    void SpawnEnemies()
+    void HandleDayStart()
     {
-        foreach (Transform point in spawnPoints)
-        {
-            int index = Random.Range(0, enemyPrefabs.Length);
-            GameObject enemy = Instantiate(enemyPrefabs[index], point.position, Quaternion.identity);
-        }
+        spawner?.RegenerateResources(regenerationRatio);
+        SetAnimalsNightState(false);
+        lightController?.SetDay(true);
+        MusicManager.Instance?.SetDay(true);
     }
 
+    void HandleNightStart()
+    {
+        enemyManager?.SpawnEnemies();
+        SetAnimalsNightState(true);
+        lightController?.SetDay(false);
+        MusicManager.Instance?.SetDay(false);
+    }
+
+    void SetAnimalsNightState(bool night)
+    {
+        foreach (var a in FindObjectsOfType<Animal>())
+            a.SetNight(night);
+    }
 }

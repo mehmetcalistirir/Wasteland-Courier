@@ -1,13 +1,16 @@
-// WeaponSlotButton.cs
-
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class WeaponSlotButton : MonoBehaviour
 {
+    [Header("UI References")]
     [SerializeField] private Image weaponIcon;
     [SerializeField] private GameObject highlightBorder;
+
+    [Header("Icon Settings")]
+    [Tooltip("Bu boyut weaponIcon'un RectTransform'una uygulanır.")]
+    [SerializeField] private Vector2 iconSize = new Vector2(64, 64);
 
     private int slotIndex;
     private Button button;
@@ -18,21 +21,23 @@ public class WeaponSlotButton : MonoBehaviour
         button.onClick.AddListener(OnSlotClicked);
     }
 
-    // Bu fonksiyon, WeaponSlotUI tarafından çağrılarak slotu ayarlar.
+    // WeaponSlotUI tarafından çağrılır
     public void Setup(int index, Sprite icon)
     {
         this.slotIndex = index;
 
-        // Eğer bir ikon gönderildiyse...
         if (icon != null)
         {
-            // ...ikonu ata ve Image'ı görünür yap.
             this.weaponIcon.sprite = icon;
             this.weaponIcon.enabled = true;
+
+            // Inspector'dan verilen boyutu uygula
+            RectTransform rt = weaponIcon.GetComponent<RectTransform>();
+            if (rt != null)
+                rt.sizeDelta = iconSize;
         }
         else
         {
-            // Eğer ikon yoksa (slot boşsa), Image'ı gizle.
             this.weaponIcon.enabled = false;
         }
     }

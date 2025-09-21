@@ -21,6 +21,9 @@ public class PlayerMovement : MonoBehaviour
     // FacingDirection artık silah sistemi için ve karakteri çevirmek için kullanılacak.
     public static float FacingDirection { get; private set; } = 1f;
 
+    public float soundRadius = 5f;
+
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -35,6 +38,11 @@ public class PlayerMovement : MonoBehaviour
         controls.Gameplay.Move.performed += OnMovePerformed;
         controls.Gameplay.Move.canceled += OnMoveCanceled;
         controls.Gameplay.Enable();
+    }
+
+    public void EmitFootstep()
+    {
+        SoundEmitter.EmitSound(transform.position, soundRadius);
     }
 
     private void OnDisable()
@@ -60,8 +68,9 @@ public class PlayerMovement : MonoBehaviour
         rb.MovePosition(rb.position + moveInput * currentSpeed * Time.fixedDeltaTime);
     }
 
-    private void Update()
+    void Update()
     {
+        if (GameStateManager.IsGamePaused) return;
         UpdateAnimationAndDirection();
     }
 

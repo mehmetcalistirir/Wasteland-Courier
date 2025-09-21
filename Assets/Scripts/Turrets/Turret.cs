@@ -26,17 +26,20 @@ public class Turret : MonoBehaviour
         }
     }
 
-    void Shoot(Vector3 targetPosition)
-    {
-        Vector3 direction = (targetPosition - transform.position).normalized;
+void Shoot(Vector3 targetPosition)
+{
+    Vector3 direction = (targetPosition - transform.position).normalized;
 
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.linearVelocity = direction * bulletSpeed;
-        }
-    }
+    // Yön doğrultusunda bir rotasyon hesapla (X yönüne göre döndür)
+    float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+    Quaternion rotation = Quaternion.Euler(0, 0, angle); // ⬅️ sadece bu önemli
+
+    // Mermiyi doğru rotasyonla oluştur
+    GameObject bullet = Instantiate(bulletPrefab, transform.position, rotation);
+}
+
+
+
 
     void OnDrawGizmosSelected()
     {

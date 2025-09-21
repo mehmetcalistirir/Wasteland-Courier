@@ -15,9 +15,15 @@ MonoBehaviour:
   weaponName: Sniper
   weaponIcon: {fileID: -952550666369105273, guid: b79f2ecc80f5a604f8e899515e907df5, type: 3}
   isAutomatic: 0
-  fireRate: 16
+  fireRate: 2
   damage: 40
   clipSize: 5
   maxAmmoCapacity: 15
   reloadTime: 3
   attackRange: 15
+  isShotgun: 0
+  pelletsPerShot: 3
+  pelletSpreadAngle: 8
+  shotgunCooldown: 2.5
+  isSniper: 1
+  sniperCooldown: 3

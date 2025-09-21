@@ -105,44 +105,9 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
-    - serializedVersion: 2
-      name: "Yaral\u0131 Asfalt Par\xE7ac\u0131\u011F\u0131-Photoroom_0"
-      rect:
-        serializedVersion: 2
-        x: 99
-        y: 672
-        width: 17
-        height: 27
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3d0830d0e21c70c90800000000000000
-      internalID: -7203576675424829229
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     - serializedVersion: 2
       name: "Yaral\u0131 Asfalt Par\xE7ac\u0131\u011F\u0131-Photoroom_1"
       rect:
@@ -152,7 +117,7 @@ TextureImporter:
         width: 803
         height: 708
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -165,55 +130,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: "Yaral\u0131 Asfalt Par\xE7ac\u0131\u011F\u0131-Photoroom_2"
-      rect:
-        serializedVersion: 2
-        x: 89
-        y: 547
-        width: 73
-        height: 50
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5c04929e805e6f4d0800000000000000
-      internalID: -3101039466963713851
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "Yaral\u0131 Asfalt Par\xE7ac\u0131\u011F\u0131-Photoroom_3"
-      rect:
-        serializedVersion: 2
-        x: 112
-        y: 418
-        width: 26
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 86ce1b978c2e7a770800000000000000
-      internalID: 8622109362287144040
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: cce33523555acb747968b33f0634c5c3
     internalID: 0
     vertices: []
     indices: 

@@ -4,56 +4,53 @@ using TMPro;
 
 public class BlueprintUI : MonoBehaviour
 {
-    [Header("UI Elements")]
-    public Image weaponIcon;
-    public TextMeshProUGUI weaponNameText;
-    public Button selectButton; // Ana seçim butonu (resmin kendisi)
-    public TextMeshProUGUI storageCountText; // "0/1" veya "1/1" yazısı
-    public Button swapButton; // "Değiştir" butonu
+    [Header("Wiring")]
+    public TMP_Text weaponNameText;
+    public Image    weaponIconImage;
+    public Button   selectButton;        // “ikon”a tıklama
+    public TMP_Text storageCountText;    // SADECE 0/1 – Inspector’da StorageWeaponText’e bunu bağla
 
-    private WeaponBlueprint currentBlueprint;
+    [Header("Data (assigned by WeaponCraftingSystem)")]
+    public WeaponBlueprint blueprint;    // Setup ile atanır
 
-    public void Setup(WeaponBlueprint blueprint)
+    void Awake()
     {
-        currentBlueprint = blueprint;
-        weaponNameText.text = blueprint.weaponName;
-        weaponIcon.sprite = blueprint.weaponIcon;
-        
-        // Resme tıklandığında detayları göster
-        selectButton.onClick.RemoveAllListeners();
-        selectButton.onClick.AddListener(() => WeaponCraftingSystem.Instance.SelectBlueprint(currentBlueprint));
-
-        // Değiştir butonuna tıklandığında silahı değiştir
-        swapButton.onClick.RemoveAllListeners();
-        swapButton.onClick.AddListener(() => CaravanInventory.Instance.SwapWeapon(currentBlueprint));
+        if (selectButton != null)
+        {
+            selectButton.onClick.RemoveAllListeners();
+            selectButton.onClick.AddListener(OnSelectClicked);
+        }
     }
 
-    // Bu fonksiyon CraftingSystem tarafından çağrılarak UI'ın durumunu ayarlar.
-    public void UpdateStatus()
+    public void Setup(WeaponBlueprint bp)
     {
-        bool isStored = CaravanInventory.Instance.IsWeaponStored(currentBlueprint);
-        bool canBeCrafted = WeaponCraftingSystem.Instance.CanCraft(currentBlueprint);
+        blueprint = bp;
 
-        // 1. Depo sayacını güncelle
-        storageCountText.text = isStored ? "1 / 1" : "0 / 1";
-        storageCountText.color = isStored ? Color.cyan : Color.white;
+        if (weaponNameText != null)  weaponNameText.text  = bp != null ? bp.weaponName : "-";
+        if (weaponIconImage != null) weaponIconImage.sprite = bp != null ? bp.weaponIcon : null;
 
-        // 2. Değiştir butonunu yönet
-        // Silah depodaysa ve oyuncu karavan menzilindeyse değiştir butonu aktif olur.
-        swapButton.gameObject.SetActive(isStored && CraftingStation.IsPlayerInRange);
-        
-        // 3. İkon rengini ayarla (isteğe bağlı, craft durumu için)
-        if (isStored)
-        {
-            weaponIcon.color = Color.white; // Depodaysa parlak
-        }
-        else if (canBeCrafted)
-        {
-            weaponIcon.color = Color.yellow; // Craftlanabilirse sarı
-        }
-        else
-        {
-            weaponIcon.color = new Color(0.2f, 0.2f, 0.2f, 0.8f); // Craftlanamazsa karanlık
-        }
+        UpdateStatus(); // ilk açılışta sayacı yaz
+    }
+
+    void OnEnable()
+    {
+        // Panel tekrar görünür olduğunda da tazele
+        UpdateStatus();
+    }
+
+   public void UpdateStatus()
+{
+    if (blueprint == null) return;
+    int typeKey = blueprint.weaponSlotIndexToUnlock;
+    int count = CaravanInventory.Instance.GetStoredCountForType(typeKey);
+    if (storageCountText != null) storageCountText.text = $"{count} adet";
+}
+
+
+
+    private void OnSelectClicked()
+    {
+        if (blueprint == null) return;
+        WeaponCraftingSystem.Instance.SelectBlueprint(blueprint);
     }
 }

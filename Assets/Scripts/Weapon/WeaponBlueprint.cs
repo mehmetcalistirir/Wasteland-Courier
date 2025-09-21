@@ -1,33 +1,24 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// Bu, bir silah� craftlamak i�in gereken par�alar� ve miktarlar�n� tan�mlar.
-[System.Serializable]
-public class PartRequirement
-{
-    public WeaponPartType partType;
-    public int amount;
-}
-
+// Silah üretim tariflerini tanımlayan ScriptableObject
 [CreateAssetMenu(fileName = "New Weapon Blueprint", menuName = "Crafting/Weapon Blueprint")]
 public class WeaponBlueprint : ScriptableObject
 {
-    [Tooltip("Bu tarifin üreteceği silaha ait tüm oyun içi verileri (hasar, hız vb.) içeren WeaponData dosyası.")]
-    public WeaponData weaponData;
+    [Header("Genel Bilgiler")]
     public string weaponName;
-    [TextArea] public string description; // Silah açıklaması için
+    [TextArea] public string description;
     public Sprite weaponIcon;
-    public int weaponSlotIndexToUnlock;
+    public WeaponData weaponData;
 
-    // YENİ: Temel kaynak gereksinimleri
-    [Header("Resource Requirements")]
+    [Tooltip("Bu silah hangi slotun kilidini açar?")]
+    public int weaponSlotIndexToUnlock = 0;
+
+    [Header("Kaynak Gereksinimleri")]
     public int requiredStone = 0;
     public int requiredWood = 0;
     public int requiredScrapMetal = 0;
 
-    [Header("Part Requirements")]
-    public List<PartRequirement> requiredParts;
-    
-
-    
+    [Header("Parça Gereksinimleri")]
+    public List<PartRequirement> requiredParts; // Örn: Barrel x1, Trigger x1
 }

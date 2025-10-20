@@ -7,6 +7,8 @@ public class FuelSpawner : MonoBehaviour
     public Vector2 spawnMin = new Vector2(-10, -5);
     public Vector2 spawnMax = new Vector2(10, 5);
 
+    //Deneme için
+
     void Start()
     {
         for (int i = 0; i < fuelCount; i++)

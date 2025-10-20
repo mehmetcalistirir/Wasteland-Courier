@@ -297,7 +297,14 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      AmmoSniper_0: 5699242917808476451
+      AmmoSniper_1: -2981594278537491682
+      AmmoSniper_2: 8616685599469899680
+      AmmoSniper_3: 8934840106316642128
+      AmmoSniper_4: 1621532503063331340
+      AmmoSniper_5: 5319558675223724254
+      AmmoSniper_6: -5415945385953382945
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -5,16 +5,16 @@ using UnityEngine.UI;
 public class Animal : MonoBehaviour
 {
 
-  private Animator animator;
+    private Animator animator;
     private Vector2 lastMoveDir = Vector2.down; // idle yönü için
 
 
-[Header("Animation Direction")]
-public float dirDeadzone = 0.15f;   // çok küçük x/y titreşimlerini yok say
-public float axisHysteresis = 0.10f; // eksenler arası geçişte yapışkanlık (0.05-0.15 iyi)
+    [Header("Animation Direction")]
+    public float dirDeadzone = 0.15f;   // çok küçük x/y titreşimlerini yok say
+    public float axisHysteresis = 0.10f; // eksenler arası geçişte yapışkanlık (0.05-0.15 iyi)
 
-// Son seçilen animasyon yönünü tut (sağ/sol/yukarı/aşağı)
-private Vector2 lastAnimDir = Vector2.down;
+    // Son seçilen animasyon yönünü tut (sağ/sol/yukarı/aşağı)
+    private Vector2 lastAnimDir = Vector2.down;
 
     public string animalType = "Geyik";
     public int maxHealth = 3;
@@ -58,6 +58,8 @@ private Vector2 lastAnimDir = Vector2.down;
         detectionRadius = baseDetectionRadius;
         PickNewRoamTarget();
 
+        //deneme
+
         if (hpBarPrefab != null)
         {
             hpBarInstance = Instantiate(hpBarPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
@@ -73,28 +75,28 @@ private Vector2 lastAnimDir = Vector2.down;
     }
 
     void Update()
-{
-    DetectThreats();
-
-    switch (currentState)
     {
-        case AnimalState.Roaming:
-        case AnimalState.NightRoaming:
-            Roam();
-            break;
+        DetectThreats();
 
-        case AnimalState.Fleeing:
-            Flee();
-            break;
+        switch (currentState)
+        {
+            case AnimalState.Roaming:
+            case AnimalState.NightRoaming:
+                Roam();
+                break;
 
-        case AnimalState.Sleeping:
-            // sadece uyurken idle'a zorla
-            UpdateAnimator(Vector2.zero, 0f);
-            break;
+            case AnimalState.Fleeing:
+                Flee();
+                break;
+
+            case AnimalState.Sleeping:
+                // sadece uyurken idle'a zorla
+                UpdateAnimator(Vector2.zero, 0f);
+                break;
+        }
     }
-}
 
-     void OnEnable()
+    void OnEnable()
     {
         AnimalSoundEmitter.OnSound += OnSoundHeard;
     }
@@ -114,30 +116,30 @@ private Vector2 lastAnimDir = Vector2.down;
     }
 
     private Vector2 GetAnimCardinalDir(Vector2 dir)
-{
-    if (dir.sqrMagnitude < 0.0001f) return lastAnimDir;
+    {
+        if (dir.sqrMagnitude < 0.0001f) return lastAnimDir;
 
-    float ax = Mathf.Abs(dir.x);
-    float ay = Mathf.Abs(dir.y);
+        float ax = Mathf.Abs(dir.x);
+        float ay = Mathf.Abs(dir.y);
 
-    // eksen seçimini biraz yapışkan yap
-    bool preferX = ax > ay + axisHysteresis;
-    bool preferY = ay > ax + axisHysteresis;
+        // eksen seçimini biraz yapışkan yap
+        bool preferX = ax > ay + axisHysteresis;
+        bool preferY = ay > ax + axisHysteresis;
 
-    Vector2 target;
-    if (preferX || (!preferY && lastAnimDir.y != 0))
-        target = new Vector2(dir.x >= 0f ? 1f : -1f, 0f);
-    else if (preferY || (!preferX && lastAnimDir.x != 0))
-        target = new Vector2(0f, dir.y >= 0f ? 1f : -1f);
-    else
-        target = (ax >= ay) ? new Vector2(dir.x >= 0f ? 1f : -1f, 0f)
-                            : new Vector2(0f, dir.y >= 0f ? 1f : -1f);
+        Vector2 target;
+        if (preferX || (!preferY && lastAnimDir.y != 0))
+            target = new Vector2(dir.x >= 0f ? 1f : -1f, 0f);
+        else if (preferY || (!preferX && lastAnimDir.x != 0))
+            target = new Vector2(0f, dir.y >= 0f ? 1f : -1f);
+        else
+            target = (ax >= ay) ? new Vector2(dir.x >= 0f ? 1f : -1f, 0f)
+                                : new Vector2(0f, dir.y >= 0f ? 1f : -1f);
 
-    if (Mathf.Abs(dir.x) < dirDeadzone && lastAnimDir.x != 0f) target = lastAnimDir;
-    if (Mathf.Abs(dir.y) < dirDeadzone && lastAnimDir.y != 0f) target = lastAnimDir;
+        if (Mathf.Abs(dir.x) < dirDeadzone && lastAnimDir.x != 0f) target = lastAnimDir;
+        if (Mathf.Abs(dir.y) < dirDeadzone && lastAnimDir.y != 0f) target = lastAnimDir;
 
-    return target;
-}
+        return target;
+    }
 
     public void Scare(Vector2 fromPosition, float duration, float speedMult)
     {
@@ -234,34 +236,34 @@ private Vector2 lastAnimDir = Vector2.down;
     }
 
     private void MoveWithAnim(Vector2 dir, float speed)
-{
-    if (dir.sqrMagnitude > 0.0001f)
-        transform.Translate(dir * speed * Time.deltaTime);
+    {
+        if (dir.sqrMagnitude > 0.0001f)
+            transform.Translate(dir * speed * Time.deltaTime);
 
-    Vector2 animDir = GetAnimCardinalDir(dir);     // <-- kritik
-    UpdateAnimator(animDir, speed);
-}
+        Vector2 animDir = GetAnimCardinalDir(dir);     // <-- kritik
+        UpdateAnimator(animDir, speed);
+    }
 
     private void UpdateAnimator(Vector2 animDir, float speed)
-{
-    if (animator == null) return;
-
-    bool isMovingNow = animDir.sqrMagnitude > 0.0001f && speed > 0.01f;
-    animator.SetBool("isMoving", isMovingNow);
-
-    if (isMovingNow)
     {
-        animator.SetFloat("MoveX", animDir.x);  // -1,0,1
-        animator.SetFloat("MoveY", animDir.y);  // -1,0,1
-        lastMoveDir = animDir;
-        lastAnimDir = animDir;
+        if (animator == null) return;
+
+        bool isMovingNow = animDir.sqrMagnitude > 0.0001f && speed > 0.01f;
+        animator.SetBool("isMoving", isMovingNow);
+
+        if (isMovingNow)
+        {
+            animator.SetFloat("MoveX", animDir.x);  // -1,0,1
+            animator.SetFloat("MoveY", animDir.y);  // -1,0,1
+            lastMoveDir = animDir;
+            lastAnimDir = animDir;
+        }
+        else
+        {
+            animator.SetFloat("MoveX", lastMoveDir.x);
+            animator.SetFloat("MoveY", lastMoveDir.y);
+        }
     }
-    else
-    {
-        animator.SetFloat("MoveX", lastMoveDir.x);
-        animator.SetFloat("MoveY", lastMoveDir.y);
-    }
-}
 
     void PickNewRoamTarget()
     {

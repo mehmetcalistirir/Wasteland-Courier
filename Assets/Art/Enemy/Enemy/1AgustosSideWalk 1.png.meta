@@ -1,0 +1,442 @@
+fileFormatVersion: 2
+guid: ee6970cda0e1e1a44bb5a9eafa3067da
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2915045512527831517
+    second: 1AgustosSideWalk 1_0
+  - first:
+      213: -5412622836552638131
+    second: 1AgustosSideWalk 1_1
+  - first:
+      213: 8628227008315814015
+    second: 1AgustosSideWalk 1_2
+  - first:
+      213: -1512438274063361857
+    second: 1AgustosSideWalk 1_3
+  - first:
+      213: -1715431616154166253
+    second: 1AgustosSideWalk 1_4
+  - first:
+      213: -6108026484307246154
+    second: 1AgustosSideWalk 1_5
+  - first:
+      213: -3741139793443279316
+    second: 1AgustosSideWalk 1_6
+  - first:
+      213: -6319701701717869252
+    second: 1AgustosSideWalk 1_7
+  - first:
+      213: -3010302039327719967
+    second: 1AgustosSideWalk 1_8
+  - first:
+      213: 4332823631182025042
+    second: 1AgustosSideWalk 1_9
+  - first:
+      213: 1732894831063580352
+    second: 1AgustosSideWalk 1_10
+  - first:
+      213: 8157342814462785147
+    second: 1AgustosSideWalk 1_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 20
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_0
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 5
+        width: 54
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd16156f272547820800000000000000
+      internalID: 2915045512527831517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_1
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 4
+        width: 54
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d41ec1c153082e4b0800000000000000
+      internalID: -5412622836552638131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_2
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 3
+        width: 54
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f707810ffbe9db770800000000000000
+      internalID: 8628227008315814015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_3
+      rect:
+        serializedVersion: 2
+        x: 252
+        y: 2
+        width: 54
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb89fb9276db20be0800000000000000
+      internalID: -1512438274063361857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_4
+      rect:
+        serializedVersion: 2
+        x: 331
+        y: 1
+        width: 55
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31c18aaa8009138e0800000000000000
+      internalID: -1715431616154166253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_5
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 0
+        width: 55
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b34034364eeb3ba0800000000000000
+      internalID: -6108026484307246154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_6
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 0
+        width: 56
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2e2cb4ed2dc41cc0800000000000000
+      internalID: -3741139793443279316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_7
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 0
+        width: 56
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3dbca619c8eb48a0800000000000000
+      internalID: -6319701701717869252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_8
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 1
+        width: 56
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1edbc379e324936d0800000000000000
+      internalID: -3010302039327719967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_9
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 2
+        width: 55
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 251d503e228412c30800000000000000
+      internalID: 4332823631182025042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_10
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 3
+        width: 54
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ceb7a6eaaa7c0810800000000000000
+      internalID: 1732894831063580352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1AgustosSideWalk 1_11
+      rect:
+        serializedVersion: 2
+        x: 892
+        y: 4
+        width: 56
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b76b32ff114b43170800000000000000
+      internalID: 8157342814462785147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      1AgustosSideWalk 1_0: 2915045512527831517
+      1AgustosSideWalk 1_1: -5412622836552638131
+      1AgustosSideWalk 1_10: 1732894831063580352
+      1AgustosSideWalk 1_11: 8157342814462785147
+      1AgustosSideWalk 1_2: 8628227008315814015
+      1AgustosSideWalk 1_3: -1512438274063361857
+      1AgustosSideWalk 1_4: -1715431616154166253
+      1AgustosSideWalk 1_5: -6108026484307246154
+      1AgustosSideWalk 1_6: -3741139793443279316
+      1AgustosSideWalk 1_7: -6319701701717869252
+      1AgustosSideWalk 1_8: -3010302039327719967
+      1AgustosSideWalk 1_9: 4332823631182025042
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

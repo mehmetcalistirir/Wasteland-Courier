@@ -1,0 +1,377 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4332568536927215517
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2243342873577748831}
+  - component: {fileID: 1017591648696346655}
+  - component: {fileID: 1901054954283515642}
+  - component: {fileID: 6325730467235097454}
+  - component: {fileID: 5883423141642112396}
+  - component: {fileID: 408433156941147806}
+  - component: {fileID: 1893863080789037764}
+  - component: {fileID: 5332541922574428768}
+  - component: {fileID: 1807631111396881505}
+  - component: {fileID: 3603864426398938071}
+  m_Layer: 0
+  m_Name: Game Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2243342873577748831
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1017591648696346655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c57057ca4e86f63438fc8cbd074b4bef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requiredFuel: 6
+  gameOverPanel: {fileID: 0}
+--- !u!114 &1901054954283515642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ea224475c96478459aa7fa089ff7155, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dayDuration: 10
+  nightDuration: 10
+  lightController: {fileID: 0}
+  spawner: {fileID: 1893863080789037764}
+  enemyManager: {fileID: 6325730467235097454}
+  regenerationRatio: 0.5
+--- !u!114 &6325730467235097454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8246f75df3b09b34c979bf59de781e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefabs:
+  - {fileID: 5687110353871480299, guid: 58126baf9dff2f948a2cc08ac0bf9380, type: 3}
+  - {fileID: 5687110353871480299, guid: d499a2078edfd2b4596eab3dd7fbc943, type: 3}
+  - {fileID: 5687110353871480299, guid: 77a803c77073d6f4dac9b137c280d8f0, type: 3}
+  - {fileID: 5687110353871480299, guid: c620283aaaec31c4d8fe13c56ababbcf, type: 3}
+  spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  baseEnemyCount: 5
+  enemyCountIncreasePerDay: 2
+  spawnZoneManager: {fileID: 0}
+  extraWanderGroups:
+  - area: {fileID: 0}
+    wanderPrefabs: []
+    extraCount: 0
+--- !u!114 &5883423141642112396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127f1670c15cf264eb8d1612ac68fb47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pausePanel: {fileID: 0}
+  settingsPanel: {fileID: 0}
+--- !u!114 &408433156941147806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3861b865eb5d88749bfd633279fd5e4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableBlueprints: []
+  craftingPanel: {fileID: 0}
+  requirementsContainer: {fileID: 0}
+  requirementLinePrefab: {fileID: 1877293434998382191, guid: 255ac01e9e8f047448d72d00013bc347, type: 3}
+  craftPromptText: {fileID: 0}
+  craftButton: {fileID: 0}
+  swapButton: {fileID: 0}
+  slotManager: {fileID: 0}
+--- !u!114 &1893863080789037764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c5047cfc3eee7842aedd79f242a7f17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stonePrefab: {fileID: 6150571164243365950, guid: e0b0a5d1e8cf5d042a86cacccc224750, type: 3}
+  woodPrefab: {fileID: 6150571164243365950, guid: 8563a6cf242dfef4181371b0e7c9b502, type: 3}
+  scrapMetalPrefab: {fileID: 6150571164243365950, guid: ee9f517b253fba948a706f516eee1818, type: 3}
+  stoneCount: 5
+  woodCount: 3
+  scrapMetalCount: 2
+  spawnAreaMin: {x: -10, y: -5}
+  spawnAreaMax: {x: 200, y: 100}
+--- !u!114 &5332541922574428768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62df1652776183c4c9b88adfc7f28011, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideCursorInGame: 0
+  lockMode: 2
+--- !u!114 &1807631111396881505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4313765829464ea46afdc3eaf91a515d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  capacity: 30
+  slots:
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+  - data: {fileID: 0}
+    count: 0
+    weapon:
+      id: 
+      clip: 0
+      reserve: 0
+--- !u!114 &3603864426398938071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b072f7eeb9c44c149881f471e7fb4265, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

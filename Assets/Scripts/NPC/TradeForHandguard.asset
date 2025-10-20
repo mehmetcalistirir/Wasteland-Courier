@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ee571c4d90443c4f85439d50d1be434, type: 3}
+  m_Name: TradeForHandguard
+  m_EditorClassIdentifier: 
+  stoneSO: {fileID: 11400000, guid: d1b4eb59deb9eea449a078661fde2354, type: 2}
+  requiredStone: 10
+  woodSO: {fileID: 11400000, guid: 241e72043066a074c9d13e406f796c00, type: 2}
+  requiredWood: 15
+  scrapSO: {fileID: 11400000, guid: 314077d7c5cd09a48b4fc1a29a338684, type: 2}
+  requiredScrapMetal: 10
+  ammoSO: {fileID: 11400000, guid: 50a3c1bc2fa5bc64e9a373324ae08cbb, type: 2}
+  requiredAmmo: 0
+  meatSO: {fileID: 11400000, guid: 133f2affd49f48947b5939c89096890f, type: 2}
+  requiredMeat: 0
+  deerHideSO: {fileID: 11400000, guid: d1116203837a4424081ee5bfd36e25c6, type: 2}
+  requiredDeerHide: 0
+  rabbitHideSO: {fileID: 11400000, guid: 1c63cf5e8571ed442b118564bd1931e3, type: 2}
+  requiredRabbitHide: 0
+  herbSO: {fileID: 0}
+  requiredHerb: 0
+  rewardKind: 1
+  partToGive: 2
+  amountToGive: 1
+  rewardItemSO: {fileID: 11400000, guid: 1d12b905bfa924d40856900dfd5e6ee7, type: 2}
+  rewardAmount: 1

@@ -8,27 +8,27 @@ public class PlayerStats : MonoBehaviour
 {
 
     // En üste alan ekle
-private Dictionary<WeaponPartType, int> weaponParts = new Dictionary<WeaponPartType, int>();
+    private Dictionary<WeaponPartType, int> weaponParts = new Dictionary<WeaponPartType, int>();
 
-public int GetWeaponPartCount(WeaponPartType part)
-{
-    return weaponParts.ContainsKey(part) ? weaponParts[part] : 0;
-}
-
-public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
-{
-    foreach (var p in partsToConsume)
+    public int GetWeaponPartCount(WeaponPartType part)
     {
-        if (weaponParts.ContainsKey(p.partType) && weaponParts[p.partType] >= p.amount)
+        return weaponParts.ContainsKey(part) ? weaponParts[part] : 0;
+    }
+
+    public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
+    {
+        foreach (var p in partsToConsume)
         {
-            weaponParts[p.partType] -= p.amount;
-            WeaponPartsUI.Instance?.UpdatePartText(p.partType, weaponParts[p.partType]);
+            if (weaponParts.ContainsKey(p.partType) && weaponParts[p.partType] >= p.amount)
+            {
+                weaponParts[p.partType] -= p.amount;
+                WeaponPartsUI.Instance?.UpdatePartText(p.partType, weaponParts[p.partType]);
+            }
         }
     }
-}
 
 
-    [Header("Food Healing / Hunger")]
+    [Header("Yiyeceklerle İyileşme / Aclik")]
     public int healOnRawMeatUse = 5;
     public int healOnCookedMeatUse = 15;
     public int healOnHerbUse = 10;
@@ -37,7 +37,14 @@ public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
     public int hungerOnCookedMeatUse = 30;
     public int hungerOnHerbUse = 0;
 
-    [Header("Health")]
+    [Header("Stamina Ayarları")]
+    public float maxStamina = 100f;
+    [SerializeField] private float currentStamina;
+    public float staminaDrainRate = 15f;  // koşarken azalır
+    public float staminaRegenWalk = 8f;   // yürürken artar
+    public float staminaRegenIdle = 18f;  // dururken artar
+
+    [Header("Saglik")]
     public int maxHealth = 100;
     public int currentHealth;
     public float damageCooldown = 0.5f;
@@ -84,18 +91,18 @@ public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
     public delegate void OnHealthChanged(int current, int max);
     public event OnHealthChanged onHealthChanged;
 
-    [Header("Move/Inventory")]
+    [Header("Hareket/Envanter")]
     public float moveSpeed = 5f;
     public int gold = 10;
 
-    [Header("Hunger")]
+    [Header("Aclik")]
     public int maxHunger = 100;
     public int currentHunger;
     public float hungerDecreaseInterval = 5f;
     public int hungerDecreaseAmount = 1;
     private float hungerTimer;
 
-    [Header("Audio")]
+    [Header("Ses")]
     public AudioClip hurtClip;
     private AudioSource audioSource;
 
@@ -119,6 +126,7 @@ public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
         hungerTimer = hungerDecreaseInterval;
         currentHealth = maxHealth;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
+        currentStamina = maxStamina;
     }
 
     void Awake()
@@ -136,6 +144,26 @@ public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
 
         if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
             TryConsumeFood();
+    }
+    public float GetStamina()
+    {
+        return currentStamina;
+    }
+    public float GetMaxStamina()
+    {
+        return maxStamina;
+    }
+    public void ModifyStamina(float amount)
+    {
+        currentStamina = Mathf.Clamp(currentStamina + amount, 0, maxStamina);
+    }
+    public bool HasStamina()
+    {
+        return currentStamina > 0f;
+    }
+    public void ResetStamina()
+    {
+        currentStamina = maxStamina;
     }
 
     public void CollectWeaponPart(WeaponPartType part, int amountToCollect = 1)

@@ -16,18 +16,18 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Fire",
+                    "name": "Sprint",
                     "type": "Button",
-                    "id": "768b2120-4aa8-4731-8eaf-8c1a82d53d6e",
+                    "id": "45ebb3c3-7009-4a8a-a165-ed3054c6ef36",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Sprint",
+                    "name": "Map",
                     "type": "Button",
-                    "id": "45ebb3c3-7009-4a8a-a165-ed3054c6ef36",
+                    "id": "1c96cc24-21dc-4ee5-9d8a-644df25287e3",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -92,23 +92,23 @@
                 },
                 {
                     "name": "",
-                    "id": "9656bd61-5fab-48da-8cdf-980db4c393d0",
-                    "path": "<Mouse>/leftButton",
+                    "id": "11824abd-e6f1-4acd-8663-22360e3afdb9",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Fire",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "11824abd-e6f1-4acd-8663-22360e3afdb9",
-                    "path": "<Keyboard>/leftShift",
+                    "id": "60679d51-a8e5-4168-8d8f-ed16a73fed87",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Sprint",
+                    "action": "Map",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

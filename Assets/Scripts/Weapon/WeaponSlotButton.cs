@@ -41,7 +41,7 @@ public class WeaponSlotButton : MonoBehaviour
             rt.offsetMin = rt.offsetMax = Vector2.zero;
         }
 
-        weaponIcon.preserveAspect = true;
+        
     }
     else
     {

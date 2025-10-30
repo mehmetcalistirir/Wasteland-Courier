@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Shotgun
   m_EditorClassIdentifier: 
   weaponName: Shotgun
-  weaponIcon: {fileID: 1275589539659018210, guid: 44be8ddb925998240a0597efb288fd56, type: 3}
+  weaponIcon: {fileID: 4099191518589774541, guid: 8d28fad03878d464fb4e8f1f05844664, type: 3}
+  prefab: {fileID: 7802920725924030239, guid: 795cdce0369154b42a7cc1dfab215d8f, type: 3}
   weaponType: 2
   knockbackForce: 6
   knockbackDuration: 0.18
@@ -32,3 +33,9 @@ MonoBehaviour:
   sniperCooldown: 3
   sniperPenetrationCount: 2
   ammoType: 9
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

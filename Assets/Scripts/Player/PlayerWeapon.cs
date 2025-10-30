@@ -97,22 +97,28 @@ public class PlayerWeapon : MonoBehaviour
     {
         if (currentAmmoInClip <= 0) return;
 
-        int cost = weaponData.isShotgun ? Mathf.Max(2, durabilityCostPerShot) : durabilityCostPerShot;
-        durability.LoseDurability(cost);
+        // Ateş hızı kontrolü
+        float cooldown =
+            weaponData.isShotgun ? weaponData.shotgunCooldown :
+            weaponData.isSniper ? weaponData.sniperCooldown :
+            (1f / weaponData.fireRate);
 
+        // Eğer cooldown süresi dolmadıysa çık
+        if (Time.time < nextTimeToFire)
+            return;
 
-        // Shotgun'da sabit bekleme; diğerlerinde fireRate
-       float cooldown =
-    weaponData.isShotgun ? weaponData.shotgunCooldown :
-    weaponData.isSniper  ? weaponData.sniperCooldown  :
-    (1f / weaponData.fireRate);
+        nextTimeToFire = Time.time + cooldown;
 
-    nextTimeToFire = Time.time + cooldown;   // <<— BUNU EKLE
-
-
-
-        // Klasik shotgun davranışı: tetikte kaç saçma çıkarsa çıksın 1 mermi eksilt
+        // Şimdi mermiyi azalt
         currentAmmoInClip--;
+
+        int cost = weaponData.isShotgun ? Mathf.Max(2, durabilityCostPerShot) : durabilityCostPerShot;
+        if (durability != null)
+            durability.LoseDurability(cost);
+
+
+
+        
 
         if (shootSound != null)
             audioSource.PlayOneShot(shootSound);

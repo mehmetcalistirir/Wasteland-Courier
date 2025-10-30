@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Sniper
   weaponIcon: {fileID: -952550666369105273, guid: b79f2ecc80f5a604f8e899515e907df5, type: 3}
+  prefab: {fileID: 7059562024863783809, guid: 82e160535d9f9604697498cf2183195e, type: 3}
   weaponType: 3
   knockbackForce: 6
   knockbackDuration: 0.18
@@ -32,3 +33,9 @@ MonoBehaviour:
   sniperCooldown: 3
   sniperPenetrationCount: 2
   ammoType: 10
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

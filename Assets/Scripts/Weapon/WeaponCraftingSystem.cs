@@ -79,34 +79,47 @@ public class WeaponCraftingSystem : MonoBehaviour
     }
 
     private void InitializeBlueprintList()
+{
+    // 🔹 Önce tüm kartları topla
+    blueprintUIElements.Clear();
+    blueprintUIElements.AddRange(craftingPanel.GetComponentsInChildren<BlueprintUI>(true));
+
+    // 🔹 Her kartın blueprint'i zaten Inspector'dan atanmışsa o veriyi kullan
+    foreach (var ui in blueprintUIElements)
     {
-        blueprintUIElements.Clear();
+        if (ui == null) continue;
 
-        // 1) UI kartlarını al ve pozisyona göre (soldan sağa, yukarıdan aşağıya) sırala
-        var uis = craftingPanel.GetComponentsInChildren<BlueprintUI>(true)
-                               .OrderBy(ui =>
-                               {
-                                   var rt = ui.transform as RectTransform;
-                                   // önce satır (y küçük -> üst), sonra sütun (x küçük -> sol)
-                                   return (rt ? (rt.anchoredPosition.y * -10000f + rt.anchoredPosition.x) : 0f);
-                               })
-                               .ToList();
-        blueprintUIElements.AddRange(uis);
+        // Eğer Inspector'dan Blueprint atanmadıysa, availableBlueprints içinden isim eşleştir
+        if (ui.blueprint == null && availableBlueprints != null)
+        {
+            foreach (var bp in availableBlueprints)
+            {
+                if (bp == null) continue;
 
-        // 2) Blueprint’leri slot indexine göre sırala (0:Machinegun, 1:Pistol, 2:Sniper, 3:Shotgun ...)
-        var bps = (availableBlueprints ?? new List<WeaponBlueprint>())
-                      .Where(bp => bp != null)
-                      .OrderBy(bp => bp.weaponSlotIndexToUnlock)
-                      .ToList();
+                // Blueprint ismine göre eşleştir (örnek: "BP_Sniper" ile "Sniper" eşleşir)
+                if (bp.weaponName.ToLower().Contains(ui.name.ToLower().Replace("inventoryuiimage", "")))
+                {
+                    ui.blueprint = bp;
+                    break;
+                }
+            }
+        }
 
-        // 3) Eşleştir ve kur
-        int count = Mathf.Min(bps.Count, blueprintUIElements.Count);
-        for (int i = 0; i < count; i++)
-            blueprintUIElements[i].Setup(bps[i]);
-
-        // 4) İlk açılışta depo sayaçlarını doğru yaz
-        UpdateAllBlueprintUI();
+        // Son olarak UI’yi blueprint ile kur
+        if (ui.blueprint != null)
+        {
+            ui.Setup(ui.blueprint);
+            Debug.Log($"[BlueprintUI] {ui.name} kartına atanan blueprint → {ui.blueprint.weaponName}");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ {ui.name} kartına blueprint atanamadı!");
+        }
     }
+
+    UpdateAllBlueprintUI();
+}
+
 
 
     public void ToggleCraftingPanel()
@@ -140,56 +153,91 @@ public class WeaponCraftingSystem : MonoBehaviour
     }
 
     private void UpdateDetailPanel()
+{
+    // önce eski satırları temizle
+    foreach (Transform c in requirementsContainer)
+        Destroy(c.gameObject);
+
+    if (selectedBlueprint == null)
     {
-        foreach (Transform c in requirementsContainer) Destroy(c.gameObject);
-
-        if (selectedBlueprint == null)
-        {
-            SetGlobalButtons(false, false);
-            return;
-        }
-
-        // Gereksinimleri yaz
-        foreach (var req in selectedBlueprint.requiredParts)
-        {
-            int have = playerStats.GetWeaponPartCount(req.partType);
-            AddRequirementLine(req.partType.ToString(), have, req.amount);
-        }
-
-        if (craftPromptText) craftPromptText.gameObject.SetActive(false);
-
-        // --- Yeni mantık ---
-        bool canCraftNow = CanCraft(selectedBlueprint);
-
-        var wsm = WeaponSlotManager.Instance;
-        int selectedKey = TypeKey(selectedBlueprint);
-        int active = wsm?.activeSlotIndex ?? -1;
-        bool activeEmpty = (wsm != null && wsm.GetBlueprintForSlot(active) == null);
-
-        // Depo sayıları (seçili tür + toplam)
-        int storedSelected = CaravanInventory.Instance.GetStoredCountForType(selectedKey);
-        int totalStored = 0;
-        if (wsm != null && wsm.weaponSlots != null)
-        {
-            for (int i = 0; i < wsm.weaponSlots.Length; i++)
-                totalStored += CaravanInventory.Instance.GetStoredCountForType(i);
-        }
-
-        bool inRange = CraftingStation.IsPlayerInRange;
-        bool rightSlot = (wsm != null && active == selectedKey);
-
-        // Aktif slot boşsa: seçili tür varsa ya da depoda herhangi bir tür varsa swap butonu aktif
-        // Aktif slot doluysa: eski kural; tür eşleşmeli ve o türden depoda olmalı
-        bool canSwapNow = inRange && (
-                            (activeEmpty && (storedSelected > 0 || totalStored > 0)) ||
-                            (!activeEmpty && rightSlot && storedSelected > 0)
-                          );
-
-        SetGlobalButtons(canCraftNow, canSwapNow);
-
-        Debug.Log($"[DETAIL] selectedKey={selectedKey}  active={active}  activeEmpty={activeEmpty}  " +
-                  $"storedSel={storedSelected} totalStored={totalStored} canCraft={canCraftNow} canSwap={canSwapNow}");
+        SetGlobalButtons(false, false);
+        return;
     }
+
+    // 🔍 blueprint’in türünü öğren
+    var type = selectedBlueprint.weaponData.weaponType;
+
+    // 🔧 tür ateşli silahlardan biri mi?
+    bool isFirearm =
+        type == WeaponType.MachineGun ||
+        type == WeaponType.Pistol ||
+        type == WeaponType.Sniper ||
+        type == WeaponType.Shotgun;
+
+    // 🔧 tür melee / fırlatmalı / molotof mu?
+    bool isPrimitive =
+        type == WeaponType.ThrowingSpear ||
+        type == WeaponType.Bow ||
+        type == WeaponType.MeeleSword ||
+        type == WeaponType.Molotov;
+
+    // 🔹 parça listesi değişkeni
+    var parts = new System.Collections.Generic.List<(string name, int have, int need)>();
+
+    if (isFirearm)
+    {
+        // 🧱 6 parça türü: Barrel, Magazine, Handguard, Grip, Trigger, TriggerGuard
+        parts.Add(("Barrel",      playerStats.GetWeaponPartCount(WeaponPartType.Barrel),      1));
+        parts.Add(("Magazine",    playerStats.GetWeaponPartCount(WeaponPartType.Magazine),    1));
+        parts.Add(("Handguard",   playerStats.GetWeaponPartCount(WeaponPartType.Handguard),   1));
+        parts.Add(("Grip",        playerStats.GetWeaponPartCount(WeaponPartType.Grip),        1));
+        parts.Add(("Trigger",     playerStats.GetWeaponPartCount(WeaponPartType.Trigger),     1));
+        parts.Add(("TriggerGuard",playerStats.GetWeaponPartCount(WeaponPartType.TriggerGuard),1));
+    }
+    else if (isPrimitive)
+    {
+        // 🪵 3 temel malzeme: Stone, Wood, ScrapMetal
+        parts.Add(("Stone",      playerStats.GetWeaponPartCount(WeaponPartType.Stone),       1));
+        parts.Add(("Wood",       playerStats.GetWeaponPartCount(WeaponPartType.Wood),        1));
+        parts.Add(("ScrapMetal", playerStats.GetWeaponPartCount(WeaponPartType.ScrapMetal),  1));
+    }
+    else
+    {
+        Debug.LogWarning($"⚠️ {selectedBlueprint.weaponName} için parça kategorisi tanımlı değil!");
+    }
+
+    // 🔹 UI satırlarını oluştur
+    foreach (var p in parts)
+        AddRequirementLine(p.name, p.have, p.need);
+
+    // diğer Craft / Swap buton mantığı aynı kalsın
+    if (craftPromptText) craftPromptText.gameObject.SetActive(false);
+    bool canCraftNow = CanCraft(selectedBlueprint);
+
+    var wsm = WeaponSlotManager.Instance;
+    int selectedKey = TypeKey(selectedBlueprint);
+    int active = wsm?.activeSlotIndex ?? -1;
+    bool activeEmpty = (wsm != null && wsm.GetBlueprintForSlot(active) == null);
+
+    int storedSelected = CaravanInventory.Instance.GetStoredCountForType(selectedKey);
+    int totalStored = 0;
+    if (wsm != null && wsm.weaponSlots != null)
+    {
+        for (int i = 0; i < wsm.weaponSlots.Length; i++)
+            totalStored += CaravanInventory.Instance.GetStoredCountForType(i);
+    }
+
+    bool inRange = CraftingStation.IsPlayerInRange;
+    bool rightSlot = (wsm != null && active == selectedKey);
+
+    bool canSwapNow = inRange && (
+        (activeEmpty && (storedSelected > 0 || totalStored > 0)) ||
+        (!activeEmpty && rightSlot && storedSelected > 0)
+    );
+
+    SetGlobalButtons(canCraftNow, canSwapNow);
+}
+
 
 
 
@@ -207,12 +255,17 @@ public class WeaponCraftingSystem : MonoBehaviour
     }
 
     private void AddRequirementLine(string itemName, int current, int required)
-    {
-        if (requirementLinePrefab == null || required <= 0) return;
-        var go = Instantiate(requirementLinePrefab, requirementsContainer);
-        var ui = go.GetComponent<RequirementLineUI>();
-        ui.Setup(itemName, current, required);
-    }
+{
+    // Prefab null ise çık ama miktar 0 bile olsa gösterim yapılmalı
+    if (requirementLinePrefab == null) return;
+
+    var go = Instantiate(requirementLinePrefab, requirementsContainer);
+    var ui = go.GetComponent<RequirementLineUI>();
+
+    // Eğer Required 0 ise bile, göster: "Barrel: 0 / 0"
+    ui.Setup(itemName, current, required);
+}
+
 
     public bool CanCraft(WeaponBlueprint bp)
     {

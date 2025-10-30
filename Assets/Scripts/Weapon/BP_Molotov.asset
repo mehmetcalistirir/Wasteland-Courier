@@ -23,15 +23,9 @@ MonoBehaviour:
   requiredWood: 0
   requiredScrapMetal: 0
   requiredParts:
-  - partType: 0
+  - partType: 6
     amount: 1
-  - partType: 1
+  - partType: 7
     amount: 1
-  - partType: 2
-    amount: 1
-  - partType: 3
-    amount: 1
-  - partType: 4
-    amount: 1
-  - partType: 5
+  - partType: 8
     amount: 1

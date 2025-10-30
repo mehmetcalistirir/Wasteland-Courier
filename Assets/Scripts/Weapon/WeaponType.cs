@@ -4,5 +4,8 @@ public enum WeaponType
     MachineGun,
     Shotgun,
     Sniper,
-    Molotov
+    Molotov,
+    ThrowingSpear,
+    Bow,
+    MeeleSword
 }

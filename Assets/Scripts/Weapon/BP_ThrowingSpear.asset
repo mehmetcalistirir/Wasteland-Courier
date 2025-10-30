@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5661faa13df877545a4e1110bce1977f, type: 3}
   m_Name: BP_ThrowingSpear
   m_EditorClassIdentifier: 
+  weaponType: 0
   weaponName: ThrowingSpear
   description: 
   weaponIcon: {fileID: -4880558716026876163, guid: 1b3269afd422e7b4883f160d9f98d14b, type: 3}
@@ -22,15 +23,7 @@ MonoBehaviour:
   requiredWood: 0
   requiredScrapMetal: 0
   requiredParts:
-  - partType: 0
+  - partType: 8
     amount: 1
-  - partType: 1
-    amount: 1
-  - partType: 2
-    amount: 1
-  - partType: 3
-    amount: 1
-  - partType: 4
-    amount: 1
-  - partType: 5
+  - partType: 7
     amount: 1

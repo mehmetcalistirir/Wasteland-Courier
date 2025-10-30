@@ -22,25 +22,34 @@ public class WeaponSlotButton : MonoBehaviour
     }
 
     // WeaponSlotUI tarafından çağrılır
-    public void Setup(int index, Sprite icon)
+   public void Setup(int index, Sprite icon)
+{
+    slotIndex = index;
+
+    if (icon != null)
     {
-        this.slotIndex = index;
+        weaponIcon.sprite = icon;
+        weaponIcon.enabled = true;
 
-        if (icon != null)
+        // Slot boyutuna göre orantılı küçültme
+        RectTransform rt = weaponIcon.GetComponent<RectTransform>();
+        if (rt != null)
         {
-            this.weaponIcon.sprite = icon;
-            this.weaponIcon.enabled = true;
+            // slotun içine sığacak maksimum boyut
+            rt.anchorMin = new Vector2(0.1f, 0.1f);
+            rt.anchorMax = new Vector2(0.9f, 0.9f);
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+        }
 
-            // Inspector'dan verilen boyutu uygula
-            RectTransform rt = weaponIcon.GetComponent<RectTransform>();
-            if (rt != null)
-                rt.sizeDelta = iconSize;
-        }
-        else
-        {
-            this.weaponIcon.enabled = false;
-        }
+        weaponIcon.preserveAspect = true;
     }
+    else
+    {
+        weaponIcon.enabled = false;
+        weaponIcon.sprite = null;
+    }
+}
+
 
     private void OnSlotClicked()
     {

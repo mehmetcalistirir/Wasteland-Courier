@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Molotov
   m_EditorClassIdentifier: 
   weaponName: Molotov
-  weaponIcon: {fileID: 3984404083290902542, guid: cd39b130b33486c40832744354491c6a, type: 3}
+  weaponIcon: {fileID: -3212455835368639413, guid: 387ee359de6e5004f922c797aa178e97, type: 3}
+  prefab: {fileID: 6163771216665897810, guid: ef115dea25c3a3443812cecfa8259c49, type: 3}
   weaponType: 4
   knockbackForce: 6
   knockbackDuration: 0.18

@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c808f84d6af51764da7c9e1c33f4dab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponIcon: {fileID: 3935586577744020936}
+  weaponIcon: {fileID: 0}
   highlightBorder: {fileID: 4331819883049152908}
   iconSize: {x: 96, y: 64}
 --- !u!114 &8241939120564539818
@@ -244,7 +244,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2754551319147892592}
   - component: {fileID: 7672846998229073498}
-  - component: {fileID: 3935586577744020936}
+  - component: {fileID: 6101511819763338418}
   m_Layer: 5
   m_Name: WeaponIcon
   m_TagString: Untagged
@@ -279,7 +279,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6675875837592632295}
   m_CullTransparentMesh: 1
---- !u!114 &3935586577744020936
+--- !u!114 &6101511819763338418
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -290,7 +290,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1

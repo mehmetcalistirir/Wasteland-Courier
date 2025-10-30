@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e35b7c80e4de9745ba74c74c4daddeb, type: 3}
   m_Name: MachinegunSO
   m_EditorClassIdentifier: 
+  resourceType: 0
   itemName: Machinegun
   icon: {fileID: 564439294832975815, guid: aac77143ad6b52e4d97d1befc6edd695, type: 3}
   category: 2
   stackable: 0
   maxStack: 1
   blueprint: {fileID: 11400000, guid: 74299bc927f3a7b42a474d2ba45599bb, type: 2}
+  weaponType: 1

@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: ThrowingSpear
   weaponIcon: {fileID: -4880558716026876163, guid: 1b3269afd422e7b4883f160d9f98d14b, type: 3}
+  prefab: {fileID: 8329565982022195850, guid: 1ab2b8b913564da4f8d0c712f7a171ed, type: 3}
+  weaponType: 0
+  knockbackForce: 6
+  knockbackDuration: 0.18
   isAutomatic: 0
   fireRate: 2
   damage: 8
@@ -21,3 +25,17 @@ MonoBehaviour:
   maxAmmoCapacity: 0
   reloadTime: 1.5
   attackRange: 1.5
+  isShotgun: 0
+  pelletsPerShot: 3
+  pelletSpreadAngle: 8
+  shotgunCooldown: 2.5
+  isSniper: 0
+  sniperCooldown: 3
+  sniperPenetrationCount: 2
+  ammoType: 0
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

@@ -5,5 +5,8 @@ public enum WeaponPartType
     Handguard,
     Grip,
     Trigger,
-    TriggerGuard
+    TriggerGuard,
+    Stone,
+    Wood,
+    ScrapMetal
 }

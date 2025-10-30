@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: MachineGun
   m_EditorClassIdentifier: 
   weaponName: Machine Gun
-  weaponIcon: {fileID: 0}
+  weaponIcon: {fileID: 564439294832975815, guid: 7a62928c4b4846140a4fd9b6aa1fdda1, type: 3}
+  prefab: {fileID: 6873116168706336214, guid: 00a04fac6cd7216479428d3cdab0b3b2, type: 3}
   weaponType: 1
   knockbackForce: 6
   knockbackDuration: 0.18
@@ -32,3 +33,9 @@ MonoBehaviour:
   sniperCooldown: 3
   sniperPenetrationCount: 2
   ammoType: 7
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

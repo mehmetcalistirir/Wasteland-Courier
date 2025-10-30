@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: Bow
   m_EditorClassIdentifier: 
   weaponName: Bow
-  weaponIcon: {fileID: 8350332015550957046, guid: 8c8648fcb732a1d44b7203218c651cc5, type: 3}
+  weaponIcon: {fileID: 2031992868565647794, guid: 0c89bcec77114c84fa61d39c0a5aab48, type: 3}
+  prefab: {fileID: 7324183614779471187, guid: 5af9a92d6d54bcc4aa18209801343d29, type: 3}
+  weaponType: 0
+  knockbackForce: 6
+  knockbackDuration: 0.18
   isAutomatic: 0
   fireRate: 2
   damage: 5
@@ -21,3 +25,17 @@ MonoBehaviour:
   maxAmmoCapacity: 0
   reloadTime: 1.5
   attackRange: 1.5
+  isShotgun: 0
+  pelletsPerShot: 3
+  pelletSpreadAngle: 8
+  shotgunCooldown: 2.5
+  isSniper: 0
+  sniperCooldown: 3
+  sniperPenetrationCount: 2
+  ammoType: 0
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

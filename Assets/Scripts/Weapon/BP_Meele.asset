@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5661faa13df877545a4e1110bce1977f, type: 3}
   m_Name: BP_Meele
   m_EditorClassIdentifier: 
+  weaponType: 0
   weaponName: Blade
   description: 
   weaponIcon: {fileID: -4854829337826818713, guid: 1932acb0fbd75864b8c860ca2a361333, type: 3}
@@ -22,15 +23,7 @@ MonoBehaviour:
   requiredWood: 0
   requiredScrapMetal: 0
   requiredParts:
-  - partType: 0
+  - partType: 7
     amount: 1
-  - partType: 1
+  - partType: 8
     amount: 2
-  - partType: 2
-    amount: 3
-  - partType: 3
-    amount: 3
-  - partType: 4
-    amount: 2
-  - partType: 5
-    amount: 3

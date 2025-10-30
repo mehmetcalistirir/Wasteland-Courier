@@ -5,6 +5,9 @@ public class WeaponData : ScriptableObject
 {
     public string weaponName;
     public Sprite weaponIcon;
+    [Header("Prefab")]
+public GameObject prefab;
+
 
     public WeaponType weaponType;
     [Header("Knockback Settings")]

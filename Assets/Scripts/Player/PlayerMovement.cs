@@ -8,9 +8,9 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float sprintMultiplier = 1.7f; // Koşarken hız artışı
     private bool isSprinting = false;
-    
+
     [Header("UI")]
-    public Slider staminaBar; 
+    public Slider staminaBar;
 
     // --- Bileşen Referansları ---
     private Rigidbody2D rb;
@@ -91,7 +91,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (GameStateManager.IsGamePaused) return;
         UpdateAnimationAndDirection();
-        
+
         if (staminaBar != null && stats != null)
         {
             staminaBar.maxValue = stats.GetMaxStamina();
@@ -103,19 +103,32 @@ public class PlayerMovement : MonoBehaviour
     {
         bool isMoving = moveInput.magnitude > 0.1f;
 
+        // Açlığa göre yenilenme çarpanı hesapla
+        float hungerRatio = (float)stats.currentHunger / stats.maxHunger;
+        float hungerMultiplier = 1f;
+
+        if (hungerRatio >= 0.8f)
+            hungerMultiplier = 1.0f; // tokken normal yenilenme
+        else if (hungerRatio >= 0.4f)
+            hungerMultiplier = 0.7f; // orta açlıkta yavaş
+        else
+            hungerMultiplier = 0.4f; // çok açken çok yavaş yenilenme
+
+        // Stamina değişimi
         if (isSprinting && isMoving)
         {
             stats.ModifyStamina(-stats.staminaDrainRate * Time.deltaTime);
         }
         else if (isMoving)
         {
-            stats.ModifyStamina(stats.staminaRegenWalk * Time.deltaTime);
+            stats.ModifyStamina(stats.staminaRegenWalk * hungerMultiplier * Time.deltaTime);
         }
         else
         {
-            stats.ModifyStamina(stats.staminaRegenIdle * Time.deltaTime);
+            stats.ModifyStamina(stats.staminaRegenIdle * hungerMultiplier * Time.deltaTime);
         }
     }
+
 
     private void UpdateAnimationAndDirection()
     {

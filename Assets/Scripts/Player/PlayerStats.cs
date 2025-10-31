@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
+
 
 
 
@@ -28,10 +30,9 @@ public class PlayerStats : MonoBehaviour
     }
 
 
-    [Header("Yiyeceklerle İyileşme / Aclik")]
-    public int healOnRawMeatUse = 5;
-    public int healOnCookedMeatUse = 15;
-    public int healOnHerbUse = 10;
+
+
+
 
     public int hungerOnRawMeatUse = 10;
     public int hungerOnCookedMeatUse = 30;
@@ -43,6 +44,9 @@ public class PlayerStats : MonoBehaviour
     public float staminaDrainRate = 15f;  // koşarken azalır
     public float staminaRegenWalk = 8f;   // yürürken artar
     public float staminaRegenIdle = 18f;  // dururken artar
+
+    [Header("Açlık UI")]
+    public TextMeshProUGUI hungerText;
 
     [Header("Saglik")]
     public int maxHealth = 100;
@@ -102,6 +106,14 @@ public class PlayerStats : MonoBehaviour
     public int hungerDecreaseAmount = 1;
     private float hungerTimer;
 
+    [Header("Doğal İyileşme (Açlığa bağlı)")]
+    public bool enableHungerRegen = true;
+    public float hungerRegenThreshold = 80f;   // 80 üstü tok sayılır
+    public float healthRegenRate = 3f;         // saniyede kaç HP yenilenecek
+    public float healthRegenInterval = 1f;     // kaç saniyede bir yenileme olur
+    private float healthRegenTimer = 0f;
+
+
     [Header("Ses")]
     public AudioClip hurtClip;
     private AudioSource audioSource;
@@ -141,9 +153,27 @@ public class PlayerStats : MonoBehaviour
     void Update()
     {
         HandleHunger();
+        HandleHungerRegen();
+        HandleStarvation();
+
 
         if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
             TryConsumeFood();
+
+        // --- Açlık UI Güncellemesi ---
+        if (hungerText != null)
+        {
+            hungerText.text = $"Açlık: {currentHunger}/{maxHunger}";
+
+            // Renk geçişi: açlığa göre değişsin
+            if (currentHunger > 60)
+                hungerText.color = Color.green;
+            else if (currentHunger > 30)
+                hungerText.color = Color.yellow;
+            else
+                hungerText.color = Color.red;
+        }
+
     }
     public float GetStamina()
     {
@@ -218,6 +248,36 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    void HandleHungerRegen()
+    {
+        if (!enableHungerRegen) return;
+        if (currentHunger < hungerRegenThreshold) return; // tok değil
+        if (currentHealth >= maxHealth) return; // zaten full sağlık
+
+        healthRegenTimer += Time.deltaTime;
+        if (healthRegenTimer >= healthRegenInterval)
+        {
+            Heal(Mathf.RoundToInt(healthRegenRate)); // mevcut Heal fonksiyonunu kullan
+            healthRegenTimer = 0f;
+        }
+    }
+
+    void HandleStarvation()
+    {
+        if (currentHunger > 0) return;
+        if (currentHealth <= 0) return;
+
+        // Açlıktan yavaş can kaybı
+        healthRegenTimer += Time.deltaTime;
+        if (healthRegenTimer >= 2f) // 2 saniyede bir
+        {
+            TakeDamage(1);
+            healthRegenTimer = 0f;
+        }
+    }
+
+
+
     // ==== Inventory Köprü ====
     public void AddResource(ItemData item, int amount)
     {
@@ -241,7 +301,6 @@ public class PlayerStats : MonoBehaviour
         if (Inventory.Instance.HasEnough(cookedMeatSO, 1))
         {
             Inventory.Instance.TryConsume(cookedMeatSO, 1);
-            Heal(healOnCookedMeatUse);
             GainHunger(hungerOnCookedMeatUse);
             Debug.Log("🍗 Pişmiş et yendi!");
             return;
@@ -250,7 +309,6 @@ public class PlayerStats : MonoBehaviour
         if (Inventory.Instance.HasEnough(rawMeatSO, 1))
         {
             Inventory.Instance.TryConsume(rawMeatSO, 1);
-            Heal(healOnRawMeatUse);
             GainHunger(hungerOnRawMeatUse);
             Debug.Log("🥩 Çiğ et yendi!");
             return;
@@ -259,7 +317,6 @@ public class PlayerStats : MonoBehaviour
         if (Inventory.Instance.HasEnough(herbSO, 1))
         {
             Inventory.Instance.TryConsume(herbSO, 1);
-            Heal(healOnHerbUse);
             GainHunger(hungerOnHerbUse);
             Debug.Log("🌿 Ot yendi!");
             return;

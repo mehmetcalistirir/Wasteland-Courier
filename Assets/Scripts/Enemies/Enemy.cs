@@ -37,6 +37,7 @@ public class Enemy : MonoBehaviour
     public int damageToCaravan = 1;
     private Animator animator;
     private AudioSource audioSource; // YENİ
+    
 
     [SerializeField] private GameObject ammoMachineGunPrefab;
     [SerializeField] private GameObject ammoPistolPrefab;
@@ -200,7 +201,7 @@ public class Enemy : MonoBehaviour
             StartCoroutine(PlayAmbientSounds());
 
         // --- Mevcut Start içeriğin (OverlapCircleAll vb.) devamı ---
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.5f);
+        /*Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.5f);
         foreach (var hit in hits)
         {
             if (hit.CompareTag("Player"))
@@ -215,7 +216,7 @@ public class Enemy : MonoBehaviour
                 else if (enemyType == EnemyType.Exploder)
                     Explode();
             }
-        }
+        }*/
 
         GameObject cycleObj = GameObject.FindObjectOfType<DayNightCycle>()?.gameObject;
         if (cycleObj != null)
@@ -227,6 +228,8 @@ public class Enemy : MonoBehaviour
         }
 
     }
+
+
 
     private bool IsDayTime()
     {
@@ -372,71 +375,49 @@ public class Enemy : MonoBehaviour
     }
 
 
-    void Update()
+   void Update()
+{
+    if (target == null)
     {
-        if (target == null)
+        if ((enemyType == EnemyType.Normal || enemyType == EnemyType.Fast) && player != null)
+            target = player;
+        else if ((enemyType == EnemyType.Armored || enemyType == EnemyType.Exploder) && caravan != null)
+            target = caravan;
+    }
+
+    if (!externalMovement && target != null)
+    {
+        float distanceToTarget = Vector2.Distance(transform.position, target.position);
+        float stopDistance = (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast)
+            ? damageRangeToPlayer
+            : damageRangeToCaravan;
+
+        Vector2 dir = (target.position - transform.position).normalized;
+
+        if (!isAttacking) // 🔸 saldırı modunda değilse
         {
-            if ((enemyType == EnemyType.Normal || enemyType == EnemyType.Fast) && player != null)
-                target = player;
-            else if ((enemyType == EnemyType.Armored || enemyType == EnemyType.Exploder) && caravan != null)
-                target = caravan;
-        }
-
-        if (!externalMovement && target != null)
-        {
-            float distanceToTarget = Vector2.Distance(transform.position, target.position);
-            float stopDistance = (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast)
-                ? damageRangeToPlayer
-                : damageRangeToCaravan;
-
-            Vector2 dir = (target.position - transform.position).normalized;
-
             if (distanceToTarget > stopDistance)
             {
-                Debug.Log("Enemy moving - IsMoving TRUE");
-
                 // 🧭 Hedefe doğru ilerle
                 transform.position += (Vector3)(dir * moveSpeed * Time.deltaTime);
 
-                // 🎬 Walk animasyonuna geç
+                // 🎬 Yürüme animasyonu
                 if (!animator.GetBool("IsMoving"))
                     animator.SetBool("IsMoving", true);
 
-                // 🔁 Hedef yönüne dönme (360°)
+                // 🔁 360° rotasyon
                 float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
             }
             else
             {
-                Debug.Log("Enemy stopped - IsMoving FALSE");
-
-                // 🛑 Idle animasyonuna geç
-                if (animator.GetBool("IsMoving"))
-                    animator.SetBool("IsMoving", false);
+                // 🔸 hedefe ulaştıysa -> saldırı başlat
+                animator.SetBool("IsMoving", false);
+                StartCoroutine(AttackPlayerRoutine());
             }
-            if (distanceToTarget <= stopDistance)
-            {
-                if (!animator.GetBool("IsMoving"))
-                    animator.SetBool("IsMoving", false);
-
-                // 🧠 Saldırı animasyonunu tetikle (örnek olarak)
-                if (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast)
-                {
-                    if (Time.frameCount % 120 == 0) // her ~1 saniyede bir
-                    {
-                        animator.SetTrigger("Attack");
-                    }
-                }
-            }
-
         }
-
-
     }
-
-
-
-
+}
 
 
     public void TakeDamage(int amount)
@@ -509,6 +490,44 @@ public class Enemy : MonoBehaviour
 
 
     }
+
+public bool isAttacking = false;
+
+public IEnumerator AttackPlayerRoutine()
+{
+    if (isAttacking) yield break;
+    isAttacking = true;
+
+    // 🛑 Hareketi durdur
+    animator.SetBool("IsMoving", false);
+
+    // 🎬 Saldırı animasyonu
+    animator.SetTrigger("Attack");
+
+    // ⏳ Animasyon bitene kadar bekle (örneğin 2 sn)
+    yield return new WaitForSeconds(2f);
+
+    // 🔁 Tekrar hareket etmeye devam et
+    isAttacking = false;
+}
+
+// 🔥 Animator Event tarafından çağrılacak fonksiyon
+public void DealDamageToPlayer()
+{
+    if (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast)
+    {
+        if (player != null)
+        {
+            PlayerStats ps = player.GetComponent<PlayerStats>();
+            if (ps != null)
+            {
+                ps.TakeDamage(damageToPlayer);
+                Debug.Log("💥 Düşman saldırı animasyonu sırasında oyuncuya hasar verdi!");
+            }
+        }
+    }
+}
+
 
     /*void OnTriggerStay2D(Collider2D collision)
     {
@@ -613,7 +632,7 @@ public class Enemy : MonoBehaviour
         caravanDamageCo = null;
     }
 
-    public void StartPlayerDamage(Transform playerTransform)
+   /* public void StartPlayerDamage(Transform playerTransform)
     {
         if (!isDamagingPlayer)
             playerDamageCo = StartCoroutine(DamagePlayerOverTime(playerTransform));
@@ -641,7 +660,7 @@ public class Enemy : MonoBehaviour
         playerDamageCo = null;
     }
 
-
+*/
 
     private bool isDamagingCaravan = false;
 

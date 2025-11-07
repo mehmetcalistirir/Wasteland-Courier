@@ -9,8 +9,8 @@ public class EnemyHitbox : MonoBehaviour
         enemyParent = GetComponentInParent<Enemy>();
         if (enemyParent == null)
             Debug.LogError("[EnemyHitbox] Parent'ta Enemy scripti yok!");
-        
-        // Güvenlik: Collider kesinlikle trigger olmalı
+
+        // Güvenlik: Collider trigger olmalı
         var col = GetComponent<Collider2D>();
         if (col != null && !col.isTrigger)
             col.isTrigger = true;
@@ -22,9 +22,13 @@ public class EnemyHitbox : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            // Normal/Fast oyuncuya yakınken hasar
+            // Yeni sistem: temas ettiğinde saldırıyı başlat
             if (enemyParent.enemyType == EnemyType.Normal || enemyParent.enemyType == EnemyType.Fast)
-                enemyParent.StartPlayerDamage(other.transform);
+            {
+                // Düşman oyuncuya değdiğinde artık direkt saldırı coroutine'i çağrılıyor
+                if (!enemyParent.isAttacking)
+                    enemyParent.StartCoroutine(enemyParent.AttackPlayerRoutine());
+            }
         }
         else if (other.CompareTag("Caravan"))
         {
@@ -39,22 +43,22 @@ public class EnemyHitbox : MonoBehaviour
     {
         if (enemyParent == null) return;
 
-        if (other.CompareTag("Player"))
-            enemyParent.StopPlayerDamage();
-
         if (other.CompareTag("Caravan"))
             enemyParent.StopCaravanDamage();
     }
 
-    // İstersen sürekli temas varken periyodik hasar için Enter yerine Stay de kullanılabilir:
+    // İstersen sürekli temas varken de saldırı denemesi yapılabilir:
     private void OnTriggerStay2D(Collider2D other)
     {
         if (enemyParent == null) return;
 
         if (other.CompareTag("Player"))
         {
-            if (enemyParent.enemyType == EnemyType.Normal || enemyParent.enemyType == EnemyType.Fast)
-                enemyParent.StartPlayerDamage(other.transform); // Start içinde guard zaten var
+            if ((enemyParent.enemyType == EnemyType.Normal || enemyParent.enemyType == EnemyType.Fast) && !enemyParent.isAttacking)
+            {
+                // Temas devam ederken hâlâ saldırmıyorsa tekrar saldır
+                enemyParent.StartCoroutine(enemyParent.AttackPlayerRoutine());
+            }
         }
         else if (other.CompareTag("Caravan"))
         {

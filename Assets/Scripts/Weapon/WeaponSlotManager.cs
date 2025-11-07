@@ -91,13 +91,13 @@ public class WeaponSlotManager : MonoBehaviour
 
         equippedBlueprints = new WeaponBlueprint[weaponSlots.Length];
 
-         // Eğer inspector’dan atanmadıysa default olarak 8 slot aç
-    if (weaponSlots == null || weaponSlots.Length == 0)
-        weaponSlots = new GameObject[8];
+        // Eğer inspector’dan atanmadıysa default olarak 8 slot aç
+        if (weaponSlots == null || weaponSlots.Length == 0)
+            weaponSlots = new GameObject[8];
 
         if (equippedBlueprints == null || equippedBlueprints.Length == 0)
             equippedBlueprints = new WeaponBlueprint[weaponSlots.Length];
-        
+
         foreach (var blueprint in startingEquippedWeapons)
         {
             if (blueprint == null) continue;
@@ -383,11 +383,11 @@ public class WeaponSlotManager : MonoBehaviour
 
         // Slot ikonunu güncelle
         if (WeaponSlotUI.Instance != null)
-{
-    var bp = GetBlueprintForSlot(slotIndex);
-    if (bp != null && bp.weaponData != null && bp.weaponData.weaponIcon != null)
-        WeaponSlotUI.Instance.SetSlotIcon(slotIndex, bp.weaponData.weaponIcon);
-}
+        {
+            var bp = GetBlueprintForSlot(slotIndex);
+            if (bp != null && bp.weaponData != null && bp.weaponData.weaponIcon != null)
+                WeaponSlotUI.Instance.SetSlotIcon(slotIndex, bp.weaponData.weaponIcon);
+        }
 
 
         // Eğer aktif slot ise, sadece data’yı uygula; FULL yapma
@@ -460,12 +460,12 @@ public class WeaponSlotManager : MonoBehaviour
             activeWeapon.SetAmmoInClip(ammoInClips[activeSlotIndex]);
 
         UpdateUI();
-      if (WeaponSlotUI.Instance != null)
-{
-    var currentBlueprint = GetBlueprintForSlot(activeSlotIndex);
-    if (currentBlueprint != null && currentBlueprint.weaponData != null && currentBlueprint.weaponData.weaponIcon != null)
-        WeaponSlotUI.Instance.SetSlotIcon(activeSlotIndex, currentBlueprint.weaponData.weaponIcon);
-}
+        if (WeaponSlotUI.Instance != null)
+        {
+            var currentBlueprint = GetBlueprintForSlot(activeSlotIndex);
+            if (currentBlueprint != null && currentBlueprint.weaponData != null && currentBlueprint.weaponData.weaponIcon != null)
+                WeaponSlotUI.Instance.SetSlotIcon(activeSlotIndex, currentBlueprint.weaponData.weaponIcon);
+        }
 
 
         WeaponSlotUI.Instance?.UpdateHighlight(activeSlotIndex);
@@ -603,11 +603,11 @@ public class WeaponSlotManager : MonoBehaviour
     {
         // 🔹 WeaponSlot UI yenile
         if (WeaponSlotUI.Instance != null)
-{
-    var bp = GetBlueprintForSlot(activeSlotIndex);
-    if (bp != null && bp.weaponData != null && bp.weaponData.weaponIcon != null)
-        WeaponSlotUI.Instance.SetSlotIcon(activeSlotIndex, bp.weaponData.weaponIcon);
-}
+        {
+            var bp = GetBlueprintForSlot(activeSlotIndex);
+            if (bp != null && bp.weaponData != null && bp.weaponData.weaponIcon != null)
+                WeaponSlotUI.Instance.SetSlotIcon(activeSlotIndex, bp.weaponData.weaponIcon);
+        }
 
 
         // 🔹 Envanter UI yenile
@@ -697,7 +697,22 @@ public class WeaponSlotManager : MonoBehaviour
             Debug.Log(isMolotov
                 ? "💣 Molotov aktif edildi — PlayerWeapon devre dışı bırakıldı."
                 : "🔫 Normal silah aktif — MolotovThrower devre dışı.");
+            // 🔧 Molotov seçildiyse Rigidbody2D'nin yerçekimini kapat
+            if (isMolotov)
+            {
+                var rb = weaponSlots[newIndex]?.GetComponent<Rigidbody2D>();
+                if (rb != null)
+                {
+                    rb.gravityScale = 0f;
+                    rb.linearVelocity = Vector2.zero;
+                    rb.angularVelocity = 0f;
+                    Debug.Log("🧲 Molotov seçildi -> Gravity kapatıldı.");
+                }
+            }
+
         }
+
+
 
     }
 
@@ -837,29 +852,29 @@ public class WeaponSlotManager : MonoBehaviour
 
         // 5️⃣ UI senkronizasyonu
         // 🔄 Yeni blueprint'i dizilere uygula
-equippedBlueprints[activeSlotIndex] = newBlueprint;
+        equippedBlueprints[activeSlotIndex] = newBlueprint;
 
-// 🔧 Model ve ammo UI güncelle
-// 5️⃣ UI senkronizasyonu
-ApplyEquippedBlueprintToActiveSlot();
-UpdateUI();
+        // 🔧 Model ve ammo UI güncelle
+        // 5️⃣ UI senkronizasyonu
+        ApplyEquippedBlueprintToActiveSlot();
+        UpdateUI();
 
-// 🎯 Aktif slottaki ikonun yeni silaha göre güncellenmesi
-if (WeaponSlotUI.Instance != null)
-{
-    var currentBlueprint = newBlueprint; // Yeni blueprint doğrudan kullanılıyor
-    if (currentBlueprint != null && currentBlueprint.weaponData != null && currentBlueprint.weaponData.weaponIcon != null)
-    {
-        WeaponSlotUI.Instance.SetSlotIcon(activeSlotIndex, currentBlueprint.weaponData.weaponIcon);
-        Debug.Log($"✅ Aktif slot {activeSlotIndex} ikonu {currentBlueprint.weaponData.weaponName} olarak güncellendi.");
-    }
-    else
-    {
-        Debug.LogWarning("⚠️ Yeni silahın ikon datası eksik!");
-    }
-}
+        // 🎯 Aktif slottaki ikonun yeni silaha göre güncellenmesi
+        if (WeaponSlotUI.Instance != null)
+        {
+            var currentBlueprint = newBlueprint; // Yeni blueprint doğrudan kullanılıyor
+            if (currentBlueprint != null && currentBlueprint.weaponData != null && currentBlueprint.weaponData.weaponIcon != null)
+            {
+                WeaponSlotUI.Instance.SetSlotIcon(activeSlotIndex, currentBlueprint.weaponData.weaponIcon);
+                Debug.Log($"✅ Aktif slot {activeSlotIndex} ikonu {currentBlueprint.weaponData.weaponName} olarak güncellendi.");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Yeni silahın ikon datası eksik!");
+            }
+        }
 
-WeaponSlotUI.Instance?.RefreshAllFromState();
+        WeaponSlotUI.Instance?.RefreshAllFromState();
 
 
 

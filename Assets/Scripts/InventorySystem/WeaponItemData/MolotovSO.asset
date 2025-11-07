@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e35b7c80e4de9745ba74c74c4daddeb, type: 3}
   m_Name: MolotovSO
   m_EditorClassIdentifier: 
-  resourceType: 0
+  resourceType: 15
   itemName: Molotov
   icon: {fileID: 3984404083290902542, guid: cd39b130b33486c40832744354491c6a, type: 3}
   category: 2

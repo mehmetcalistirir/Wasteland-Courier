@@ -58,6 +58,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -79,10 +81,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 8793729625641108797, guid: ab77a868cb2efa247a64446b4917c773, type: 3}
+  m_Sprite: {fileID: -1612698152615810838, guid: d78cac009d38365418db38adf03769e0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -164,6 +167,8 @@ MonoBehaviour:
   explosionHitMask:
     serializedVersion: 2
     m_Bits: 0
+  canBeKnockedBack: 1
+  knockbackRecoveryTime: 0.25
   contactDamageInterval: 1
   damageToPlayer: 1
   externalMovement: 0
@@ -226,17 +231,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.7370224, y: -0.1139034}
+  m_Offset: {x: 0.002575159, y: 0.12689877}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.95, y: 3.65}
+    oldSize: {x: 4.5, y: 5.25}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.7835197, y: 2.9621933}
+  m_Size: {x: 5.275149, y: 6.09262}
   m_EdgeRadius: 0
 --- !u!82 &-6503446648121400137
 AudioSource:

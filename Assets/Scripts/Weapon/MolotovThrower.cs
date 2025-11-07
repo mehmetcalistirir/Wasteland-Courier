@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,139 +9,117 @@ public class MolotovThrower : MonoBehaviour
     public Transform throwPoint;
     public float maxThrowForce = 12f;
     public float minThrowForce = 4f;
-    public float chargeSpeed = 5f;
+    public float chargeSpeed = 4f;
     public float cooldown = 1.5f;
 
     private float currentForce;
     private bool isCharging;
+    private float chargeStartTime;
     private float lastThrowTime;
+
+    private bool justEnabled;
+
 
     void Awake()
     {
-        // 🔹 ThrowPoint’i sahnede bulmaya çalış
-        TryAssignThrowPoint();
-    }
-
-    void OnEnable()
-    {
-        // 🔹 Her aktive olduğunda tekrar dene (inactive’tan çıkınca null olabilir)
-        if (throwPoint == null)
-            TryAssignThrowPoint();
-            AutoWireThrowPoint();
-    }
-
-    private void TryAssignThrowPoint()
-    {
-        if (throwPoint != null) return;
-
-        // 1️⃣ Kendi altındaki FirePoint
-        Transform found = transform.Find("FirePoint");
-        if (found != null)
-        {
-            throwPoint = found;
-            return;
-        }
-
-        // 2️⃣ WeaponSlotManager’daki PlayerWeapon’dan al
-        var wsm = WeaponSlotManager.Instance;
-        if (wsm != null && wsm.playerWeapon != null && wsm.playerWeapon.firePoint != null)
-        {
-            throwPoint = wsm.playerWeapon.firePoint;
-            Debug.Log($"MolotovThrower: ThrowPoint, PlayerWeapon'dan alındı -> {throwPoint.name}");
-            return;
-        }
-
-        Debug.LogWarning($"MolotovThrower: ThrowPoint atanamadı! ({gameObject.name})");
+        AutoWireThrowPoint();
     }
 
     void Update()
-{
-    // Molotov aktif değilse hiç çalışmasın
-    var wm = WeaponSlotManager.Instance;
-    if (wm == null) return;
-
-    var bp = wm.GetBlueprintForSlot(wm.activeSlotIndex);
-    if (bp == null || bp.weaponData == null || !bp.weaponData.isMolotov)
-        return;  // ✨ aktif silah Molotov değil -> hiç işlem yapma
-
-    // --- aşağısı senin mevcut kodun ---
-    if (Time.time < lastThrowTime + cooldown)
-        return;
-
-    if (Mouse.current.leftButton.wasPressedThisFrame)
     {
-        isCharging = true;
-        currentForce = minThrowForce;
-    }
 
-    if (isCharging && Mouse.current.leftButton.isPressed)
+        if (justEnabled)
     {
-        currentForce += chargeSpeed * Time.deltaTime;
-        currentForce = Mathf.Clamp(currentForce, minThrowForce, maxThrowForce);
-    }
-
-    if (isCharging && Mouse.current.leftButton.wasReleasedThisFrame)
-    {
-        TryThrowMolotov();
-    }
-}
-
-
-
-private void AutoWireThrowPoint()
-{
-    if (throwPoint != null) return;
-
-    // Önce aktif silahın FirePoint'ini dene
-    var fp = WeaponSlotManager.Instance?.activeWeapon?.firePoint;
-    if (fp != null) { throwPoint = fp; return; }
-
-    // Olmazsa player içinde "FirePoint" ara
-    var found = transform.Find("FirePoint");
-    if (found != null) { throwPoint = found; }
-}
-
-
-   private void TryThrowMolotov()
-{
-    AutoWireThrowPoint();   // emin ol
-
-    var wm = WeaponSlotManager.Instance;
-    if (wm == null) return;
-
-    int slotIndex = wm.activeSlotIndex;
-    var bp = wm.GetBlueprintForSlot(slotIndex);
-    if (bp == null || bp.weaponData == null || !bp.weaponData.isMolotov) return;
-
-    var (clip, reserve) = wm.GetAmmoStateForSlot(slotIndex);
-    if (clip <= 0)
-    {
-        wm.activeWeapon?.PlayEmptyClipSound();
+        // 🔒 Bu frame'de hiçbir input işleme
+        justEnabled = false;
         return;
     }
 
-    ThrowMolotov();
+     
+        
+        // --- Fırlatma kilidi: cooldown bitmeden atış olmasın
+        if (Time.time < lastThrowTime + cooldown)
+            return;
 
-    clip--;
-    wm.SetAmmoStateForSlot(slotIndex, clip, reserve);
-    wm.UpdateUI();
+        // --- Basılı tutma süresine göre şarj et
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            isCharging = true;
+            chargeStartTime = Time.time;
+            currentForce = minThrowForce;
+            Debug.Log("🔥 Molotov şarj ediliyor...");
+        }
+
+        if (isCharging && Mouse.current.leftButton.isPressed)
+        {
+            float elapsed = Time.time - chargeStartTime;
+            float t = Mathf.Clamp01(elapsed / 3f); // 3 saniyede tam şarj
+            currentForce = Mathf.Lerp(minThrowForce, maxThrowForce, t);
+        }
+
+        // --- Mouse bırakıldığında fırlat
+        if (isCharging && Mouse.current.leftButton.wasReleasedThisFrame)
+        {
+            ThrowMolotov();
+            isCharging = false;
+        }
+    }
+
+void OnEnable()
+{
+    justEnabled = true; // aktif edildiği frame
 }
 
-private void ThrowMolotov()
+
+
+
+    private void AutoWireThrowPoint()
+    {
+        if (throwPoint != null) return;
+
+        // Önce player’ın FirePoint’ini bul
+        var playerWeapon = GetComponentInParent<PlayerWeapon>();
+        if (playerWeapon != null && playerWeapon.firePoint != null)
+        {
+            throwPoint = playerWeapon.firePoint;
+            Debug.Log($"MolotovThrower → FirePoint otomatik atandı: {throwPoint.name}");
+            return;
+        }
+
+        // Sahne içinde “FirePoint” isminde bir child varsa onu kullan
+        var found = transform.Find("FirePoint");
+        if (found != null)
+        {
+            throwPoint = found;
+            Debug.Log($"MolotovThrower → FirePoint bulundu: {throwPoint.name}");
+        }
+    }
+
+    private void ThrowMolotov()
 {
-    AutoWireThrowPoint();   // emin ol
-    if (molotovPrefab == null || throwPoint == null) return; // ❌ LogError yerine sessiz çık
+    if (molotovPrefab == null || throwPoint == null)
+    {
+        Debug.LogWarning("⚠️ MolotovPrefab veya ThrowPoint atanmadı!");
+        return;
+    }
 
     Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-    Vector2 dir = (mouseWorldPos - throwPoint.position).normalized;
+    Vector2 direction = (mouseWorldPos - throwPoint.position).normalized;
 
-    var molotov = Instantiate(molotovPrefab, throwPoint.position, Quaternion.identity);
-    var rb = molotov.GetComponent<Rigidbody2D>();
-    if (rb != null) rb.AddForce(dir * currentForce, ForceMode2D.Impulse);
+    Vector3 spawnPos = throwPoint.position + (Vector3)direction * 0.5f;
+    GameObject molotov = Instantiate(molotovPrefab, spawnPos, Quaternion.identity);
+    Rigidbody2D rb = molotov.GetComponent<Rigidbody2D>();
 
-    isCharging = false;
+    if (rb != null)
+    {
+        rb.gravityScale = 1f; // 🔥 fırlatıldığında yerçekimini tekrar aç
+        rb.AddForce(direction * currentForce, ForceMode2D.Impulse);
+    }
+
+    Debug.Log($"💣 Molotov fırlatıldı! Güç: {currentForce:F2}");
+
     lastThrowTime = Time.time;
 }
 
-    
+
 }

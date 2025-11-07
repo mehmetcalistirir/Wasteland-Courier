@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BP_Molotov
   m_EditorClassIdentifier: 
   weaponType: 4
-  weaponName: Bow
+  weaponName: Molotov
   description: 
   weaponIcon: {fileID: -3212455835368639413, guid: 387ee359de6e5004f922c797aa178e97, type: 3}
   weaponData: {fileID: 11400000, guid: 6830335928f2ff34d9488f8442705d96, type: 2}

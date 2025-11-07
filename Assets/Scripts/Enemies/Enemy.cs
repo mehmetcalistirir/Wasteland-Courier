@@ -280,59 +280,59 @@ public class Enemy : MonoBehaviour
     }
 
 
-public void ApplyKnockback(Vector2 sourcePosition, float force, float duration)
-{
-    if (!canBeKnockedBack) return;
-
-    // Eğer zaten bir knockback coroutine çalışıyorsa tekrar başlatma
-    if (knockbackCoroutine != null)
-        return;
-
-    Vector2 dir = ((Vector2)transform.position - sourcePosition).normalized;
-    knockbackCoroutine = StartCoroutine(KnockbackRoutine(dir, force, duration));
-}
-
-private IEnumerator KnockbackRoutine(Vector2 direction, float force, float duration)
-{
-    Rigidbody2D rb = GetComponent<Rigidbody2D>();
-    float elapsed = 0f;
-
-    if (rb != null)
+    public void ApplyKnockback(Vector2 sourcePosition, float force, float duration)
     {
-        bool wasKinematic = rb.isKinematic;
-        if (wasKinematic) rb.isKinematic = false;
+        if (!canBeKnockedBack) return;
 
-        // 🔹 Kuvvet uygula (Impulse)
-        rb.AddForce(direction * force, ForceMode2D.Impulse);
+        // Eğer zaten bir knockback coroutine çalışıyorsa tekrar başlatma
+        if (knockbackCoroutine != null)
+            return;
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        // 🔹 Hareketi durdur
-        rb.linearVelocity = Vector2.zero;
-
-        if (wasKinematic) rb.isKinematic = true;
-    }
-    else
-    {
-        // Rigidbody yoksa transform hareketi uygula
-        Vector2 startPos = transform.position;
-        while (elapsed < duration)
-        {
-            transform.position = (Vector2)transform.position + direction * (force * Time.deltaTime);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
+        Vector2 dir = ((Vector2)transform.position - sourcePosition).normalized;
+        knockbackCoroutine = StartCoroutine(KnockbackRoutine(dir, force, duration));
     }
 
-    // 🔹 Küçük bir toparlanma süresi
-    yield return new WaitForSeconds(knockbackRecoveryTime);
+    private IEnumerator KnockbackRoutine(Vector2 direction, float force, float duration)
+    {
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        float elapsed = 0f;
 
-    knockbackCoroutine = null;
-}
+        if (rb != null)
+        {
+            bool wasKinematic = rb.isKinematic;
+            if (wasKinematic) rb.isKinematic = false;
+
+            // 🔹 Kuvvet uygula (Impulse)
+            rb.AddForce(direction * force, ForceMode2D.Impulse);
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            // 🔹 Hareketi durdur
+            rb.linearVelocity = Vector2.zero;
+
+            if (wasKinematic) rb.isKinematic = true;
+        }
+        else
+        {
+            // Rigidbody yoksa transform hareketi uygula
+            Vector2 startPos = transform.position;
+            while (elapsed < duration)
+            {
+                transform.position = (Vector2)transform.position + direction * (force * Time.deltaTime);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        // 🔹 Küçük bir toparlanma süresi
+        yield return new WaitForSeconds(knockbackRecoveryTime);
+
+        knockbackCoroutine = null;
+    }
 
 
     // Enemy.cs içine
@@ -385,31 +385,55 @@ private IEnumerator KnockbackRoutine(Vector2 direction, float force, float durat
         if (!externalMovement && target != null)
         {
             float distanceToTarget = Vector2.Distance(transform.position, target.position);
-            float stopDistance = (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast) ? damageRangeToPlayer : damageRangeToCaravan;
+            float stopDistance = (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast)
+                ? damageRangeToPlayer
+                : damageRangeToCaravan;
+
+            Vector2 dir = (target.position - transform.position).normalized;
 
             if (distanceToTarget > stopDistance)
             {
-                Vector2 dir = (target.position - transform.position).normalized;
-                transform.position += (Vector3)(dir * Time.deltaTime * moveSpeed);
+                Debug.Log("Enemy moving - IsMoving TRUE");
 
-                animator.SetFloat("Speed", 1f);
-                animator.SetFloat("MoveX", dir.x);
-                animator.SetFloat("MoveY", dir.y);
-                lastMoveDir = dir;
+                // 🧭 Hedefe doğru ilerle
+                transform.position += (Vector3)(dir * moveSpeed * Time.deltaTime);
+
+                // 🎬 Walk animasyonuna geç
+                if (!animator.GetBool("IsMoving"))
+                    animator.SetBool("IsMoving", true);
+
+                // 🔁 Hedef yönüne dönme (360°)
+                float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
             }
             else
             {
-                animator.SetFloat("Speed", 0f);
+                Debug.Log("Enemy stopped - IsMoving FALSE");
+
+                // 🛑 Idle animasyonuna geç
+                if (animator.GetBool("IsMoving"))
+                    animator.SetBool("IsMoving", false);
+            }
+            if (distanceToTarget <= stopDistance)
+            {
+                if (!animator.GetBool("IsMoving"))
+                    animator.SetBool("IsMoving", false);
+
+                // 🧠 Saldırı animasyonunu tetikle (örnek olarak)
+                if (enemyType == EnemyType.Normal || enemyType == EnemyType.Fast)
+                {
+                    if (Time.frameCount % 120 == 0) // her ~1 saniyede bir
+                    {
+                        animator.SetTrigger("Attack");
+                    }
+                }
             }
 
-            animator.SetFloat("LastMoveX", lastMoveDir.x);
-            animator.SetFloat("LastMoveY", lastMoveDir.y);
-
         }
-        GetComponent<SpriteRenderer>().flipY = false;
 
 
     }
+
 
 
 

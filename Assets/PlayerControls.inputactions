@@ -16,18 +16,18 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Fire",
+                    "name": "Sprint",
                     "type": "Button",
-                    "id": "768b2120-4aa8-4731-8eaf-8c1a82d53d6e",
+                    "id": "45ebb3c3-7009-4a8a-a165-ed3054c6ef36",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Sprint",
+                    "name": "Map",
                     "type": "Button",
-                    "id": "45ebb3c3-7009-4a8a-a165-ed3054c6ef36",
+                    "id": "2e782fbb-135a-4a43-9a9c-3a4373d3a8e2",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -92,23 +92,23 @@
                 },
                 {
                     "name": "",
-                    "id": "9656bd61-5fab-48da-8cdf-980db4c393d0",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Fire",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "11824abd-e6f1-4acd-8663-22360e3afdb9",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5e4270dd-d5d7-4faa-b7a3-2e7b7fb7755f",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Map",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

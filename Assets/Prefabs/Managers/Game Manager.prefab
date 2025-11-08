@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 5332541922574428768}
   - component: {fileID: 1807631111396881505}
   - component: {fileID: 3603864426398938071}
+  - component: {fileID: 1908544901465505163}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -127,7 +128,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3861b865eb5d88749bfd633279fd5e4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableBlueprints: []
+  availableBlueprints:
+  - {fileID: 11400000, guid: 74299bc927f3a7b42a474d2ba45599bb, type: 2}
   craftingPanel: {fileID: 0}
   requirementsContainer: {fileID: 0}
   requirementLinePrefab: {fileID: 1877293434998382191, guid: 255ac01e9e8f047448d72d00013bc347, type: 3}
@@ -189,180 +191,210 @@ MonoBehaviour:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
   - data: {fileID: 0}
     count: 0
     weapon:
       id: 
       clip: 0
       reserve: 0
+      durability: 0
 --- !u!114 &3603864426398938071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375,3 +407,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b072f7eeb9c44c149881f471e7fb4265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1908544901465505163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a240f79ea87aef4db3e83bd5775206c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapToggle
+  mapPanel: {fileID: 0}
+  mapRect: {fileID: 0}
+  playerMarker: {fileID: 0}
+  player: {fileID: 0}
+  mapScale: 1

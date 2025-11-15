@@ -213,7 +213,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponIcon: {fileID: 6101511819763338418}
   highlightBorder: {fileID: 4331819883049152908}
-  iconSize: {x: 96, y: 64}
 --- !u!114 &8241939120564539818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -266,10 +265,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 7383379472059053326}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7672846998229073498
 CanvasRenderer:

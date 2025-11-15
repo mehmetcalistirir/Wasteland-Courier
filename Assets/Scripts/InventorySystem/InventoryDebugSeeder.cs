@@ -19,6 +19,7 @@ public class InventoryDebugSeeder : MonoBehaviour
     public GenericItemData ScrapSO;
 
     public GenericItemData WoodSO;
+    public GenericItemData BandageSO;
 
     public WeaponItemData  machinegunSO;
 

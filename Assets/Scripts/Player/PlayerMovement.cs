@@ -6,20 +6,23 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
-    public float sprintMultiplier = 1.7f;
+    public float sprintMultiplier = 1.7f; // Koşarken hız artışı
     private bool isSprinting = false;
 
     [Header("UI")]
     public Slider staminaBar;
 
+    // --- Bileşen Referansları ---
     private Rigidbody2D rb;
     private PlayerStats stats;
     private Animator animator;
     private Camera mainCamera;
 
+    // --- Input System ---
     private PlayerControls controls;
     private Vector2 moveInput;
 
+    // --- Ek Özellikler ---
     public static float FacingDirection { get; private set; } = 1f;
     public float soundRadius = 5f;
 
@@ -90,33 +93,49 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // --- Stamina Sistemi (Açlığa bağlı yenilenme dahil) ---
     private void UpdateStamina()
     {
         bool isMoving = moveInput.magnitude > 0.1f;
 
+        // Açlığa göre stamina yenilenme hızı
+        float hungerRatio = (float)stats.currentHunger / stats.maxHunger;
+        float hungerMultiplier = 1f;
+
+        if (hungerRatio >= 0.8f)
+            hungerMultiplier = 1.0f;
+        else if (hungerRatio >= 0.4f)
+            hungerMultiplier = 0.7f;
+        else
+            hungerMultiplier = 0.4f;
+
         if (isSprinting && isMoving)
             stats.ModifyStamina(-stats.staminaDrainRate * Time.deltaTime);
         else if (isMoving)
-            stats.ModifyStamina(stats.staminaRegenWalk * Time.deltaTime);
+            stats.ModifyStamina(stats.staminaRegenWalk * hungerMultiplier * Time.deltaTime);
         else
-            stats.ModifyStamina(stats.staminaRegenIdle * Time.deltaTime);
+            stats.ModifyStamina(stats.staminaRegenIdle * hungerMultiplier * Time.deltaTime);
     }
 
+    // --- 360° Fareye Dönük Animasyon ve Rotasyon ---
     private void UpdateRotationAndAnimation()
     {
         if (animator == null || mainCamera == null) return;
 
-        // 🧭 1. Fare yönünü bul
-        Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
-        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(mouseScreenPosition);
-        Vector2 aimDir = (mouseWorldPosition - transform.position).normalized;
+        // 🧭 Fare konumunu al ve yönü hesapla
+        Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
+        Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(mouseScreenPos);
+        Vector2 aimDirection = (mouseWorldPos - transform.position).normalized;
 
-        // 🌀 2. Oyuncunun yönünü fareye çevir (360° rotasyon)
-        float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarı bakıyorsa -90° uygundur
+        // 🌀 Karakteri fareye çevir (360°)
+        float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarı bakıyorsa -90f uygundur
 
-        // 🎞️ 3. Animasyon kontrolü
+        // 🎞 Animasyon durumu
         bool isMoving = moveInput.magnitude > 0.1f;
         animator.SetBool("IsMoving", isMoving);
+
+        // 🔁 FacingDirection flip kontrolü (silah veya atış yönü için)
+        FacingDirection = aimDirection.x >= 0 ? 1f : -1f;
     }
 }

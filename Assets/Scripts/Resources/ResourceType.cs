@@ -15,6 +15,7 @@ public enum ResourceType
     Herb,
     Ammo,
     Blueprint,
-    Molotov   // ✅ yeni eklenen
+    Molotov,
+    Bandage// ✅ yeni eklenen
 
 }

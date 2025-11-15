@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+
 
 public class MolotovThrower : MonoBehaviour
 {
@@ -19,6 +21,21 @@ public class MolotovThrower : MonoBehaviour
 
     private bool justEnabled;
 
+    [Header("UI")]
+    public Slider chargeBar; // şarj dolum göstergesi
+
+
+    private void Start()
+    {
+        if (chargeBar == null)
+        {
+            chargeBar = GameObject.FindObjectOfType<Slider>(true);
+            if (chargeBar != null)
+                Debug.Log("✅ ChargeBar sahnede otomatik bulundu!");
+            else
+                Debug.LogWarning("⚠️ ChargeBar sahnede bulunamadı!");
+        }
+    }
 
     void Awake()
     {
@@ -29,14 +46,14 @@ public class MolotovThrower : MonoBehaviour
     {
 
         if (justEnabled)
-    {
-        // 🔒 Bu frame'de hiçbir input işleme
-        justEnabled = false;
-        return;
-    }
+        {
+            // 🔒 Bu frame'de hiçbir input işleme
+            justEnabled = false;
+            return;
+        }
 
-     
-        
+
+
         // --- Fırlatma kilidi: cooldown bitmeden atış olmasın
         if (Time.time < lastThrowTime + cooldown)
             return;
@@ -48,6 +65,12 @@ public class MolotovThrower : MonoBehaviour
             chargeStartTime = Time.time;
             currentForce = minThrowForce;
             Debug.Log("🔥 Molotov şarj ediliyor...");
+
+            if (chargeBar != null)
+            {
+                chargeBar.gameObject.SetActive(true);
+                chargeBar.value = 0f;
+            }
         }
 
         if (isCharging && Mouse.current.leftButton.isPressed)
@@ -55,6 +78,10 @@ public class MolotovThrower : MonoBehaviour
             float elapsed = Time.time - chargeStartTime;
             float t = Mathf.Clamp01(elapsed / 3f); // 3 saniyede tam şarj
             currentForce = Mathf.Lerp(minThrowForce, maxThrowForce, t);
+
+            // 🔹 Bar'ı güncelle
+            if (chargeBar != null)
+                chargeBar.value = t;
         }
 
         // --- Mouse bırakıldığında fırlat
@@ -62,13 +89,20 @@ public class MolotovThrower : MonoBehaviour
         {
             ThrowMolotov();
             isCharging = false;
+
+            if (chargeBar != null)
+            {
+                chargeBar.value = 0f;
+                chargeBar.gameObject.SetActive(false);
+            }
         }
+
     }
 
-void OnEnable()
-{
-    justEnabled = true; // aktif edildiği frame
-}
+    void OnEnable()
+    {
+        justEnabled = true; // aktif edildiği frame
+    }
 
 
 
@@ -95,31 +129,42 @@ void OnEnable()
         }
     }
 
+    // MolotovThrower.cs - değişiklikler
     private void ThrowMolotov()
-{
-    if (molotovPrefab == null || throwPoint == null)
     {
-        Debug.LogWarning("⚠️ MolotovPrefab veya ThrowPoint atanmadı!");
-        return;
+        if (molotovPrefab == null || throwPoint == null)
+        {
+            Debug.LogWarning("⚠️ MolotovPrefab veya ThrowPoint atanmadı!");
+            return;
+        }
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector2 direction = (mouseWorldPos - throwPoint.position).normalized;
+
+        Vector3 spawnPos = throwPoint.position + (Vector3)direction * 0.5f;
+        GameObject molotov = Instantiate(molotovPrefab, spawnPos, Quaternion.identity);
+
+        Debug.Log($"🧨 Molotov oluşturuldu: {molotov.name} @ {spawnPos}");
+
+        Rigidbody2D rb = molotov.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.gravityScale = 1f;
+            rb.AddForce(direction * currentForce, ForceMode2D.Impulse);
+            Debug.Log($"💣 Kuvvet uygulandı: {direction * currentForce}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Rigidbody2D bulunamadı!");
+        }
+
+        lastThrowTime = Time.time;
+
+        // 🔥 Molotov fırlatıldıktan sonra WeaponSlot'tan kaldır
+        WeaponSlotManager.Instance?.OnMolotovUsed();
     }
 
-    Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-    Vector2 direction = (mouseWorldPos - throwPoint.position).normalized;
 
-    Vector3 spawnPos = throwPoint.position + (Vector3)direction * 0.5f;
-    GameObject molotov = Instantiate(molotovPrefab, spawnPos, Quaternion.identity);
-    Rigidbody2D rb = molotov.GetComponent<Rigidbody2D>();
-
-    if (rb != null)
-    {
-        rb.gravityScale = 1f; // 🔥 fırlatıldığında yerçekimini tekrar aç
-        rb.AddForce(direction * currentForce, ForceMode2D.Impulse);
-    }
-
-    Debug.Log($"💣 Molotov fırlatıldı! Güç: {currentForce:F2}");
-
-    lastThrowTime = Time.time;
-}
 
 
 }

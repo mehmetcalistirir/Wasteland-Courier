@@ -24,8 +24,8 @@ MonoBehaviour:
   requiredScrapMetal: 0
   requiredParts:
   - partType: 6
-    amount: 1
+    amount: 0
   - partType: 7
-    amount: 1
+    amount: 0
   - partType: 8
-    amount: 1
+    amount: 0

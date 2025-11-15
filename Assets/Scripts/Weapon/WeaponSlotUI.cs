@@ -1,99 +1,128 @@
 using UnityEngine;
-using System.Collections.Generic;
-using UnityEngine.UI;
 
 public class WeaponSlotUI : MonoBehaviour
 {
     public static WeaponSlotUI Instance { get; private set; }
 
-    [Header("UI")]
-    public Transform slotContainer;
-    public GameObject slotPrefab;
+    [Header("Ayarlar")]
+    [SerializeField] private int slotCount = 11;
 
-    [Header("Slot Görselleri")]
-    [Tooltip("Hotbar üzerindeki silah ikonlarını sırayla buraya atayın.")]
-    public Image[] slotIcons;
+    [Header("Prefab")]
+    [SerializeField] private GameObject slotTemplatePrefab;
 
-    [Tooltip("Boş slot için kullanılacak sprite.")]
-    public Sprite emptySlotSprite;
+    [Header("Slot Butonları (Otomatik Doldurulur)")]
+    public WeaponSlotButton[] slotButtons;
 
-    private readonly List<WeaponSlotButton> slotButtons = new List<WeaponSlotButton>();
-    private bool initialized;
-
-    void Awake()
+    private void Awake()
     {
-        if (Instance == null) Instance = this; else Destroy(gameObject);
-    }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
-    void Start()
-    {
-        InitializeSlots();
-    }
-
-    public void InitializeSlots()
-    {
-        if (slotContainer == null || slotPrefab == null || WeaponSlotManager.Instance == null) return;
-
-        foreach (Transform child in slotContainer) Destroy(child.gameObject);
-        slotButtons.Clear();
-
-        var equipped = WeaponSlotManager.Instance.GetEquippedBlueprints();
-        if (equipped == null) return;
-
-        for (int i = 0; i < equipped.Length; i++)
+        // Eğer prefab eksikse hata ver
+        if (slotTemplatePrefab == null)
         {
-            GameObject slotObject = Instantiate(slotPrefab, slotContainer);
-            var slotButton = slotObject.GetComponent<WeaponSlotButton>();
-            slotButtons.Add(slotButton);
-
-            // 🔴 DİKKAT: Blueprint.weaponIcon yerine her zaman weaponData.weaponIcon
-            Sprite icon = GetIconForSlot(i);
-            slotButton.Setup(i, icon);
+            Debug.LogError("❌ WeaponSlotUI: Slot_Template prefab atanmadı!");
+            return;
         }
 
-        initialized = true;
-        UpdateHighlight(WeaponSlotManager.Instance.activeSlotIndex);
+        GenerateSlots();
     }
 
-    private Sprite GetIconForSlot(int i)
+    private void Start()
     {
-        var wsm = WeaponSlotManager.Instance;
-        var bp = wsm != null ? wsm.GetBlueprintForSlot(i) : null;
-        return bp != null ? bp.weaponData?.weaponIcon : null;
+        RefreshAllFromState();
     }
-    
-     public void RefreshAllFromState()
-    {
-        if (!initialized) InitializeSlots();
-        for (int i = 0; i < slotButtons.Count; i++)
-            slotButtons[i].Setup(i, GetIconForSlot(i));
 
-        UpdateHighlight(WeaponSlotManager.Instance.activeSlotIndex);
+    //==========================================================
+    // SLOT GENERATOR — WeaponSlotsPanel içine slotları oluşturur
+    //==========================================================
+    private void GenerateSlots()
+    {
+        // Tüm eski slotları temizle
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        slotButtons = new WeaponSlotButton[slotCount];
+
+        for (int i = 0; i < slotCount; i++)
+        {
+            GameObject slotObj = Instantiate(slotTemplatePrefab, transform);
+            slotObj.name = $"Slot_{i}";
+
+            WeaponSlotButton btn = slotObj.GetComponent<WeaponSlotButton>();
+            if (btn == null)
+            {
+                Debug.LogError("❌ Slot_Template içinde WeaponSlotButton script'i bulunamadı!");
+                continue;
+            }
+
+            btn.Init(i);
+            slotButtons[i] = btn;
+        }
+
+        Debug.Log($"✅ {slotCount} adet Slot_Template başarıyla oluşturuldu.");
     }
-    
 
-    public void OnSlotClicked(int index)
+    //==========================================================
+    // UI Güncelleme Fonksiyonları
+    //==========================================================
+    public void SetSlotIcon(int index, Sprite icon)
     {
-        WeaponSlotManager.Instance.SwitchToSlot(index);
-        UpdateHighlight(index);
+        if (!IsValidIndex(index)) return;
+        slotButtons[index].SetIcon(icon);
+    }
+
+    public void ClearSlotIcon(int index)
+    {
+        if (!IsValidIndex(index)) return;
+        slotButtons[index].Clear();
     }
 
     public void UpdateHighlight(int activeIndex)
     {
-        for (int i = 0; i < slotButtons.Count; i++)
-            slotButtons[i]?.SetHighlight(i == activeIndex);
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            if (slotButtons[i] != null)
+                slotButtons[i].SetHighlight(i == activeIndex);
+        }
     }
 
-    // 🔹 Tek bir slotun ikonunu güncelle (diğerlerini etkilemeden)
- public void SetSlotIcon(int index, Sprite icon)
+    public void RefreshAllFromState()
     {
-        if (!initialized) InitializeSlots();
-        if (index < 0 || index >= slotButtons.Count) return;
+        var wsm = WeaponSlotManager.Instance;
+        if (wsm == null) return;
 
-        slotButtons[index].Setup(index, icon); // WeaponSlotButton içindeki serialized WeaponIcon’u kullanır
-        Debug.Log($"🎯 Slot {index} ikonu: {icon?.name ?? "NULL"}");
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            Sprite icon = null;
+
+            // BANDAJ SLOTLARI
+            if (wsm.slotTypes != null &&
+                wsm.slotTypes[i] == SlotItemType.Bandage &&
+                wsm.bandageSlots[i] != null)
+            {
+                icon = wsm.bandageSlots[i].icon;
+            }
+            else
+            {
+                var bp = wsm.GetBlueprintForSlot(i);
+                if (bp != null && bp.weaponData != null)
+                    icon = bp.weaponData.weaponIcon;
+            }
+
+            slotButtons[i].SetIcon(icon);
+        }
+
+        UpdateHighlight(wsm.activeSlotIndex);
     }
 
-
-
+    private bool IsValidIndex(int index)
+    {
+        return slotButtons != null &&
+               index >= 0 &&
+               index < slotButtons.Length &&
+               slotButtons[index] != null;
+    }
 }

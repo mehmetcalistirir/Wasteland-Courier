@@ -4,12 +4,23 @@ using TMPro;
 using System.Collections.Generic;
 using WeaponInstance = CaravanInventory.WeaponInstance; // Adım 0
 
+
+public enum SlotItemType
+{
+    Weapon,
+    Bandage
+}
+
 public class WeaponSlotManager : MonoBehaviour
 {
     [Header("Weapon Objects")]
     [Tooltip("Sahnedeki silah GameObject'lerini buraya sırayla atayın (0: Makineli, 1: Tabanca, 2: Kılıç).")]
     public GameObject[] weaponSlots;
     // Her slotta takılı silahın benzersiz kimliği
+    // 🔹 BURAYA EKLE (class'ın İÇİNDE)
+    [Header("Bandage Slots")]
+    public GenericItemData[] bandageSlots;
+    public SlotItemType[] slotTypes;
     private string[] equippedInstanceIds;
 
 
@@ -109,6 +120,11 @@ public class WeaponSlotManager : MonoBehaviour
                 Debug.Log($"Başlangıçta Kuşanıldı: {blueprint.weaponName} -> Slot {slotIndex}");
             }
         }
+        bandageSlots = new GenericItemData[weaponSlots.Length];
+        slotTypes = new SlotItemType[weaponSlots.Length];
+
+        for (int i = 0; i < slotTypes.Length; i++)
+            slotTypes[i] = SlotItemType.Weapon; // default silah slotu
 
         if (spearThrowBlueprint != null &&
             spearSlotIndex >= 0 && spearSlotIndex < equippedBlueprints.Length)
@@ -283,7 +299,12 @@ public class WeaponSlotManager : MonoBehaviour
         }
 
         // 🔥 İlk silahı aktif et
+        // 🔥 İlk silahı aktif et
         SwitchToSlot(0);
+
+        // 🔁 UI’da ikonları doldur
+        WeaponSlotUI.Instance?.RefreshAllFromState();
+
     }
 
 
@@ -340,6 +361,31 @@ public class WeaponSlotManager : MonoBehaviour
         }
 
         Debug.Log($"[WeaponBroken] Slot {idx} boşaltıldı.");
+    }
+
+    public void OnMolotovUsed()
+    {
+        // Aktif slot Molotov değilse hiçbir şey yapma
+        var bp = GetBlueprintForSlot(activeSlotIndex);
+        if (bp == null || bp.weaponData == null || !bp.weaponData.isMolotov)
+            return;
+
+        Debug.Log("💥 Molotov stoğu bitti! WeaponSlot'tan kaldırılıyor...");
+
+        // Blueprint'i ve prefab referansını temizle
+        equippedBlueprints[activeSlotIndex] = null;
+
+        if (weaponSlots[activeSlotIndex] != null)
+        {
+            Destroy(weaponSlots[activeSlotIndex]);
+            weaponSlots[activeSlotIndex] = null;
+        }
+
+        // UI güncelle
+        WeaponSlotUI.Instance?.RefreshAllFromState();
+
+        // Eğer aktif silah buysa, elindeki silahı da kaldır
+        activeWeapon = null;
     }
 
 
@@ -636,27 +682,38 @@ public class WeaponSlotManager : MonoBehaviour
 
     public void SwitchToSlot(int newIndex)
     {
-        if (newIndex < 0 || newIndex >= weaponSlots.Length || newIndex == activeSlotIndex) return;
-        if (weaponSlots[newIndex] == null) { Debug.LogError($"Fiziksel silah slotu {newIndex} boş!"); return; }
-        if (equippedBlueprints[newIndex] == null) { Debug.Log($"Slot {newIndex} boş."); return; }
+        if (newIndex < 0 || newIndex >= weaponSlots.Length) return;
 
-        // Eski aktif silahın canlı şarjörünü kaydet
+        // Aynı slot ise hiçbir şey yapma
+        if (newIndex == activeSlotIndex) return;
+
+        // 🔹 Eski aktif silahın canlı şarjörünü kaydet
         if (activeSlotIndex != -1 && activeWeapon != null)
         {
             if (activeWeapon.weaponData.clipSize > 0)
-            {
                 ammoInClips[activeSlotIndex] = activeWeapon.GetCurrentAmmoInClip();
-                Debug.Log($"{activeWeapon.weaponData.weaponName} (Slot {activeSlotIndex}) mermisi kaydedildi: {ammoInClips[activeSlotIndex]}");
-            }
 
             if (activeWeapon.IsReloading())
                 activeWeapon.StopAllCoroutines();
 
-            weaponSlots[activeSlotIndex].SetActive(false);
+            if (weaponSlots[activeSlotIndex] != null)
+                weaponSlots[activeSlotIndex].SetActive(false);
         }
 
+        // 🔹 Yeni slotu aktif et
         activeSlotIndex = newIndex;
         GameObject newWeaponObject = weaponSlots[activeSlotIndex];
+
+        if (newWeaponObject == null)
+        {
+            Debug.Log($"[INFO] Slot {newIndex} boş — silah bulunmuyor. Boş slota geçiş yapıldı.");
+            activeWeapon = null;
+            WeaponSlotUI.Instance?.UpdateHighlight(activeSlotIndex);
+            UpdateUI();
+            return; // ❗ Silah yoksa sadece boş geç
+        }
+
+        // 🔹 Slotta silah varsa aktif et
         newWeaponObject.SetActive(true);
         activeWeapon = newWeaponObject.GetComponent<PlayerWeapon>();
 
@@ -665,56 +722,34 @@ public class WeaponSlotManager : MonoBehaviour
             activeWeapon.weaponData = equippedBlueprints[activeSlotIndex].weaponData;
 
             if (activeWeapon.weaponData.clipSize > 0)
-                activeWeapon.SetAmmoInClip(ammoInClips[activeSlotIndex]); // state'ten uygula
+                activeWeapon.SetAmmoInClip(ammoInClips[activeSlotIndex]);
 
             Debug.Log($"Başarıyla '{activeWeapon.weaponData.weaponName}' silahına geçildi.");
-            UpdateUI();
-            WeaponSlotUI.Instance?.UpdateHighlight(activeSlotIndex);
         }
 
-        // 🔥 Ek: Molotov seçildiyse PlayerWeapon yerine MolotovThrower'ı aktive et
+        // 🔹 Molotov / normal silah ayrımı
         var equippedWeaponData = equippedBlueprints[activeSlotIndex]?.weaponData;
+        bool isMolotov = equippedWeaponData != null && equippedWeaponData.isMolotov;
 
-        if (equippedWeaponData != null)
+        if (playerWeapon != null)
+            playerWeapon.enabled = !isMolotov;
+
+        if (molotovThrower != null)
         {
-            bool isMolotov = equippedWeaponData.isMolotov;
-
-            if (playerWeapon != null)
-                playerWeapon.enabled = !isMolotov;
-
-            if (molotovThrower != null)
-            {
-                molotovThrower.enabled = isMolotov;
-
-                // FirePoint atanmadıysa otomatik bağla
-                if (isMolotov && molotovThrower.throwPoint == null)
-                {
-                    molotovThrower.throwPoint = playerWeapon.firePoint;
-                    Debug.Log("MolotovThrower → FirePoint otomatik atandı.");
-                }
-            }
-
-            Debug.Log(isMolotov
-                ? "💣 Molotov aktif edildi — PlayerWeapon devre dışı bırakıldı."
-                : "🔫 Normal silah aktif — MolotovThrower devre dışı.");
-            // 🔧 Molotov seçildiyse Rigidbody2D'nin yerçekimini kapat
-            if (isMolotov)
-            {
-                var rb = weaponSlots[newIndex]?.GetComponent<Rigidbody2D>();
-                if (rb != null)
-                {
-                    rb.gravityScale = 0f;
-                    rb.linearVelocity = Vector2.zero;
-                    rb.angularVelocity = 0f;
-                    Debug.Log("🧲 Molotov seçildi -> Gravity kapatıldı.");
-                }
-            }
-
+            molotovThrower.enabled = isMolotov;
+            if (isMolotov && molotovThrower.throwPoint == null && playerWeapon != null)
+                molotovThrower.throwPoint = playerWeapon.firePoint;
         }
 
+        Debug.Log(isMolotov
+            ? "💣 Molotov aktif edildi — PlayerWeapon devre dışı bırakıldı."
+            : "🔫 Normal silah aktif — MolotovThrower devre dışı.");
 
-
+        // 🔹 UI güncelle
+        UpdateUI();
+        WeaponSlotUI.Instance?.UpdateHighlight(activeSlotIndex);
     }
+
 
     // Aktif slottaki blueprint değiştiğinde, objeyi kapatıp açmadan verileri uygula.
     public void ApplyEquippedBlueprintToActiveSlot()
@@ -736,6 +771,39 @@ public class WeaponSlotManager : MonoBehaviour
 
         UpdateUI();
         WeaponSlotUI.Instance?.UpdateHighlight(activeSlotIndex);
+    }
+
+    // WeaponSlotManager.cs - en alta yakına ekle
+    public void EquipFromInventorySlotToActive(int inventoryIndex)
+    {
+        var item = Inventory.Instance?.slots[inventoryIndex];
+        if (item == null || item.data is not WeaponItemData wid || wid.blueprint == null)
+        {
+            Debug.Log("⚠️ Bu slotta kuşanılabilir bir silah yok.");
+            return;
+        }
+
+        // Aktif slot index'i zaten var: activeSlotIndex
+        // Bu slotun payload'unu (clip/reserve/durability) item.weapon’dan alıyoruz:
+        var payload = item.weapon ?? new InventoryItem.WeaponInstancePayload
+        {
+            id = System.Guid.NewGuid().ToString("N"),
+            clip = wid.blueprint.weaponData.clipSize,
+            reserve = wid.blueprint.weaponData.maxAmmoCapacity,
+            durability = 100
+        };
+
+        // Slot'a tak ve aktif et:
+        EquipWeaponInstanceIntoSlot(activeSlotIndex, wid.blueprint, payload);
+
+        // Envanterden “kullanılan” item'ı kaldır (silah tekil olduğundan 1 adet)
+        Inventory.Instance.TryRemoveAt(inventoryIndex, 1);
+
+        Debug.Log($"🎒 Envanterden kuşanıldı → {wid.blueprint.weaponName} (Aktif slot: {activeSlotIndex})");
+
+        // UI tazele
+        Inventory.Instance.RaiseChanged();
+        WeaponSlotUI.Instance?.RefreshAllFromState();
     }
 
 

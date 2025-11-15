@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
-
+using TMPro;
 
 public class PlayerStats : MonoBehaviour
 {
-
-    // En üste alan ekle
+    // --- Craft/Silah Parçaları ---
     private Dictionary<WeaponPartType, int> weaponParts = new Dictionary<WeaponPartType, int>();
 
     public int GetWeaponPartCount(WeaponPartType part)
@@ -27,16 +25,16 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    public void CollectWeaponPart(WeaponPartType part, int amountToCollect = 1)
+    {
+        if (!weaponParts.ContainsKey(part))
+            weaponParts[part] = 0;
 
-    [Header("Yiyeceklerle İyileşme / Aclik")]
-    public int healOnRawMeatUse = 5;
-    public int healOnCookedMeatUse = 15;
-    public int healOnHerbUse = 10;
+        weaponParts[part] += amountToCollect;
+        WeaponPartsUI.Instance?.UpdatePartText(part, weaponParts[part]);
+    }
 
-    public int hungerOnRawMeatUse = 10;
-    public int hungerOnCookedMeatUse = 30;
-    public int hungerOnHerbUse = 0;
-
+    // --- Stamina ---
     [Header("Stamina Ayarları")]
     public float maxStamina = 100f;
     [SerializeField] private float currentStamina;
@@ -44,44 +42,18 @@ public class PlayerStats : MonoBehaviour
     public float staminaRegenWalk = 8f;   // yürürken artar
     public float staminaRegenIdle = 18f;  // dururken artar
 
-    [Header("Saglik")]
+    public float GetStamina() => currentStamina;
+    public float GetMaxStamina() => maxStamina;
+    public void ModifyStamina(float amount) => currentStamina = Mathf.Clamp(currentStamina + amount, 0, maxStamina);
+    public bool HasStamina() => currentStamina > 0f;
+    public void ResetStamina() => currentStamina = maxStamina;
+
+    // --- Sağlık ---
+    [Header("Sağlık")]
     public int maxHealth = 100;
     public int currentHealth;
     public float damageCooldown = 0.5f;
     private float lastDamageTime = -999f;
-
-    public GenericItemData stoneSO;
-    public GenericItemData ammo9mmSO;
-
-    public GenericItemData BluePrintSO;
-
-    public GenericItemData CookedMeatSO;
-
-    public GenericItemData DeerHideSO;
-
-    public GenericItemData MeatSO;
-
-    public GenericItemData RabbitHideSO;
-
-    public GenericItemData ScrapSO;
-
-    public GenericItemData WoodSO;
-
-    public WeaponItemData machinegunSO;
-
-    public WeaponItemData pistolSO;
-
-    public WeaponItemData shotgunSO;
-
-    public WeaponItemData sniperSO;
-
-    public WeaponItemData throwingSpearSO;
-
-    public WeaponItemData bowSO;
-
-    public WeaponItemData meeleSpearSO;
-
-    public WeaponItemData meeleSwordSO;
 
     public delegate void OnDeath();
     public event OnDeath onDeath;
@@ -91,22 +63,44 @@ public class PlayerStats : MonoBehaviour
     public delegate void OnHealthChanged(int current, int max);
     public event OnHealthChanged onHealthChanged;
 
+    // --- Hareket/Envanter ---
     [Header("Hareket/Envanter")]
     public float moveSpeed = 5f;
     public int gold = 10;
 
-    [Header("Aclik")]
+    // --- Açlık / UI ---
+    [Header("Açlık")]
     public int maxHunger = 100;
     public int currentHunger;
     public float hungerDecreaseInterval = 5f;
     public int hungerDecreaseAmount = 1;
     private float hungerTimer;
 
+    [Header("Açlık UI")]
+    public TextMeshProUGUI hungerText;
+
+    // Yemeklerin sadece AÇLIK etkileri (SAĞLIK HEAL YOK!)
+    public int hungerOnRawMeatUse = 10;
+    public int hungerOnCookedMeatUse = 30;
+    public int hungerOnHerbUse = 0;
+
+    // --- Açlığa bağlı Doğal İyileşme / Açlıktan Hasar ---
+    [Header("Doğal İyileşme (Açlığa bağlı)")]
+    public bool enableHungerRegen = true;
+    public float hungerRegenThreshold = 80f;   // 80 üstü tok sayılır
+    public float healthRegenRate = 3f;         // her tikte kaç HP
+    public float healthRegenInterval = 1f;     // saniye
+    private float healthRegenTimer = 0f;
+
+    private float starvationTickInterval = 2f; // açlıktan hasar aralığı
+    private float starvationTimer = 0f;
+
+    // --- Ses ---
     [Header("Ses")]
     public AudioClip hurtClip;
     private AudioSource audioSource;
 
-    // XP/Level
+    // --- XP/Level ---
     public int currentXP = 0;
     public int level = 1;
     public int skillPoints = 0;
@@ -120,62 +114,52 @@ public class PlayerStats : MonoBehaviour
     public ItemData rawMeatSO;
     public ItemData herbSO;
 
+    // --- (Diğer) Scriptable Referanslar (dokunulmadı) ---
+    public GenericItemData stoneSO, ammo9mmSO, BluePrintSO, CookedMeatSO, DeerHideSO,
+                            MeatSO, RabbitHideSO, ScrapSO, WoodSO;
+
+    public WeaponItemData machinegunSO, pistolSO, shotgunSO, sniperSO,
+                           throwingSpearSO, bowSO, meeleSpearSO, meeleSwordSO;
+
+    // --- Unity Döngüsü ---
+    void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+        AudioManager.Instance?.RouteToSFX(audioSource);
+    }
+
     void Start()
     {
         currentHunger = maxHunger;
         hungerTimer = hungerDecreaseInterval;
+
         currentHealth = maxHealth;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
+
         currentStamina = maxStamina;
-    }
-
-    void Awake()
-    {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-            audioSource = gameObject.AddComponent<AudioSource>();
-
-        AudioManager.Instance?.RouteToSFX(audioSource);
     }
 
     void Update()
     {
         HandleHunger();
+        HandleHungerRegen();
+        HandleStarvation();
 
         if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
-            TryConsumeFood();
-    }
-    public float GetStamina()
-    {
-        return currentStamina;
-    }
-    public float GetMaxStamina()
-    {
-        return maxStamina;
-    }
-    public void ModifyStamina(float amount)
-    {
-        currentStamina = Mathf.Clamp(currentStamina + amount, 0, maxStamina);
-    }
-    public bool HasStamina()
-    {
-        return currentStamina > 0f;
-    }
-    public void ResetStamina()
-    {
-        currentStamina = maxStamina;
+            TryConsumeFood(); // sadece AÇLIK kazanır, sağlık vermez
+
+        // Açlık UI güncelle
+        if (hungerText != null)
+        {
+            hungerText.text = $"Açlık: {currentHunger}/{maxHunger}";
+            if (currentHunger > 60) hungerText.color = Color.green;
+            else if (currentHunger > 30) hungerText.color = Color.yellow;
+            else hungerText.color = Color.red;
+        }
     }
 
-    public void CollectWeaponPart(WeaponPartType part, int amountToCollect = 1)
-    {
-        if (!weaponParts.ContainsKey(part))
-            weaponParts[part] = 0;
-
-        weaponParts[part] += amountToCollect;
-        WeaponPartsUI.Instance?.UpdatePartText(part, weaponParts[part]);
-    }
-
-
+    // --- Hasar / Heal ---
     public bool IsAlive() => currentHealth > 0;
 
     public void TakeDamage(int amount)
@@ -208,6 +192,7 @@ public class PlayerStats : MonoBehaviour
         onDeath?.Invoke();
     }
 
+    // --- Açlık Mekaniği ---
     void HandleHunger()
     {
         hungerTimer -= Time.deltaTime;
@@ -218,7 +203,34 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // ==== Inventory Köprü ====
+    void HandleHungerRegen()
+    {
+        if (!enableHungerRegen) return;
+        if (currentHunger < hungerRegenThreshold) return;  // tok değil
+        if (currentHealth >= maxHealth) return;            // zaten full
+
+        healthRegenTimer += Time.deltaTime;
+        if (healthRegenTimer >= healthRegenInterval)
+        {
+            Heal(Mathf.RoundToInt(healthRegenRate));
+            healthRegenTimer = 0f;
+        }
+    }
+
+    void HandleStarvation()
+    {
+        if (currentHunger > 0 || currentHealth <= 0) { starvationTimer = 0f; return; }
+
+        // açlık 0 ise periyodik can kaybı
+        starvationTimer += Time.deltaTime;
+        if (starvationTimer >= starvationTickInterval)
+        {
+            TakeDamage(1);
+            starvationTimer = 0f;
+        }
+    }
+
+    // --- Envanter Köprü ---
     public void AddResource(ItemData item, int amount)
     {
         if (item != null)
@@ -235,13 +247,12 @@ public class PlayerStats : MonoBehaviour
         return item != null ? Inventory.Instance.GetTotalCount(item) : 0;
     }
 
-    // ==== Yemek ====
+    // --- Yemek Tüketimi (Sadece açlık ekler; SAĞLIK YOK) ---
     private void TryConsumeFood()
     {
         if (Inventory.Instance.HasEnough(cookedMeatSO, 1))
         {
             Inventory.Instance.TryConsume(cookedMeatSO, 1);
-            Heal(healOnCookedMeatUse);
             GainHunger(hungerOnCookedMeatUse);
             Debug.Log("🍗 Pişmiş et yendi!");
             return;
@@ -250,7 +261,6 @@ public class PlayerStats : MonoBehaviour
         if (Inventory.Instance.HasEnough(rawMeatSO, 1))
         {
             Inventory.Instance.TryConsume(rawMeatSO, 1);
-            Heal(healOnRawMeatUse);
             GainHunger(hungerOnRawMeatUse);
             Debug.Log("🥩 Çiğ et yendi!");
             return;
@@ -259,7 +269,6 @@ public class PlayerStats : MonoBehaviour
         if (Inventory.Instance.HasEnough(herbSO, 1))
         {
             Inventory.Instance.TryConsume(herbSO, 1);
-            Heal(healOnHerbUse);
             GainHunger(hungerOnHerbUse);
             Debug.Log("🌿 Ot yendi!");
             return;

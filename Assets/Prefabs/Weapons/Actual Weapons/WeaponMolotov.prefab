@@ -13,11 +13,7 @@ GameObject:
   - component: {fileID: 5644147039748475230}
   - component: {fileID: 6966626695259840510}
   - component: {fileID: 7152839039305172282}
-  - component: {fileID: 7681437714983819493}
   - component: {fileID: 2391671135962038320}
-  - component: {fileID: 6980371829322050137}
-  - component: {fileID: 6518563660366513114}
-  - component: {fileID: 345975093025478961}
   m_Layer: 11
   m_Name: WeaponMolotov
   m_TagString: Untagged
@@ -33,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6163771216665897810}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.1, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
@@ -241,23 +237,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &7681437714983819493
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6163771216665897810}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 984402fa24d82d440b20af613dae79b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxDurability: 1000
-  durabilityBarPrefab: {fileID: 2576955762809197913, guid: 6c1a0102341a1a4499a6e0b85914d46e, type: 3}
-  onBroken:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &2391671135962038320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,100 +251,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   molotovPrefab: {fileID: 3763136069803453783, guid: 3be0062ff73a4234ea034f9242d0f0fd, type: 3}
   throwPoint: {fileID: 1189568978687341454}
-  maxThrowForce: 12
+  maxThrowForce: 300
   minThrowForce: 4
   chargeSpeed: 5
   cooldown: 1.5
---- !u!50 &6980371829322050137
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6163771216665897810}
-  m_BodyType: 1
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
---- !u!61 &6518563660366513114
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6163771216665897810}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.024, y: 0.029}
-    newSize: {x: 0.48, y: 0.58}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.024, y: 0.029}
-  m_EdgeRadius: 0
---- !u!114 &345975093025478961
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6163771216665897810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 473a50e3d70c33040b1893e2ea84c8b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MolotovProjectile
-  fireEffectPrefab: {fileID: 6790244917400230293, guid: 128108d4b2501924f9d74f10d56a8bfa, type: 3}
-  explosionRadius: 2.5
-  impactDamage: 20
-  burnDamagePerSecond: 5
-  fireDuration: 5
 --- !u!1 &6573386076653961597
 GameObject:
   m_ObjectHideFlags: 0

@@ -67,8 +67,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ea224475c96478459aa7fa089ff7155, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dayDuration: 10
-  nightDuration: 10
+  dayDuration: 120
+  nightDuration: 120
   lightController: {fileID: 0}
   spawner: {fileID: 1893863080789037764}
   enemyManager: {fileID: 6325730467235097454}

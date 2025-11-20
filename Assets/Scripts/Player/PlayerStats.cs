@@ -5,34 +5,6 @@ using TMPro;
 
 public class PlayerStats : MonoBehaviour
 {
-    // --- Craft/Silah Parçaları ---
-    private Dictionary<WeaponPartType, int> weaponParts = new Dictionary<WeaponPartType, int>();
-
-    public int GetWeaponPartCount(WeaponPartType part)
-    {
-        return weaponParts.ContainsKey(part) ? weaponParts[part] : 0;
-    }
-
-    public void ConsumeWeaponParts(List<PartRequirement> partsToConsume)
-    {
-        foreach (var p in partsToConsume)
-        {
-            if (weaponParts.ContainsKey(p.partType) && weaponParts[p.partType] >= p.amount)
-            {
-                weaponParts[p.partType] -= p.amount;
-                WeaponPartsUI.Instance?.UpdatePartText(p.partType, weaponParts[p.partType]);
-            }
-        }
-    }
-
-    public void CollectWeaponPart(WeaponPartType part, int amountToCollect = 1)
-    {
-        if (!weaponParts.ContainsKey(part))
-            weaponParts[part] = 0;
-
-        weaponParts[part] += amountToCollect;
-        WeaponPartsUI.Instance?.UpdatePartText(part, weaponParts[part]);
-    }
 
     // --- Stamina ---
     [Header("Stamina Ayarları")]
@@ -118,8 +90,7 @@ public class PlayerStats : MonoBehaviour
     public GenericItemData stoneSO, ammo9mmSO, BluePrintSO, CookedMeatSO, DeerHideSO,
                             MeatSO, RabbitHideSO, ScrapSO, WoodSO;
 
-    public WeaponItemData machinegunSO, pistolSO, shotgunSO, sniperSO,
-                           throwingSpearSO, bowSO, meeleSpearSO, meeleSwordSO;
+    
 
     // --- Unity Döngüsü ---
     void Awake()
@@ -280,4 +251,9 @@ public class PlayerStats : MonoBehaviour
         if (amount > 0)
             currentHunger = Mathf.Min(maxHunger, currentHunger + amount);
     }
+    public void RefreshHealthUI()
+{
+    onHealthChanged?.Invoke(currentHealth, maxHealth);
+}
+
 }

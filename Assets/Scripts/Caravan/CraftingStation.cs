@@ -3,6 +3,8 @@ using UnityEngine;
 public class CraftingStation : MonoBehaviour
 {
     public GameObject interactionPrompt;
+    public GameObject craftingPanel;
+
     public static bool IsPlayerInRange { get; private set; }
 
     private void Awake()
@@ -28,20 +30,21 @@ public class CraftingStation : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+private void OnTriggerExit2D(Collider2D other)
+{
+    if (other.CompareTag("Player"))
     {
-        if (other.CompareTag("Player"))
-        {
-            IsPlayerInRange = false;
+        IsPlayerInRange = false;
 
-            if (interactionPrompt != null)
-                interactionPrompt.SetActive(false);
+        if (interactionPrompt != null)
+            interactionPrompt.SetActive(false);
 
-            if (WeaponCraftingSystem.Instance != null)
-            {
-                WeaponCraftingSystem.Instance.CloseCraftingPanel();
-                Time.timeScale = 1f; // oyun devam etsin
-            }
-        }
+        if (craftingPanel != null)
+            craftingPanel.SetActive(false);
+
+        Time.timeScale = 1f;
     }
+}
+
+
 }

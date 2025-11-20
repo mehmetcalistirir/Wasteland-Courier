@@ -25,7 +25,6 @@ public class GameSceneBootstrap : MonoBehaviour
         if (pm != null) pm.ResumeGame();
 
         // (İsteğe bağlı) Diğer panelleri de kapat
-        if (WeaponCraftingSystem.Instance != null) WeaponCraftingSystem.Instance.CloseCraftingPanel();
         if (NPCInteraction.Instance != null)       NPCInteraction.Instance.CloseTradePanel();
 
         // PlayerInput action map'i Gameplay'e zorla (kullanıyorsan)

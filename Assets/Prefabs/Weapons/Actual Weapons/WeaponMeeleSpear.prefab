@@ -97,14 +97,13 @@ GameObject:
   - component: {fileID: 6385869869418457149}
   - component: {fileID: 2329993721695046402}
   - component: {fileID: 5759696347228277711}
-  - component: {fileID: 5193888075076643252}
   m_Layer: 0
   m_Name: WeaponMeeleSpear
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3465567562603156701
 Transform:
   m_ObjectHideFlags: 0
@@ -207,8 +206,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  durabilityCostPerShot: 1
-  durabilityCostPerMelee: 1
   weaponData: {fileID: 11400000, guid: 23b941dccc66a014184f475471e68ece, type: 2}
   firePoint: {fileID: 4614354588770972592}
   bulletPrefab: {fileID: 0}
@@ -321,23 +318,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &5193888075076643252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944365562594708401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 984402fa24d82d440b20af613dae79b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxDurability: 100
-  durabilityBarPrefab: {fileID: 2576955762809197913, guid: 6c1a0102341a1a4499a6e0b85914d46e, type: 3}
-  onBroken:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &3290946930982214341
 GameObject:
   m_ObjectHideFlags: 0

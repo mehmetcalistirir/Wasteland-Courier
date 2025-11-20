@@ -156,14 +156,13 @@ GameObject:
   - component: {fileID: 4251597347442928559}
   - component: {fileID: 7167408195675684027}
   - component: {fileID: 4173961316608945778}
-  - component: {fileID: 3523431072320193127}
   m_Layer: 0
   m_Name: WeaponSniper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3364235303649634445
 Transform:
   m_ObjectHideFlags: 0
@@ -266,8 +265,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  durabilityCostPerShot: 1
-  durabilityCostPerMelee: 1
   weaponData: {fileID: 11400000, guid: 85c7b221ff1168c45b4f926ea4f212cc, type: 2}
   firePoint: {fileID: 5240749513553078688}
   bulletPrefab: {fileID: 3839466002162504836, guid: 6dbb90b9dacb96744b10f092742c1375, type: 3}
@@ -380,23 +377,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &3523431072320193127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7059562024863783809}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 984402fa24d82d440b20af613dae79b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxDurability: 100
-  durabilityBarPrefab: {fileID: 2576955762809197913, guid: 6c1a0102341a1a4499a6e0b85914d46e, type: 3}
-  onBroken:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &7642893112794390514
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a164e53ad684bcf489b85596401d39dc, type: 3}
+  m_Name: Item_Molotov
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponItemData
+  itemName: Molotov
+  itemID: weapon_molotov
+  icon: {fileID: -3212455835368639413, guid: 387ee359de6e5004f922c797aa178e97, type: 3}
+  category: 2
+  stackable: 0
+  maxStack: 1
+  weaponType: 4
+  weaponData: {fileID: 11400000, guid: 6830335928f2ff34d9488f8442705d96, type: 2}

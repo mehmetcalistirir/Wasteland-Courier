@@ -34,7 +34,6 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("🚚 Tüm yakıtlar toplandı, sonraki sahneye geçiliyor...");
         int currentIndex = SceneManager.GetActiveScene().buildIndex;
-        SaveSystem.MarkLevelComplete(currentIndex);
 
         // 🧠 Oyuncunun en son oynadığı bölümü hatırla
         PlayerPrefs.SetInt("LastLevel", currentIndex + 1);

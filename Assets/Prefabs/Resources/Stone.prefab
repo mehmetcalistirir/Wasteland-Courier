@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5146117353057106884}
   - component: {fileID: 6921577911449915916}
   - component: {fileID: 7735523158610280009}
-  - component: {fileID: 4682034194401431673}
   m_Layer: 7
   m_Name: Stone
   m_TagString: Resource
@@ -55,6 +54,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -76,6 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
@@ -102,7 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 623acb3bd47a35b418d937a9a13c593b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemData: {fileID: 11400000, guid: d1b4eb59deb9eea449a078661fde2354, type: 2}
+  itemData: {fileID: 11400000, guid: b2d31cee7f457ea4c93c724e7fe405a2, type: 2}
   type: 0
   amount: 1
   hitsRequired: 3
@@ -161,16 +163,3 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 5.46, y: 4.17}
   m_EdgeRadius: 0
---- !u!114 &4682034194401431673
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6150571164243365950}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8876f339876d1a42be02a65a0530f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  yOffset: 0

@@ -13,19 +13,22 @@ public class InventoryItem
         public string id;
         public int clip;
         public int reserve;
-        public int durability;  // dayanıklılık
-
-        
+        public int durability;
     }
 
-    public WeaponInstancePayload weapon; // sadece Weapon için
-    
+    public WeaponInstancePayload weapon; // silahlar için payload
 
-    public InventoryItem() {}
-    public InventoryItem(ItemData data = null, int count = 0)
+    public bool IsWeapon => weapon != null;
+
+    public InventoryItem() 
+    {
+        data = null;
+        count = 0;
+    }
+
+    public InventoryItem(ItemData data, int count = 1)
     {
         this.data = data;
         this.count = count;
-        this.weapon = null;
     }
 }

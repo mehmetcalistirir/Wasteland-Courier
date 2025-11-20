@@ -50,8 +50,8 @@ public class Resource : MonoBehaviour
 
 
     public void Collect()
-    {
-        if (itemData == null)
+{
+    if (itemData == null)
     {
         Debug.LogError($"[Resource] itemData null! '{gameObject.name}' üzerinde itemData atanmamış.");
         return;
@@ -63,22 +63,15 @@ public class Resource : MonoBehaviour
         return;
     }
 
-        Inventory.Instance.TryAdd(itemData, amount);
+    // Item'ı envantere ekle
+    Inventory.Instance.TryAdd(itemData, amount);
 
-        var stats = GameObject.FindWithTag("Player")?.GetComponent<PlayerStats>();
-        if (stats == null) return;
+    // Eski PlayerInventory sistemine bağlı satır SİLİNDİ
+    // Çünkü yeni sistemde gerek yok.
 
+    Destroy(gameObject);
+}
 
-        if (itemData is PartItemData partItem)
-        {
-            PlayerInventory.Instance.AddPart(partItem.partType, amount);
-        }
-
-        
-
-        Destroy(gameObject);
-
-    }
 
     public void HitResource()
     {

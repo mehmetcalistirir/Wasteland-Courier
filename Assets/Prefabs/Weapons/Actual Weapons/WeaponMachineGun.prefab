@@ -126,10 +126,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4735970477265894781}
   - component: {fileID: 4806085838917515918}
-  - component: {fileID: 6440875251637357550}
-  - component: {fileID: 6898099584480398005}
   - component: {fileID: 8338772452457127103}
-  - component: {fileID: 7782126700282193960}
   m_Layer: 0
   m_Name: WeaponMachineGun
   m_TagString: Untagged
@@ -212,50 +209,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6440875251637357550
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6873116168706336214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1d7d1a11a1465d4897fa4eafcb13dd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponPivot: {fileID: 4735970477265894781}
-  flashlight: {fileID: 1565530242955448718}
-  firePoint: {fileID: 8887718218237990283}
---- !u!114 &6898099584480398005
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6873116168706336214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  durabilityCostPerShot: 1
-  durabilityCostPerMelee: 1
-  weaponData: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}
-  firePoint: {fileID: 8887718218237990283}
-  bulletPrefab: {fileID: 3839466002162504836, guid: 6dbb90b9dacb96744b10f092742c1375, type: 3}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  muzzleFlash: {fileID: 1658773028757876559}
-  muzzleFlashDuration: 0.05
-  muzzleFlashIntensity: 3
-  shootSound: {fileID: 8300000, guid: c7d9524043a540c43aa82793a080e402, type: 3}
-  reloadSound: {fileID: 8300000, guid: b52a40a0c578f7d4da17c4bfa1c3d121, type: 3}
-  emptyClipSound: {fileID: 8300000, guid: 26d5b6cd21cc6764fa56e29471eae6bb, type: 3}
-  gunshotHearingRadius: 12
-  gunshotFleeDuration: 3
-  gunshotFleeMultiplier: 1.8
 --- !u!82 &8338772452457127103
 AudioSource:
   m_ObjectHideFlags: 0
@@ -353,23 +306,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &7782126700282193960
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6873116168706336214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 984402fa24d82d440b20af613dae79b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxDurability: 1000
-  durabilityBarPrefab: {fileID: 2576955762809197913, guid: 6c1a0102341a1a4499a6e0b85914d46e, type: 3}
-  onBroken:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &9070002023260008600
 GameObject:
   m_ObjectHideFlags: 0

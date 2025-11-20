@@ -1,14 +1,14 @@
 using UnityEngine;
 
-public enum ItemCategory { Resource, Ammo, Weapon, Misc }
 
+public enum ItemCategory { Resource, Ammo, Weapon, Misc }
+[CreateAssetMenu(menuName = "Items/Item Data")]
 public abstract class ItemData : ScriptableObject
 {
 
-    public ResourceType resourceType;
-
     [Header("Base")]
     public string itemName;
+    public string itemID;
     public Sprite icon;
     public ItemCategory category;
     public bool stackable = true;

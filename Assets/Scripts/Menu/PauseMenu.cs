@@ -24,39 +24,32 @@ public class PauseMenu : MonoBehaviour
     }
 
     void Update()
+{
+    if (Keyboard.current.escapeKey.wasPressedThisFrame)
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        // Trade panel açıksa → kapat
+        if (NPCInteraction.IsTradeOpen)
         {
-            // Crafting panel açıksa → kapat
-            if (WeaponCraftingSystem.IsCraftingOpen)
-            {
-                WeaponCraftingSystem.Instance.ToggleCraftingPanel();
-                Time.timeScale = 1f;
-                return;
-            }
-
-            // Trade panel açıksa → kapat
-            if (NPCInteraction.IsTradeOpen)
-            {
-                NPCInteraction.Instance.CloseTradePanel();
-                Time.timeScale = 1f;
-                return;
-            }
-
-            // Ayarlardayken ESC → pause menüsüne dön
-            if (isInSettings)
-            {
-                CloseSettings();
-                return;
-            }
-
-            // Pause toggle
-            if (IsPaused)
-                ResumeGame();
-            else
-                PauseGame();
+            NPCInteraction.Instance.CloseTradePanel();
+            Time.timeScale = 1f;
+            return;
         }
+
+        // Ayarlardayken ESC → pause menüsüne dön
+        if (isInSettings)
+        {
+            CloseSettings();
+            return;
+        }
+
+        // Pause toggle
+        if (IsPaused)
+            ResumeGame();
+        else
+            PauseGame();
     }
+}
+
 
     public void PauseGame()
     {

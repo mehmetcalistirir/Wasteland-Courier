@@ -160,8 +160,6 @@ public class MolotovThrower : MonoBehaviour
 
         lastThrowTime = Time.time;
 
-        // 🔥 Molotov fırlatıldıktan sonra WeaponSlot'tan kaldır
-        WeaponSlotManager.Instance?.OnMolotovUsed();
     }
 
 

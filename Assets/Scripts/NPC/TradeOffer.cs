@@ -37,8 +37,8 @@ public class TradeOffer : ScriptableObject
     [Header("Player Gets (Rewards)")]
     public RewardKind rewardKind = RewardKind.Resource;
 
-    // WeaponPart ödülü için
-    public WeaponPartType partToGive;
+    // ✔ WeaponPart ödülü için (Yeni sistem)
+    public PartItemData partToGive;
     public int amountToGive = 1;
 
     // Resource ödülü için

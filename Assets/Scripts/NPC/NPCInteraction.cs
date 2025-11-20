@@ -241,18 +241,21 @@ public class NPCInteraction : MonoBehaviour
 }
 
     // --- Takas işlemi ---
-    public void ExecuteTrade(TradeOffer offer)
+public void ExecuteTrade(TradeOffer offer)
 {
     if (offer == null) return;
 
+    // Yeterli kaynak var mı?
     if (!HasEnoughResources(offer))
     {
         Debug.Log("Takas başarısız! Yeterli materyal yok.");
         return;
     }
 
+    // Kaynakları düş
     DeductResources(offer);
 
+    // Ödül tipi: normal resource
     if (offer.rewardKind == RewardKind.Resource)
     {
         if (offer.rewardItemSO != null && offer.rewardAmount > 0)
@@ -261,15 +264,20 @@ public class NPCInteraction : MonoBehaviour
             Debug.Log($"Takas başarılı! {offer.rewardAmount} x {offer.rewardItemSO.itemName} alındı.");
         }
     }
+    // Ödül tipi: silah parçası
     else if (offer.rewardKind == RewardKind.WeaponPart)
     {
-        playerStats?.CollectWeaponPart(offer.partToGive, offer.amountToGive);
-        Debug.Log($"Takas başarılı! {offer.amountToGive} x {offer.partToGive} alındı.");
+        if (offer.partToGive != null && offer.amountToGive > 0)
+        {
+            Inventory.Instance.TryAdd(offer.partToGive, offer.amountToGive);
+            Debug.Log($"Takas başarılı! {offer.amountToGive} x {offer.partToGive.itemName} alındı.");
+        }
     }
 
-    // UI’ı tazele
+    // UI yenile
     PopulateTradeOffers();
 }
+
 
 
     // --- Trigger alanı ---

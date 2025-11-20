@@ -1,27 +1,18 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
-// Silah üretim tariflerini tanımlayan ScriptableObject
-[CreateAssetMenu(fileName = "New Weapon Blueprint", menuName = "Crafting/Weapon Blueprint")]
+[CreateAssetMenu(menuName = "Weapons/Weapon Blueprint")]
 public class WeaponBlueprint : ScriptableObject
 {
-    public WeaponType weaponType;
-    [Header("Genel Bilgiler")]
+    [Header("Weapon Info")]
     public string weaponName;
-    [TextArea] public string description;
-    public Sprite weaponIcon;
-    public WeaponData weaponData;
-    public WeaponItemData weaponItemSO;
 
+    [Header("Output Weapon")]
+    public WeaponData weaponItemSO;
 
-    [Tooltip("Bu silah hangi slotun kilidini açar?")]
-    public int weaponSlotIndexToUnlock = 0;
-
-    [Header("Kaynak Gereksinimleri")]
-    public int requiredStone = 0;
-    public int requiredWood = 0;
-    public int requiredScrapMetal = 0;
-
-    [Header("Parça Gereksinimleri")]
-    public List<PartRequirement> requiredParts; // Örn: Barrel x1, Trigger x1
+    [Header("Required Parts")]
+    public List<PartRequirement> requiredParts = new List<PartRequirement>();
 }
+
+

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e9591c0c3c19a4d873b1c6fe87e5b8, type: 3}
+  m_Name: Weapon_Sniper
+  m_EditorClassIdentifier: 
+  weaponName: Sniper
+  weaponIcon: {fileID: -952550666369105273, guid: b79f2ecc80f5a604f8e899515e907df5, type: 3}
+  prefab: {fileID: 7059562024863783809, guid: 82e160535d9f9604697498cf2183195e, type: 3}
+  weaponType: 3
+  knockbackForce: 6
+  knockbackDuration: 0.18
+  isAutomatic: 0
+  fireRate: 2
+  damage: 40
+  clipSize: 5
+  maxAmmoCapacity: 15
+  reloadTime: 3
+  attackRange: 15
+  isShotgun: 0
+  pelletsPerShot: 3
+  pelletSpreadAngle: 8
+  shotgunCooldown: 2.5
+  isSniper: 1
+  sniperCooldown: 3
+  sniperPenetrationCount: 2
+  ammoType: 10
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

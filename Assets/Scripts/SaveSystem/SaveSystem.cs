@@ -28,12 +28,12 @@ public static class SaveSystem
 
         SaveData data = new SaveData();
 
-        // Pozisyon
+        // ---- Pozisyon ----
         data.posX = player.position.x;
         data.posY = player.position.y;
         data.posZ = player.position.z;
 
-        // Statlar
+        // ---- Statlar ----
         data.currentHealth = stats.currentHealth;
         data.maxHealth = stats.maxHealth;
 
@@ -45,7 +45,7 @@ public static class SaveSystem
 
         data.gold = stats.gold;
 
-        // Envanter
+        // ---- Envanter ----
         data.inventory.Clear();
         foreach (var slot in inventory.slots)
         {
@@ -60,7 +60,7 @@ public static class SaveSystem
             data.inventory.Add(saved);
         }
 
-        // Craft ile açılmış silahlar
+        // ---- Craft ile açılmış silahlar ----
         data.unlockedWeaponIDs.Clear();
         if (CraftingSystem.Instance != null && CraftingSystem.Instance.unlockedWeapons != null)
         {
@@ -68,9 +68,44 @@ public static class SaveSystem
                 data.unlockedWeaponIDs.Add(id);
         }
 
+        // ---- Ekipman silah slotları (WeaponSlotManager) ----
+        WeaponSlotManager wsm = WeaponSlotManager.Instance;
+        if (wsm != null)
+        {
+            // Diziler boşsa oluştur
+            if (data.equippedWeaponKeys == null || data.equippedWeaponKeys.Length != 3)
+                data.equippedWeaponKeys = new string[3];
+            if (data.slotClip == null || data.slotClip.Length != 3)
+                data.slotClip = new int[3];
+            if (data.slotReserve == null || data.slotReserve.Length != 3)
+                data.slotReserve = new int[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                WeaponData wd = wsm.slots[i];
+
+                // WeaponData → string key (weaponName veya asset name)
+                if (wd != null)
+                {
+                    data.equippedWeaponKeys[i] = GetWeaponKey(wd);
+                }
+                else
+                {
+                    data.equippedWeaponKeys[i] = "";
+                }
+
+                var ammo = wsm.GetAmmo(i);
+                data.slotClip[i] = ammo.clip;
+                data.slotReserve[i] = ammo.reserve;
+            }
+
+            data.activeSlotIndex = wsm.activeSlotIndex;
+        }
+
+        // ---- JSON yaz ----
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
-        Debug.Log("SAVE → Pozisyon + statlar + envanter + unlock silahlar kaydedildi.");
+        Debug.Log("💾 SAVE → Pozisyon + statlar + envanter + unlock silahlar + ekipman slotları kaydedildi.");
     }
 
     // ===================== LOAD =====================
@@ -95,7 +130,7 @@ public static class SaveSystem
         string json = File.ReadAllText(savePath);
         SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-        // Pozisyon
+        // ---- Pozisyon ----
         Vector3 loadedPos = new Vector3(data.posX, data.posY, data.posZ);
         if (loadedPos != Vector3.zero)
         {
@@ -103,7 +138,7 @@ public static class SaveSystem
             player.position = loadedPos;
         }
 
-        // Statlar
+        // ---- Statlar ----
         stats.maxHealth = data.maxHealth;
         stats.currentHealth = data.currentHealth;
         stats.RefreshHealthUI();
@@ -117,7 +152,7 @@ public static class SaveSystem
 
         stats.gold = data.gold;
 
-        // Envanter
+        // ---- Envanter ----
         inventory.ClearInventory();
         foreach (var item in data.inventory)
         {
@@ -129,7 +164,7 @@ public static class SaveSystem
             inventory.TryAdd(so, item.amount);
         }
 
-        // Craft ile açılmış silahlar
+        // ---- Craft ile açılmış silahlar ----
         if (CraftingSystem.Instance != null)
         {
             CraftingSystem.Instance.unlockedWeapons.Clear();
@@ -137,6 +172,98 @@ public static class SaveSystem
                 CraftingSystem.Instance.unlockedWeapons.Add(id);
         }
 
-        Debug.Log("LOAD → Pozisyon + statlar + envanter + unlock silahlar yüklendi.");
+        // ---- WeaponSlotManager slotlarını geri yükle ----
+        WeaponSlotManager wsm = WeaponSlotManager.Instance;
+        if (wsm != null && data.equippedWeaponKeys != null && data.equippedWeaponKeys.Length == 3)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                string key = data.equippedWeaponKeys[i];
+
+                if (!string.IsNullOrEmpty(key))
+                {
+                    // Save'de tuttuğumuz key'e göre WeaponData bul
+                    WeaponData wd = FindWeaponDataByKey(key);
+                    if (wd != null)
+                    {
+                        wsm.slots[i] = wd;
+                        // Ammo
+                        if (data.slotClip != null && data.slotClip.Length > i)
+                            wsm.clip[i] = data.slotClip[i];
+                        if (data.slotReserve != null && data.slotReserve.Length > i)
+                            wsm.reserve[i] = data.slotReserve[i];
+                    }
+                    else
+                    {
+                        wsm.slots[i] = null;
+                        wsm.clip[i] = 0;
+                        wsm.reserve[i] = 0;
+                    }
+                }
+                else
+                {
+                    wsm.slots[i] = null;
+                    wsm.clip[i] = 0;
+                    wsm.reserve[i] = 0;
+                }
+            }
+
+            // Aktif slotu geri yükle
+            int restoredSlot = Mathf.Clamp(data.activeSlotIndex, 0, 2);
+            wsm.activeSlotIndex = restoredSlot;
+            // 🔥 ApplyToHandler private olduğu için public SwitchSlot kullanıyoruz
+            wsm.SwitchSlot(restoredSlot);
+        }
+
+        Debug.Log("📥 LOAD → Pozisyon + statlar + envanter + unlock silahlar + ekipman slotları yüklendi.");
     }
+
+    // ===================== YARDIMCI METOTLAR =====================
+
+    // WeaponData → Save için string key (CraftingSystem ile aynı mantık)
+    private static string GetWeaponKey(WeaponData weapon)
+{
+    if (weapon == null) return "";
+
+    // WeaponData içinde itemName var
+    if (!string.IsNullOrWhiteSpace(weapon.itemName))
+        return weapon.itemName;
+
+    // fallback: Unity asset adı
+    return weapon.name;
+}
+
+
+    // Save'den gelen key'e göre WeaponData bul
+    private static WeaponData FindWeaponDataByKey(string key)
+{
+    if (string.IsNullOrEmpty(key)) return null;
+    if (CraftingSystem.Instance == null) return null;
+
+    foreach (var recipe in CraftingSystem.Instance.recipes)
+    {
+        if (recipe == null) continue;
+
+        WeaponData wd = null;
+
+        // WeaponData doğrudan recipe.weaponData içinde olabilir
+        if (recipe.weaponData != null)
+            wd = recipe.weaponData;
+
+        // Yoksa WeaponItemData.weaponData kullanılıyor olabilir
+        else if (recipe.weaponItem != null)
+            wd = recipe.weaponItem.weaponData;
+
+        if (wd == null) continue;
+
+        // Kaydedilen silah key'i ile eşleşiyor mu?
+        string currentKey = GetWeaponKey(wd);
+        if (currentKey == key)
+            return wd;
+    }
+
+    Debug.LogWarning($"SaveSystem: '{key}' için WeaponData bulunamadı.");
+    return null;
+}
+
 }

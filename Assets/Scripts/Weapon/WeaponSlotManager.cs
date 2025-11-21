@@ -42,8 +42,6 @@ public class WeaponSlotManager : MonoBehaviour
         }
     }
 
-    
-
 
 
     // -------------------------------
@@ -131,7 +129,7 @@ public class WeaponSlotManager : MonoBehaviour
     rifleHandler.gameObject.SetActive(false);
     meleeHandler.gameObject.SetActive(false);
 
-    // Slot boşsa bile handler’ı açmalıyız
+    // Yeni handler
     PlayerWeapon handler = GetHandler(slot);
     if (handler == null)
     {
@@ -139,9 +137,14 @@ public class WeaponSlotManager : MonoBehaviour
         return;
     }
 
+    // 🔥 Kritik Fix: Ateş durmalı
+    handler.ResetShootHold();
+
+
+    // Handler’ı aktif et
     handler.gameObject.SetActive(true);
 
-    // Eğer silah takılıysa modeli yükle
+    // Silahı yükle
     WeaponData weapon = slots[slot];
     if (weapon != null)
     {
@@ -153,6 +156,8 @@ public class WeaponSlotManager : MonoBehaviour
         Debug.LogWarning("Slot boş ama handler aktif edildi: " + slot);
     }
 }
+
+
 
 
 

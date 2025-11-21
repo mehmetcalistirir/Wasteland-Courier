@@ -12,7 +12,13 @@ public class ResourceCost
 public class WeaponRecipe
 {
     public string id;                    // Opsiyonel: "Pistol", "Rifle" vs.
-    public WeaponData weapon;            // Craft edeceğin silah
+
+    [Header("Envantere girecek item (ZORUNLU)")]
+    public WeaponItemData weaponItem;    // Inventory'e girecek item
+
+    [Header("Silah statları (boş bırakılırsa weaponItem.weaponData kullanılır)")]
+    public WeaponData weaponData;        // Silahın gerçek statları
+
     public List<ResourceCost> costs = new();  // Gerekli kaynaklar
 }
 
@@ -42,9 +48,10 @@ public class CraftingSystem : MonoBehaviour
     private string GetKey(WeaponData weapon)
     {
         if (weapon == null) return "";
-        // WeaponData'da weaponName varsa onu kullan, yoksa asset name
+
         if (!string.IsNullOrWhiteSpace(weapon.itemName))
             return weapon.itemName;
+
         return weapon.name;
     }
 
@@ -57,14 +64,31 @@ public class CraftingSystem : MonoBehaviour
         return unlockedWeapons.Contains(GetKey(weapon));
     }
 
+    // Tarif içinden güvenli şekilde WeaponData çek
+    private WeaponData GetWeaponDataFromRecipe(WeaponRecipe recipe)
+    {
+        if (recipe == null) return null;
+
+        if (recipe.weaponData != null)
+            return recipe.weaponData;
+
+        if (recipe.weaponItem != null)
+            return recipe.weaponItem.weaponData;
+
+        return null;
+    }
+
     // --------------------------------------
     //  Bu tarifi craft edebiliyor muyuz?
     // --------------------------------------
     public bool CanCraft(WeaponRecipe recipe)
     {
-        if (recipe == null || recipe.weapon == null) return false;
-        if (IsUnlocked(recipe.weapon)) return false; // Zaten açık
+        if (recipe == null) return false;
 
+        WeaponData weapon = GetWeaponDataFromRecipe(recipe);
+        if (weapon == null) return false;
+
+        if (IsUnlocked(weapon)) return false; // Zaten açık
         if (Inventory.Instance == null) return false;
 
         foreach (var cost in recipe.costs)
@@ -83,46 +107,71 @@ public class CraftingSystem : MonoBehaviour
     //  Craft et (1 kere)
     // --------------------------------------
     public bool TryCraft(WeaponRecipe recipe)
-{
-    if (!CanCraft(recipe))
     {
-        Debug.Log("CraftingSystem: Craft şartları sağlanmıyor.");
-        return false;
+        if (!CanCraft(recipe))
+        {
+            Debug.Log("CraftingSystem: Craft şartları sağlanmıyor.");
+            return false;
+        }
+
+        WeaponData weapon = GetWeaponDataFromRecipe(recipe);
+        if (weapon == null)
+        {
+            Debug.LogError("CraftingSystem: Recipe içinde geçerli WeaponData yok!");
+            return false;
+        }
+
+        // 1) Kaynakları tüket
+        foreach (var cost in recipe.costs)
+        {
+            if (cost.item == null || cost.amount <= 0)
+                continue;
+
+            Inventory.Instance.TryConsume(cost.item, cost.amount);
+        }
+
+        // 2) Silahı kalıcı olarak aç
+        string key = GetKey(weapon);
+        unlockedWeapons.Add(key);
+        Debug.Log($"🔓 Silah craft edildi ve kalıcı açıldı → {key}");
+
+        // 3) Silahı ENVANTERE EKLE
+        ItemData weaponItem = recipe.weaponItem;
+        if (weaponItem == null)
+        {
+            Debug.LogError("CraftingSystem: weaponItem atanmadı! Envantere eklenemedi.");
+            return false;
+        }
+
+        bool added = Inventory.Instance.TryAdd(weaponItem, 1);
+
+        if (!added)
+        {
+            Debug.LogWarning($"⚠ Envanter dolu, {weaponItem.itemName} envantere eklenemedi.");
+        }
+        else
+        {
+            Debug.Log($"📦 Envantere eklendi → {weaponItem.itemName}");
+        }
+
+        // 4) Silahı OTOMATİK TAK
+        if (WeaponSlotManager.Instance != null)
+        {
+            // Silahı slot'a yerleştir
+            WeaponSlotManager.Instance.EquipWeapon(weaponItem);
+
+            // 🔥 OTOMATİK SLOT DEĞİŞTİR (MAİN FIX)
+            int slotIndex = (int)WeaponSlotManager.Instance.GetSlotForWeapon(weapon);
+            WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+
+            Debug.Log($"🎯 Oyuncuya takıldı ve slot değiştirildi → {weaponItem.itemName}");
+        }
+        else
+        {
+            Debug.LogWarning("CraftingSystem: WeaponSlotManager.Instance = null, silah takılamadı!");
+        }
+
+        return true;
     }
-
-    // 1) Kaynakları tüket
-    foreach (var cost in recipe.costs)
-    {
-        if (cost.item == null || cost.amount <= 0)
-            continue;
-
-        Inventory.Instance.TryConsume(cost.item, cost.amount);
-    }
-
-    // 2) Silahı kalıcı olarak aç
-    string key = GetKey(recipe.weapon);
-    unlockedWeapons.Add(key);
-    Debug.Log($"🔓 Silah craft edildi ve kalıcı açıldı → {key}");
-
-    // 3) Silahı ENVANTERE EKLE
-    ItemData weaponItem = recipe.weapon; // WeaponData, ItemData’dan türemiş
-    bool added = Inventory.Instance.TryAdd(weaponItem, 1);
-
-    if (!added)
-    {
-        Debug.LogWarning($"⚠ Envanter dolu, {weaponItem.itemName} envantere eklenemedi.");
-    }
-    else
-    {
-        Debug.Log($"📦 Envantere eklendi → {weaponItem.itemName}");
-    }
-
-    // 4) Silahı OTOMATİK TAK
-    WeaponSlotManager.Instance.EquipWeapon(weaponItem);
-    Debug.Log($"🎯 Oyuncuya takıldı → {weaponItem.itemName}");
-
-    return true;
-}
-
 
 }

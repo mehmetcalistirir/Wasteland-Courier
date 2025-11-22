@@ -238,8 +238,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1895796640528736525}
   - component: {fileID: 3290383497976546350}
-  - component: {fileID: 5789285379098799919}
-  - component: {fileID: 9192697826367962207}
   - component: {fileID: 4139782362206700681}
   m_Layer: 0
   m_Name: WeaponShotgun
@@ -323,48 +321,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5789285379098799919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7802920725924030239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1d7d1a11a1465d4897fa4eafcb13dd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponPivot: {fileID: 1895796640528736525}
-  flashlight: {fileID: 5441129152130687554}
-  firePoint: {fileID: 227207365044635455}
---- !u!114 &9192697826367962207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7802920725924030239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: 18378fe0a73d11443b1e040e6125cbf7, type: 2}
-  firePoint: {fileID: 227207365044635455}
-  bulletPrefab: {fileID: 3839466002162504836, guid: 6dbb90b9dacb96744b10f092742c1375, type: 3}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  muzzleFlash: {fileID: 1017106564500974548}
-  muzzleFlashDuration: 0.05
-  muzzleFlashIntensity: 3
-  shootSound: {fileID: 8300000, guid: 4810065072f7c9c4b9a799040da63862, type: 3}
-  reloadSound: {fileID: 8300000, guid: b5340d4dd5cbbf24cbebc60f95e5be99, type: 3}
-  emptyClipSound: {fileID: 8300000, guid: 26d5b6cd21cc6764fa56e29471eae6bb, type: 3}
-  gunshotHearingRadius: 12
-  gunshotFleeDuration: 3
-  gunshotFleeMultiplier: 1.8
 --- !u!82 &4139782362206700681
 AudioSource:
   m_ObjectHideFlags: 0

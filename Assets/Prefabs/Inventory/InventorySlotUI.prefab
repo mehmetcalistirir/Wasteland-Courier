@@ -53,15 +53,6 @@ MonoBehaviour:
   icon: {fileID: 6280949716033283543}
   countText: {fileID: 1554269457288889378}
   canvasGroup: {fileID: 0}
-  invSlot:
-    data: {fileID: 0}
-    count: 1
-    weapon:
-      id: 
-      clip: 0
-      reserve: 0
-      durability: 0
-  inventoryPanel: {fileID: 0}
 --- !u!1 &3827604595270382438
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,7 +87,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -5, y: -16}
+  m_AnchoredPosition: {x: -1, y: -25}
   m_SizeDelta: {x: -1, y: 25}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &9100026619603361811
@@ -233,7 +224,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1684581332104936287
 CanvasRenderer:
@@ -263,7 +254,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7467644495458278819, guid: 798a7dca770030a4da4820f32e39454b, type: 3}
+  m_Sprite: {fileID: 3144263470874752199, guid: 4204ffbb5e1e9da4b9a07c1ce2f0d1ad, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

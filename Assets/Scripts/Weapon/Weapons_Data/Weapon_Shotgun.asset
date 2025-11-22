@@ -12,8 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e9591c0c3c19a4d873b1c6fe87e5b8, type: 3}
   m_Name: Weapon_Shotgun
   m_EditorClassIdentifier: 
-  weaponName: Shotgun
-  weaponIcon: {fileID: 4099191518589774541, guid: 8d28fad03878d464fb4e8f1f05844664, type: 3}
+  itemName: Shotgun
+  itemID: weapon_shotgun
+  icon: {fileID: 4099191518589774541, guid: 8d28fad03878d464fb4e8f1f05844664, type: 3}
+  category: 2
+  stackable: 0
+  maxStack: 1
   prefab: {fileID: 7802920725924030239, guid: 795cdce0369154b42a7cc1dfab215d8f, type: 3}
   weaponType: 2
   knockbackForce: 6

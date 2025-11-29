@@ -23,6 +23,7 @@ public class Animal : MonoBehaviour
     public float baseDetectionRadius = 4f;
     public float nightDetectionFactor = 0.5f;
     public float fleeSpeedMultiplier = 1.5f;
+    public float animalCount = 3;
 
     public GameObject meatPrefab;
     public GameObject hidePrefab;

@@ -17,7 +17,7 @@ public class Animal : MonoBehaviour
     private Vector2 lastAnimDir = Vector2.down;
 
     public string animalType = "Geyik";
-    public int maxHealth = 5;
+    public int maxHealth = 3;
     public float moveSpeed = 2f;
     public float roamRadius = 5f;
     public float baseDetectionRadius = 4f;

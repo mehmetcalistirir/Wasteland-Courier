@@ -28,14 +28,15 @@ public class InventoryInput : MonoBehaviour
     }
 
     private void OnInventoryPressed(InputAction.CallbackContext ctx)
-    {
-        if (inventoryPanel == null) return;
+{
+    if (inventoryPanel == null) return;
 
-        inventoryOpen = !inventoryOpen;
-        inventoryPanel.SetActive(inventoryOpen);
+    // Eğer craft açık ise önce craft'ı kapat
+    if (craftUI != null && craftUI.craftPanel.activeSelf)
+        craftUI.Close();
 
-        // Envanter açıldığında craft kapanır
-        if (inventoryOpen && craftUI != null && craftUI.craftPanel.activeSelf)
-            craftUI.Close();
-    }
+    inventoryOpen = !inventoryOpen;
+    inventoryPanel.SetActive(inventoryOpen);
+}
+
 }

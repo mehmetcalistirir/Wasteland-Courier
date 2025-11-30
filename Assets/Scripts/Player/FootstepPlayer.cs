@@ -23,14 +23,13 @@ public class PlayerFootsteps : MonoBehaviour
     public float minPitch = 0.95f;
     public float maxPitch = 1.05f;
     public float minStepGap = 0.12f; // iki adım arası min süre
+    private float nextStepAvailableTime = 0f;
 
     private AudioSource src;
     private Vector3 lastPosition;
     private float accumulatedDistance = 0f;
     private float lastStepTime = 0f;
     private int lastClipIndex = -1;
-    private float nextStepAvailableTime = 0f;
-
 
     void Awake()
     {
@@ -84,23 +83,21 @@ public class PlayerFootsteps : MonoBehaviour
 
     private void PlayStep()
 {
-    // 1) Ses süresi + gap bitmeden adım çalma
+    // Ses uzunluğu bitene kadar bekle
     if (Time.time < nextStepAvailableTime) return;
 
-    // 2) minStepGap kontrolü (çift tetik engeli)
+    // Debounce
     if (Time.time - lastStepTime < minStepGap) return;
     lastStepTime = Time.time;
 
-    // 3) Ses seç
     int idx = PickClipIndex();
-    float clipLength = footstepClips[idx].length;
+    float len = footstepClips[idx].length;
 
-    // 4) Ses çal
     src.pitch = Random.Range(minPitch, maxPitch);
     src.PlayOneShot(footstepClips[idx], volume);
 
-    // 5) Ses boyunca yeni adımı engelle
-    nextStepAvailableTime = Time.time + clipLength;
+    // Ses süresi boyunca yeni adım engelli
+    nextStepAvailableTime = Time.time + len;
 }
 
     private int PickClipIndex()

@@ -244,20 +244,15 @@ public static class SaveSystem
     {
         if (recipe == null) continue;
 
-        WeaponData wd = null;
-
-        // WeaponData doğrudan recipe.weaponData içinde olabilir
-        if (recipe.weaponData != null)
-            wd = recipe.weaponData;
-
-        // Yoksa WeaponItemData.weaponData kullanılıyor olabilir
-        else if (recipe.weaponItem != null)
-            wd = recipe.weaponItem.weaponData;
+        WeaponData wd = recipe.resultWeapon;   // YENİ DOĞRU ALAN
 
         if (wd == null) continue;
 
-        // Kaydedilen silah key'i ile eşleşiyor mu?
-        string currentKey = GetWeaponKey(wd);
+        // Key karşılaştırması
+        string currentKey = wd.itemName;
+        if (string.IsNullOrWhiteSpace(currentKey))
+            currentKey = wd.name;
+
         if (currentKey == key)
             return wd;
     }
@@ -265,5 +260,6 @@ public static class SaveSystem
     Debug.LogWarning($"SaveSystem: '{key}' için WeaponData bulunamadı.");
     return null;
 }
+
 
 }

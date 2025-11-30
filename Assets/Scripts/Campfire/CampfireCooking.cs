@@ -5,41 +5,33 @@ using UnityEngine.UI;
 public class CampfireCooking : MonoBehaviour
 {
     [Header("Cooking")]
-    public float cookTime = 5f;                 // Basılı tutma süresi
-    public GameObject cookedMeatPrefab;         // Düşecek pickup
-    public Transform dropPoint;                 // Opsiyonel, yoksa otomatik offset
+    public float cookTime = 5f;
+    public GameObject cookedMeatPrefab;
+    public Transform dropPoint;
 
-    // string yerine ItemData kullan
     [SerializeField] private ItemData meatSO;
     [SerializeField] private ItemData cookedMeatSO;
 
-
     [Header("UI")]
-    public GameObject progressCanvas;           // Panel (aktif/pasif yapılacak)
-    public Slider progressBar;                  // 0..1
+    public GameObject progressCanvas;
+    public Slider progressBar;
 
     private bool isPlayerNearby = false;
     private bool isCooking = false;
     private float holdTimer = 0f;
 
-    private PlayerStats playerStats;
-
     void Start()
     {
-        var player = GameObject.FindWithTag("Player");
-        if (player) playerStats = player.GetComponent<PlayerStats>();
-
         if (progressCanvas) progressCanvas.SetActive(false);
         if (progressBar) progressBar.value = 0f;
     }
 
     void Update()
     {
-        if (!isPlayerNearby || playerStats == null) return;
+        if (!isPlayerNearby) return;
 
-        bool hasMeat = playerStats.GetResourceAmount(meatSO) > 0;
+        bool hasMeat = Inventory.Instance.GetTotalCount(meatSO) > 0;
 
-        // C'ye basılı tutuluyorsa ve et varsa pişirmeyi başlat/sürdür
         if (hasMeat && Keyboard.current.cKey.isPressed)
         {
             if (!isCooking)
@@ -53,39 +45,33 @@ public class CampfireCooking : MonoBehaviour
 
             if (holdTimer >= cookTime)
             {
-                FinishCooking();
+                CookMeat();
                 ResetCooking();
             }
         }
         else
         {
-            // Tuş bırakıldıysa veya et yoksa ilerlemeyi sıfırla
-            if (isCooking) ResetCooking();
+            if (isCooking)
+                ResetCooking();
         }
     }
 
-    private void FinishCooking()
+    private void CookMeat()
     {
-        // Envanterden 1 Meat düş; (RemoveResource bool döndürmüyorsa önce kontrol ettik zaten)
-        if (playerStats.GetResourceAmount(meatSO) > 0)
-            playerStats.RemoveResource(meatSO, 1);
-        else
-            return;
+        if (Inventory.Instance.TryConsume(meatSO, 1))
+        {
+            Vector3 pos = dropPoint ? dropPoint.position
+                                    : transform.position + new Vector3(0.4f, 0f, 0f);
 
-        // Pişmiş et prefab'ını düşür
-        Vector3 pos = dropPoint ? dropPoint.position
-                                : transform.position + new Vector3(0.4f, 0f, 0f);
-
-        if (cookedMeatPrefab)
             Instantiate(cookedMeatPrefab, pos, Quaternion.identity);
-        else
-            Debug.LogWarning("CookedMeat prefab atanmadı!");
+        }
     }
 
     private void ResetCooking()
     {
         isCooking = false;
         holdTimer = 0f;
+
         if (progressBar) progressBar.value = 0f;
         if (progressCanvas) progressCanvas.SetActive(false);
     }

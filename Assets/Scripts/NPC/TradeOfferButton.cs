@@ -19,12 +19,9 @@ public class TradeOfferButton : MonoBehaviour
     [Header("Sprites (Optional)")]
     public Sprite fallbackSprite;
 
-    // Yeni sistem — PartItemData → Sprite
     private Dictionary<PartItemData, Sprite> partMap = new();
-
     private TradeOffer currentOffer;
     private NPCInteraction npc;
-    private PlayerStats stats;
 
     [SerializeField] private TextMeshProUGUI offerTextSlot;
     private TextMeshProUGUI offerTextInstance;
@@ -46,15 +43,14 @@ public class TradeOfferButton : MonoBehaviour
         else if (offerTextPrefab != null)
             offerTextInstance = Instantiate(offerTextPrefab, transform).GetComponent<TextMeshProUGUI>();
         else
-            Debug.LogError("[TradeOfferButton] Text kaynağı yok!");
+            Debug.LogError("[TradeOfferButton] No text source assigned!");
 
         PositionAndSizeText();
     }
 
-    public void Setup(TradeOffer offer, PlayerStats statsRef)
+    public void Setup(TradeOffer offer)
     {
         currentOffer = offer;
-        stats = statsRef;
         npc = NPCInteraction.Instance;
 
         if (!tradeButton || currentOffer == null)
@@ -63,34 +59,30 @@ public class TradeOfferButton : MonoBehaviour
         EnsureOfferText();
         ApplyIconForOffer(offer);
 
-        // ------ Metin ------
-        if (offerTextInstance)
-        {
-            string cost = BuildCostText(offer);
+        string cost = BuildCostText(offer);
 
-            string reward = offer.rewardKind == RewardKind.WeaponPart
-                ? $"Verilen: {offer.amountToGive} x {offer.partToGive?.itemName}"
-                : $"Verilen: {offer.rewardAmount} x {offer.rewardItemSO?.itemName}";
+        string reward = offer.rewardKind == RewardKind.WeaponPart
+            ? $"Verilen: {offer.amountToGive} x {offer.partToGive?.itemName}"
+            : $"Verilen: {offer.rewardAmount} x {offer.rewardItemSO?.itemName}";
 
-            offerTextInstance.text = $"{cost}\n{reward}";
-        }
+        offerTextInstance.text = $"{cost}\n{reward}";
 
         tradeButton.interactable = CanAfford(offer);
         tradeButton.onClick.RemoveAllListeners();
         tradeButton.onClick.AddListener(OnTradeClicked);
     }
 
-    private bool CanAfford(TradeOffer offer)
+    private bool CanAfford(TradeOffer o)
     {
         return
-            stats.GetResourceAmount(offer.stoneSO) >= offer.requiredStone &&
-            stats.GetResourceAmount(offer.woodSO) >= offer.requiredWood &&
-            stats.GetResourceAmount(offer.scrapSO) >= offer.requiredScrapMetal &&
-            stats.GetResourceAmount(offer.meatSO) >= offer.requiredMeat &&
-            stats.GetResourceAmount(offer.deerHideSO) >= offer.requiredDeerHide &&
-            stats.GetResourceAmount(offer.rabbitHideSO) >= offer.requiredRabbitHide &&
-            stats.GetResourceAmount(offer.herbSO) >= offer.requiredHerb &&
-            stats.GetResourceAmount(offer.ammoSO) >= offer.requiredAmmo;
+            Inventory.Instance.GetTotalCount(o.stoneSO) >= o.requiredStone &&
+            Inventory.Instance.GetTotalCount(o.woodSO) >= o.requiredWood &&
+            Inventory.Instance.GetTotalCount(o.scrapSO) >= o.requiredScrapMetal &&
+            Inventory.Instance.GetTotalCount(o.meatSO) >= o.requiredMeat &&
+            Inventory.Instance.GetTotalCount(o.deerHideSO) >= o.requiredDeerHide &&
+            Inventory.Instance.GetTotalCount(o.rabbitHideSO) >= o.requiredRabbitHide &&
+            Inventory.Instance.GetTotalCount(o.herbSO) >= o.requiredHerb &&
+            Inventory.Instance.GetTotalCount(o.ammoSO) >= o.requiredAmmo;
     }
 
     private string BuildCostText(TradeOffer o)
@@ -136,7 +128,7 @@ public class TradeOfferButton : MonoBehaviour
         if (offer.rewardKind == RewardKind.WeaponPart)
         {
             if (offer.partToGive != null)
-                s = offer.partToGive.icon; // ItemData icon
+                s = offer.partToGive.icon;
         }
         else if (offer.rewardKind == RewardKind.Resource)
         {
@@ -146,7 +138,9 @@ public class TradeOfferButton : MonoBehaviour
 
         iconImage.sprite = s ? s : fallbackSprite;
         iconImage.enabled = iconImage.sprite != null;
-        if (iconImage.enabled) iconImage.preserveAspect = true;
+
+        if (iconImage.enabled)
+            iconImage.preserveAspect = true;
     }
 
     private void OnTradeClicked()

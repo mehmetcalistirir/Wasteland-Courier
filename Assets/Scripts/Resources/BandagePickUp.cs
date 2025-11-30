@@ -17,7 +17,8 @@ public class BandagePickup : MonoBehaviour
         Debug.Log("🩹 Bandaj toplandı +" + amount);
 
         // Envantere ekle
-        stats.AddResource(bandageSO, amount);
+        Inventory.Instance.TryAdd(bandageSO, amount);
+
 
         // Prefab'ı yok et
         Destroy(gameObject);

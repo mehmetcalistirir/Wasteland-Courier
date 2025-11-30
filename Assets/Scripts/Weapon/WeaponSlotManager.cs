@@ -155,8 +155,6 @@ public class WeaponSlotManager : MonoBehaviour
 
 
 
-
-
     private PlayerWeapon GetHandler(int slot)
     {
         switch ((WeaponSlotType)slot)

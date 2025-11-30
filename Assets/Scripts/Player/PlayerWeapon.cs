@@ -40,11 +40,13 @@ public class PlayerWeapon : MonoBehaviour
     private int clipSize = 0;
 
     private float lastAutoFireTime = 0f;
+    private PlayerControls controls;
 
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
         animator = GetComponentInChildren<Animator>();
+        controls = new PlayerControls();
 
         if (muzzleFlash != null)
             muzzleFlash.enabled = false;
@@ -87,6 +89,24 @@ public class PlayerWeapon : MonoBehaviour
         if (Mouse.current.rightButton.wasReleasedThisFrame)
             StopADS();
     }
+
+    private void OnEnable()
+{
+    controls.Gameplay.Enable();
+    controls.Gameplay.Reload.performed += OnReloadPressed;
+}
+
+private void OnDisable()
+{
+    controls.Gameplay.Reload.performed -= OnReloadPressed;
+    controls.Gameplay.Disable();
+}
+
+private void OnReloadPressed(InputAction.CallbackContext ctx)
+{
+    if (!isReloading && reserve > 0 && clip < clipSize)
+        StartCoroutine(Reload());
+}
 
     // ===============================
     // AUTO FIRE

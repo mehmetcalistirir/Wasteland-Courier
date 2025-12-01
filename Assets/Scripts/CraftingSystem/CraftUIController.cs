@@ -4,31 +4,47 @@ using TMPro;
 
 public class CraftUIController : MonoBehaviour
 {
+    [Header("UI")]
     public GameObject craftPanel;
     public Transform gridParent;
     public GameObject craftSlotPrefab;
 
-    public WeaponRecipe selectedRecipe;
+    [Header("Logic")]
+    public WeaponCraftRecipe selectedRecipe;
+
     public static CraftUIController Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
-        Instance = this;
-
         PopulateRecipes();
         craftPanel.SetActive(false);
     }
 
+    // ---------------------------------------------------------
+    //  Tarif slotlarını oluştur
+    // ---------------------------------------------------------
     public void PopulateRecipes()
     {
+        // Grid üzerindeki eski slotları sil
         foreach (Transform t in gridParent)
             Destroy(t.gameObject);
 
+        if (CraftingSystem.Instance == null)
+        {
+            Debug.LogError("CraftingSystem.Instance bulunamadı!");
+            return;
+        }
+
+        // Tüm WeaponCraftRecipe tariflerini slot olarak ekle
         foreach (var recipe in CraftingSystem.Instance.recipes)
         {
             GameObject slotGO = Instantiate(craftSlotPrefab, gridParent);
 
-            // 🔹 Artık buton event'ini CraftSlotUI yönetecek
             CraftSlotUI slotUI = slotGO.GetComponent<CraftSlotUI>();
             if (slotUI == null)
             {
@@ -36,30 +52,58 @@ public class CraftUIController : MonoBehaviour
                 continue;
             }
 
+            // WeaponCraftRecipe → WeaponData
+            WeaponData weapon = recipe.resultWeapon;
+
+            if (weapon == null)
+            {
+                Debug.LogError("Tarifte resultWeapon eksik!");
+                continue;
+            }
+
+            // Slot UI setup
             slotUI.Setup(
                 recipe,
-                recipe.weaponItem.icon,
-                recipe.weaponItem.itemName
+                weapon.icon,     // WeaponData'daki icon
+                weapon.itemName  // WeaponData'daki isim
             );
         }
     }
 
-    public void SelectRecipe(WeaponRecipe recipe)
+    // ---------------------------------------------------------
+    //  Slot tıklayınca tarif seçilir
+    // ---------------------------------------------------------
+    public void SelectRecipe(WeaponCraftRecipe recipe)
     {
         selectedRecipe = recipe;
-        Debug.Log("Seçilen tarif: " + recipe.weaponItem.itemName);
+        Debug.Log($"📌 Seçilen tarif: {recipe.resultWeapon.itemName}");
     }
 
-    public void TryCraft(WeaponRecipe recipe)
+    // ---------------------------------------------------------
+    //  Craft Butonu
+    // ---------------------------------------------------------
+    public void OnCraftButtonPressed()
     {
-        if (CraftingSystem.Instance.TryCraft(recipe))
-            Debug.Log("Craft başarılı!");
+        if (selectedRecipe == null)
+        {
+            Debug.Log("❗ Craft yapmak için tarif seçilmedi.");
+            return;
+        }
+
+        bool success = CraftingSystem.Instance.TryCraft(selectedRecipe);
+
+        if (success)
+            Debug.Log($"✅ Craft başarılı → {selectedRecipe.resultWeapon.itemName}");
         else
-            Debug.Log("Craft başarısız!");
+            Debug.Log($"❌ Craft başarısız → {selectedRecipe.resultWeapon.itemName}");
     }
 
+    // ---------------------------------------------------------
+    //  Craft UI Aç / Kapat
+    // ---------------------------------------------------------
     public void Open()
     {
+        PopulateRecipes(); 
         craftPanel.SetActive(true);
         Time.timeScale = 0f;
     }

@@ -4,7 +4,9 @@ using UnityEngine.InputSystem;
 public class CraftInput : MonoBehaviour
 {
     public CraftUIController craftUI;
-    public GameObject inventoryPanel; // Craft açıldığında envanter kapatılacak
+    public GameObject inventoryPanel;
+
+    public CaravanInteraction caravan;   // Karavan referansı → oyuncu yakında mı?
 
     private PlayerControls controls;
 
@@ -29,13 +31,22 @@ public class CraftInput : MonoBehaviour
     {
         if (craftUI == null) return;
 
-        if (craftUI.craftPanel.activeSelf)
+        // 🟡 Karavana yakın değilse craft açılmasın
+        if (caravan != null && !caravan.playerInRange)
+        {
+            Debug.Log("Craft açılamadı → Karavana yakın değilsin.");
+            return;
+        }
+
+        bool isOpen = craftUI.craftPanel.activeSelf;
+
+        // Craft açılacaksa inventory kapat
+        if (!isOpen && inventoryPanel != null && inventoryPanel.activeSelf)
+            inventoryPanel.SetActive(false);
+
+        if (isOpen)
             craftUI.Close();
         else
             craftUI.Open();
-
-        // Craft açılınca envanter kapanır
-        if (inventoryPanel != null && craftUI.craftPanel.activeSelf)
-            inventoryPanel.SetActive(false);
     }
 }

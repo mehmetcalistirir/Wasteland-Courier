@@ -4,28 +4,29 @@ using TMPro;
 
 public class CraftSlotUI : MonoBehaviour
 {
-    public Image icon;
-    public TMP_Text title;
+    [Header("UI")]
+    public Image iconImage;
+    public TMP_Text titleText;
     public Button button;
 
-    private WeaponRecipe recipe;
+    [Header("Data")]
+    public WeaponCraftRecipe recipe;
 
-    public void Setup(WeaponRecipe recipe, Sprite iconSprite, string titleText)
+    // ---------------------------------------------------------
+    //  Slotu tarif verisiyle hazırla
+    // ---------------------------------------------------------
+    public void Setup(WeaponCraftRecipe recipe, Sprite icon, string title)
     {
         this.recipe = recipe;
-        icon.sprite = iconSprite;
-        title.text = titleText;
 
+        iconImage.sprite = icon;
+        titleText.text = title;
+
+        // Tıklama event’lerini temizle → ekle
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(OnClick);
-    }
-
-    private void OnClick()
-    {
-        // Tarif seç
-        CraftUIController.Instance.SelectRecipe(recipe);
-
-        // Direkt craft et
-        CraftUIController.Instance.TryCraft(recipe);
+        button.onClick.AddListener(() =>
+        {
+            CraftUIController.Instance.SelectRecipe(recipe);
+        });
     }
 }

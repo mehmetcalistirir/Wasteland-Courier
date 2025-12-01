@@ -88,11 +88,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6370573785070047475}
   - component: {fileID: 8905566402852767534}
+  - component: {fileID: 3242861520853767594}
   - component: {fileID: 749821391349403318}
   - component: {fileID: 6348652568386422223}
-  - component: {fileID: 3242861520853767594}
-  - component: {fileID: 2670471128595485471}
-  - component: {fileID: 9096949258552563813}
   m_Layer: 0
   m_Name: Caravan
   m_TagString: Caravan
@@ -175,32 +173,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &749821391349403318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5899447824848960637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f6a13d1ac8a8144084750519a511bf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 5
-  healthSlider: {fileID: 0}
---- !u!114 &6348652568386422223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5899447824848960637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c78a25ab13e80745842327e606f0df2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!58 &3242861520853767594
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -237,7 +209,7 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: -0.2681192}
   m_Radius: 5.6272907
---- !u!114 &2670471128595485471
+--- !u!114 &749821391349403318
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -246,11 +218,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5899447824848960637}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6fa0cf5257d44048a10e7bb2d9c9257, type: 3}
+  m_Script: {fileID: 11500000, guid: 9f6a13d1ac8a8144084750519a511bf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionPrompt: {fileID: 0}
---- !u!114 &9096949258552563813
+  maxHealth: 5
+  healthSlider: {fileID: 0}
+--- !u!114 &6348652568386422223
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -259,12 +232,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 5899447824848960637}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02c4ade74dd97684eab1d6e99a84f6c4, type: 3}
+  m_Script: {fileID: 11500000, guid: 6c78a25ab13e80745842327e606f0df2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingWeapons:
-  - {fileID: 11400000, guid: 74299bc927f3a7b42a474d2ba45599bb, type: 2}
-  startingStoredWeapons: []
+  interactDistance: 2
+  playerInRange: 0
 --- !u!1 &8465899657240817895
 GameObject:
   m_ObjectHideFlags: 0

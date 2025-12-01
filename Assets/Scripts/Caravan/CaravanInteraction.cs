@@ -1,34 +1,27 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class CaravanInteraction : MonoBehaviour
 {
-    private bool isPlayerNearby = false;
+    [Header("Ayarlar")]
+    public float interactDistance = 2f;
 
-    void Update()
+    [Header("Durum")]
+    public bool playerInRange = false;   // CraftInput burayı kontrol edecek
+
+    private Transform player;
+
+    private void Start()
     {
-        if (isPlayerNearby && Keyboard.current.eKey.wasPressedThisFrame)
-        {
-            if (GameManager.Instance.HasAllFuel())
-            {
-                GameManager.Instance.LoadNextScene();
-            }
-            else
-            {
-                Debug.Log("⛔ Tüm yakıtlar toplanmadan karavana binemezsin!");
-            }
-        }
+        player = GameObject.FindWithTag("Player")?.transform;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    private void Update()
     {
-        if (other.CompareTag("Player"))
-            isPlayerNearby = true;
-    }
+        if (player == null) return;
 
-    void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-            isPlayerNearby = false;
+        float dist = Vector2.Distance(player.position, transform.position);
+
+        // Oyuncu karavana yakın mı?
+        playerInRange = dist <= interactDistance;
     }
 }

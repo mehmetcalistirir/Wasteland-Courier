@@ -137,10 +137,6 @@ public class WeaponSlotManager : MonoBehaviour
         return;
     }
 
-    // 🔥 Kritik Fix: Ateş durmalı
-    handler.ResetShootHold();
-
-
     // Handler’ı aktif et
     handler.gameObject.SetActive(true);
 
@@ -156,8 +152,6 @@ public class WeaponSlotManager : MonoBehaviour
         Debug.LogWarning("Slot boş ama handler aktif edildi: " + slot);
     }
 }
-
-
 
 
 

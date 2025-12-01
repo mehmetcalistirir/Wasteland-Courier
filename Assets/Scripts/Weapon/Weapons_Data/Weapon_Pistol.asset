@@ -22,7 +22,7 @@ MonoBehaviour:
   weaponType: 0
   knockbackForce: 6
   knockbackDuration: 0.18
-  isAutomatic: 0
+  isAutomatic: 1
   fireRate: 5
   damage: 8
   clipSize: 15

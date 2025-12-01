@@ -20,23 +20,22 @@ public class WeaponDataEditor : Editor
 
     SerializedProperty attackRange;
 
-    SerializedProperty isShotgun;
     SerializedProperty pelletsPerShot;
     SerializedProperty pelletSpreadAngle;
     SerializedProperty shotgunCooldown;
 
-    SerializedProperty isSniper;
     SerializedProperty sniperCooldown;
     SerializedProperty sniperPenetrationCount;
 
     SerializedProperty ammoType;
 
-    SerializedProperty isMolotov;
     SerializedProperty fireEffectPrefab;
     SerializedProperty explosionRadius;
     SerializedProperty burnDamage;
     SerializedProperty burnDuration;
     SerializedProperty tickInterval;
+
+    SerializedProperty isMolotov;
 
     void OnEnable()
     {
@@ -56,32 +55,32 @@ public class WeaponDataEditor : Editor
 
         attackRange = serializedObject.FindProperty("attackRange");
 
-        isShotgun = serializedObject.FindProperty("isShotgun");
         pelletsPerShot = serializedObject.FindProperty("pelletsPerShot");
         pelletSpreadAngle = serializedObject.FindProperty("pelletSpreadAngle");
         shotgunCooldown = serializedObject.FindProperty("shotgunCooldown");
 
-        isSniper = serializedObject.FindProperty("isSniper");
         sniperCooldown = serializedObject.FindProperty("sniperCooldown");
         sniperPenetrationCount = serializedObject.FindProperty("sniperPenetrationCount");
 
         ammoType = serializedObject.FindProperty("ammoType");
 
-        isMolotov = serializedObject.FindProperty("isMolotov");
         fireEffectPrefab = serializedObject.FindProperty("fireEffectPrefab");
         explosionRadius = serializedObject.FindProperty("explosionRadius");
         burnDamage = serializedObject.FindProperty("burnDamage");
         burnDuration = serializedObject.FindProperty("burnDuration");
         tickInterval = serializedObject.FindProperty("tickInterval");
+
+        isMolotov = serializedObject.FindProperty("isMolotov");
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        // Base fields
         EditorGUILayout.PropertyField(prefab);
         EditorGUILayout.PropertyField(weaponType);
+
+        WeaponType wt = (WeaponType)weaponType.enumValueIndex;
 
         EditorGUILayout.Space(5);
         EditorGUILayout.LabelField("Stats", EditorStyles.boldLabel);
@@ -96,14 +95,14 @@ public class WeaponDataEditor : Editor
         EditorGUILayout.PropertyField(reloadTime);
         EditorGUILayout.PropertyField(attackRange);
 
-        // Automatic (Pistol / MG)
-        if (!isShotgun.boolValue && !isSniper.boolValue && !isMolotov.boolValue)
+        // ---- Normal / Pistol / Rifle / MG vb. (Shotgun, Sniper, Molotov HARİÇ hepsi) ----
+        if (wt != WeaponType.Shotgun && wt != WeaponType.Sniper && wt != WeaponType.Molotov)
         {
             EditorGUILayout.PropertyField(isAutomatic);
         }
 
-        // Shotgun
-        if (isShotgun.boolValue)
+        // ---- Shotgun ----
+        if (wt == WeaponType.Shotgun)
         {
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("Shotgun Settings", EditorStyles.boldLabel);
@@ -112,8 +111,8 @@ public class WeaponDataEditor : Editor
             EditorGUILayout.PropertyField(shotgunCooldown);
         }
 
-        // Sniper
-        if (isSniper.boolValue)
+        // ---- Sniper ----
+        if (wt == WeaponType.Sniper)
         {
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("Sniper Settings", EditorStyles.boldLabel);
@@ -121,9 +120,12 @@ public class WeaponDataEditor : Editor
             EditorGUILayout.PropertyField(sniperPenetrationCount);
         }
 
-        // Molotov
-        if (isMolotov.boolValue)
+        // ---- Molotov ----
+        if (wt == WeaponType.Molotov)
         {
+            // İstersen runtime için bool’u da senkron tut:
+            isMolotov.boolValue = true;
+
             EditorGUILayout.Space(5);
             EditorGUILayout.LabelField("Molotov Settings", EditorStyles.boldLabel);
 
@@ -133,9 +135,13 @@ public class WeaponDataEditor : Editor
             EditorGUILayout.PropertyField(burnDuration);
             EditorGUILayout.PropertyField(tickInterval);
         }
+        else
+        {
+            // Diğer tüm silahlarda false
+            isMolotov.boolValue = false;
+        }
 
-        // Ammo selection (all guns)
-        EditorGUILayout.Space();
+        EditorGUILayout.Space(10);
         EditorGUILayout.PropertyField(ammoType);
 
         serializedObject.ApplyModifiedProperties();

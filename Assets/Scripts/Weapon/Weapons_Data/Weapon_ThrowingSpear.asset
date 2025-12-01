@@ -12,8 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e9591c0c3c19a4d873b1c6fe87e5b8, type: 3}
   m_Name: Weapon_ThrowingSpear
   m_EditorClassIdentifier: 
-  weaponName: Throwing Spear
-  weaponIcon: {fileID: -4880558716026876163, guid: 1b3269afd422e7b4883f160d9f98d14b, type: 3}
+  itemName: 
+  itemID: 
+  icon: {fileID: 0}
+  category: 0
+  stackable: 1
+  maxStack: 99
   prefab: {fileID: 8329565982022195850, guid: 1ab2b8b913564da4f8d0c712f7a171ed, type: 3}
   weaponType: 5
   knockbackForce: 6

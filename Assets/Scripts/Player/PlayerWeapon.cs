@@ -8,11 +8,9 @@ public class PlayerWeapon : MonoBehaviour
 {
     private GameObject currentModel;
 
-    private bool isShootingHeld = false;
     private bool isAiming = false;
     private bool isReloading = false;
 
-    private PlayerControls controls;
     private WeaponSlotManager slotManager;
 
     [Header("Weapon Configuration")]
@@ -41,11 +39,9 @@ public class PlayerWeapon : MonoBehaviour
     private int reserve = 0;
     private int clipSize = 0;
 
-    private float nextTimeToFire = 0f;
+    private float lastAutoFireTime = 0f;
+    private PlayerControls controls;
 
-    // ---------------------------------------------------------
-    // UNITY
-    // ---------------------------------------------------------
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -66,97 +62,77 @@ public class PlayerWeapon : MonoBehaviour
             Debug.LogError("[PlayerWeapon] Slot Manager null!");
     }
 
-    private void OnEnable()
-    {
-        controls.Gameplay.Enable();
-
-        controls.Gameplay.Shoot.performed += OnShootPerformed;
-        controls.Gameplay.Shoot.canceled += OnShootCanceled;
-
-        controls.Gameplay.Reload.performed += OnReload;
-
-        controls.Gameplay.Weapon1.performed += ctx => slotManager?.SwitchSlot(0);
-        controls.Gameplay.Weapon2.performed += ctx => slotManager?.SwitchSlot(1);
-        controls.Gameplay.Weapon3.performed += ctx => slotManager?.SwitchSlot(2);
-
-        controls.Gameplay.Melee.performed += OnMelee;
-
-        controls.Gameplay.ADS.performed += ctx => StartADS();
-        controls.Gameplay.ADS.canceled += ctx => StopADS();
-
-        isReloading = false;
-    }
-
-    private void OnDisable()
-    {
-        controls.Gameplay.Shoot.performed -= OnShootPerformed;
-        controls.Gameplay.Shoot.canceled -= OnShootCanceled;
-
-        controls.Gameplay.Reload.performed -= OnReload;
-        controls.Gameplay.Melee.performed -= OnMelee;
-
-        controls.Gameplay.Disable();
-    }
-
     private void Update()
     {
-        Debug.Log($"held={isShootingHeld} auto={weaponData?.isAutomatic}");
-        if (weaponData == null) return;
-
-        // Otomatik ateş
-        if (weaponData.isAutomatic && isShootingHeld)
-            Shoot();
-    }
-
-    // ---------------------------------------------------------
-    // INPUT EVENTS
-    // ---------------------------------------------------------
-    private void OnShootPerformed(InputAction.CallbackContext ctx)
-    {
-        if (weaponData == null) return;
-        isShootingHeld = true;
-
-        if (!weaponData.isAutomatic)
-            Shoot();
-    }
-
-    private void OnShootCanceled(InputAction.CallbackContext ctx)
-    {
-        if (weaponData == null) return;
-        isShootingHeld = false;
-    }
-
-    private void OnReload(InputAction.CallbackContext ctx)
-    {
-        if (isReloading || weaponData == null) return;
-        if (reserve <= 0 || clip >= clipSize) return;
-
-        StartCoroutine(Reload());
-    }
-
-    private void OnMelee(InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
-        MeleeAttack();
-    }
-
-    // ---------------------------------------------------------
-    // SHOOTING
-    // ---------------------------------------------------------
-    public void Shoot()
-    {
-        if (PauseMenu.IsPaused || isReloading || Time.time < nextTimeToFire)
+        if (weaponData == null || PauseMenu.IsPaused || isReloading)
             return;
 
-        if (weaponData == null)
+        // ---- Shoot Input (Klasik fare tıklaması) ----
+        bool mouseHeld = Mouse.current.leftButton.isPressed;
+        bool mousePressedOnce = Mouse.current.leftButton.wasPressedThisFrame;
+
+        if (weaponData.isAutomatic)
         {
-            Debug.LogWarning("WeaponData NULL!");
-            return;
+            if (mouseHeld)
+                AutoFire();
+        }
+        else
+        {
+            if (mousePressedOnce)
+                Shoot();
         }
 
-        if (weaponData.clipSize <= 0)
+        // ---- ADS Input ----
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+            StartADS();
+
+        if (Mouse.current.rightButton.wasReleasedThisFrame)
+            StopADS();
+    }
+
+    private void OnEnable()
+{
+    controls.Gameplay.Enable();
+    controls.Gameplay.Reload.performed += OnReloadPressed;
+}
+
+private void OnDisable()
+{
+    controls.Gameplay.Reload.performed -= OnReloadPressed;
+    controls.Gameplay.Disable();
+}
+
+private void OnReloadPressed(InputAction.CallbackContext ctx)
+{
+    if (!isReloading && reserve > 0 && clip < clipSize)
+        StartCoroutine(Reload());
+}
+
+    // ===============================
+    // AUTO FIRE
+    // ===============================
+    private void AutoFire()
+    {
+        float fireDelay = 1f / weaponData.fireRate;
+
+        if (Time.time - lastAutoFireTime >= fireDelay)
         {
-            MeleeAttack();
+            lastAutoFireTime = Time.time;
+            Shoot();
+        }
+    }
+
+    // ===============================
+    // SHOOTING
+    // ===============================
+    public void Shoot()
+    {
+        if (isReloading || PauseMenu.IsPaused)
+            return;
+
+        if (clip <= 0)
+        {
+            PlayEmptyClipSound();
             return;
         }
 
@@ -165,37 +141,20 @@ public class PlayerWeapon : MonoBehaviour
 
     private void RangedAttack()
     {
-        if (clip <= 0)
-        {
-            PlayEmptyClipSound();
-            return;
-        }
-
-        float cooldown =
-            weaponData.isShotgun ? weaponData.shotgunCooldown :
-            weaponData.isSniper ? weaponData.sniperCooldown :
-            (1f / weaponData.fireRate);
-
-        nextTimeToFire = Time.time + cooldown;
-
         clip--;
         SyncAmmoToSlot();
 
         if (shootSound != null)
             audioSource.PlayOneShot(shootSound);
 
-        if (animator != null)
-            animator.SetTrigger("Shoot");
+        animator?.SetTrigger("Shoot");
 
-        if (bulletPrefab != null && firePoint != null)
-        {
-            if (weaponData.isShotgun)
-                FireShotgunPellets();
-            else
-                FireSingleBullet();
+        if (weaponData.isShotgun)
+            FireShotgunPellets();
+        else
+            FireSingleBullet();
 
-            TryMuzzleFlash();
-        }
+        TryMuzzleFlash();
     }
 
     private void FireSingleBullet()
@@ -236,9 +195,9 @@ public class PlayerWeapon : MonoBehaviour
         }
     }
 
-    // ---------------------------------------------------------
+    // ===============================
     // ADS
-    // ---------------------------------------------------------
+    // ===============================
     private void StartADS()
     {
         isAiming = true;
@@ -251,20 +210,22 @@ public class PlayerWeapon : MonoBehaviour
         animator?.SetBool("ADS", false);
     }
 
-    // ---------------------------------------------------------
+    // ===============================
     // MELEE
-    // ---------------------------------------------------------
-    private void MeleeAttack()
+    // ===============================
+    public void MeleeAttack()
     {
-        nextTimeToFire = Time.time + (1f / weaponData.fireRate);
         Physics2D.OverlapCircleAll(firePoint.position, weaponData.attackRange, enemyLayer);
     }
 
-    // ---------------------------------------------------------
+    // ===============================
     // RELOAD
-    // ---------------------------------------------------------
-    private IEnumerator Reload()
+    // ===============================
+    public IEnumerator Reload()
     {
+        if (isReloading || reserve <= 0 || clip >= clipSize)
+            yield break;
+
         isReloading = true;
 
         if (reloadSound != null)
@@ -279,13 +240,12 @@ public class PlayerWeapon : MonoBehaviour
         reserve -= loadAmount;
 
         SyncAmmoToSlot();
-
         isReloading = false;
     }
 
-    // ---------------------------------------------------------
-    // SLOT / MODEL SYNC
-    // ---------------------------------------------------------
+    // ===============================
+    // AMMO / SLOT SYNC
+    // ===============================
     private void SyncAmmoToSlot()
     {
         slotManager?.SetAmmo(slotManager.activeSlotIndex, clip, reserve);
@@ -309,12 +269,11 @@ public class PlayerWeapon : MonoBehaviour
 
     public void SetWeapon(WeaponData data, int clipAmount, int reserveAmount)
     {
-        isShootingHeld = false;
         weaponData = data;
+
         clipSize = data.clipSize;
         clip = clipAmount;
         reserve = reserveAmount;
-        isShootingHeld = false;
 
         if (currentModel != null)
             Destroy(currentModel);
@@ -329,24 +288,14 @@ public class PlayerWeapon : MonoBehaviour
             if (fp != null)
                 firePoint = fp;
         }
-        else
-        {
-            Debug.LogError("Weapon prefab is NULL!");
-        }
     }
-    public void ResetShootHold()
-{
-    isShootingHeld = false;
-}
 
-
-    // ---------------------------------------------------------
+    // ===============================
     // MUZZLE FLASH
-    // ---------------------------------------------------------
+    // ===============================
     private void TryMuzzleFlash()
     {
-        if (muzzleFlash == null || firePoint == null)
-            return;
+        if (muzzleFlash == null) return;
 
         muzzleFlash.transform.position = firePoint.position;
 

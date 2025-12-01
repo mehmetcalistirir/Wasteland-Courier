@@ -194,7 +194,8 @@ public class NPCInteraction : MonoBehaviour
 
         // HER SEFERİNDE: sadece veri / interaktiflik güncelle
         for (int i = 0; i < spawned.Count && i < tradeOffers.Count; i++)
-            spawned[i].Setup(tradeOffers[i], playerStats);
+            spawned[i].Setup(tradeOffers[i]);
+
 
         // UI sabitle
         Canvas.ForceUpdateCanvases();

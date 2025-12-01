@@ -12,8 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e9591c0c3c19a4d873b1c6fe87e5b8, type: 3}
   m_Name: Weapon_MeeleSword
   m_EditorClassIdentifier: 
-  weaponName: Meele Sword
-  weaponIcon: {fileID: 1284973499873244234, guid: 171cdb54c30d9b8488cfe2c488492715, type: 3}
+  itemName: 
+  itemID: 
+  icon: {fileID: 0}
+  category: 0
+  stackable: 1
+  maxStack: 99
   prefab: {fileID: 944365562594708401, guid: c1cc0170a9db38a43bdb6a9e16d7679d, type: 3}
   weaponType: 7
   knockbackForce: 6

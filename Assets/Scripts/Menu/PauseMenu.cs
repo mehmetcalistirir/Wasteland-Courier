@@ -4,52 +4,51 @@ using UnityEngine.InputSystem;
 
 public class PauseMenu : MonoBehaviour
 {
+    public static PauseMenu Instance { get; private set; }
+
     public GameObject pausePanel;
     public GameObject settingsPanel;
+
     public static bool IsPaused { get; private set; }
 
-    private PlayerInput playerInput;
-    private bool isInSettings = false;
-
-    public static PauseMenu Instance { get; private set; }
+    private PlayerControls controls;
 
     private void Awake()
     {
         Instance = this;
+
+        controls = new PlayerControls();
+        controls.Gameplay.Escape.performed += ctx => OnEscapePressed();
     }
 
-    void Start()
+    private void OnEnable()
     {
-        playerInput = GetComponent<PlayerInput>();
+        controls.Gameplay.Enable();
     }
 
-    void Update()
-{
-    if (Keyboard.current.escapeKey.wasPressedThisFrame)
+    private void OnDisable()
     {
-        // Trade panel açıksa → kapat
-        if (NPCInteraction.IsTradeOpen)
-        {
-            NPCInteraction.Instance.CloseTradePanel();
-            Time.timeScale = 1f;
-            return;
-        }
+        controls.Gameplay.Disable();
+    }
 
-        // Ayarlardayken ESC → pause menüsüne dön
-        if (isInSettings)
+    private void OnEscapePressed()
+    {
+        Debug.Log("ESC INPUT");
+
+        // 🌟 1) SETTINGS PANEL AÇIKSA → SADECE ONU KAPAT
+        if (settingsPanel.activeSelf)
         {
+            Debug.Log("SettingsPanel kapanıyor...");
             CloseSettings();
-            return;
+            return;    // PauseMenu'ya ASLA dokunma
         }
 
-        // Pause toggle
+        // 🌟 2) SETTINGS PANEL KAPALIYSA → NORMAL PAUSE MENÜ TOGGLE
         if (IsPaused)
             ResumeGame();
         else
             PauseGame();
     }
-}
-
 
     public void PauseGame()
     {
@@ -64,29 +63,21 @@ public class PauseMenu : MonoBehaviour
         IsPaused = false;
         pausePanel.SetActive(false);
         settingsPanel.SetActive(false);
-        isInSettings = false;
         Time.timeScale = 1f;
     }
 
     public void OpenSettings()
     {
+        // Settings açıldığında PauseMenu gizlenir ama oyun duraklamaya devam eder
+        IsPaused = true;
         pausePanel.SetActive(false);
         settingsPanel.SetActive(true);
-        isInSettings = true;
-        Debug.Log("⚙️ Ayarlar paneli açıldı.");
     }
 
     public void CloseSettings()
     {
+        // Sadece SettingsPanel kapanır, PauseMenu'ya dönülmez
         settingsPanel.SetActive(false);
-        pausePanel.SetActive(true);
-        isInSettings = false;
-        Debug.Log("⬅️ Ayarlardan çıkıldı, Pause menüsüne dönüldü.");
-    }
-
-    public void GoToMainMenu()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        // pausePanel.SetActive(true);  ❌ BUNU ÖZELLİKLE KOYMUYORUZ
     }
 }

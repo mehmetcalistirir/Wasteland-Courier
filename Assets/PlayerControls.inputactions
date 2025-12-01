@@ -104,27 +104,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-<<<<<<< HEAD
-                },
-                {
-                    "name": "Shoot",
-                    "type": "Button",
-                    "id": "5076013d-702c-4254-b927-6983d9995f1d",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 },
                 {
                     "name": "Escape",
                     "type": "Button",
-                    "id": "695cd435-c7d8-4f62-aefa-9193dfd0bd5f",
+                    "id": "a6222bc1-fc83-4910-bbf0-61aa05be2863",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-=======
->>>>>>> da5267243d205fbc8a192f813337323292b27f82
                 }
             ],
             "bindings": [
@@ -292,7 +280,6 @@
                     "action": "ADS",
                     "isComposite": false,
                     "isPartOfComposite": false
-<<<<<<< HEAD
                 },
                 {
                     "name": "",
@@ -307,7 +294,7 @@
                 },
                 {
                     "name": "",
-                    "id": "b1de2c9c-b03f-476b-8754-21d1c7811629",
+                    "id": "a5d41ede-fbb9-496a-98f1-724efe8672eb",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
@@ -315,8 +302,6 @@
                     "action": "Escape",
                     "isComposite": false,
                     "isPartOfComposite": false
-=======
->>>>>>> da5267243d205fbc8a192f813337323292b27f82
                 }
             ]
         }

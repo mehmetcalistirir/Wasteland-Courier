@@ -16,6 +16,7 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
 
     private void Awake()
     {
+        Debug.Log("EscapeHandler Awake ÇALIŞTI");
         controls = new PlayerControls();
         controls.Gameplay.SetCallbacks(this);   // 🚀 En önemli satır
     }

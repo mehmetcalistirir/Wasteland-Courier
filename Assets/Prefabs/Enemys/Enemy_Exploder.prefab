@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7092030044526869399}
   - component: {fileID: 8447757053825607418}
   - component: {fileID: 8227206359375966284}
+  - component: {fileID: -6574281528775494263}
   m_Layer: 6
   m_Name: Enemy_Exploder
   m_TagString: Enemy
@@ -341,6 +342,18 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &-6574281528775494263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5687110353871480299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b0d866d9bb6af34294470539163d42b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHitbox
 --- !u!1 &8273024124155826637
 GameObject:
   m_ObjectHideFlags: 0

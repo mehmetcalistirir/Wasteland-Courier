@@ -175,6 +175,7 @@ MonoBehaviour:
   damageRangeToPlayer: 5
   damageRangeToCaravan: 5
   target: {fileID: 6370573785070047475, guid: 07166245952cd734daa010f4526e861c, type: 3}
+  isAttacking: 0
 --- !u!95 &-8429525953165891100
 Animator:
   serializedVersion: 7
@@ -347,7 +348,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5687110353871480299}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b0d866d9bb6af34294470539163d42b, type: 3}
   m_Name: 

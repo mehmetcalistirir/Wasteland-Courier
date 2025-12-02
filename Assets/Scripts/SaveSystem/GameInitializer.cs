@@ -26,43 +26,53 @@ public class GameInitializer : MonoBehaviour
     }
 
     private void Start()
+{
+    Debug.Log("GameInitializer: ShouldLoad = " + SaveBootstrap.ShouldLoadFromSave);
+    Debug.Log("GameInitializer: HasSave = " + SaveSystem.HasSave());
+
+    // 1) Save yükleme...
+    if (SaveBootstrap.ShouldLoadFromSave && SaveSystem.HasSave())
     {
-        Debug.Log("GameInitializer: ShouldLoad = " + SaveBootstrap.ShouldLoadFromSave);
-        Debug.Log("GameInitializer: HasSave = " + SaveSystem.HasSave());
-
-        // 1) Eğer kayıt yükleniyorsa → direkt save yükle
-        if (SaveBootstrap.ShouldLoadFromSave && SaveSystem.HasSave())
-        {
-            SaveSystem.LoadPlayerAndInventory(player, inventory, stats);
-            SaveBootstrap.ShouldLoadFromSave = false;
-            return; // Kaydı yükledik → artık bitirebiliriz
-        }
-
-        // 2) Yeni oyun → Default spawn
-        Vector3 spawnPos = player.position;
-
-        if (defaultSpawnPoint != null)
-            spawnPos = defaultSpawnPoint.position;
-        else if (fallbackSpawnPosition != Vector3.zero)
-            spawnPos = fallbackSpawnPosition;
-
-        player.position = spawnPos;
-        Debug.Log("Yeni oyun → Player default pozisyona yerleştirildi: " + spawnPos);
-
-        // 3) Yeni oyuna başlangıç silahını ver
-        ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
-        if (pistolItem != null)
-        {
-            WeaponSlotManager.Instance.EquipWeapon(pistolItem);
-            WeaponSlotManager.Instance.activeSlotIndex = 0;
-
-            // PlayerWeapon'ın SetWeapon çağrıldığını logla
-            Debug.Log("▶ Yeni oyun → Başlangıç silahı verildi: weapon_pistol");
-        }
-        else
-        {
-            Debug.LogError("❌ ItemDatabase GET weapon_pistol başarısız! ItemID doğru mu?");
-        }
+        SaveSystem.LoadPlayerAndInventory(player, inventory, stats);
+        SaveBootstrap.ShouldLoadFromSave = false;
+        return;
     }
+
+    // 2) Yeni oyun → default spawn
+    Vector3 spawnPos = player.position;
+
+    if (defaultSpawnPoint != null)
+        spawnPos = defaultSpawnPoint.position;
+    else if (fallbackSpawnPosition != Vector3.zero)
+        spawnPos = fallbackSpawnPosition;
+
+    player.position = spawnPos;
+
+
+    // 3) BAŞLANGIÇ PİSTOL
+    ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
+    if (pistolItem != null)
+    {
+        WeaponSlotManager.Instance.EquipWeapon(pistolItem);
+        Debug.Log("▶ Yeni oyun → Başlangıç silahı verildi: Pistol");
+    }
+
+
+    // 4) BAŞLANGIÇ SHOTGUN  ⭐⭐⭐ YENİ EKLENEN KOD ⭐⭐⭐
+    ItemData shotgunItem = ItemDatabase.Get("weapon_shotgun");
+    if (shotgunItem != null)
+    {
+        WeaponSlotManager.Instance.EquipWeapon(shotgunItem);
+        Debug.Log("▶ Yeni oyun → Başlangıç silahı verildi: Shotgun");
+    }
+    else
+    {
+        Debug.LogError("❌ ItemDatabase GET weapon_shotgun bulunamadı!");
+    }
+
+    // Aktif slot pistol olsun
+    WeaponSlotManager.Instance.activeSlotIndex = 1;
+}
+
 
 }

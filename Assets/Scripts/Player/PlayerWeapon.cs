@@ -92,14 +92,25 @@ public class PlayerWeapon : MonoBehaviour
 
     private void OnEnable()
 {
-    controls.Gameplay.Enable();
+     controls.Gameplay.Enable();
+
+    controls.Gameplay.Weapon1.performed += ctx => SwitchToSlot(0);
+    controls.Gameplay.Weapon2.performed += ctx => SwitchToSlot(1);
+    controls.Gameplay.Weapon3.performed += ctx => SwitchToSlot(2);
     controls.Gameplay.Reload.performed += OnReloadPressed;
 }
 
 private void OnDisable()
 {
+    controls.Gameplay.Weapon1.performed -= ctx => SwitchToSlot(0);
+    controls.Gameplay.Weapon2.performed -= ctx => SwitchToSlot(1);
+    controls.Gameplay.Weapon3.performed -= ctx => SwitchToSlot(2);
     controls.Gameplay.Reload.performed -= OnReloadPressed;
     controls.Gameplay.Disable();
+}
+private void SwitchToSlot(int slot)
+{
+    WeaponSlotManager.Instance.SwitchSlot(slot);
 }
 
 private void OnReloadPressed(InputAction.CallbackContext ctx)

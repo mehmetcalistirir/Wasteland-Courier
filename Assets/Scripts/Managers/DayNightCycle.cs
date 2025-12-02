@@ -57,21 +57,31 @@ public bool IsDay => isDay;
 
     // ✅ YENİ: Baştan kurulum
     public void ResetCycle()
+{
+    Debug.Log("🔥 ResetCycle ÇAĞRILDI! GÜNDÜZ BAŞLATILIYOR!");
+
+    // 🔥 Tüm gece/gündüz müziklerini sıfırla
+    if (MusicManager.Instance != null)
     {
-        isDay = true;
-        timer = dayDuration;
-
-        // Gündüz başlangıç durumunu tüm sistemlere uygula
-        lightController?.SetDay(true);
-        spawner?.RegenerateResources(0f);      // İstersen 0f; açılışta respawn yapma
-        enemyManager?.ResetDayCount();         // Gece sayacını sıfırla
-
-        SetAnimalsNightState(false);
-
-        // MusicManager sahneler arası yaşıyorsa (DontDestroyOnLoad), ilk state’i bildir
-        if (MusicManager.Instance != null)
-            MusicManager.Instance.SetDay(true);
+        MusicManager.Instance.StopAll();  // ← Ekliyoruz
     }
+
+    // 🕒 Oyunun her yeni yüklenişi GÜNDÜZ başlayacaksa:
+    isDay = true;
+    timer = dayDuration;
+
+    // Eğer ileride gece başlamasını istersen bunu false yaparsın.
+    
+    // 🔆 Gündüz setup
+    lightController?.SetDay(true);
+    enemyManager?.ResetDayCount();
+    spawner?.RegenerateResources(0f);
+    SetAnimalsNightState(false);
+
+    // 🎵 Temiz gündüz müziği *tek başına* çalsın
+    MusicManager.Instance?.SetDay(true);
+}
+
 
     void HandleDayStart()
     {

@@ -26,6 +26,10 @@ public class MusicManager : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("🎵 MusicManager Awake ÇALIŞTI! Playlist Day=" 
+          + dayMusicPlaylist.Count 
+          + " Night=" + nightMusicPlaylist.Count);
+
         // Singleton Pattern
         if (Instance == null)
         {
@@ -53,19 +57,39 @@ public class MusicManager : MonoBehaviour
             PlayNextTrack();
         }
     }
+public void StopAll()
+{
+    if (audioSource != null)
+    {
+        audioSource.Stop();
+        audioSource.clip = null;      // Clip temizlensin
+        audioSource.time = 0f;        // Parça zamanı reset
+        // audioSource.enabled = false;  // ❌ KALDIRILDI!
+    }
+
+    currentTrackIndex = -1;
+}
+
+
 
 
     // DayNightCycle bu fonksiyonu çağırarak durumu bildirir.
     public void SetDay(bool isCurrentlyDay)
+{
+    // Durumu her zaman güncelle
+    this.isDay = isCurrentlyDay;
+
+    // Müzik çalmıyorsa direkt başlat
+    if (!audioSource.isPlaying || audioSource.clip == null)
     {
-        // Eğer durum zaten aynıysa, bir şey yapma.
-        if (this.isDay == isCurrentlyDay) return;
-
-        this.isDay = isCurrentlyDay;
-
-        // Yeni duruma göre yeni bir şarkı başlat.
-        StartCoroutine(CrossfadeToNextTrack());
+        PlayNextTrack();
+        return;
     }
+
+    // Eğer müzik çalıyorsa crossfade yap
+    StartCoroutine(CrossfadeToNextTrack());
+}
+
 
     private void PlayNextTrack()
     {

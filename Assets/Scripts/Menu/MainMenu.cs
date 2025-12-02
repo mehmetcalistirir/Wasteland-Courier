@@ -14,48 +14,53 @@ public class MainMenu : MonoBehaviour
     public GameObject creditsPanel;
     public GameObject levelPanel;
 
-    // Durumlar
     private bool isInSettings = false;
     private bool isInLevels = false;
     private bool isInCredits = false;
 
     private void Start()
     {
-        StartCoroutine(PlayMusicWithDelay(0.5f));
+        // 🔥 Oyun sahnesinden gelen MusicManager varsa yok et
+        if (MusicManager.Instance != null)
+            Destroy(MusicManager.Instance.gameObject);
 
-        // ✔️ Yeni SaveSystem’e göre "Devam Et" butonunu aktif/pasif yap
+        // 🔥 TimeScale sıfır kalmış olabilir. Menüde kesinlikle 1 olsun.
+        Time.timeScale = 1f;
+
+        StartCoroutine(PlayMusicWithDelay(0.25f));  
+
+        // Devam Et butonunu aktif/pasif yap
         var continueBtn = GameObject.Find("Continue Button")?.GetComponent<UnityEngine.UI.Button>();
         if (continueBtn != null)
             continueBtn.interactable = SaveSystem.HasSave();
     }
 
-    private void Update()
-    {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            if (isInSettings) { CloseSettings(); return; }
-            if (isInCredits) { CloseCredits(); return; }
-            if (isInLevels) { CloseLevels(); return; }
-        }
-    }
-
     private System.Collections.IEnumerator PlayMusicWithDelay(float delay)
     {
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSecondsRealtime(delay);
 
-        if (musicSource && menuMusic)
+        if (musicSource != null && menuMusic != null)
         {
             musicSource.clip = menuMusic;
             musicSource.loop = true;
+            musicSource.volume = 1f;
+
+            // Mixer çıkışını bypass et → test için en temiz yöntem
+            musicSource.outputAudioMixerGroup = null;
+
             musicSource.Play();
+            Debug.Log("🎵 Ana Menü müziği BAŞLADI!");
+        }
+        else
+        {
+            Debug.LogError("❌ musicSource veya menuMusic atanmadı!");
         }
     }
 
-    // -----------------------------
-    //        OYUN BAŞLATMA
-    // -----------------------------
+    // -----------------------------------
+    //           OYUN BAŞLATMA
+    // -----------------------------------
 
-    // ✔️ Yeni oyun = eski kaydı sil
     public void YeniOyunaBasla()
     {
         SaveSystem.DeleteSave();
@@ -63,21 +68,18 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("Bolum1");
     }
 
-    // ✔️ Kayda göre devam et
     public void DevamEt()
     {
         if (!SaveSystem.HasSave())
             return;
 
         SaveBootstrap.ShouldLoadFromSave = true;
-        SceneManager.LoadScene("Bolum1");  // hep aynı oyun sahnesine giriyoruz
+        SceneManager.LoadScene("Bolum1");
     }
 
-
-    // -----------------------------
-    //        PANEL SİSTEMİ
-    // -----------------------------
-
+    // -----------------------------------
+    //           PANEL KONTROLÜ
+    // -----------------------------------
     public void OpenSettings()
     {
         mainPanel.SetActive(false);
@@ -103,7 +105,7 @@ public class MainMenu : MonoBehaviour
     {
         levelPanel.SetActive(false);
         mainPanel.SetActive(true);
-        isInLevels = false;  // ❗ Daha önce burada yanlışlıkla isInCredits = false deniyordu
+        isInLevels = false;
     }
 
     public void OpenCredits()

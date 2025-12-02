@@ -11,13 +11,58 @@ public class GameManager : MonoBehaviour
 
     public GameObject gameOverPanel;
 
+    private void Start()
+{
+    var player = GameObject.FindWithTag("Player");
+    if (player != null)
+    {
+        var stats = player.GetComponent<PlayerStats>();
+        if (stats != null)
+        {
+            stats.onDeath += GameOver;   // 🔥 Ölünce GameOver tetikleniyor
+            Debug.Log("✔ Player death event GameManager'a bağlandı.");
+        }
+        else
+        {
+            Debug.LogError("❌ PlayerStats component bulunamadı!");
+        }
+    }
+    else
+    {
+        Debug.LogError("❌ 'Player' tag'ına sahip obje bulunamadı!");
+    }
+}
+
+private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+{
+    if (scene.name == "MainMenu")
+        return;
+
+    // Yeni Sahne → DayNightCycle var mı?
+    var cycle = FindObjectOfType<DayNightCycle>();
+    if (cycle != null)
+    {
+        Debug.Log("🔥 SceneLoaded → ResetCycle() çağrılıyor!");
+        cycle.ResetCycle();
+    }
+    else
+    {
+        Debug.LogError("❌ DayNightCycle SAHNEDE YOK!");
+    }
+}
+
+
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
+             SceneManager.sceneLoaded += OnSceneLoaded;
+
     }
+
+
 
     public void AddFuel(int amount)
     {
@@ -74,10 +119,37 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void ReturnToMainMenu()
-    {
+   public void ReturnToMainMenu()
+{
+    Debug.Log("🏁 Ana menüye dönülüyor...");
 
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu"); // Menü sahnenin ismi bu olmalı
+    // Oyun hızını sıfırla
+    Time.timeScale = 1f;
+
+    // GameState reset
+    GameStateManager.IsGameOver = false;
+    GameStateManager.ResetGameState();
+
+    // 🔥 SAHNEDEKİ TÜM SESLERİ DURDUR (Bolum1 dahil)
+    StopAllSceneAudio();
+
+    // Ana Menü sahnesine geç
+    SceneManager.LoadScene("MainMenu");
+}
+
+private void StopAllSceneAudio()
+{
+    AudioSource[] allAudioSources = FindObjectsOfType<AudioSource>();
+
+    foreach (AudioSource audio in allAudioSources)
+    {
+        audio.Stop();
+        audio.enabled = false;   // 🔥 Müzik tekrar başlamasın
     }
+
+    Debug.Log("🔇 Bolum1 içindeki TÜM sesler durduruldu!");
+}
+
+
+
 }

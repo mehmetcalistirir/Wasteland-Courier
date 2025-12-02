@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.UI;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -23,10 +24,18 @@ public class PlayerStats : MonoBehaviour
     public void ModifyStamina(float amount)
     {
         currentStamina = Mathf.Clamp(currentStamina + amount, 0, maxStamina);
+        UpdateStaminaUI();
     }
 
     public void ResetStamina() => currentStamina = maxStamina;
     public bool HasStamina() => currentStamina > 0;
+
+    [Header("Açlık Koşu Çarpanı")]
+    public float runningHungerMultiplier = 1.5f; // koşarken açlık 2 hızlı azalır
+    [Header("Stamina UI")]
+    public Slider staminaSlider;
+
+
 
 
     // ------------------------------
@@ -98,18 +107,6 @@ public class PlayerStats : MonoBehaviour
 
 
     // ------------------------------
-    //       XP / LEVEL
-    // ------------------------------
-    public int currentXP = 0;
-    public int level = 1;
-    public int skillPoints = 0;
-    public int xpToNextLevel = 100;
-
-    public delegate void OnLevelUp();
-    public event OnLevelUp onLevelUp;
-
-
-    // ------------------------------
     // ITEM REFERANSLARI
     // ------------------------------
     [Header("Item References")]
@@ -139,6 +136,13 @@ public class PlayerStats : MonoBehaviour
 
         currentHealth = maxHealth;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
+
+        if (staminaSlider != null)
+{
+    staminaSlider.maxValue = maxStamina;
+    staminaSlider.value = currentStamina;
+}
+
     }
 
     void Update()
@@ -147,12 +151,34 @@ public class PlayerStats : MonoBehaviour
         UpdateStaminaByHunger();
         UpdateStaminaRegen();
         UpdateHealthByHunger();
+        
 
         if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
             TryConsumeFood();
 
         UpdateHungerUI();
+        UpdateStaminaUI();
+
     }
+
+    private void UpdateStaminaUI()
+{
+    if (staminaSlider == null) return;
+
+    // Full ise gizle
+    if (currentStamina >= maxStamina)
+    {
+        staminaSlider.gameObject.SetActive(false);
+    }
+    else
+    {
+        staminaSlider.gameObject.SetActive(true);
+        staminaSlider.maxValue = maxStamina;
+        staminaSlider.value = currentStamina;
+    }
+}
+
+
 
 
     // ============================================================
@@ -160,14 +186,23 @@ public class PlayerStats : MonoBehaviour
     // ============================================================
 
     void HandleHungerSystem()
+{
+    float interval = hungerDecreaseInterval;
+
+    // Koşuyorsa açlık daha hızlı azalır
+    if (isRunning)
+        interval /= runningHungerMultiplier;
+
+    hungerTimer -= Time.deltaTime;
+
+    if (hungerTimer <= 0f)
     {
-        hungerTimer -= Time.deltaTime;
-        if (hungerTimer <= 0f)
-        {
-            currentHunger = Mathf.Max(0, currentHunger - hungerDecreaseAmount);
-            hungerTimer = hungerDecreaseInterval;
-        }
+        currentHunger = Mathf.Max(0, currentHunger - hungerDecreaseAmount);
+        hungerTimer = interval;
     }
+}
+
+
 
 
     // ============================================================
@@ -178,9 +213,11 @@ public class PlayerStats : MonoBehaviour
     {
         maxStamina = currentHunger;
 
+        // currentStamina fazla kaldıysa otomatik düşür
         if (currentStamina > maxStamina)
             currentStamina = maxStamina;
     }
+
 
 
     // ============================================================
@@ -188,23 +225,42 @@ public class PlayerStats : MonoBehaviour
     // ============================================================
 
     void UpdateStaminaRegen()
+{
+    float hungerPercent = (float)currentHunger / maxHunger;
+
+    // Açlık → regen katsayısı
+    float hungerMult;
+    if (hungerPercent >= 0.70f)
+        hungerMult = 1.5f;   // tok → hızlı regen
+    else if (hungerPercent >= 0.40f)
+        hungerMult = 1f;     // normal
+    else if (hungerPercent >= 0.20f)
+        hungerMult = 0.5f;   // yorgun
+    else
+        hungerMult = 0.2f;   // bitkin
+
+    // KOŞARKEN → sadece STAMINA AZALIR
+    if (isRunning && isMoving)
     {
-        if (isRunning) return;  // koşarken regen yok
+        ModifyStamina(-staminaDrainRate * Time.deltaTime);
+        return;
+    }
 
-        float hungerPercent = (float)currentHunger / maxHunger;
-        float regen = staminaRegenIdle;
-
-        if (hungerPercent >= 0.70f)
-            regen *= 1.5f;          // çok tok → hızlı regen
-        else if (hungerPercent >= 0.40f)
-            regen *= 1f;            // normal
-        else if (hungerPercent >= 0.20f)
-            regen *= 0.5f;          // yorgun
-        else
-            regen *= 0.2f;          // bitkin
-
+    // YÜRÜRKEN → az regen
+    if (isMoving)
+    {
+        float regen = staminaRegenWalk * hungerMult;
         ModifyStamina(regen * Time.deltaTime);
     }
+    // HİÇ HAREKET ETMEZKEN → daha fazla regen
+    else
+    {
+        float regen = staminaRegenIdle * hungerMult;
+        ModifyStamina(regen * Time.deltaTime);
+    }
+}
+
+
 
 
     // ============================================================
@@ -217,22 +273,26 @@ public class PlayerStats : MonoBehaviour
 
         float hungerPercent = (float)currentHunger / maxHunger;
 
-        // CAN YENİLEME
+        // Tok → Can yenilenir
         if (hungerPercent >= highHungerThresholdPercent)
         {
             healthRegenTimer += Time.deltaTime;
+
             if (healthRegenTimer >= healthRegenInterval && currentHealth < maxHealth)
             {
                 Heal(Mathf.RoundToInt(healthRegenRate));
                 healthRegenTimer = 0f;
             }
+
             return;
         }
 
-        // CAN KAYBETME (açlık çok düşük)
+
+        // Çok aç → Can düşer
         if (hungerPercent <= lowHungerThresholdPercent)
         {
             starvationTimer += Time.deltaTime;
+
             if (starvationTimer >= starvationTickInterval)
             {
                 TakeDamage(1);
@@ -241,9 +301,10 @@ public class PlayerStats : MonoBehaviour
         }
         else
         {
-            starvationTimer = 0f;
+            starvationTimer = 0f; // güvenli reset
         }
     }
+
 
 
 
@@ -278,8 +339,9 @@ public class PlayerStats : MonoBehaviour
     private void GainHunger(int amount)
     {
         if (amount > 0)
-            currentHunger = Mathf.Min(maxHunger, currentHunger + amount);
+            currentHunger = Mathf.Clamp(currentHunger + amount, 0, maxHunger);
     }
+
 
 
     // ============================================================

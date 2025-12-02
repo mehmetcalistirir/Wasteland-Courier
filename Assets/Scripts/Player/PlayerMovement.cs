@@ -9,9 +9,6 @@ public class PlayerMovement : MonoBehaviour
     public float sprintMultiplier = 1.7f; // Koşarken hız artışı
     private bool isSprinting = false;
 
-    [Header("UI")]
-    public Slider staminaBar;
-
     // --- Bileşen Referansları ---
     private Rigidbody2D rb;
     private PlayerStats stats;
@@ -65,20 +62,22 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void FixedUpdate()
-    {
-        UpdateStamina();
+{
+    float currentSpeed = moveSpeed;
+    bool isMoving = moveInput.magnitude > 0.1f;
 
-        float currentSpeed = moveSpeed;
-        bool isMoving = moveInput.magnitude > 0.1f;
+    // PlayerStats'a koşu/yürüme bilgisini HER FRAME gönder
+    stats.SetMovementState(isMoving, isSprinting);
 
-        if (isSprinting && stats.HasStamina() && isMoving)
-            currentSpeed *= sprintMultiplier;
-        else
-            isSprinting = false;
+    if (isSprinting && stats.HasStamina() && isMoving)
+        currentSpeed *= sprintMultiplier;
+    else
+        isSprinting = false;
 
-        Vector2 moveDelta = moveInput * currentSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + moveDelta);
-    }
+    Vector2 moveDelta = moveInput * currentSpeed * Time.fixedDeltaTime;
+    rb.MovePosition(rb.position + moveDelta);
+}
+
 
     void Update()
     {
@@ -86,36 +85,9 @@ public class PlayerMovement : MonoBehaviour
 
         UpdateRotationAndAnimation();
 
-        if (staminaBar != null && stats != null)
-        {
-            staminaBar.maxValue = stats.GetMaxStamina();
-            staminaBar.value = stats.GetStamina();
-        }
     }
 
-    // --- Stamina Sistemi (Açlığa bağlı yenilenme dahil) ---
-    private void UpdateStamina()
-    {
-        bool isMoving = moveInput.magnitude > 0.1f;
 
-        // Açlığa göre stamina yenilenme hızı
-        float hungerRatio = (float)stats.currentHunger / stats.maxHunger;
-        float hungerMultiplier = 1f;
-
-        if (hungerRatio >= 0.8f)
-            hungerMultiplier = 1.0f;
-        else if (hungerRatio >= 0.4f)
-            hungerMultiplier = 0.7f;
-        else
-            hungerMultiplier = 0.4f;
-
-        if (isSprinting && isMoving)
-            stats.ModifyStamina(-stats.staminaDrainRate * Time.deltaTime);
-        else if (isMoving)
-            stats.ModifyStamina(stats.staminaRegenWalk * hungerMultiplier * Time.deltaTime);
-        else
-            stats.ModifyStamina(stats.staminaRegenIdle * hungerMultiplier * Time.deltaTime);
-    }
 
     // --- 360° Fareye Dönük Animasyon ve Rotasyon ---
     private void UpdateRotationAndAnimation()

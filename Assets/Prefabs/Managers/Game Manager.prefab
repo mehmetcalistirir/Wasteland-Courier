@@ -13,12 +13,17 @@ GameObject:
   - component: {fileID: 1901054954283515642}
   - component: {fileID: 6325730467235097454}
   - component: {fileID: 5883423141642112396}
-  - component: {fileID: 408433156941147806}
   - component: {fileID: 1893863080789037764}
   - component: {fileID: 5332541922574428768}
   - component: {fileID: 1807631111396881505}
-  - component: {fileID: 3603864426398938071}
   - component: {fileID: 1908544901465505163}
+  - component: {fileID: 8919865334208836751}
+  - component: {fileID: 3073242646340338223}
+  - component: {fileID: 4980758778925912920}
+  - component: {fileID: 8770927295364645125}
+  - component: {fileID: 2482210822807126482}
+  - component: {fileID: 3654170249835193281}
+  - component: {fileID: 8994490260070843749}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -67,8 +72,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ea224475c96478459aa7fa089ff7155, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dayDuration: 120
-  nightDuration: 120
+  dayDuration: 40
+  nightDuration: 40
   lightController: {fileID: 0}
   spawner: {fileID: 1893863080789037764}
   enemyManager: {fileID: 6325730467235097454}
@@ -116,27 +121,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pausePanel: {fileID: 0}
   settingsPanel: {fileID: 0}
---- !u!114 &408433156941147806
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4332568536927215517}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3861b865eb5d88749bfd633279fd5e4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  availableBlueprints:
-  - {fileID: 11400000, guid: 74299bc927f3a7b42a474d2ba45599bb, type: 2}
-  craftingPanel: {fileID: 0}
-  requirementsContainer: {fileID: 0}
-  requirementLinePrefab: {fileID: 1877293434998382191, guid: 255ac01e9e8f047448d72d00013bc347, type: 3}
-  craftPromptText: {fileID: 0}
-  craftButton: {fileID: 0}
-  swapButton: {fileID: 0}
-  slotManager: {fileID: 0}
 --- !u!114 &1893863080789037764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,18 +379,6 @@ MonoBehaviour:
       clip: 0
       reserve: 0
       durability: 0
---- !u!114 &3603864426398938071
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4332568536927215517}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b072f7eeb9c44c149881f471e7fb4265, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1908544901465505163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,3 +396,122 @@ MonoBehaviour:
   playerMarker: {fileID: 0}
   player: {fileID: 0}
   mapScale: 1
+--- !u!114 &8919865334208836751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a76dfd4cad424849914ec195005ff2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameInitializer
+  player: {fileID: 0}
+  registry: {fileID: 11400000, guid: d431ef3faf34df540b1ba237b4916bdc, type: 2}
+  inventory: {fileID: 1807631111396881505}
+  stats: {fileID: 0}
+  defaultSpawnPoint: {fileID: 0}
+  fallbackSpawnPosition: {x: 0, y: 0, z: 15}
+--- !u!114 &3073242646340338223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd7f31ede32ce574db5d4ef158c150c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CraftingSystem
+  recipes:
+  - {fileID: 11400000, guid: 669cfbf0f839c454ba0b5dd0cd2cb3cc, type: 2}
+  caravanInventory: {fileID: 0}
+--- !u!114 &4980758778925912920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bff11b38a0b9134f8faf4d5728e1923, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponSlotManager
+  pistolHandler: {fileID: 0}
+  rifleHandler: {fileID: 0}
+  meleeHandler: {fileID: 0}
+  slots:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  clip: 000000000000000000000000
+  reserve: 000000000000000000000000
+  activeSlotIndex: 0
+--- !u!114 &8770927295364645125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acbc07f8376ef804187ea4e19d0171cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CraftUIController
+  craftPanel: {fileID: 0}
+  gridParent: {fileID: 0}
+  craftSlotPrefab: {fileID: 3113399832598990371, guid: 2a42a1f7cd3fe4442b64046faf347525, type: 3}
+  craftButton: {fileID: 0}
+  craftButtonText: {fileID: 0}
+  selectedRecipe: {fileID: 0}
+--- !u!114 &2482210822807126482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3e14e5957a19542a3ae3346a481139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryInput
+  inventoryPanel: {fileID: 0}
+  craftUI: {fileID: 8770927295364645125}
+--- !u!114 &3654170249835193281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bc6ef3025ee65247a87e82669311b00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CraftInput
+  craftUI: {fileID: 8770927295364645125}
+  inventoryPanel: {fileID: 0}
+  caravan: {fileID: 0}
+  caravanWeaponPanel: {fileID: 0}
+--- !u!114 &8994490260070843749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332568536927215517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca07d9ac348bc084c84b5a473fcf1ade, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeHandler
+  inventoryPanel: {fileID: 0}
+  craftPanel: {fileID: 0}
+  tradePanel: {fileID: 0}
+  pauseMenu: {fileID: 0}

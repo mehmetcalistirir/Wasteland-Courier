@@ -193,4 +193,106 @@ public class WeaponSlotManager : MonoBehaviour
     {
         return slots[slot];
     }
+
+    public void EquipCraftedWeapon(WeaponData newWeapon)
+{
+    int slot = (int)GetSlotForWeapon(newWeapon);
+
+    Debug.Log($"[EquipCraftedWeapon] Yeni silah: {newWeapon.itemName}, Slot: {slot}");
+
+    // 1) Eski silahı karavana gönder
+    WeaponData oldWeapon = slots[slot];
+    if (oldWeapon != null)
+    {
+        CaravanInventory.Instance.StoreWeapon(oldWeapon);
+        Debug.Log("Eski silah karavana gönderildi: " + oldWeapon.itemName);
+    }
+
+    // 2) Yeni silah slota ekle
+    slots[slot] = newWeapon;
+
+    // 3) Mermi bilgilerini sıfırla
+    clip[slot] = newWeapon.clipSize;
+    reserve[slot] = newWeapon.maxAmmoCapacity;
+
+    // 4) Eğer aktif slot buysa hemen güncelle
+    if (activeSlotIndex == slot)
+    {
+        ApplyToHandler(slot);
+    }
+    else
+    {
+        // Craft edilen silaha otomatik geçmek istiyorsan:
+        activeSlotIndex = slot;
+        ApplyToHandler(slot);
+    }
+
+    Debug.Log("Yeni silah oyuncuya takıldı: " + newWeapon.itemName);
+}
+
+// ----------------------------------------------------
+//  SAVE
+// ----------------------------------------------------
+public WeaponSlotSaveData GetSaveData()
+{
+    WeaponSlotSaveData data = new WeaponSlotSaveData();
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (slots[i] != null)
+            data.equippedWeaponIDs[i] = slots[i].itemID;
+        else
+            data.equippedWeaponIDs[i] = "";
+
+        data.clip[i] = clip[i];
+        data.reserve[i] = reserve[i];
+    }
+
+    data.activeSlotIndex = activeSlotIndex;
+
+    return data;
+}
+
+
+// ----------------------------------------------------
+//  LOAD
+// ----------------------------------------------------
+public void LoadData(WeaponSlotSaveData data)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        string id = data.equippedWeaponIDs[i];
+
+        if (!string.IsNullOrEmpty(id))
+        {
+            ItemData item = ItemDatabase.Get(id);
+            if (item is WeaponItemData wid)
+            {
+                slots[i] = wid.weaponData;
+                clip[i] = data.clip[i];
+                reserve[i] = data.reserve[i];
+            }
+            else
+            {
+                slots[i] = null;
+                clip[i] = 0;
+                reserve[i] = 0;
+            }
+        }
+        else
+        {
+            slots[i] = null;
+            clip[i] = 0;
+            reserve[i] = 0;
+        }
+    }
+
+    activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
+
+    // handler'ı güncelle
+    SwitchSlot(activeSlotIndex);
+}
+
+
+
 }

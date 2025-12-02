@@ -125,4 +125,30 @@ public class CaravanInventory : MonoBehaviour
     return false;
 }
 
+public void LoadFromData(CaravanSaveData save)
+{
+    // Tüm silahları temizle
+    foreach (var key in storedWeapons.Keys)
+        storedWeapons[key].Clear();
+
+    // Save verisini geri yükle
+    foreach (var entry in save.weaponEntries)
+    {
+        if (!storedWeapons.ContainsKey(entry.type))
+            storedWeapons[entry.type] = new List<WeaponData>();
+
+        foreach (string id in entry.weaponIDs)
+        {
+            ItemData data = ItemDatabase.Get(id);
+
+            if (data is WeaponItemData wid)
+                storedWeapons[entry.type].Add(wid.weaponData);
+        }
+    }
+
+    Debug.Log("CaravanInventory yüklendi.");
+}
+
+
+
 }

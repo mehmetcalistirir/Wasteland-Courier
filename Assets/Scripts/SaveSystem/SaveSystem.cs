@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEngine;
+using System.Collections.Generic;
 
 public static class SaveSystem
 {
@@ -13,7 +14,9 @@ public static class SaveSystem
             File.Delete(savePath);
     }
 
-    // ===================== SAVE =====================
+    // ============================================================
+    //                          SAVE
+    // ============================================================
 
     public static void SavePlayerAndInventory(
         Transform player,
@@ -62,37 +65,24 @@ public static class SaveSystem
 
         // ---- Craft ile açılmış silahlar ----
         data.unlockedWeaponIDs.Clear();
-        if (CraftingSystem.Instance != null && CraftingSystem.Instance.unlockedWeapons != null)
+        if (CraftingSystem.Instance != null)
         {
             foreach (var id in CraftingSystem.Instance.unlockedWeapons)
                 data.unlockedWeaponIDs.Add(id);
         }
 
-        // ---- Ekipman silah slotları (WeaponSlotManager) ----
+        // ---- Ekipman Silah Slotları (WeaponSlotManager) ----
         WeaponSlotManager wsm = WeaponSlotManager.Instance;
         if (wsm != null)
         {
-            // Diziler boşsa oluştur
-            if (data.equippedWeaponKeys == null || data.equippedWeaponKeys.Length != 3)
-                data.equippedWeaponKeys = new string[3];
-            if (data.slotClip == null || data.slotClip.Length != 3)
-                data.slotClip = new int[3];
-            if (data.slotReserve == null || data.slotReserve.Length != 3)
-                data.slotReserve = new int[3];
-
             for (int i = 0; i < 3; i++)
             {
                 WeaponData wd = wsm.slots[i];
 
-                // WeaponData → string key (weaponName veya asset name)
                 if (wd != null)
-                {
-                    data.equippedWeaponKeys[i] = GetWeaponKey(wd);
-                }
+                    data.equippedWeaponIDs[i] = wd.itemID;
                 else
-                {
-                    data.equippedWeaponKeys[i] = "";
-                }
+                    data.equippedWeaponIDs[i] = "";
 
                 var ammo = wsm.GetAmmo(i);
                 data.slotClip[i] = ammo.clip;
@@ -102,13 +92,20 @@ public static class SaveSystem
             data.activeSlotIndex = wsm.activeSlotIndex;
         }
 
-        // ---- JSON yaz ----
+        // ---- Karavan Envanteri ----
+        if (CaravanInventory.Instance != null)
+            data.caravanSave = CaravanInventory.Instance.GetSaveData();
+
+        // ---- JSON Yaz ----
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
-        Debug.Log("💾 SAVE → Pozisyon + statlar + envanter + unlock silahlar + ekipman slotları kaydedildi.");
+
+        Debug.Log("💾 SAVE → Tüm veriler kaydedildi.");
     }
 
-    // ===================== LOAD =====================
+    // ============================================================
+    //                          LOAD
+    // ============================================================
 
     public static void LoadPlayerAndInventory(
         Transform player,
@@ -132,11 +129,8 @@ public static class SaveSystem
 
         // ---- Pozisyon ----
         Vector3 loadedPos = new Vector3(data.posX, data.posY, data.posZ);
-        if (loadedPos != Vector3.zero)
-        {
-            if (loadedPos.y < 1f) loadedPos.y = 1f;
-            player.position = loadedPos;
-        }
+        if (loadedPos.y < 1f) loadedPos.y = 1f;  // yere gömülme önlemi
+        player.position = loadedPos;
 
         // ---- Statlar ----
         stats.maxHealth = data.maxHealth;
@@ -172,26 +166,22 @@ public static class SaveSystem
                 CraftingSystem.Instance.unlockedWeapons.Add(id);
         }
 
-        // ---- WeaponSlotManager slotlarını geri yükle ----
+        // ---- WeaponSlotManager yükleme ----
         WeaponSlotManager wsm = WeaponSlotManager.Instance;
-        if (wsm != null && data.equippedWeaponKeys != null && data.equippedWeaponKeys.Length == 3)
+        if (wsm != null)
         {
             for (int i = 0; i < 3; i++)
             {
-                string key = data.equippedWeaponKeys[i];
+                string id = data.equippedWeaponIDs[i];
 
-                if (!string.IsNullOrEmpty(key))
+                if (!string.IsNullOrEmpty(id))
                 {
-                    // Save'de tuttuğumuz key'e göre WeaponData bul
-                    WeaponData wd = FindWeaponDataByKey(key);
-                    if (wd != null)
+                    ItemData so = ItemDatabase.Get(id);
+                    if (so is WeaponItemData wid)
                     {
-                        wsm.slots[i] = wd;
-                        // Ammo
-                        if (data.slotClip != null && data.slotClip.Length > i)
-                            wsm.clip[i] = data.slotClip[i];
-                        if (data.slotReserve != null && data.slotReserve.Length > i)
-                            wsm.reserve[i] = data.slotReserve[i];
+                        wsm.slots[i] = wid.weaponData;
+                        wsm.clip[i] = data.slotClip[i];
+                        wsm.reserve[i] = data.slotReserve[i];
                     }
                     else
                     {
@@ -208,58 +198,17 @@ public static class SaveSystem
                 }
             }
 
-            // Aktif slotu geri yükle
-            int restoredSlot = Mathf.Clamp(data.activeSlotIndex, 0, 2);
-            wsm.activeSlotIndex = restoredSlot;
-            // 🔥 ApplyToHandler private olduğu için public SwitchSlot kullanıyoruz
-            wsm.SwitchSlot(restoredSlot);
+            // Aktif slotu uygula
+            wsm.activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
+            wsm.SwitchSlot(wsm.activeSlotIndex);
         }
 
-        Debug.Log("📥 LOAD → Pozisyon + statlar + envanter + unlock silahlar + ekipman slotları yüklendi.");
+        // ---- Karavan Yükleme ----
+        if (data.caravanSave != null && CaravanInventory.Instance != null)
+        {
+            CaravanInventory.Instance.LoadFromData(data.caravanSave);
+        }
+
+        Debug.Log("📥 LOAD → Tüm veriler geri yüklendi.");
     }
-
-    // ===================== YARDIMCI METOTLAR =====================
-
-    // WeaponData → Save için string key (CraftingSystem ile aynı mantık)
-    private static string GetWeaponKey(WeaponData weapon)
-{
-    if (weapon == null) return "";
-
-    // WeaponData içinde itemName var
-    if (!string.IsNullOrWhiteSpace(weapon.itemName))
-        return weapon.itemName;
-
-    // fallback: Unity asset adı
-    return weapon.name;
-}
-
-
-    // Save'den gelen key'e göre WeaponData bul
-    private static WeaponData FindWeaponDataByKey(string key)
-{
-    if (string.IsNullOrEmpty(key)) return null;
-    if (CraftingSystem.Instance == null) return null;
-
-    foreach (var recipe in CraftingSystem.Instance.recipes)
-    {
-        if (recipe == null) continue;
-
-        WeaponData wd = recipe.resultWeapon;   // YENİ DOĞRU ALAN
-
-        if (wd == null) continue;
-
-        // Key karşılaştırması
-        string currentKey = wd.itemName;
-        if (string.IsNullOrWhiteSpace(currentKey))
-            currentKey = wd.name;
-
-        if (currentKey == key)
-            return wd;
-    }
-
-    Debug.LogWarning($"SaveSystem: '{key}' için WeaponData bulunamadı.");
-    return null;
-}
-
-
 }

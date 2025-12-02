@@ -15,13 +15,77 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-public partial class @PlayerControls : IInputActionCollection2, IDisposable
+/// <summary>
+/// Provides programmatic access to <see cref="InputActionAsset" />, <see cref="InputActionMap" />, <see cref="InputAction" /> and <see cref="InputControlScheme" /> instances defined in asset "Assets/PlayerControls.inputactions".
+/// </summary>
+/// <remarks>
+/// This class is source generated and any manual edits will be discarded if the associated asset is reimported or modified.
+/// </remarks>
+/// <example>
+/// <code>
+/// using namespace UnityEngine;
+/// using UnityEngine.InputSystem;
+///
+/// // Example of using an InputActionMap named "Player" from a UnityEngine.MonoBehaviour implementing callback interface.
+/// public class Example : MonoBehaviour, MyActions.IPlayerActions
+/// {
+///     private MyActions_Actions m_Actions;                  // Source code representation of asset.
+///     private MyActions_Actions.PlayerActions m_Player;     // Source code representation of action map.
+///
+///     void Awake()
+///     {
+///         m_Actions = new MyActions_Actions();              // Create asset object.
+///         m_Player = m_Actions.Player;                      // Extract action map object.
+///         m_Player.AddCallbacks(this);                      // Register callback interface IPlayerActions.
+///     }
+///
+///     void OnDestroy()
+///     {
+///         m_Actions.Dispose();                              // Destroy asset object.
+///     }
+///
+///     void OnEnable()
+///     {
+///         m_Player.Enable();                                // Enable all actions within map.
+///     }
+///
+///     void OnDisable()
+///     {
+///         m_Player.Disable();                               // Disable all actions within map.
+///     }
+///
+///     #region Interface implementation of MyActions.IPlayerActions
+///
+///     // Invoked when "Move" action is either started, performed or canceled.
+///     public void OnMove(InputAction.CallbackContext context)
+///     {
+///         Debug.Log($"OnMove: {context.ReadValue&lt;Vector2&gt;()}");
+///     }
+///
+///     // Invoked when "Attack" action is either started, performed or canceled.
+///     public void OnAttack(InputAction.CallbackContext context)
+///     {
+///         Debug.Log($"OnAttack: {context.ReadValue&lt;float&gt;()}");
+///     }
+///
+///     #endregion
+/// }
+/// </code>
+/// </example>
+public partial class @PlayerControls: IInputActionCollection2, IDisposable
 {
+    /// <summary>
+    /// Provides access to the underlying asset instance.
+    /// </summary>
     public InputActionAsset asset { get; }
 
+    /// <summary>
+    /// Constructs a new instance.
+    /// </summary>
     public @PlayerControls()
     {
         asset = InputActionAsset.FromJson(@"{
+    ""version"": 1,
     ""name"": ""PlayerControls"",
     ""maps"": [
         {
@@ -33,62 +97,117 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""6838bf5b-d781-4388-9c07-4693d4e2ca48"",
                     ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Sprint"",
                     ""type"": ""Button"",
-                    ""id"": ""45ebb3c3-7009-4a8a-a165-ed3054c6ef36""
+                    ""id"": ""45ebb3c3-7009-4a8a-a165-ed3054c6ef36"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Map"",
                     ""type"": ""Button"",
-                    ""id"": ""2e782fbb-135a-4a43-9a9c-3a4373d3a8e2""
+                    ""id"": ""2e782fbb-135a-4a43-9a9c-3a4373d3a8e2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Inventory"",
                     ""type"": ""Button"",
-                    ""id"": ""0478b12f-c9a9-4cdf-9371-1860496b3f36""
+                    ""id"": ""0478b12f-c9a9-4cdf-9371-1860496b3f36"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Craft"",
                     ""type"": ""Button"",
-                    ""id"": ""9494e607-349a-4168-ab04-e72ea9023cea""
+                    ""id"": ""9494e607-349a-4168-ab04-e72ea9023cea"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Reload"",
                     ""type"": ""Button"",
-                    ""id"": ""e12ea45d-86cc-4953-ba85-4ebaeae503c7""
+                    ""id"": ""e12ea45d-86cc-4953-ba85-4ebaeae503c7"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Weapon1"",
                     ""type"": ""Button"",
-                    ""id"": ""bd8cb524-a4ea-4b32-a89c-9e0c346146f5""
+                    ""id"": ""bd8cb524-a4ea-4b32-a89c-9e0c346146f5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Weapon2"",
                     ""type"": ""Button"",
-                    ""id"": ""5ff2da64-dee7-4e5a-b8de-28f8fd9c52aa""
+                    ""id"": ""5ff2da64-dee7-4e5a-b8de-28f8fd9c52aa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Weapon3"",
                     ""type"": ""Button"",
-                    ""id"": ""d6fa25ab-88a4-46b7-8d0f-406c7777892b""
+                    ""id"": ""d6fa25ab-88a4-46b7-8d0f-406c7777892b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Melee"",
                     ""type"": ""Button"",
-                    ""id"": ""9e876173-9b95-4a4d-8e4b-7b5fe2f0b698""
+                    ""id"": ""9e876173-9b95-4a4d-8e4b-7b5fe2f0b698"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""ADS"",
                     ""type"": ""Button"",
-                    ""id"": ""d331dae3-a933-4df8-8e65-bf621e691d2b""
+                    ""id"": ""d331dae3-a933-4df8-8e65-bf621e691d2b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Escape"",
                     ""type"": ""Button"",
-                    ""id"": ""ee3c41dc-3226-4ae6-9f6e-b0183f861302""
+                    ""id"": ""a6222bc1-fc83-4910-bbf0-61aa05be2863"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CaravanWeapons"",
+                    ""type"": ""Button"",
+                    ""id"": ""072c6dd8-4e70-479c-8364-2ec14dac14cf"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -96,91 +215,199 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""name"": ""2D Vector"",
                     ""id"": ""3383b4d5-fc66-4647-b928-edca3a4ab878"",
                     ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""Move"",
-                    ""isComposite"": true
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
                 },
                 {
                     ""name"": ""up"",
                     ""id"": ""3f85a2d0-ad06-4bac-ba2a-5e0f545d0f67"",
                     ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""Move"",
+                    ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
                     ""name"": ""down"",
                     ""id"": ""fdbdac5d-42b4-4401-b681-5f8d2388d38c"",
                     ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""Move"",
+                    ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
                     ""name"": ""left"",
                     ""id"": ""a8ca0c47-50f5-4c89-9770-def1d77ab876"",
                     ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""Move"",
+                    ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
                     ""name"": ""right"",
                     ""id"": ""1256667d-c507-4ca0-a048-8de1d8f721a6"",
                     ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""Move"",
+                    ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
+                    ""name"": """",
                     ""id"": ""11824abd-e6f1-4acd-8663-22360e3afdb9"",
                     ""path"": ""<Keyboard>/leftShift"",
-                    ""action"": ""Sprint""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""5e4270dd-d5d7-4faa-b7a3-2e7b7fb7755f"",
                     ""path"": ""<Keyboard>/tab"",
-                    ""action"": ""Map""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Map"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""a6b2b1a2-254c-470f-9a1f-438a10109095"",
                     ""path"": ""<Keyboard>/i"",
-                    ""action"": ""Inventory""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Inventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""fcb1ac19-edbc-48ad-a882-268972a2f710"",
                     ""path"": ""<Keyboard>/c"",
-                    ""action"": ""Craft""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Craft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""071bb287-198d-43f5-9cba-ac00b998e654"",
                     ""path"": ""<Keyboard>/r"",
-                    ""action"": ""Reload""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reload"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""5cb54c6f-bee0-4a12-9812-255054c1d0e7"",
                     ""path"": ""<Keyboard>/1"",
-                    ""action"": ""Weapon1""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Weapon1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""e895afd1-acf8-44e9-b378-6dbc6f08d394"",
                     ""path"": ""<Keyboard>/2"",
-                    ""action"": ""Weapon2""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Weapon2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""8276c639-0d9a-4c5a-ba7d-25ec9c984962"",
                     ""path"": ""<Keyboard>/3"",
-                    ""action"": ""Weapon3""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Weapon3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""849fcd24-a8b8-49a6-b295-2c30cef31f0e"",
                     ""path"": ""<Keyboard>/f"",
-                    ""action"": ""Melee""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Melee"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
                     ""id"": ""ef95c1f0-8bca-4cc9-8c2a-2904293a2bed"",
                     ""path"": ""<Mouse>/rightButton"",
-                    ""action"": ""ADS""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ADS"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
-                    ""id"": ""f4e31db3-7d28-4bb5-91ae-7bc9ef26baf8"",
+                    ""name"": """",
+                    ""id"": ""1d69e72d-a4a9-4037-a597-967d5e60a371"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shoot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a5d41ede-fbb9-496a-98f1-724efe8672eb"",
                     ""path"": ""<Keyboard>/escape"",
-                    ""action"": ""Escape""
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Escape"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""090b3cef-12ec-4282-8458-b134a6089e59"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CaravanWeapons"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -201,65 +428,79 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Gameplay_Melee = m_Gameplay.FindAction("Melee", throwIfNotFound: true);
         m_Gameplay_ADS = m_Gameplay.FindAction("ADS", throwIfNotFound: true);
         m_Gameplay_Escape = m_Gameplay.FindAction("Escape", throwIfNotFound: true);
+        m_Gameplay_CaravanWeapons = m_Gameplay.FindAction("CaravanWeapons", throwIfNotFound: true);
     }
 
-    ~PlayerControls()
+    ~@PlayerControls()
     {
-        UnityEngine.Debug.Assert(!m_Gameplay.enabled,
-            "This will cause a leak. PlayerControls.Gameplay.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Gameplay.enabled, "This will cause a leak and performance issues, PlayerControls.Gameplay.Disable() has not been called.");
     }
 
+    /// <summary>
+    /// Destroys this asset and all associated <see cref="InputAction"/> instances.
+    /// </summary>
     public void Dispose()
     {
         UnityEngine.Object.Destroy(asset);
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.bindingMask" />
     public InputBinding? bindingMask
     {
         get => asset.bindingMask;
         set => asset.bindingMask = value;
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.devices" />
     public ReadOnlyArray<InputDevice>? devices
     {
         get => asset.devices;
         set => asset.devices = value;
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.controlSchemes" />
     public ReadOnlyArray<InputControlScheme> controlSchemes => asset.controlSchemes;
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.Contains(InputAction)" />
     public bool Contains(InputAction action)
     {
         return asset.Contains(action);
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.GetEnumerator()" />
     public IEnumerator<InputAction> GetEnumerator()
     {
         return asset.GetEnumerator();
     }
 
+    /// <inheritdoc cref="IEnumerable.GetEnumerator()" />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.Enable()" />
     public void Enable()
     {
         asset.Enable();
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.Disable()" />
     public void Disable()
     {
         asset.Disable();
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.bindings" />
     public IEnumerable<InputBinding> bindings => asset.bindings;
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.FindAction(string, bool)" />
     public InputAction FindAction(string actionNameOrId, bool throwIfNotFound = false)
     {
         return asset.FindAction(actionNameOrId, throwIfNotFound);
     }
 
+    /// <inheritdoc cref="UnityEngine.InputSystem.InputActionAsset.FindBinding(InputBinding, out InputAction)" />
     public int FindBinding(InputBinding bindingMask, out InputAction action)
     {
         return asset.FindBinding(bindingMask, out action);
@@ -280,172 +521,315 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Melee;
     private readonly InputAction m_Gameplay_ADS;
     private readonly InputAction m_Gameplay_Escape;
-
+    private readonly InputAction m_Gameplay_CaravanWeapons;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Gameplay".
+    /// </summary>
     public struct GameplayActions
     {
-        private PlayerControls m_Wrapper;
+        private @PlayerControls m_Wrapper;
 
-        public GameplayActions(PlayerControls wrapper) { m_Wrapper = wrapper; }
-
-        public InputAction Move => m_Wrapper.m_Gameplay_Move;
-        public InputAction Sprint => m_Wrapper.m_Gameplay_Sprint;
-        public InputAction Map => m_Wrapper.m_Gameplay_Map;
-        public InputAction Inventory => m_Wrapper.m_Gameplay_Inventory;
-        public InputAction Craft => m_Wrapper.m_Gameplay_Craft;
-        public InputAction Reload => m_Wrapper.m_Gameplay_Reload;
-        public InputAction Weapon1 => m_Wrapper.m_Gameplay_Weapon1;
-        public InputAction Weapon2 => m_Wrapper.m_Gameplay_Weapon2;
-        public InputAction Weapon3 => m_Wrapper.m_Gameplay_Weapon3;
-        public InputAction Melee => m_Wrapper.m_Gameplay_Melee;
-        public InputAction ADS => m_Wrapper.m_Gameplay_ADS;
-        public InputAction Escape => m_Wrapper.m_Gameplay_Escape;
-
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public GameplayActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Move".
+        /// </summary>
+        public InputAction @Move => m_Wrapper.m_Gameplay_Move;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Sprint".
+        /// </summary>
+        public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Map".
+        /// </summary>
+        public InputAction @Map => m_Wrapper.m_Gameplay_Map;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Inventory".
+        /// </summary>
+        public InputAction @Inventory => m_Wrapper.m_Gameplay_Inventory;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Craft".
+        /// </summary>
+        public InputAction @Craft => m_Wrapper.m_Gameplay_Craft;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Reload".
+        /// </summary>
+        public InputAction @Reload => m_Wrapper.m_Gameplay_Reload;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Weapon1".
+        /// </summary>
+        public InputAction @Weapon1 => m_Wrapper.m_Gameplay_Weapon1;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Weapon2".
+        /// </summary>
+        public InputAction @Weapon2 => m_Wrapper.m_Gameplay_Weapon2;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Weapon3".
+        /// </summary>
+        public InputAction @Weapon3 => m_Wrapper.m_Gameplay_Weapon3;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Melee".
+        /// </summary>
+        public InputAction @Melee => m_Wrapper.m_Gameplay_Melee;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/ADS".
+        /// </summary>
+        public InputAction @ADS => m_Wrapper.m_Gameplay_ADS;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Escape".
+        /// </summary>
+        public InputAction @Escape => m_Wrapper.m_Gameplay_Escape;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/CaravanWeapons".
+        /// </summary>
+        public InputAction @CaravanWeapons => m_Wrapper.m_Gameplay_CaravanWeapons;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
-
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
         public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
         public void Disable() { Get().Disable(); }
-
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
         public bool enabled => Get().enabled;
-
-        public static implicit operator InputActionMap(GameplayActions set)
-        {
-            return set.Get();
-        }
+        /// <summary>
+        /// Implicitly converts an <see ref="GameplayActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(GameplayActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="GameplayActions" />
         public void AddCallbacks(IGameplayActions instance)
         {
-            if (instance == null || m_Wrapper.m_GameplayActionsCallbackInterfaces.Contains(instance))
-                return;
-
+            if (instance == null || m_Wrapper.m_GameplayActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_GameplayActionsCallbackInterfaces.Add(instance);
-
-            Move.started += instance.OnMove;
-            Move.performed += instance.OnMove;
-            Move.canceled += instance.OnMove;
-
-            Sprint.started += instance.OnSprint;
-            Sprint.performed += instance.OnSprint;
-            Sprint.canceled += instance.OnSprint;
-
-            Map.started += instance.OnMap;
-            Map.performed += instance.OnMap;
-            Map.canceled += instance.OnMap;
-
-            Inventory.started += instance.OnInventory;
-            Inventory.performed += instance.OnInventory;
-            Inventory.canceled += instance.OnInventory;
-
-            Craft.started += instance.OnCraft;
-            Craft.performed += instance.OnCraft;
-            Craft.canceled += instance.OnCraft;
-
-            Reload.started += instance.OnReload;
-            Reload.performed += instance.OnReload;
-            Reload.canceled += instance.OnReload;
-
-            Weapon1.started += instance.OnWeapon1;
-            Weapon1.performed += instance.OnWeapon1;
-            Weapon1.canceled += instance.OnWeapon1;
-
-            Weapon2.started += instance.OnWeapon2;
-            Weapon2.performed += instance.OnWeapon2;
-            Weapon2.canceled += instance.OnWeapon2;
-
-            Weapon3.started += instance.OnWeapon3;
-            Weapon3.performed += instance.OnWeapon3;
-            Weapon3.canceled += instance.OnWeapon3;
-
-            Melee.started += instance.OnMelee;
-            Melee.performed += instance.OnMelee;
-            Melee.canceled += instance.OnMelee;
-
-            ADS.started += instance.OnADS;
-            ADS.performed += instance.OnADS;
-            ADS.canceled += instance.OnADS;
-
-            Escape.started += instance.OnEscape;
-            Escape.performed += instance.OnEscape;
-            Escape.canceled += instance.OnEscape;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
+            @Map.started += instance.OnMap;
+            @Map.performed += instance.OnMap;
+            @Map.canceled += instance.OnMap;
+            @Inventory.started += instance.OnInventory;
+            @Inventory.performed += instance.OnInventory;
+            @Inventory.canceled += instance.OnInventory;
+            @Craft.started += instance.OnCraft;
+            @Craft.performed += instance.OnCraft;
+            @Craft.canceled += instance.OnCraft;
+            @Reload.started += instance.OnReload;
+            @Reload.performed += instance.OnReload;
+            @Reload.canceled += instance.OnReload;
+            @Weapon1.started += instance.OnWeapon1;
+            @Weapon1.performed += instance.OnWeapon1;
+            @Weapon1.canceled += instance.OnWeapon1;
+            @Weapon2.started += instance.OnWeapon2;
+            @Weapon2.performed += instance.OnWeapon2;
+            @Weapon2.canceled += instance.OnWeapon2;
+            @Weapon3.started += instance.OnWeapon3;
+            @Weapon3.performed += instance.OnWeapon3;
+            @Weapon3.canceled += instance.OnWeapon3;
+            @Melee.started += instance.OnMelee;
+            @Melee.performed += instance.OnMelee;
+            @Melee.canceled += instance.OnMelee;
+            @ADS.started += instance.OnADS;
+            @ADS.performed += instance.OnADS;
+            @ADS.canceled += instance.OnADS;
+            @Escape.started += instance.OnEscape;
+            @Escape.performed += instance.OnEscape;
+            @Escape.canceled += instance.OnEscape;
+            @CaravanWeapons.started += instance.OnCaravanWeapons;
+            @CaravanWeapons.performed += instance.OnCaravanWeapons;
+            @CaravanWeapons.canceled += instance.OnCaravanWeapons;
         }
 
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="GameplayActions" />
+        private void UnregisterCallbacks(IGameplayActions instance)
+        {
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
+            @Map.started -= instance.OnMap;
+            @Map.performed -= instance.OnMap;
+            @Map.canceled -= instance.OnMap;
+            @Inventory.started -= instance.OnInventory;
+            @Inventory.performed -= instance.OnInventory;
+            @Inventory.canceled -= instance.OnInventory;
+            @Craft.started -= instance.OnCraft;
+            @Craft.performed -= instance.OnCraft;
+            @Craft.canceled -= instance.OnCraft;
+            @Reload.started -= instance.OnReload;
+            @Reload.performed -= instance.OnReload;
+            @Reload.canceled -= instance.OnReload;
+            @Weapon1.started -= instance.OnWeapon1;
+            @Weapon1.performed -= instance.OnWeapon1;
+            @Weapon1.canceled -= instance.OnWeapon1;
+            @Weapon2.started -= instance.OnWeapon2;
+            @Weapon2.performed -= instance.OnWeapon2;
+            @Weapon2.canceled -= instance.OnWeapon2;
+            @Weapon3.started -= instance.OnWeapon3;
+            @Weapon3.performed -= instance.OnWeapon3;
+            @Weapon3.canceled -= instance.OnWeapon3;
+            @Melee.started -= instance.OnMelee;
+            @Melee.performed -= instance.OnMelee;
+            @Melee.canceled -= instance.OnMelee;
+            @ADS.started -= instance.OnADS;
+            @ADS.performed -= instance.OnADS;
+            @ADS.canceled -= instance.OnADS;
+            @Escape.started -= instance.OnEscape;
+            @Escape.performed -= instance.OnEscape;
+            @Escape.canceled -= instance.OnEscape;
+            @CaravanWeapons.started -= instance.OnCaravanWeapons;
+            @CaravanWeapons.performed -= instance.OnCaravanWeapons;
+            @CaravanWeapons.canceled -= instance.OnCaravanWeapons;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="GameplayActions.UnregisterCallbacks(IGameplayActions)" />.
+        /// </summary>
+        /// <seealso cref="GameplayActions.UnregisterCallbacks(IGameplayActions)" />
         public void RemoveCallbacks(IGameplayActions instance)
         {
-            if (!m_Wrapper.m_GameplayActionsCallbackInterfaces.Remove(instance))
-                return;
-
-            Move.started -= instance.OnMove;
-            Move.performed -= instance.OnMove;
-            Move.canceled -= instance.OnMove;
-
-            Sprint.started -= instance.OnSprint;
-            Sprint.performed -= instance.OnSprint;
-            Sprint.canceled -= instance.OnSprint;
-
-            Map.started -= instance.OnMap;
-            Map.performed -= instance.OnMap;
-            Map.canceled -= instance.OnMap;
-
-            Inventory.started -= instance.OnInventory;
-            Inventory.performed -= instance.OnInventory;
-            Inventory.canceled -= instance.OnInventory;
-
-            Craft.started -= instance.OnCraft;
-            Craft.performed -= instance.OnCraft;
-            Craft.canceled -= instance.OnCraft;
-
-            Reload.started -= instance.OnReload;
-            Reload.performed -= instance.OnReload;
-            Reload.canceled -= instance.OnReload;
-
-            Weapon1.started -= instance.OnWeapon1;
-            Weapon1.performed -= instance.OnWeapon1;
-            Weapon1.canceled -= instance.OnWeapon1;
-
-            Weapon2.started -= instance.OnWeapon2;
-            Weapon2.performed -= instance.OnWeapon2;
-            Weapon2.canceled -= instance.OnWeapon2;
-
-            Weapon3.started -= instance.OnWeapon3;
-            Weapon3.performed -= instance.OnWeapon3;
-            Weapon3.canceled -= instance.OnWeapon3;
-
-            Melee.started -= instance.OnMelee;
-            Melee.performed -= instance.OnMelee;
-            Melee.canceled -= instance.OnMelee;
-
-            ADS.started -= instance.OnADS;
-            ADS.performed -= instance.OnADS;
-            ADS.canceled -= instance.OnADS;
-
-            Escape.started -= instance.OnEscape;
-            Escape.performed -= instance.OnEscape;
-            Escape.canceled -= instance.OnEscape;
+            if (m_Wrapper.m_GameplayActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
         }
 
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="GameplayActions.AddCallbacks(IGameplayActions)" />
+        /// <seealso cref="GameplayActions.RemoveCallbacks(IGameplayActions)" />
+        /// <seealso cref="GameplayActions.UnregisterCallbacks(IGameplayActions)" />
         public void SetCallbacks(IGameplayActions instance)
         {
-            foreach (var existing in m_Wrapper.m_GameplayActionsCallbackInterfaces)
-                RemoveCallbacks(existing);
-
+            foreach (var item in m_Wrapper.m_GameplayActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
             m_Wrapper.m_GameplayActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-
-    public GameplayActions Gameplay => new GameplayActions(this);
-
+    /// <summary>
+    /// Provides a new <see cref="GameplayActions" /> instance referencing this action map.
+    /// </summary>
+    public GameplayActions @Gameplay => new GameplayActions(this);
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Gameplay" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="GameplayActions.AddCallbacks(IGameplayActions)" />
+    /// <seealso cref="GameplayActions.RemoveCallbacks(IGameplayActions)" />
     public interface IGameplayActions
     {
+        /// <summary>
+        /// Method invoked when associated input action "Move" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMove(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSprint(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Map" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMap(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Inventory" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInventory(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Craft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCraft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Reload" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnReload(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Weapon1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnWeapon1(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Weapon2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnWeapon2(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Weapon3" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnWeapon3(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Melee" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMelee(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ADS" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnADS(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Escape" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnEscape(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CaravanWeapons" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCaravanWeapons(InputAction.CallbackContext context);
     }
 }

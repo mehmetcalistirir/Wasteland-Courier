@@ -83,20 +83,31 @@ public class CraftUIController : MonoBehaviour
     //  Craft Butonu
     // ---------------------------------------------------------
     public void OnCraftButtonPressed()
+{
+    if (selectedRecipe == null)
     {
-        if (selectedRecipe == null)
-        {
-            Debug.Log("❗ Craft yapmak için tarif seçilmedi.");
-            return;
-        }
-
-        bool success = CraftingSystem.Instance.TryCraft(selectedRecipe);
-
-        if (success)
-            Debug.Log($"✅ Craft başarılı → {selectedRecipe.resultWeapon.itemName}");
-        else
-            Debug.Log($"❌ Craft başarısız → {selectedRecipe.resultWeapon.itemName}");
+        Debug.Log("❗ Craft yapmak için tarif seçilmedi.");
+        return;
     }
+
+    bool success = CraftingSystem.Instance.TryCraft(selectedRecipe);
+
+    if (success)
+    {
+        Debug.Log($"✅ Craft başarılı → {selectedRecipe.resultWeapon.itemName}");
+
+        // Tarif listesi yenilensin
+        PopulateRecipes();
+        selectedRecipe = null;
+    }
+    else
+    {
+        Debug.Log($"❌ Craft başarısız → {selectedRecipe.resultWeapon.itemName}");
+    }
+}
+
+
+
 
     // ---------------------------------------------------------
     //  Craft UI Aç / Kapat
@@ -109,8 +120,10 @@ public class CraftUIController : MonoBehaviour
     }
 
     public void Close()
-    {
-        craftPanel.SetActive(false);
-        Time.timeScale = 1f;
-    }
+{
+    craftPanel.SetActive(false);
+    selectedRecipe = null;
+    Time.timeScale = 1f;
+}
+
 }

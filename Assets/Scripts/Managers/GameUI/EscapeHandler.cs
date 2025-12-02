@@ -31,11 +31,11 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
     }
 
     public void OnEscape(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
+{
+    if (!ctx.performed) return;
 
-        HandleEscape();
-    }
+    HandleEscape();
+}
 
     private void HandleEscape()
     {
@@ -67,4 +67,5 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
     public void OnMelee(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}
     public void OnADS(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}
     public void OnShoot(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}
+    public void OnCaravanWeapons(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}
 }

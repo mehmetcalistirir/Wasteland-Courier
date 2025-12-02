@@ -4,29 +4,43 @@ using TMPro;
 
 public class CraftSlotUI : MonoBehaviour
 {
-    [Header("UI")]
-    public Image iconImage;
-    public TMP_Text titleText;
-    public Button button;
+    public Image icon;
+    public TMP_Text nameText;
+    public Transform costRoot;
+    public GameObject costEntryPrefab;
 
-    [Header("Data")]
-    public WeaponCraftRecipe recipe;
+    private WeaponCraftRecipe recipe;
 
-    // ---------------------------------------------------------
-    //  Slotu tarif verisiyle hazırla
-    // ---------------------------------------------------------
-    public void Setup(WeaponCraftRecipe recipe, Sprite icon, string title)
+    public void Setup(WeaponCraftRecipe recipe, Sprite weaponIcon, string name)
     {
         this.recipe = recipe;
 
-        iconImage.sprite = icon;
-        titleText.text = title;
+        icon.sprite = weaponIcon;
+        nameText.text = name;
 
-        // Tıklama event’lerini temizle → ekle
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() =>
+        RefreshCosts();
+    }
+
+    private void RefreshCosts()
+    {
+        // Eski maliyet entry'lerini temizle
+        foreach (Transform t in costRoot)
+            Destroy(t.gameObject);
+
+        foreach (var cost in recipe.costs)
         {
-            CraftUIController.Instance.SelectRecipe(recipe);
-        });
+            GameObject costGO = Instantiate(costEntryPrefab, costRoot);
+            CraftCostUI ui = costGO.GetComponent<CraftCostUI>();
+
+            int playerAmount = Inventory.Instance.GetItemCount(cost.item);
+
+            ui.Setup(cost.item, cost.amount, playerAmount);
+        }
+    }
+
+    // UI butonu için
+    public void OnSelectPressed()
+    {
+        CraftUIController.Instance.SelectRecipe(recipe);
     }
 }

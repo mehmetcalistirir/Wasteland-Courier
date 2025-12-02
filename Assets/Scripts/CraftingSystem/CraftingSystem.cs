@@ -36,7 +36,7 @@ public class CraftingSystem : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(weapon.itemName))
             return weapon.itemName;
 
-        return weapon.name;
+        return weapon.itemID;
     }
 
     public bool IsUnlocked(WeaponCraftRecipe recipe)

@@ -7,7 +7,7 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
     public GameObject inventoryPanel;
     public GameObject craftPanel;
     public GameObject tradePanel;
-    public GameObject pauseMenu;
+    public GameObject pauseMenu;   // artık kullanılmayacak ama referansı kalsın
 
     private bool AnyPanelOpen =>
         (inventoryPanel && inventoryPanel.activeSelf) ||
@@ -16,9 +16,8 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
 
     private void Awake()
     {
-        Debug.Log("EscapeHandler Awake ÇALIŞTI");
         controls = new PlayerControls();
-        controls.Gameplay.SetCallbacks(this);   // 🚀 En önemli satır
+        controls.Gameplay.SetCallbacks(this);
     }
 
     private void OnEnable()
@@ -31,17 +30,16 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
         controls.Gameplay.Disable();
     }
 
-    // 🚀 PlayerControls içindeki ESC tuşuna basınca burası otomatik tetiklenir
     public void OnEscape(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
-        if (!ctx.performed) return; // sadece "performed" anında çalışsın
+        if (!ctx.performed) return;
 
         HandleEscape();
     }
 
     private void HandleEscape()
     {
-        // 1) Panel açıksa sadece paneli kapatsın
+        // 1) Eğer Inventory / Craft / Trade açık ise → sadece onları kapat
         if (AnyPanelOpen)
         {
             if (inventoryPanel) inventoryPanel.SetActive(false);
@@ -52,13 +50,11 @@ public class EscapeHandler : MonoBehaviour, PlayerControls.IGameplayActions
             return;
         }
 
-        // 2) Panel yoksa → Pause Toggle
-        bool isActive = pauseMenu.activeSelf;
-        pauseMenu.SetActive(!isActive);
-        Time.timeScale = isActive ? 1f : 0f;
+        // ❌ 2) PauseMenu'yu artık EscapeHandler KESİNLİKLE YÖNETMİYOR ❌
+        // PauseMenu tamamen PauseMenu.cs tarafından kontrol edilecek.
     }
 
-    // Kullanmadığın input callback'leri boş bırakılacak:
+    // kullanılmayan callbacks:
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}
     public void OnSprint(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}
     public void OnMap(UnityEngine.InputSystem.InputAction.CallbackContext ctx) {}

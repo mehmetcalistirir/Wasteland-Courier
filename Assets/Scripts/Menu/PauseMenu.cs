@@ -8,6 +8,8 @@ public class PauseMenu : MonoBehaviour
 
     public GameObject pausePanel;
     public GameObject settingsPanel;
+    private bool justClosedSettings = false;
+
 
     public static bool IsPaused { get; private set; }
 
@@ -31,24 +33,26 @@ public class PauseMenu : MonoBehaviour
         controls.Gameplay.Disable();
     }
 
-    private void OnEscapePressed()
+   private void OnEscapePressed()
+{
+    // ESC koruması (SettingsPanel yeni kapandıysa)
+    if (justClosedSettings)
     {
-        Debug.Log("ESC INPUT");
-
-        // 🌟 1) SETTINGS PANEL AÇIKSA → SADECE ONU KAPAT
-        if (settingsPanel.activeSelf)
-        {
-            Debug.Log("SettingsPanel kapanıyor...");
-            CloseSettings();
-            return;    // PauseMenu'ya ASLA dokunma
-        }
-
-        // 🌟 2) SETTINGS PANEL KAPALIYSA → NORMAL PAUSE MENÜ TOGGLE
-        if (IsPaused)
-            ResumeGame();
-        else
-            PauseGame();
+        justClosedSettings = false; // Bir kere blokla
+        return;
     }
+
+    if (settingsPanel.activeSelf)
+    {
+        CloseSettings();
+        return;
+    }
+
+    if (IsPaused)
+        ResumeGame();
+    else
+        PauseGame();
+}
 
     public void PauseGame()
     {
@@ -74,10 +78,28 @@ public class PauseMenu : MonoBehaviour
         settingsPanel.SetActive(true);
     }
 
-    public void CloseSettings()
-    {
-        // Sadece SettingsPanel kapanır, PauseMenu'ya dönülmez
-        settingsPanel.SetActive(false);
-        // pausePanel.SetActive(true);  ❌ BUNU ÖZELLİKLE KOYMUYORUZ
-    }
+   public void CloseSettings()
+{
+    // Sadece SettingsPanel kapanır
+    settingsPanel.SetActive(false);
+
+    // PauseMenuPanel tekrar görünür olmalı
+    pausePanel.SetActive(true);
+
+    // Oyun pause durumda kalmalı
+    IsPaused = true;
+    Time.timeScale = 0f;
+
+    // ESC’nin hemen PauseMenu’yu kapatmaması için 0.2 sn koruma
+    justClosedSettings = true;
+    Invoke(nameof(ResetSettingsCloseFlag), 0.2f);
+}
+
+
+private void ResetSettingsCloseFlag()
+{
+    justClosedSettings = false;
+}
+
+
 }

@@ -111,4 +111,18 @@ public class CaravanInventory : MonoBehaviour
 
         return save;
     }
+    public bool HasWeapon(WeaponData weapon)
+{
+    if (!storedWeapons.ContainsKey(weapon.weaponType))
+        return false;
+
+    foreach (var w in storedWeapons[weapon.weaponType])
+    {
+        if (w.itemID == weapon.itemID)
+            return true;
+    }
+
+    return false;
+}
+
 }

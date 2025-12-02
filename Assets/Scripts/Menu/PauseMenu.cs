@@ -35,6 +35,10 @@ public class PauseMenu : MonoBehaviour
 
    private void OnEscapePressed()
 {
+    // 🔥 Game Over durumunda ESC hiçbir şey yapamaz
+    if (GameStateManager.IsGameOver)
+        return;
+
     // ESC koruması (SettingsPanel yeni kapandıysa)
     if (justClosedSettings)
     {
@@ -53,6 +57,7 @@ public class PauseMenu : MonoBehaviour
     else
         PauseGame();
 }
+
 
     public void PauseGame()
     {

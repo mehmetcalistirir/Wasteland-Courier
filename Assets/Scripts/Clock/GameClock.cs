@@ -47,7 +47,7 @@ if (player == null)
     
     void Update()
     {
-        Debug.Log("GameClock player = " + player);
+    
 
         // ---- ZAMAN İLERLETME ----
         if (dayNightCycle.IsDay)

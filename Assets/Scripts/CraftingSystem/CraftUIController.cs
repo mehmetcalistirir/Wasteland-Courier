@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
+
+
 
 public class CraftUIController : MonoBehaviour
 {
@@ -8,6 +11,9 @@ public class CraftUIController : MonoBehaviour
     public GameObject craftPanel;
     public Transform gridParent;
     public GameObject craftSlotPrefab;
+    public Button craftButton;
+    public TMP_Text craftButtonText;
+
 
     [Header("Logic")]
     public WeaponCraftRecipe selectedRecipe;
@@ -74,10 +80,23 @@ public class CraftUIController : MonoBehaviour
     //  Slot tıklayınca tarif seçilir
     // ---------------------------------------------------------
     public void SelectRecipe(WeaponCraftRecipe recipe)
+{
+    selectedRecipe = recipe;
+
+    WeaponData weapon = recipe.resultWeapon;
+
+    bool existsInCaravan = CaravanInventory.Instance.HasWeapon(weapon);
+
+    if (existsInCaravan)
     {
-        selectedRecipe = recipe;
-        Debug.Log($"📌 Seçilen tarif: {recipe.resultWeapon.itemName}");
+        craftButtonText.text = "Swap";      // ücretsiz değişim
     }
+    else
+    {
+        craftButtonText.text = "Craft";     // malzeme gerektirir
+    }
+}
+
 
     // ---------------------------------------------------------
     //  Craft Butonu
@@ -86,26 +105,77 @@ public class CraftUIController : MonoBehaviour
 {
     if (selectedRecipe == null)
     {
-        Debug.Log("❗ Craft yapmak için tarif seçilmedi.");
+        Debug.Log("❗ Tarif seçilmedi.");
         return;
     }
 
+    WeaponData weapon = selectedRecipe.resultWeapon;
+
+    bool existsInCaravan = CaravanInventory.Instance.HasWeapon(weapon);
+
+    // ------------------------------------------------
+    // 1) EĞER SİLAH KARAVANDA VARSA → SWAP
+    // ------------------------------------------------
+    if (existsInCaravan)
+    {
+        SwapWithCaravan(weapon);
+        Debug.Log($"🔄 Swap → {weapon.itemName} karavandan alındı.");
+        
+        Close();
+        return;
+    }
+
+    // ------------------------------------------------
+    // 2) DEĞİLSE → NORMAL CRAFT
+    // ------------------------------------------------
     bool success = CraftingSystem.Instance.TryCraft(selectedRecipe);
 
     if (success)
     {
-        Debug.Log($"✅ Craft başarılı → {selectedRecipe.resultWeapon.itemName}");
-
-        // Tarif listesi yenilensin
+        Debug.Log($"✔ Craft başarılı → {weapon.itemName} üretildi");
         PopulateRecipes();
         selectedRecipe = null;
+        Close();
     }
     else
     {
-        Debug.Log($"❌ Craft başarısız → {selectedRecipe.resultWeapon.itemName}");
+        Debug.Log($"❌ Craft başarısız → {weapon.itemName}");
     }
 }
 
+
+private void SwapWithCaravan(WeaponData weapon)
+{
+    // Silah hangi slotta kullanılacak?
+    WeaponSlotType slotType = WeaponSlotManager.Instance.GetSlotForWeapon(weapon);
+    int slotIndex = (int)slotType;
+
+    // Oyuncunun elindeki silah
+    WeaponData currentWeapon = WeaponSlotManager.Instance.slots[slotIndex];
+
+    // 1) Oyuncunun mevcut silahını karavana koy
+    if (currentWeapon != null)
+        CaravanInventory.Instance.StoreWeapon(currentWeapon);
+
+    // 2) Karavandan bu silahı al
+    List<WeaponData> list = CaravanInventory.Instance.GetWeapons(weapon.weaponType);
+
+    for (int i = 0; i < list.Count; i++)
+    {
+        if (list[i].itemID == weapon.itemID)
+        {
+            list.RemoveAt(i);
+            break;
+        }
+    }
+
+    // 3) Oyuncuya tak
+    WeaponSlotManager.Instance.slots[slotIndex] = weapon;
+    WeaponSlotManager.Instance.clip[slotIndex] = weapon.clipSize;
+    WeaponSlotManager.Instance.reserve[slotIndex] = weapon.maxAmmoCapacity;
+
+    WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+}
 
 
 

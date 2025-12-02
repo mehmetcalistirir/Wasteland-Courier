@@ -5,8 +5,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Weapon Craft Recipe", menuName = "Crafting/Weapon Craft Recipe")]
 public class WeaponCraftRecipe : ScriptableObject
 {
-    [Header("Üretilecek Silah (WeaponData)")]
+    [Header("Üretilecek Silah")]
     public WeaponData resultWeapon;
+
+    [Header("Craft Açıklaması (Opsiyonel)")]
+    [TextArea]
+    public string description;
 
     [Header("Gerekli Kaynaklar")]
     public List<ResourceCost> costs = new List<ResourceCost>();

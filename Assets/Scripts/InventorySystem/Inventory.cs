@@ -198,4 +198,24 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
         RaiseChanged();
     }
+    public int GetItemCount(ItemData item)
+{
+    if (item == null) return 0;
+
+    int total = 0;
+
+    // slots dizin ise:
+    for (int i = 0; i < slots.Length; i++)
+    {
+        InventoryItem invItem = slots[i];
+        if (invItem == null || invItem.data == null) 
+            continue;
+
+        if (invItem.data == item)
+            total += invItem.count;
+    }
+
+    return total;
+}
+
 }

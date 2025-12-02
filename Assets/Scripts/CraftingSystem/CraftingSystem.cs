@@ -69,33 +69,28 @@ public class CraftingSystem : MonoBehaviour
     // ------------------------------------------------------------
     // Craft → KARAVANA EKLE
     // ------------------------------------------------------------
-public bool TryCraft(WeaponCraftRecipe recipe)
-{
-    if (!CanCraft(recipe))
+    public bool TryCraft(WeaponCraftRecipe recipe)
     {
-        Debug.Log("Craft başarısız: Gereken koşullar sağlanmıyor.");
-        return false;
+        if (!CanCraft(recipe))
+        {
+            Debug.Log("Craft başarısız: Gereken koşullar sağlanmıyor.");
+            return false;
+        }
+
+        WeaponData weapon = GetWeapon(recipe);
+
+        // 1) Kaynakları tüket
+        foreach (var cost in recipe.costs)
+            Inventory.Instance.TryConsume(cost.item, cost.amount);
+
+        // 2) Craft edilen silahı UNLOCK et
+        unlockedWeapons.Add(GetKey(weapon));
+
+        // 3) Silahı karavana ekle
+        caravanInventory.StoreWeapon(weapon);
+
+        Debug.Log($"✔ CRAFT BAŞARILI → {weapon.itemName} karavana eklendi!");
+
+        return true;
     }
-
-    WeaponData weapon = GetWeapon(recipe);
-
-    // 1) Kaynakları tüket
-    foreach (var cost in recipe.costs)
-        Inventory.Instance.TryConsume(cost.item, cost.amount);
-
-    // 2) Silahı unlock et
-    unlockedWeapons.Add(GetKey(weapon));
-
-    // ❌ Eskisi: Craft edilen silah karavana ekleniyordu
-    // caravanInventory.StoreWeapon(weapon);
-
-    // ✔ YENİ DAVRANIŞ:
-    // 3) Craft edilen silah DOĞRUDAN oyuncuya takılır
-    WeaponSlotManager.Instance.EquipCraftedWeapon(weapon);
-
-    Debug.Log($"✔ CRAFT BAŞARILI → {weapon.itemName} oyuncuya takıldı!");
-
-    return true;
-}
-
 }

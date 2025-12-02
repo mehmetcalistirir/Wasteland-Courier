@@ -7,6 +7,8 @@ using UnityEngine.Rendering.Universal;
 public class PlayerWeapon : MonoBehaviour
 {
     private GameObject currentModel;
+    private float nextFireTime = 0f;
+
 
     private bool isAiming = false;
     private bool isReloading = false;
@@ -91,33 +93,33 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     private void OnEnable()
-{
-     controls.Gameplay.Enable();
+    {
+        controls.Gameplay.Enable();
 
-    controls.Gameplay.Weapon1.performed += ctx => SwitchToSlot(0);
-    controls.Gameplay.Weapon2.performed += ctx => SwitchToSlot(1);
-    controls.Gameplay.Weapon3.performed += ctx => SwitchToSlot(2);
-    controls.Gameplay.Reload.performed += OnReloadPressed;
-}
+        controls.Gameplay.Weapon1.performed += ctx => SwitchToSlot(0);
+        controls.Gameplay.Weapon2.performed += ctx => SwitchToSlot(1);
+        controls.Gameplay.Weapon3.performed += ctx => SwitchToSlot(2);
+        controls.Gameplay.Reload.performed += OnReloadPressed;
+    }
 
-private void OnDisable()
-{
-    controls.Gameplay.Weapon1.performed -= ctx => SwitchToSlot(0);
-    controls.Gameplay.Weapon2.performed -= ctx => SwitchToSlot(1);
-    controls.Gameplay.Weapon3.performed -= ctx => SwitchToSlot(2);
-    controls.Gameplay.Reload.performed -= OnReloadPressed;
-    controls.Gameplay.Disable();
-}
-private void SwitchToSlot(int slot)
-{
-    WeaponSlotManager.Instance.SwitchSlot(slot);
-}
+    private void OnDisable()
+    {
+        controls.Gameplay.Weapon1.performed -= ctx => SwitchToSlot(0);
+        controls.Gameplay.Weapon2.performed -= ctx => SwitchToSlot(1);
+        controls.Gameplay.Weapon3.performed -= ctx => SwitchToSlot(2);
+        controls.Gameplay.Reload.performed -= OnReloadPressed;
+        controls.Gameplay.Disable();
+    }
+    private void SwitchToSlot(int slot)
+    {
+        WeaponSlotManager.Instance.SwitchSlot(slot);
+    }
 
-private void OnReloadPressed(InputAction.CallbackContext ctx)
-{
-    if (!isReloading && reserve > 0 && clip < clipSize)
-        StartCoroutine(Reload());
-}
+    private void OnReloadPressed(InputAction.CallbackContext ctx)
+    {
+        if (!isReloading && reserve > 0 && clip < clipSize)
+            StartCoroutine(Reload());
+    }
 
     // ===============================
     // AUTO FIRE
@@ -269,9 +271,13 @@ private void OnReloadPressed(InputAction.CallbackContext ctx)
         WeaponData data = slotManager.GetEquippedWeapon(slot);
         if (data == null) return;
 
+
         weaponData = data;
 
         clipSize = weaponData.clipSize;
+        lastAutoFireTime = 0f;
+        isReloading = false;
+
 
         var ammo = slotManager.GetAmmo(slot);
         clip = ammo.clip;

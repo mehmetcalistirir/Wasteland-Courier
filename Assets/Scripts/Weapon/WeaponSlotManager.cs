@@ -81,40 +81,31 @@ public class WeaponSlotManager : MonoBehaviour
     // Silah kuşan
     // -------------------------------
     public void EquipWeapon(ItemData item)
-{
-    WeaponItemData wid = item as WeaponItemData;
-    if (wid == null)
     {
-        Debug.LogError("EquipWeapon → Bu item bir WeaponItemData değil!");
-        return;
+        WeaponItemData wid = item as WeaponItemData;
+        if (wid == null)
+        {
+            Debug.LogError("EquipWeapon → Bu item bir WeaponItemData değil!");
+            return;
+        }
+
+        WeaponData weapon = wid.weaponData;
+        if (weapon == null)
+        {
+            Debug.LogError("EquipWeapon → WeaponItemData.weaponData boş!");
+            return;
+        }
+
+        int slot = (int)GetSlotForWeapon(weapon);
+        slots[slot] = weapon;
+
+        clip[slot] = weapon.clipSize;
+        reserve[slot] = weapon.maxAmmoCapacity;
+
+        ApplyToHandler(slot);
+
+        Debug.Log($"[WeaponSlotManager] {item.itemName} (WeaponData: {weapon.name}) slot {slot} içine takıldı.");
     }
-
-    WeaponData weapon = wid.weaponData;
-    if (weapon == null)
-    {
-        Debug.LogError("EquipWeapon → WeaponItemData.weaponData boş!");
-        return;
-    }
-
-    int slot = (int)GetSlotForWeapon(weapon);
-
-    // 🔥 Yeni eklenen kısım (loot edilse bile karavan swap çalışsın)
-    if (slots[slot] != null)
-    {
-        UnequipToCaravan(slot);
-    }
-
-    // Yeni silahı tak
-    slots[slot] = weapon;
-
-    clip[slot] = weapon.clipSize;
-    reserve[slot] = weapon.maxAmmoCapacity;
-
-    ApplyToHandler(slot);
-
-    Debug.Log($"[WeaponSlotManager] {item.itemName} slota takıldı → slot {slot}");
-}
-
 
 
     // -------------------------------
@@ -202,50 +193,4 @@ public class WeaponSlotManager : MonoBehaviour
     {
         return slots[slot];
     }
-    public void EquipCraftedWeapon(WeaponData weapon)
-{
-    if (weapon == null)
-    {
-        Debug.LogError("EquipCraftedWeapon → WeaponData NULL!");
-        return;
-    }
-
-    int slot = (int)GetSlotForWeapon(weapon);
-
-    // 1) Aynı tip slottaki eski silahı karavana gönder
-    if (slots[slot] != null)
-    {
-        UnequipToCaravan(slot);
-    }
-
-    // 2) Yeni silahı tak
-    slots[slot] = weapon;
-
-    // 3) Mermi değerlerini başlat
-    clip[slot] = weapon.clipSize;
-    reserve[slot] = weapon.maxAmmoCapacity;
-
-    // Eğer bu slot aktif slot ise handler'a silahı ver
-    if (slot == activeSlotIndex)
-        ApplyToHandler(slot);
-
-    Debug.Log($"[WeaponSlotManager] Craft edilen silah takıldı → {weapon.name}, slot: {slot}");
-}
-
-    public void UnequipToCaravan(int slot)
-{
-    WeaponData oldWeapon = slots[slot];
-    if (oldWeapon == null)
-        return;
-
-    // Karavana ekle
-    CaravanInventory.Instance.AddItem(oldWeapon.itemID, 1);
-
-    // Slotu boşalt
-    slots[slot] = null;
-    clip[slot] = 0;
-    reserve[slot] = 0;
-
-    Debug.Log("[WeaponSlotManager] Silah karavana gönderildi: " + oldWeapon.itemName);
-}
 }

@@ -58,20 +58,9 @@ public class GameInitializer : MonoBehaviour
     }
 
 
-    // 4) BAŞLANGIÇ SHOTGUN  ⭐⭐⭐ YENİ EKLENEN KOD ⭐⭐⭐
-    ItemData shotgunItem = ItemDatabase.Get("weapon_shotgun");
-    if (shotgunItem != null)
-    {
-        WeaponSlotManager.Instance.EquipWeapon(shotgunItem);
-        Debug.Log("▶ Yeni oyun → Başlangıç silahı verildi: Shotgun");
-    }
-    else
-    {
-        Debug.LogError("❌ ItemDatabase GET weapon_shotgun bulunamadı!");
-    }
-
+   
     // Aktif slot pistol olsun
-    WeaponSlotManager.Instance.activeSlotIndex = 1;
+    WeaponSlotManager.Instance.activeSlotIndex = 0;
 }
 
 

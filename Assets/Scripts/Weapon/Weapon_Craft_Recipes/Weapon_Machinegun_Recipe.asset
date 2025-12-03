@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_Machinegun_Recipe
   m_EditorClassIdentifier: Assembly-CSharp::WeaponCraftRecipe
   resultWeapon: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}
+  description: "Makinal\u0131 T\xFCfek"
   costs:
   - item: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
     amount: 2

@@ -54,7 +54,7 @@ public class InventorySlotUI : MonoBehaviour,
         // Ammo ise: item.count * ammoPerItem göster
         if (item.data is AmmoItemData ammoData)
         {
-            int totalAmmo = item.count * ammoData.ammoPerItem;
+            int totalAmmo = item.count * ammoData.ammoAmount;
             countText.text = $"x{totalAmmo}";
         }
         else

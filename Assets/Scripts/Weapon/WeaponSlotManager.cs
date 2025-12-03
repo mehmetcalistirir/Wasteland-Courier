@@ -144,7 +144,8 @@ public class WeaponSlotManager : MonoBehaviour
     WeaponData weapon = slots[slot];
     if (weapon != null)
     {
-        handler.SetWeapon(weapon, clip[slot], reserve[slot]);
+        handler.SetWeapon(weapon);
+
         Debug.Log("Handler açıldı ve silah verildi: " + weapon.name);
     }
     else

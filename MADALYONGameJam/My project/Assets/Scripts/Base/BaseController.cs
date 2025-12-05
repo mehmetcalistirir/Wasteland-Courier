@@ -10,6 +10,8 @@ public class BaseController : MonoBehaviour
     public float productionRate = 0.25f; // saniyede üretilen oran
 
     private float timer = 0f;
+    public bool isCastle = false;
+
 
     void Update()
     {

@@ -68,26 +68,46 @@ public class PlayerCommander : MonoBehaviour
     /// Ordunu listedeki bir SONRAKİ köye gönder.
     /// </summary>
     public void SendArmyToNextVillage()
+{
+    if (villages == null || villages.Length == 0) return;
+    if (playerArmy == null || playerArmy.GetCount() == 0) return; // ordun yoksa çık
+
+    int loopCount = 0;
+    BaseController target = null;
+
+    // villages dizisi içinde döner, uygun hedef köyü arar
+    while (loopCount < villages.Length)
     {
-        if (villages == null || villages.Length == 0) return;
+        BaseController candidate = villages[nextVillageIndex];
 
-        int safety = 0;
-
-        // Null köyleri atla
-        while (villages[nextVillageIndex] == null && safety < villages.Length)
-        {
-            nextVillageIndex = (nextVillageIndex + 1) % villages.Length;
-            safety++;
-        }
-
-        BaseController target = villages[nextVillageIndex];
-
-        // Bir sonraki seçim için index'i ilerlet
+        // Sonraki çağrıda baştan değil, kaldığı yerden devam etsin diye artır
         nextVillageIndex = (nextVillageIndex + 1) % villages.Length;
+        loopCount++;
 
-        if (target != null)
-            SendArmyTo(target);
+        if (candidate == null) continue;
+
+        // Eğer BaseController'da isCastle kullandıysak:
+        if (candidate.isCastle) continue;       // kaleleri atla
+
+        // Kendi köyümüze saldırmayalım
+        if (candidate.owner == Team.Player) continue;
+
+        // Buraya kadar geldiyse uygun hedeftir
+        target = candidate;
+        break;
     }
+
+    if (target != null)
+    {
+        SendArmyTo(target);
+    }
+    else
+    {
+        // Uygun hedef köy yok: istersen debug log bırak
+        Debug.Log("Gönderilecek uygun köy bulunamadı.");
+    }
+}
+
 
     /// <summary>
     /// Ordunu düşman kalesine gönder (Saldırı).
@@ -98,4 +118,36 @@ public class PlayerCommander : MonoBehaviour
 
         SendArmyTo(enemyCastle);
     }
+
+    public void SendVillagePiyonsToNextVillage(BaseController fromBase)
+{
+    if (villages == null || villages.Length == 0) return;
+
+    int loop = 0;
+    BaseController target = null;
+
+    // sıradaki köyü bul
+    while (loop < villages.Length)
+    {
+        BaseController candidate = villages[nextVillageIndex];
+        nextVillageIndex = (nextVillageIndex + 1) % villages.Length;
+        loop++;
+
+        if (candidate == null) continue;
+        if (candidate.isCastle) continue;      // kale değil
+        if (candidate == fromBase) continue;   // aynı köy değil
+
+        target = candidate;
+        break;
+    }
+
+    if (target == null) return;
+
+    BasePiyonManager bpm = fromBase.GetComponent<BasePiyonManager>();
+    if (bpm == null) return;
+
+    // Köy piyonlarını savunma olarak diğer köye gönder
+    bpm.SendAllToCastle(target);  // isim castle ama işlev savunma
+}
+
 }

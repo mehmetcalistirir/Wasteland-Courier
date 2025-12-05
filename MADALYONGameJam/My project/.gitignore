@@ -79,11 +79,6 @@ crashlytics-build.properties
 # TestRunner generated files
 InitTestScene*.unity*
 
-# Ignore Input System generated files
-Assets/PlayerControls.cs
-Assets/PlayerControls.cs.meta
-Assets/PlayerControls.inputactions
-Assets/PlayerControls.inputactions.meta
 
 
 # Addressables default ignores, before user customizations

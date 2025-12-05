@@ -53,20 +53,37 @@ public class PlayerCommandUI : MonoBehaviour
     // BUTTON DURUMLARINI GÜNCELLE
     // ---------------------------------------------------
     void UpdateButtons()
+{
+    if (currentBase == null)
     {
-        if (currentBase == null)
-        {
-            btnAddToArmy.interactable = false;
-            return;
-        }
-
-        // Sadece oyuncuya aitse "Orduna Ekle" çalışır
-        btnAddToArmy.interactable = (currentBase.owner == Team.Player);
-
-        // Diğer iki buton her zaman aktif
-        btnSendNext.interactable = true;
-        btnSendCastle.interactable = true;
+        btnAddToArmy.interactable = false;
+        btnSendNext.interactable = false;
+        btnSendCastle.gameObject.SetActive(false);
+        return;
     }
+
+    // Orduna ekle butonu
+    btnAddToArmy.interactable = (currentBase.owner == Team.Player);
+
+    // Köyün piyon sayısına bak → ordunun değil!
+    bool hasVillageUnits = currentBase.unitCount > 0;
+
+    // Eğer köy ise aktif, kale ise pasif
+    if (currentBase.isCastle)
+    {
+        btnSendNext.interactable = false;  // Kale içinde kullanılamaz
+        btnSendCastle.gameObject.SetActive(false);
+    }
+    else
+    {
+        btnSendNext.interactable = hasVillageUnits; // Köyde piyon varsa aktif
+        btnSendCastle.gameObject.SetActive(true);   // Kale gönder görünür
+    }
+}
+
+
+
+
 
     // ---------------------------------------------------
     // KÖYDEKİ TÜM PIYONLARI OYUNCU ORDUSUNA KAT
@@ -90,9 +107,13 @@ public class PlayerCommandUI : MonoBehaviour
     // ORDUDAN SONRAKİ KÖYE SALDIRI
     // ---------------------------------------------------
     public void Cmd_SendToNextVillage()
-    {
-        PlayerCommander.instance.SendArmyToNextVillage();
-    }
+{
+    if (currentBase == null) return;
+    if (currentBase.owner != Team.Player) return;
+
+    PlayerCommander.instance.SendVillagePiyonsToNextVillage(currentBase);
+}
+
 
     // ---------------------------------------------------
     // KÖY PİYONLARINI SAVUNMA AMAÇLI OYUNCU KALESİNE GÖNDER

@@ -18,8 +18,12 @@ MonoBehaviour:
   m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
     rid: 595725428056391763
-  m_OverrideGlobalSceneList: 0
-  m_Scenes: []
+  m_OverrideGlobalSceneList: 1
+  m_Scenes:
+  - m_enabled: 1
+    m_path: Assets/Scenes/AnaMenu.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Oyun Sahnesi.unity
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []
@@ -38,7 +42,7 @@ MonoBehaviour:
         m_ExplicitNullChecks: 0
         m_ExplicitDivideByZeroChecks: 0
         m_ExplicitArrayBoundsChecks: 0
-        m_CompressionType: -1
+        m_CompressionType: 0
         m_InstallInBuildFolder: 0
         m_InsightsSettingsContainer:
           m_BuildProfileEngineDiagnosticsState: 2

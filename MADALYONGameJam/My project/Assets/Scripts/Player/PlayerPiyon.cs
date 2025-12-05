@@ -42,6 +42,17 @@ public class PlayerPiyon : MonoBehaviour
         }
     }
 
+        public void RemovePiyons(int amount)
+    {
+        amount = Mathf.Min(amount, piyonListesi.Count);
+
+        for (int i = 0; i < amount; i++)
+        {
+            Destroy(piyonListesi[0]);
+            piyonListesi.RemoveAt(0);
+        }
+    }
+
     void HesaplaRingBilgisi(int index, out int ring, out int indexInRing, out int ringSize)
     {
         ring = 0;

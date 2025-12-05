@@ -37,6 +37,9 @@ public class PlayerCommander : MonoBehaviour
     // -----------------------------------------------------------
     public void SendVillagePiyonsTo(BaseController fromBase, BaseController target)
     {
+        if (fromBase.owner != Team.Player)
+            return; // Player düşman köyüne komut veremez
+
         if (fromBase == null || target == null) return;
 
         BasePiyonManager bpm = fromBase.GetComponent<BasePiyonManager>();
@@ -56,17 +59,17 @@ public class PlayerCommander : MonoBehaviour
     }
 
     public void SendArmyTo(BaseController target)
-{
-    if (target == null || playerArmy == null) return;
+    {
+        if (target == null || playerArmy == null) return;
 
-    int attackerCount = playerArmy.GetCount();
+        int attackerCount = playerArmy.GetCount();
 
-    // Savaş burada çözülüyor
-    target.ResolveBattle(attackerCount, Team.Player);
+        // Savaş burada çözülüyor
+        target.ResolveBattle(attackerCount, Team.Player);
 
-    // Saldırıya katılan tüm piyonları ordudan çıkar
-    playerArmy.ExtractAll();
-}
+        // Saldırıya katılan tüm piyonları ordudan çıkar
+        playerArmy.ExtractAll();
+    }
 
 
 

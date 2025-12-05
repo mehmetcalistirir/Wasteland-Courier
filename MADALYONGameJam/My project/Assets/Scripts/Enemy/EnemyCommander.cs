@@ -210,27 +210,31 @@ public class EnemyCommander : MonoBehaviour
     // 5) KÖYE ULAŞINCA NE YAPACAK?
     // -----------------------------------------------------
     void OnReachVillage(BaseController village)
+{
+    if (village == null) return;
+
+    // Tarafsız köy → tek seferlik ele geçir
+    if (village.owner == Team.Neutral)
     {
-        if (village == null) return;
-
-        // Tarafsız köy → ele geçir
-        if (village.owner == Team.Neutral)
-        {
-            village.owner = Team.Enemy;
-        }
-
-        // Kendi köyü veya kalesi → piyonları ordusuna ekle
-        if (village.owner == Team.Enemy)
-        {
-            EnemyAddVillagePiyonsToArmy(village);
-        }
-
-        // Oyuncu köyü → ordu ile saldır
-        if (village.owner == Team.Player)
-        {
-            SendArmyTo(village);
-        }
+        village.owner = Team.Enemy;
+        return;
     }
+
+    // Kendi köyüne geldiyse → piyon toplama YASAK (bug engellendi)
+    if (village.owner == Team.Enemy)
+    {
+        // Artık hiçbir şey yapılmıyor
+        return;
+    }
+
+    // Player köyü → Saldırı başlat
+    if (village.owner == Team.Player)
+    {
+        EnemyAttack(village);
+        return;
+    }
+}
+
 
     // -----------------------------------------------------
     // 6) KÖYLERDEN ORDUYA ASKER TOPLAMA
@@ -522,13 +526,13 @@ public class EnemyCommander : MonoBehaviour
 
 
     public void EnemyAttack(BaseController target)
-    {
-        int attackerCount = enemyArmy.GetCount();
+{
+    int attackerCount = enemyArmy.GetCount();
 
-        target.ResolveBattle(attackerCount, Team.Enemy);
+    target.ResolveBattle(attackerCount, Team.Enemy);
 
-        // Saldırıya katılan düşman piyonlarını yok et
-        enemyArmy.ExtractAll();
-    }
+    enemyArmy.ExtractAll(); // saldıran tüm piyonlar silinir
+}
+
 
 }

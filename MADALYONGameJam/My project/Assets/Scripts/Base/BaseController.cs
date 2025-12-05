@@ -43,8 +43,8 @@ public class BaseController : MonoBehaviour
     }
     public void ResolveBattle(int attackerCount, Team attackerTeam)
 {
-    BasePiyonManager bpm = GetComponent<BasePiyonManager>();
-    int defenderCount = bpm != null ? bpm.GetPiyonCount() : unitCount;
+    // SAVUNMA GÜCÜ = gerçek piyon sayısı
+    int defenderCount = unitCount;
 
     // 1) Karşılıklı öldürme
     int kill = Mathf.Min(attackerCount, defenderCount);
@@ -52,52 +52,85 @@ public class BaseController : MonoBehaviour
     int attackerRemaining = attackerCount - kill;
     int defenderRemaining = defenderCount - kill;
 
-    // Savunmacı piyonları sil
+    // ---- Savunmacı kaybı ----
+    unitCount = defenderRemaining;
+
+    // BPM varsa görsel piyonları da azalt
+    BasePiyonManager bpm = GetComponent<BasePiyonManager>();
+    if (bpm != null)
+        bpm.SyncTo(unitCount);
+
+    // ---- Saldıran kazandı ----
+    if (attackerRemaining > 0)
+    {
+        owner = attackerTeam;
+        unitCount = attackerRemaining;
+
+        if (bpm != null)
+            bpm.SyncTo(unitCount);
+    }
+}
+
+void StartBattle(int attackerCount, Team attackerTeam)
+{
+    BasePiyonManager bpm = GetComponent<BasePiyonManager>();
+
+    int defenderCount = bpm != null ? bpm.GetPiyonCount() : unitCount;
+
+    int kill = Mathf.Min(attackerCount, defenderCount);
+
+    int attackerRemaining = attackerCount - kill;
+    int defenderRemaining = defenderCount - kill;
+
+    // Savunma kayıpları
     if (bpm != null)
         bpm.RemovePiyons(kill);
+    unitCount = defenderRemaining;
+
+    // Saldıran taraf kayıpları
+    if (attackerTeam == Team.Player)
+    {
+        PlayerCommander.instance.playerArmy.RemovePiyons(kill);
+    }
     else
-        unitCount = defenderRemaining;
+    {
+        EnemyCommander.instance.enemyArmy.RemovePiyons(kill);
+    }
 
-    // 2) Saldıran taraf PİYON KAYBETTİ → Bunları ilgili ordudan düşeceğiz (dışarıda)
-
-    // 3) Eğer saldıran kazanırsa → köy owner değişir
+    // Eğer saldıran kazandıysa köyü ele geçir
     if (attackerRemaining > 0)
     {
         owner = attackerTeam;
 
-        // Kalan saldıran piyonlar köye yerleşsin
-        if (bpm != null)
-        {
-            bpm.RemovePiyons(defenderRemaining); // bütün savunma temizlendi
-
-            for (int i = 0; i < attackerRemaining; i++)
-                bpm.AddFakePiyon();
-        }
-
+        // Kazanan taraf köye kalan ordusunu yerleştirir
         unitCount = attackerRemaining;
-    }
-    else
-    {
-        // Köy savundu
-        unitCount = defenderRemaining;
+
+        if (bpm != null)
+            bpm.SyncTo(attackerRemaining);
     }
 }
+
+
 
 
     // --- ELE GEÇİRME SİSTEMİ ---
     private void OnTriggerEnter2D(Collider2D other)
 {
-    if (other.CompareTag("Player"))
+    // PLAYER ORDUSU GİRERSE
+    if (other.CompareTag("PlayerKing"))
     {
-        if (owner == Team.Neutral)
-            owner = Team.Player;
+        int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
+        StartBattle(attackerCount, Team.Player);
     }
 
-    if (other.CompareTag("Enemy"))
+    // ENEMY ORDUSU GİRERSE
+    if (other.CompareTag("EnemyKing"))
     {
-        if (owner == Team.Neutral)
-            owner = Team.Enemy;
+        int attackerCount = EnemyCommander.instance.enemyArmy.GetCount();
+        StartBattle(attackerCount, Team.Enemy);
     }
 }
+
+
 
 }

@@ -1,9 +1,11 @@
 using UnityEngine;
+using TMPro;
 
 public enum Team { Neutral, Player, Enemy }
 
 public class BaseController : MonoBehaviour
 {
+    public TextMeshPro countText;
     public Team owner = Team.Neutral;
     public int unitCount = 0;
     public int maxUnits = 20;
@@ -25,6 +27,14 @@ public class BaseController : MonoBehaviour
             }
         }
     }
+    void LateUpdate()
+{
+    if (countText != null)
+    {
+        countText.text = unitCount.ToString();
+    }
+}
+
 
     // 1v1 kayıp sistemi
     public void ReceiveAttack(int attackingUnits, Team attacker)
@@ -116,20 +126,37 @@ void StartBattle(int attackerCount, Team attackerTeam)
     // --- ELE GEÇİRME SİSTEMİ ---
     private void OnTriggerEnter2D(Collider2D other)
 {
-    // PLAYER ORDUSU GİRERSE
-    if (other.CompareTag("PlayerKing"))
+    // PLAYER KING tarafsız köye girerse → savaş yok → direkt ele geçir
+    if (other.CompareTag("PlayerKing") && owner == Team.Neutral)
+    {
+        owner = Team.Player;
+        return;
+    }
+
+    // ENEMY KING tarafsız köye girerse → savaş yok → direkt ele geçir
+    if (other.CompareTag("EnemyKing") && owner == Team.Neutral)
+    {
+        owner = Team.Enemy;
+        return;
+    }
+
+    // PLAYER ORDUSU rakip köye girerse savaş
+    if (other.CompareTag("PlayerKing") && owner == Team.Enemy)
     {
         int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
         StartBattle(attackerCount, Team.Player);
+        return;
     }
 
-    // ENEMY ORDUSU GİRERSE
-    if (other.CompareTag("EnemyKing"))
+    // ENEMY ORDUSU rakip köye girerse savaş
+    if (other.CompareTag("EnemyKing") && owner == Team.Player)
     {
         int attackerCount = EnemyCommander.instance.enemyArmy.GetCount();
         StartBattle(attackerCount, Team.Enemy);
+        return;
     }
 }
+
 
 
 

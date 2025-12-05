@@ -1,9 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
+
 
 public class EnemyCommander : MonoBehaviour
 {
     public static EnemyCommander instance;
+    public TextMeshPro kingCountText;
 
     [Header("Movement Settings")]
     public float moveSpeed = 2f;
@@ -43,6 +46,8 @@ public class EnemyCommander : MonoBehaviour
     {
         // Sürekli, akıcı hareket
         MoveToTargetVillage();
+        if (kingCountText != null)
+            kingCountText.text = enemyArmy.GetCount().ToString();
     }
 
     // -----------------------------------------------------

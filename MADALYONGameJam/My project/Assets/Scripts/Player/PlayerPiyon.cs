@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class PlayerPiyon : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class PlayerPiyon : MonoBehaviour
 
     public float baseRadius = 1.5f;   // 1. halkanın yarıçapı
     public float radiusStep = 1.0f;   // Her yeni halka ne kadar genişlesin?
+    public TextMeshPro countText;
 
     private List<GameObject> piyonListesi = new List<GameObject>();
 
@@ -22,6 +24,8 @@ public class PlayerPiyon : MonoBehaviour
     void Update()
     {
         PiyonlariYorungelerdeDondur();
+        if (countText != null)
+            countText.text = GetCount().ToString();
     }
 
     void PiyonlariYorungelerdeDondur()

@@ -30,32 +30,28 @@ public class PlayerCommandUI : MonoBehaviour
         {
             currentBase = baseCtrl;
             uiPanel.SetActive(true);
-
             UpdateButtons();
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
-{
-    // Eğer other null olduysa (Destroy edilmişse) hata olmasın
-    if (other == null) return;
-    
-    BaseController baseCtrl = other.GetComponent<BaseController>();
-
-    if (currentBase != null && baseCtrl == currentBase)
     {
-        currentBase = null;
+        if (other == null) return;
 
-        if (uiPanel != null)
-            uiPanel.SetActive(false);
+        BaseController baseCtrl = other.GetComponent<BaseController>();
+
+        if (currentBase != null && baseCtrl == currentBase)
+        {
+            currentBase = null;
+
+            if (uiPanel != null)
+                uiPanel.SetActive(false);
+        }
     }
-}
 
-
-    // ------------------------------
-    // BUTTON LOGIC
-    // ------------------------------
-
+    // ---------------------------------------------------
+    // BUTTON DURUMLARINI GÜNCELLE
+    // ---------------------------------------------------
     void UpdateButtons()
     {
         if (currentBase == null)
@@ -64,51 +60,52 @@ public class PlayerCommandUI : MonoBehaviour
             return;
         }
 
-        // Sadece oyuncuya aitse orduna ekleyebilir
+        // Sadece oyuncuya aitse "Orduna Ekle" çalışır
         btnAddToArmy.interactable = (currentBase.owner == Team.Player);
 
-        // Diğer 2 buton her zaman aktif olabilir
+        // Diğer iki buton her zaman aktif
         btnSendNext.interactable = true;
         btnSendCastle.interactable = true;
     }
 
+    // ---------------------------------------------------
+    // KÖYDEKİ TÜM PIYONLARI OYUNCU ORDUSUNA KAT
+    // ---------------------------------------------------
     public void Cmd_AddToArmy()
-{
-    if (currentBase == null) return;
-    if (playerArmy == null) return;
-    if (currentBase.owner != Team.Player) return;
-
-    BasePiyonManager bpm = currentBase.GetComponent<BasePiyonManager>();
-    if (bpm != null)
     {
-        // tüm wandering piyonları oyuncuya gönder
-        bpm.TransferAllToPlayer(transform);
+        if (currentBase == null) return;
+        if (playerArmy == null) return;
+        if (currentBase.owner != Team.Player) return;
+
+        BasePiyonManager bpm = currentBase.GetComponent<BasePiyonManager>();
+        if (bpm != null)
+            bpm.TransferAllToPlayer(transform);
+
+        currentBase.unitCount = 0;
+
+        UpdateButtons();
     }
 
-    // kalan sayı sıfırlanır
-    currentBase.unitCount = 0;
-
-    UpdateButtons();
-}
-
-
+    // ---------------------------------------------------
+    // ORDUDAN SONRAKİ KÖYE SALDIRI
+    // ---------------------------------------------------
     public void Cmd_SendToNextVillage()
     {
         PlayerCommander.instance.SendArmyToNextVillage();
     }
 
+    // ---------------------------------------------------
+    // KÖY PİYONLARINI SAVUNMA AMAÇLI OYUNCU KALESİNE GÖNDER
+    // ---------------------------------------------------
     public void Cmd_SendToCastle()
-{
-    if (currentBase == null) return;
+    {
+        if (currentBase == null) return;
+        if (currentBase.owner != Team.Player) return;
 
-    // Bu köy/kale bize ait mi?
-    if (currentBase.owner != Team.Player) return;
+        BasePiyonManager bpm = currentBase.GetComponent<BasePiyonManager>();
+        if (bpm == null) return;
 
-    BasePiyonManager bpm = currentBase.GetComponent<BasePiyonManager>();
-    if (bpm == null) return;
-
-    // Köyden oyuncu kalesine piyon gönder
-    bpm.SendAllToCastle(PlayerCommander.instance.enemyCastle);
-}
-
+        // 🔥 Artık savunma için oyuncu kalesine gidiyor
+        bpm.SendAllToCastle(PlayerCommander.instance.playerCastle);
+    }
 }

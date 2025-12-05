@@ -11,6 +11,9 @@ public class PlayerCommander : MonoBehaviour
     [Tooltip("Haritadaki tüm köy BaseController'ları (Inspector'dan doldur)")]
     public BaseController[] villages;
 
+    [Tooltip("Oyuncunun kendi kalesi (Savunma için kullanılacak)")]
+    public BaseController playerCastle;   // 🔥 EKLENDİ
+
     [Tooltip("Düşman kalesinin BaseController'ı")]
     public BaseController enemyCastle;
 
@@ -18,7 +21,7 @@ public class PlayerCommander : MonoBehaviour
 
     private void Awake()
     {
-        // Basit singleton
+        // Basit Singleton
         if (instance != null && instance != this)
         {
             Destroy(gameObject);
@@ -29,7 +32,7 @@ public class PlayerCommander : MonoBehaviour
     }
 
     /// <summary>
-    /// Şu an oyuncunun ordusunda kaç piyon var?
+    /// Oyuncu ordusunda kaç piyon olduğunu döner.
     /// </summary>
     public int GetArmyCount()
     {
@@ -38,7 +41,7 @@ public class PlayerCommander : MonoBehaviour
     }
 
     /// <summary>
-    /// Ordudaki TÜM piyonları hedef base'e doğru yürütür.
+    /// Ordudaki TÜM piyonları hedef base'e doğru gönderir.
     /// </summary>
     public void SendArmyTo(BaseController target)
     {
@@ -56,9 +59,8 @@ public class PlayerCommander : MonoBehaviour
             Piyon piyon = go.GetComponent<Piyon>();
             if (piyon == null) continue;
 
-            // Piyonun kendi AttackBase fonksiyonunu kullanıyoruz
+            // Saldırı modu: piyon AttackBase kullanır
             piyon.AttackBase(target, Team.Player);
-
         }
     }
 
@@ -69,8 +71,9 @@ public class PlayerCommander : MonoBehaviour
     {
         if (villages == null || villages.Length == 0) return;
 
-        // Güvenlik: null olanları atla
         int safety = 0;
+
+        // Null köyleri atla
         while (villages[nextVillageIndex] == null && safety < villages.Length)
         {
             nextVillageIndex = (nextVillageIndex + 1) % villages.Length;
@@ -79,17 +82,15 @@ public class PlayerCommander : MonoBehaviour
 
         BaseController target = villages[nextVillageIndex];
 
-        // Sonraki çağrıda bir sonrakini seçmesi için index'i ilerlet
+        // Bir sonraki seçim için index'i ilerlet
         nextVillageIndex = (nextVillageIndex + 1) % villages.Length;
 
         if (target != null)
-        {
             SendArmyTo(target);
-        }
     }
 
     /// <summary>
-    /// Ordunu düşman kalesine gönder.
+    /// Ordunu düşman kalesine gönder (Saldırı).
     /// </summary>
     public void SendArmyToCastle()
     {

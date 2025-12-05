@@ -13,9 +13,13 @@ public class Piyon : MonoBehaviour
     private Mode currentMode = Mode.Wander;
 
     private Transform player;
-    private BaseController targetBase;
 
-    private Team attackerTeam = Team.Player; // 🔥 ARTIK saldıran takım bilgisi tutuluyor
+    // --- SALDIRI ---
+    private BaseController targetBase;
+    private Team attackerTeam = Team.Player;
+
+    // --- SAVUNMA ---
+    private BaseController defendBase;
 
     public void SetVillageCenter(Transform center)
     {
@@ -76,29 +80,50 @@ public class Piyon : MonoBehaviour
         }
     }
 
-    // ----------- BASE’E SALDIRMA ------------
+    // ----------- SALDIRI AMAÇLI BASE’E GİTME ------------
     public void AttackBase(BaseController target, Team attacker)
     {
         targetBase = target;
-        attackerTeam = attacker; // 🔥 SALDIRAN TAKIMI KAYDET
+        attackerTeam = attacker;
         currentMode = Mode.ToBase;
     }
 
-    void BaseeDogruGit()
+    // ----------- SAVUNMA AMAÇLI KALEYE GİTME ------------
+    public void GoDefendBase(BaseController castle)
     {
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetBase.transform.position,
-            joinSpeed * Time.deltaTime
-        );
-
-        if (Vector3.Distance(transform.position, targetBase.transform.position) < 0.25f)
-        {
-            // 🔥 Artık gerçek takım saldırıyor
-            targetBase.ReceiveAttack(1, attackerTeam);
-            Destroy(gameObject);
-        }
+        defendBase = castle;
+        currentMode = Mode.ToBase;
     }
+
+    // ----------- BASE'E DOĞRU HAREKET (SALDIRI + SAVUNMA) ------------
+    void BaseeDogruGit()
+{
+    BaseController goal = defendBase != null ? defendBase : targetBase;
+
+    transform.position = Vector3.MoveTowards(
+        transform.position,
+        goal.transform.position,
+        joinSpeed * Time.deltaTime
+    );
+
+    // --- SAVUNMA (Oyuncu kalesine varınca) ---
+    if (defendBase != null &&
+        Vector3.Distance(transform.position, defendBase.transform.position) < 0.25f)
+    {
+        defendBase.unitCount++;  // savunmaya ekle
+        Destroy(gameObject);
+        return;
+    }
+
+    // --- SALDIRI (düşman kaleye) ---
+    if (targetBase != null &&
+        Vector3.Distance(transform.position, targetBase.transform.position) < 0.25f)
+    {
+        targetBase.ReceiveAttack(1, attackerTeam);
+        Destroy(gameObject);
+    }
+}
+
 
     public void SetWanderSpeed(float s)
     {

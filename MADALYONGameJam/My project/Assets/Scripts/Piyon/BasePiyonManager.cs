@@ -117,21 +117,20 @@ public void SendAllToCastle(BaseController castle)
 {
     if (castle == null) return;
 
-    // Köyün sahip olduğu toplam sayısal piyon
     int count = baseController.unitCount;
     if (count <= 0) return;
 
     baseController.unitCount = 0;
 
-    // Görsel wander piyonları tek tek gönder
     foreach (var p in piyonlar)
     {
         if (p != null)
-            p.AttackBase(castle, baseController.owner);
+            p.GoDefendBase(castle);   // SALDIRI değil → SAVUNMA
     }
 
     piyonlar.Clear();
 }
+
 
 
 }

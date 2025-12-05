@@ -4,6 +4,7 @@ public enum Team { Neutral, Player, Enemy }
 
 public class BaseController : MonoBehaviour
 {
+    public string villageName = "Köy";
     public Team owner = Team.Neutral;
     public int unitCount = 0;
     public int maxUnits = 20;
@@ -15,7 +16,6 @@ public class BaseController : MonoBehaviour
 
     void Update()
     {
-        // sadece sahip olunan köy/kale üretim yapar
         if (owner != Team.Neutral && unitCount < maxUnits)
         {
             timer += Time.deltaTime;

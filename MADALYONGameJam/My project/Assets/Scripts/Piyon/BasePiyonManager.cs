@@ -13,7 +13,7 @@ public class BasePiyonManager : MonoBehaviour
     public float wanderSpeed = 1.5f;
     public int maxVisualPiyon = 30;
 
-    private List<Piyon> piyonlar = new List<Piyon>();
+    public List<Piyon> piyonlar = new List<Piyon>();
 
     void Update()
     {
@@ -103,33 +103,76 @@ public class BasePiyonManager : MonoBehaviour
             p.OyuncuyaKatıl(oyuncu);
         }
     }
+
+    public void RemovePiyons(int amount)
+    {
+        amount = Mathf.Min(amount, piyonlar.Count);
+
+        for (int i = 0; i < amount; i++)
+        {
+            if (piyonlar[0] != null)
+                Destroy(piyonlar[0].gameObject);
+
+            piyonlar.RemoveAt(0);
+        }
+    }
+
+    public void AddFakePiyon()
+    {
+        GameObject p = Instantiate(piyonPrefab, transform.position, Quaternion.identity);
+
+        Piyon script = p.GetComponent<Piyon>();
+        script.SetVillageCenter(transform);
+
+        piyonlar.Add(script);
+    }
+
     public void TransferAllToPlayer(Transform player)
-{
-    foreach (var p in piyonlar)
     {
-        if (p != null)
-            p.OyuncuyaKatıl(player);
+        foreach (var p in piyonlar)
+        {
+            if (p != null)
+                p.OyuncuyaKatıl(player);
+        }
+
+        piyonlar.Clear();
     }
 
-    piyonlar.Clear();
-}
-public void SendAllToCastle(BaseController castle)
-{
-    if (castle == null) return;
-
-    int count = baseController.unitCount;
-    if (count <= 0) return;
-
-    baseController.unitCount = 0;
-
-    foreach (var p in piyonlar)
+    public int GetPiyonCount()
     {
-        if (p != null)
-            p.GoDefendBase(castle);   // SALDIRI değil → SAVUNMA
+        return piyonlar.Count;
     }
 
-    piyonlar.Clear();
-}
+    public void SendAllToCastle(BaseController castle)
+    {
+        if (castle == null) return;
+
+        int count = baseController.unitCount;
+        if (count <= 0) return;
+
+        baseController.unitCount = 0;
+
+        foreach (var p in piyonlar)
+        {
+            if (p != null)
+                p.GoDefendBase(castle);   // SALDIRI değil → SAVUNMA
+        }
+
+        piyonlar.Clear();
+    }
+
+    public void TransferAllToEnemy(Transform enemyKing)
+    {
+        foreach (var p in piyonlar)
+        {
+            if (p != null)
+                p.DusmanaKatıl(enemyKing);
+        }
+
+        piyonlar.Clear();
+    }
+
+
 
 
 

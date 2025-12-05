@@ -53,17 +53,28 @@ public class PlayerCommandUI : MonoBehaviour
     }
 
     private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other == null) return;
+{
+    // Eğer collider zaten yok edilmişse → çık
+    if (other == null) 
+        return;
 
-        BaseController baseCtrl = other.GetComponent<BaseController>();
+    BaseController baseCtrl = other.GetComponent<BaseController>();
 
-        if (currentBase != null && baseCtrl == currentBase)
-        {
-            currentBase = null;
-            uiPanel.SetActive(false);
-        }
-    }
+    // Eğer currentBase hâlâ geçerli değilse → çık
+    if (currentBase == null)
+        return;
+
+    // Eğer bu çıkan collider currentBase değilse → çık
+    if (baseCtrl != currentBase)
+        return;
+
+    // Artık UI güvenle kapatılabilir
+    if (uiPanel != null)
+        uiPanel.SetActive(false);
+
+    currentBase = null;
+}
+
 
     // ---------------------------------------------------
     // BUTTON DURUMLARINI GÜNCELLE

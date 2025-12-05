@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections;
+
 
 public class Piyon : MonoBehaviour
 {
@@ -9,7 +11,8 @@ public class Piyon : MonoBehaviour
     private Vector3 hedefPozisyon;
     private Transform villageCenter;
 
-    private enum Mode { Wander, ToPlayer, ToBase }
+    private enum Mode { Wander, ToPlayer, ToEnemy, ToBase }
+
     private Mode currentMode = Mode.Wander;
 
     private Transform player;
@@ -34,6 +37,8 @@ public class Piyon : MonoBehaviour
             case Mode.Wander: Wander(); break;
             case Mode.ToPlayer: OyuncuyaDogruGit(); break;
             case Mode.ToBase: BaseeDogruGit(); break;
+            case Mode.ToEnemy: DusmanaDogruGit(); break;
+
         }
     }
 
@@ -81,12 +86,30 @@ public class Piyon : MonoBehaviour
     }
 
     // ----------- SALDIRI AMAÇLI BASE’E GİTME ------------
-    public void AttackBase(BaseController target, Team attacker)
+    public void AttackBase(BaseController target, Team team)
+{
+    attackerTeam = team;
+    targetBase = target;
+    StartCoroutine(DoAttack());
+}
+
+IEnumerator DoAttack()
+{
+    while (Vector2.Distance(transform.position, targetBase.transform.position) > 0.15f)
     {
-        targetBase = target;
-        attackerTeam = attacker;
-        currentMode = Mode.ToBase;
+        transform.position = Vector2.MoveTowards(transform.position, targetBase.transform.position, 5f * Time.deltaTime);
+        yield return null;
     }
+
+    // SALDIRAN TARAF SAYISINI BUL
+    int attackerCount = 1;
+
+    // KÖYDE SAVAŞI ÇALIŞTIR
+    targetBase.ResolveBattle(attackerCount, attackerTeam);
+
+    // Bu piyon artık saldırıya katıldığı için yok edilir
+    Destroy(gameObject);
+}
 
     // ----------- SAVUNMA AMAÇLI KALEYE GİTME ------------
     public void GoDefendBase(BaseController castle)
@@ -129,4 +152,28 @@ public class Piyon : MonoBehaviour
     {
         wanderSpeed = s;
     }
+
+    public void DusmanaKatıl(Transform enemyKing)
+{
+    player = enemyKing;
+    currentMode = Mode.ToEnemy;
+
+    // hedef = enemy army
+}
+
+void DusmanaDogruGit()
+{
+    transform.position = Vector3.MoveTowards(
+        transform.position,
+        player.position,
+        joinSpeed * Time.deltaTime
+    );
+
+    if (Vector3.Distance(transform.position, player.position) < 0.25f)
+    {
+        EnemyCommander.instance.enemyArmy.AddUnit(gameObject);
+    }
+}
+
+
 }

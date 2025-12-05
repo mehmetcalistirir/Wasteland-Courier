@@ -56,21 +56,19 @@ public class PlayerCommander : MonoBehaviour
     }
 
     public void SendArmyTo(BaseController target)
-    {
-        if (target == null || playerArmy == null) return;
+{
+    if (target == null || playerArmy == null) return;
 
-        GameObject[] army = playerArmy.ExtractAll();
-        if (army == null || army.Length == 0) return;
+    int attackerCount = playerArmy.GetCount();
 
-        foreach (GameObject go in army)
-        {
-            if (go == null) continue;
+    // Savaş burada çözülüyor
+    target.ResolveBattle(attackerCount, Team.Player);
 
-            Piyon piyon = go.GetComponent<Piyon>();
-            if (piyon != null)
-                piyon.AttackBase(target, Team.Player);
-        }
-    }
+    // Saldırıya katılan tüm piyonları ordudan çıkar
+    playerArmy.ExtractAll();
+}
+
+
 
     public void SendArmyToCastle()
     {

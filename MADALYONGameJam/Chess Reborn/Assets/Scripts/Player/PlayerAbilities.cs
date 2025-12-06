@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using System.Collections;
 
 
@@ -37,6 +38,13 @@ public class PlayerAbilities : MonoBehaviour
 
     void OnMouseClick()
 {
+    // UI tıklandıysa sahne tıklamasını yok say
+    if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+    {
+        Debug.Log("UI clicked — ignoring world click.");
+        return;
+    }
+
     Debug.Log("CLICK RECEIVED | placingBarrier = " + placingBarrier);
 
     if (!placingBarrier)
@@ -73,6 +81,7 @@ public class PlayerAbilities : MonoBehaviour
     placingBarrier = false;
     PlayerAbilityUI.instance.RemoveAbilityButton(AbilityType.PlaceBarrier);
 }
+
 
 
     // Speed skill aynı şekilde çalışmaya devam eder

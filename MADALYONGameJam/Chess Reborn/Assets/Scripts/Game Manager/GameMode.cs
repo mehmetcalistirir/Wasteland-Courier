@@ -45,11 +45,17 @@ public class GameMode : MonoBehaviour
         losePanel.SetActive(true);
     }
 
-    public void RestartGame()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+   public void RestartGame()
+{
+    // 🔥 MÜZİĞİ ANINDA KES
+    MusicManager.instance.StopMusic();
+
+    // 🔥 SONRA SAHNEYİ YENİDEN YÜKLE
+    UnityEngine.SceneManagement.SceneManager.LoadScene(
+        UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
+    );
+}
+
 
     public void GoMainMenu()
     {

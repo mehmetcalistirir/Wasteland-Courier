@@ -8,9 +8,21 @@ public class MusicManager : MonoBehaviour
     private AudioSource source;
     private int lastPlayed = -1;
 
+    public static MusicManager instance;
+
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        // Singleton
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
     void Start()
@@ -23,7 +35,7 @@ public class MusicManager : MonoBehaviour
     {
         if (source.clip == null) return;
 
-        // GERÇEK bitiş kontrolü
+        // Şarkı doğal olarak bittiyse tekrar rastgele çal
         if (source.time >= source.clip.length - 0.1f)
         {
             PlayRandomTrack();
@@ -34,7 +46,7 @@ public class MusicManager : MonoBehaviour
     {
         int nextTrack = Random.Range(0, 2);
 
-        // Aynı şarkıyı iki kere çalma
+        // Aynı şarkıyı 2 kere üst üste çalma
         if (nextTrack == lastPlayed)
             nextTrack = (nextTrack + 1) % 2;
 
@@ -42,5 +54,12 @@ public class MusicManager : MonoBehaviour
 
         source.clip = (nextTrack == 0) ? track1 : track2;
         source.Play();
+    }
+
+    // 🔥 Restart'a basınca çağrılacak
+    public void StopMusic()
+    {
+        if (source != null)
+            source.Stop();
     }
 }

@@ -11,19 +11,22 @@ public class PlayerMovement2D : MonoBehaviour
     public float cooldownPerPawn = 0.01f;
 
     [Header("Step Sizes")]
-    public float straightStepSize = 1f;    // düz hareket mesafesi
-    public float diagonalStepSize = 1.4f;  // çapraz hareket mesafesi
+    public float straightStepSize = 1f;
+    public float diagonalStepSize = 1.4f;
+
     private float buffAmount = 0f;
     private float zoneBuff = 0f;
     private float normalSpeed;
-
 
     private BaseController zone;
     public float zoneBonus = 2f;
 
     private float stepCooldown;
     private bool canMove = true;
-    private Vector2 moveInput;
+
+    private Vector2 moveInput;      // klavye input (WASD)
+    private Vector2 mobileInput;    // mobil UI input
+
     private Rigidbody2D rb;
 
     public AudioSource footstepSource;
@@ -33,8 +36,9 @@ public class PlayerMovement2D : MonoBehaviour
     public int pawnCount;
     private PlayerPiyon playerPiyon;
     private PlayerControls controls;
-    public float baseSpeed = 5f;        // Normal hız
-    public float speedBoostAmount = 0f; // Geçici buff (+3 gibi)
+
+    public float baseSpeed = 5f;
+    public float speedBoostAmount = 0f;
 
 
     void Awake()
@@ -61,35 +65,38 @@ public class PlayerMovement2D : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         footstepSource.loop = false;
         playerPiyon = FindObjectOfType<PlayerPiyon>();
-        baseSpeed = moveSpeed; // inspector'dan gelen değer
+        baseSpeed = moveSpeed;
+    }
+
+    // 🔥 UI yön butonları burayı çağıracak
+    public void SetMobileInput(Vector2 val)
+    {
+        mobileInput = val;
     }
 
     void Update()
-{
-    pawnCount = playerPiyon.GetCount();
-    stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
-
-    // zone bonus sadece oyuncunun kendi köyü ise aktif olmalı
-    if (zone != null && zone.owner == Team.Player)
-        zoneBonus = 2f;
-    else
-        zoneBonus = 0f;
-
-    // Tüm hız kaynaklarını birleştir
-    float finalSpeed = baseSpeed + speedBoostAmount + zoneBonus;
-    moveSpeed = finalSpeed;
-
-    if (canMove && moveInput != Vector2.zero)
     {
-        Vector2 dir = NormalizeDirection(moveInput);
-        StartCoroutine(MoveOneStep(dir));
-    }
-}
+        pawnCount = playerPiyon.GetCount();
+        stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
 
+        // Zone buff
+        zoneBonus = (zone != null && zone.owner == Team.Player) ? 2f : 0f;
+
+        // Hız birleşimi
+        moveSpeed = baseSpeed + speedBoostAmount + zoneBonus;
+
+        // 🔥 hangi input kullanılacak?
+        Vector2 finalInput = mobileInput != Vector2.zero ? mobileInput : moveInput;
+
+        if (canMove && finalInput != Vector2.zero)
+        {
+            Vector2 dir = NormalizeDirection(finalInput);
+            StartCoroutine(MoveOneStep(dir));
+        }
+    }
 
     public void AddSpeedBuff(float amount)
     {
-        // buff zaten aktifse ikinci kez ekleme
         if (zoneBuff > 0f)
             return;
 
@@ -101,7 +108,6 @@ public class PlayerMovement2D : MonoBehaviour
 
     public void RemoveSpeedBuff(float amount)
     {
-        // buff aktif değilse çıkma
         if (zoneBuff <= 0f)
             return;
 
@@ -110,6 +116,7 @@ public class PlayerMovement2D : MonoBehaviour
 
         Debug.Log("BUFF REMOVED");
     }
+
     public void SetInsideZone(BaseController b)
     {
         zone = b;
@@ -130,10 +137,9 @@ public class PlayerMovement2D : MonoBehaviour
     {
         canMove = false;
 
-        // 🔥 yön düz mü çapraz mı?
         float step = (direction.x != 0 && direction.y != 0)
-            ? diagonalStepSize      // çapraz
-            : straightStepSize;     // düz
+            ? diagonalStepSize
+            : straightStepSize;
 
         Vector2 startPos = rb.position;
         Vector2 targetPos = startPos + direction * step;

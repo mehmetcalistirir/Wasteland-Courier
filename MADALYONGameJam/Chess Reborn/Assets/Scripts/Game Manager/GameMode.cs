@@ -54,6 +54,6 @@ public class GameMode : MonoBehaviour
     public void GoMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("AnaMenu");
     }
 }

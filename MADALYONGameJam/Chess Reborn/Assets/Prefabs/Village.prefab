@@ -305,7 +305,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasePiyonManager
   baseController: {fileID: 2862569594179929421}
-  piyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
+  playerPiyonPrefab: {fileID: 3174025525024426083, guid: 75ea13f7b5b0c5e4caf2fe3ee870a3ea, type: 3}
+  enemyPiyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
   oyuncu: {fileID: 0}
   wanderRadius: 2
   wanderSpeed: 1.5
@@ -355,5 +356,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 10.038692, y: 9.24258}
+  m_Size: {x: 10, y: 10}
   m_EdgeRadius: 0

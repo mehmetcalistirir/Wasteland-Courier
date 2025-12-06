@@ -77,17 +77,21 @@ public class PlayerAbilities : MonoBehaviour
 
     // Speed skill aynı şekilde çalışmaya devam eder
     public void ActivateSpeedBoost()
-    {
-        StartCoroutine(SpeedBoostRoutine());
-    }
+{
+    // Daha tıklanır tıklanmaz butonu kaldırıyoruz:
+    PlayerAbilityUI.instance.RemoveAbilityButton(AbilityType.SpeedBoost);
+
+    StartCoroutine(SpeedBoostRoutine());
+}
 
     IEnumerator SpeedBoostRoutine()
-    {
-        float original = movement.moveSpeed;
-        movement.moveSpeed += 3f;
+{
+    float original = movement.moveSpeed;
 
-        yield return new WaitForSeconds(5f);
+    movement.moveSpeed += 3f;
 
-        movement.moveSpeed = original;
-    }
+    yield return new WaitForSeconds(5f);
+
+    movement.moveSpeed = original;
+}
 }

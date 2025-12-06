@@ -58,8 +58,6 @@ public class PlayerMovement2D : MonoBehaviour
         // İstersen minimum / maksimum sınır koyabilirsin:
         // stepCooldown = Mathf.Clamp(stepCooldown, 0.1f, 1.0f);
 
-        Debug.Log("pawnCount = " + pawnCount + " | stepCooldown = " + stepCooldown);
-
         // input varsa ve hareket edebiliyorsak
         if (canMove && moveInput != Vector2.zero)
         {

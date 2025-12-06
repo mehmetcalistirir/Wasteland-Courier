@@ -36,6 +36,11 @@ public class EnemyCommander : MonoBehaviour
 
     private bool isRetreating = false;
 
+    private Vector2 avoidDir = Vector2.zero;
+private float avoidTimer = 0f;
+public float avoidDuration = 0.5f;
+public float avoidSpeed = 2f;
+
     void Awake()
     {
         instance = this;
@@ -139,6 +144,15 @@ void StartKingBattle()
     // -----------------------------------------------------
     void MoveToTargetVillage()
     {
+        if (avoidTimer > 0)
+{
+    avoidTimer -= Time.deltaTime;
+
+    enemyKing.position += (Vector3)(avoidDir * avoidSpeed * Time.deltaTime);
+
+    return; // Hedefe gitmeyi geçici olarak durdur
+}
+
         if (!canMove) return;
         if (enemyKing == null || villages == null || villages.Length == 0) return;
 
@@ -548,4 +562,22 @@ void StartKingBattle()
 
         enemyArmy.ExtractAll();
     }
+
+    public void OnObstacleDetected(Collider2D obstacle)
+{
+    Vector2 toObstacle = obstacle.transform.position - enemyKing.position;
+
+    // Engel x ekseninde ise → yukarı/aşağı kaç
+    if (Mathf.Abs(toObstacle.x) > Mathf.Abs(toObstacle.y))
+    {
+        avoidDir = new Vector2(0, toObstacle.y > 0 ? -1 : 1);
+    }
+    else
+    {
+        // Engel y ekseninde ise → sağ/sol kaç
+        avoidDir = new Vector2(toObstacle.x > 0 ? -1 : 1, 0);
+    }
+
+    avoidTimer = avoidDuration;
+}
 }

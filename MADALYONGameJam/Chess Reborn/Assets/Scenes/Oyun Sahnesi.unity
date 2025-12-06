@@ -129,9 +129,9 @@ GameObject:
   m_Component:
   - component: {fileID: 38655327}
   - component: {fileID: 38655326}
-  - component: {fileID: 38655328}
   - component: {fileID: 38655329}
   - component: {fileID: 38655330}
+  - component: {fileID: 38655328}
   m_Layer: 8
   m_Name: Enemy King
   m_TagString: Enemy
@@ -185,7 +185,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_Sprite: {fileID: 2654564227598221988, guid: 2617e602348e4e24484f8a1a9f56ddde, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -456,11 +456,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.7393415
+      value: 0.59
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 11.936643
+      value: 17.59
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1317,7 +1317,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -1331,7 +1331,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 10, y: 10}
   m_EdgeRadius: 0
 --- !u!212 &646027168
 SpriteRenderer:
@@ -1400,7 +1400,7 @@ Transform:
   m_GameObject: {fileID: 646027165}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.77, y: 5.94, z: 0}
+  m_LocalPosition: {x: -22.33, y: -0.67, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1420,7 +1420,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasePiyonManager
   baseController: {fileID: 646027166}
-  piyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
+  playerPiyonPrefab: {fileID: 3174025525024426083, guid: 75ea13f7b5b0c5e4caf2fe3ee870a3ea, type: 3}
+  enemyPiyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
   oyuncu: {fileID: 1844597295}
   wanderRadius: 2
   wanderSpeed: 1.5
@@ -2623,7 +2624,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 5
-  m_Spacing: 5
+  m_Spacing: 40
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -3264,7 +3265,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -3278,7 +3279,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 9.744813, y: 9.431379}
+  m_Size: {x: 10, y: 10}
   m_EdgeRadius: 0
 --- !u!212 &1176936363
 SpriteRenderer:
@@ -3367,7 +3368,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasePiyonManager
   baseController: {fileID: 1176936361}
-  piyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
+  playerPiyonPrefab: {fileID: 3174025525024426083, guid: 75ea13f7b5b0c5e4caf2fe3ee870a3ea, type: 3}
+  enemyPiyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
   oyuncu: {fileID: 1844597295}
   wanderRadius: 2
   wanderSpeed: 1.5
@@ -3801,11 +3803,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 15.9283495
+      value: 23.06
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.7009602
+      value: -9.16
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4567,63 +4569,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1509175842}
   m_CullTransparentMesh: 1
---- !u!1001 &1561555597
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1160818652734762702, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_Name
-      value: BarrierPickup
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -4.416362
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.6671365
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8724139012590085720, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
 --- !u!1 &1584468612
 GameObject:
   m_ObjectHideFlags: 0
@@ -4925,6 +4870,8 @@ MonoBehaviour:
   retreatThreshold: 3
   safeRadiusFromPlayer: 6
   weakVillageUnitThreshold: 5
+  avoidDuration: 0.5
+  avoidSpeed: 2
 --- !u!114 &1765772753
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5088,7 +5035,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cc9745a0f1cb30488446c7a3a0b9c9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPiyon
-  piyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
+  piyonPrefab: {fileID: 3174025525024426083, guid: 75ea13f7b5b0c5e4caf2fe3ee870a3ea, type: 3}
   baseRadius: 4
   radiusStep: 1
   countText: {fileID: 1996679056}
@@ -5122,7 +5069,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -5136,7 +5083,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.27, y: 4.41}
   m_EdgeRadius: 0
 --- !u!50 &1844597299
 Rigidbody2D:
@@ -5164,7 +5111,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &1844597300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5649,11 +5596,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 16.1
+      value: 20.73
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.58
+      value: 10.26
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5712,4 +5659,3 @@ SceneRoots:
   - {fileID: 5125443612880835342}
   - {fileID: 1280577658}
   - {fileID: 132783054}
-  - {fileID: 1561555597}

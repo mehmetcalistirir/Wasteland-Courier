@@ -546,7 +546,8 @@ public class EnemyCommander : MonoBehaviour
 
         if (target != null)
         {
-            SendArmyTo(target);
+            currentTargetVillage = target;
+
             return;
         }
 
@@ -598,9 +599,17 @@ public class EnemyCommander : MonoBehaviour
 
         int attackerCount = enemyArmy.GetCount();
 
-        target.ResolveBattle(attackerCount, Team.Enemy);
+        float dist = Vector2.Distance(enemyKing.position, target.transform.position);
 
-        enemyArmy.ExtractAll();
+if (dist > 0.8f)
+{
+    // 🔥 Kral köyde değil → savaş başlamaz
+    return;
+}
+
+target.ResolveBattle(attackerCount, Team.Enemy);
+enemyArmy.ExtractAll();
+
     }
 
     bool EnemyIsAt(BaseController village)
@@ -610,6 +619,10 @@ public class EnemyCommander : MonoBehaviour
 
     public void EnemyAttack(BaseController target)
     {
+        float dist = Vector2.Distance(enemyKing.position, target.transform.position);
+if (dist > 0.8f)
+    return;
+
         int attackerCount = enemyArmy.GetCount();
 
         target.ResolveBattle(attackerCount, Team.Enemy);

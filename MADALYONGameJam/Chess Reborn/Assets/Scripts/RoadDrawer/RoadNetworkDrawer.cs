@@ -43,7 +43,7 @@ public class RoadNetworkDrawer : MonoBehaviour
         lr.startWidth = 0.15f;
         lr.endWidth = 0.15f;
 
-        lr.startColor = Color.brown;
+        lr.startColor = Color.black;
         lr.endColor = Color.brown;
 
         // Dünya uzayında çalışmalı

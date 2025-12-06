@@ -1,0 +1,884 @@
+fileFormatVersion: 2
+guid: e4a2646bed664fd41ba0402ecd7c0268
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7426948219103824018
+    second: MeKaMuToGamesLogoBackgroundsuz_0
+  - first:
+      213: -9216272637105088469
+    second: MeKaMuToGamesLogoBackgroundsuz_1
+  - first:
+      213: -2746334454682943720
+    second: MeKaMuToGamesLogoBackgroundsuz_2
+  - first:
+      213: 3540248285700217866
+    second: MeKaMuToGamesLogoBackgroundsuz_3
+  - first:
+      213: 966840860422211038
+    second: MeKaMuToGamesLogoBackgroundsuz_4
+  - first:
+      213: 8671805659280536951
+    second: MeKaMuToGamesLogoBackgroundsuz_5
+  - first:
+      213: -6923496018383912777
+    second: MeKaMuToGamesLogoBackgroundsuz_6
+  - first:
+      213: 4275806082285414366
+    second: MeKaMuToGamesLogoBackgroundsuz_7
+  - first:
+      213: -1569262738679231568
+    second: MeKaMuToGamesLogoBackgroundsuz_8
+  - first:
+      213: 6519047209802783041
+    second: MeKaMuToGamesLogoBackgroundsuz_9
+  - first:
+      213: -2959524681249474005
+    second: MeKaMuToGamesLogoBackgroundsuz_10
+  - first:
+      213: -3490265884796198536
+    second: MeKaMuToGamesLogoBackgroundsuz_11
+  - first:
+      213: 6487137602407896401
+    second: MeKaMuToGamesLogoBackgroundsuz_12
+  - first:
+      213: -9079007202956211407
+    second: MeKaMuToGamesLogoBackgroundsuz_13
+  - first:
+      213: 1931137821879432608
+    second: MeKaMuToGamesLogoBackgroundsuz_14
+  - first:
+      213: -2108232552587498910
+    second: MeKaMuToGamesLogoBackgroundsuz_15
+  - first:
+      213: -6274238244486130935
+    second: MeKaMuToGamesLogoBackgroundsuz_16
+  - first:
+      213: 4015911273506153712
+    second: MeKaMuToGamesLogoBackgroundsuz_17
+  - first:
+      213: -7752871079049028972
+    second: MeKaMuToGamesLogoBackgroundsuz_18
+  - first:
+      213: -9000950825846877168
+    second: MeKaMuToGamesLogoBackgroundsuz_19
+  - first:
+      213: 6482950196052834645
+    second: MeKaMuToGamesLogoBackgroundsuz_20
+  - first:
+      213: -1018236681216646217
+    second: MeKaMuToGamesLogoBackgroundsuz_21
+  - first:
+      213: 80089034941536697
+    second: MeKaMuToGamesLogoBackgroundsuz_22
+  - first:
+      213: -3856901815368948072
+    second: MeKaMuToGamesLogoBackgroundsuz_23
+  - first:
+      213: 4731174583516184169
+    second: MeKaMuToGamesLogoBackgroundsuz_24
+  - first:
+      213: -7089599203649667094
+    second: MeKaMuToGamesLogoBackgroundsuz_25
+  - first:
+      213: -389177409456906815
+    second: MeKaMuToGamesLogoBackgroundsuz_26
+  - first:
+      213: 8346243918837807253
+    second: MeKaMuToGamesLogoBackgroundsuz_27
+  - first:
+      213: -653174132968675111
+    second: MeKaMuToGamesLogoBackgroundsuz_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_0
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 511
+        width: 136
+        height: 308
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29847ec3e02d11760800000000000000
+      internalID: 7426948219103824018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_1
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 515
+        width: 72
+        height: 134
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b28d230ddd8391080800000000000000
+      internalID: -9216272637105088469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_2
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 512
+        width: 242
+        height: 507
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81ff43a3d5f03e9d0800000000000000
+      internalID: -2746334454682943720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_3
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 511
+        width: 124
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0cd8dd0f0d712130800000000000000
+      internalID: 3540248285700217866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_4
+      rect:
+        serializedVersion: 2
+        x: 623
+        y: 513
+        width: 88
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed58cc7d3a8ea6d00800000000000000
+      internalID: 966840860422211038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_5
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 512
+        width: 102
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77573aa4d41785870800000000000000
+      internalID: 8671805659280536951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_6
+      rect:
+        serializedVersion: 2
+        x: 805
+        y: 57
+        width: 217
+        height: 866
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b04564bd0dcaef90800000000000000
+      internalID: -6923496018383912777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_7
+      rect:
+        serializedVersion: 2
+        x: 117
+        y: 489
+        width: 29
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed7a3174af6b65b30800000000000000
+      internalID: 4275806082285414366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_8
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 488
+        width: 24
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bb84cd7adbd83ae0800000000000000
+      internalID: -1569262738679231568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_9
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 487
+        width: 40
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 149db4ed5ee487a50800000000000000
+      internalID: 6519047209802783041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_10
+      rect:
+        serializedVersion: 2
+        x: 247
+        y: 487
+        width: 36
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2abf1e8bf7ade6d0800000000000000
+      internalID: -2959524681249474005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_11
+      rect:
+        serializedVersion: 2
+        x: 283
+        y: 482
+        width: 611
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 871ee058ba5109fc0800000000000000
+      internalID: -3490265884796198536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_12
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 467
+        width: 34
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1551a907741f60a50800000000000000
+      internalID: 6487137602407896401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_13
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 468
+        width: 23
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13b05923d03e00280800000000000000
+      internalID: -9079007202956211407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_14
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 467
+        width: 26
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a5f17d0e97ccca10800000000000000
+      internalID: 1931137821879432608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_15
+      rect:
+        serializedVersion: 2
+        x: 235
+        y: 447
+        width: 47
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26a6b1fc9ad0eb2e0800000000000000
+      internalID: -2108232552587498910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_16
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 467
+        width: 25
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 903db391f8d6de8a0800000000000000
+      internalID: -6274238244486130935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_17
+      rect:
+        serializedVersion: 2
+        x: 283
+        y: 446
+        width: 572
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f422daa6026bb730800000000000000
+      internalID: 4015911273506153712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_18
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 467
+        width: 589
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49a12ef74d4486490800000000000000
+      internalID: -7752871079049028972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_19
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 447
+        width: 27
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01453a8b9e2361380800000000000000
+      internalID: -9000950825846877168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_20
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 448
+        width: 24
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 559374cead018f950800000000000000
+      internalID: 6482950196052834645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_21
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 426
+        width: 23
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b32fce122f7ed1f0800000000000000
+      internalID: -1018236681216646217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_22
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 400
+        width: 25
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b9181e8d888c1100800000000000000
+      internalID: 80089034941536697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_23
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 392
+        width: 551
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 896ef51db38897ac0800000000000000
+      internalID: -3856901815368948072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_24
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 88
+        width: 174
+        height: 321
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96eb6d4873288a140800000000000000
+      internalID: 4731174583516184169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_25
+      rect:
+        serializedVersion: 2
+        x: 391
+        y: 347
+        width: 61
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aefb19a261fac9d90800000000000000
+      internalID: -7089599203649667094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_26
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 345
+        width: 69
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cdd6b2453d599af0800000000000000
+      internalID: -389177409456906815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_27
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 208
+        width: 54
+        height: 201
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5987717bf90d3d370800000000000000
+      internalID: 8346243918837807253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeKaMuToGamesLogoBackgroundsuz_28
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 346
+        width: 53
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d8ade336957fe6f0800000000000000
+      internalID: -653174132968675111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      MeKaMuToGamesLogoBackgroundsuz_0: 7426948219103824018
+      MeKaMuToGamesLogoBackgroundsuz_1: -9216272637105088469
+      MeKaMuToGamesLogoBackgroundsuz_10: -2959524681249474005
+      MeKaMuToGamesLogoBackgroundsuz_11: -3490265884796198536
+      MeKaMuToGamesLogoBackgroundsuz_12: 6487137602407896401
+      MeKaMuToGamesLogoBackgroundsuz_13: -9079007202956211407
+      MeKaMuToGamesLogoBackgroundsuz_14: 1931137821879432608
+      MeKaMuToGamesLogoBackgroundsuz_15: -2108232552587498910
+      MeKaMuToGamesLogoBackgroundsuz_16: -6274238244486130935
+      MeKaMuToGamesLogoBackgroundsuz_17: 4015911273506153712
+      MeKaMuToGamesLogoBackgroundsuz_18: -7752871079049028972
+      MeKaMuToGamesLogoBackgroundsuz_19: -9000950825846877168
+      MeKaMuToGamesLogoBackgroundsuz_2: -2746334454682943720
+      MeKaMuToGamesLogoBackgroundsuz_20: 6482950196052834645
+      MeKaMuToGamesLogoBackgroundsuz_21: -1018236681216646217
+      MeKaMuToGamesLogoBackgroundsuz_22: 80089034941536697
+      MeKaMuToGamesLogoBackgroundsuz_23: -3856901815368948072
+      MeKaMuToGamesLogoBackgroundsuz_24: 4731174583516184169
+      MeKaMuToGamesLogoBackgroundsuz_25: -7089599203649667094
+      MeKaMuToGamesLogoBackgroundsuz_26: -389177409456906815
+      MeKaMuToGamesLogoBackgroundsuz_27: 8346243918837807253
+      MeKaMuToGamesLogoBackgroundsuz_28: -653174132968675111
+      MeKaMuToGamesLogoBackgroundsuz_3: 3540248285700217866
+      MeKaMuToGamesLogoBackgroundsuz_4: 966840860422211038
+      MeKaMuToGamesLogoBackgroundsuz_5: 8671805659280536951
+      MeKaMuToGamesLogoBackgroundsuz_6: -6923496018383912777
+      MeKaMuToGamesLogoBackgroundsuz_7: 4275806082285414366
+      MeKaMuToGamesLogoBackgroundsuz_8: -1569262738679231568
+      MeKaMuToGamesLogoBackgroundsuz_9: 6519047209802783041
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

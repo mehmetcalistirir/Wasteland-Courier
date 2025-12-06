@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 38655325}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -26.84, y: -3.59, z: 0}
+  m_LocalPosition: {x: 1.2, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -259,7 +259,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -316,6 +316,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovementBoost
   commander: {fileID: 1765772752}
   zoneBonus: 2
+  zoneSlow: -2
 --- !u!1 &47551433
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,7 +472,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.59
+      value: -3.8
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1415,7 +1416,7 @@ Transform:
   m_GameObject: {fileID: 646027165}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -22.33, y: -0.67, z: 0}
+  m_LocalPosition: {x: 1.2, y: 25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3544,7 +3545,7 @@ Transform:
   m_GameObject: {fileID: 1176936360}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.61, y: -8.92, z: 0}
+  m_LocalPosition: {x: 1.2, y: -25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3999,11 +4000,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 23.06
+      value: 25.2
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -9.16
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5054,8 +5055,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCommander
   kingCountText: {fileID: 1402445068}
   stepSize: 1
-  stepSpeed: 5
-  stepCooldown: 0.3
+  stepSpeed: 3
+  stepCooldown: 0.2
+  straightStepSize: 2.5
+  diagonalStepSize: 3.7
   enemyArmy: {fileID: 38655328}
   enemyKing: {fileID: 38655327}
   piyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
@@ -5148,6 +5151,7 @@ MonoBehaviour:
   straightStepSize: 2.5
   diagonalStepSize: 3.7
   zoneBonus: 2
+  zoneSlow: -2
   footstepSource: {fileID: 1163673446}
   lightFootstepLoop: {fileID: 8300000, guid: 0acb1177af161dd498964fe5346e6f94, type: 3}
   heavyFootstepLoop: {fileID: 8300000, guid: 6dbf6763ec50d964faa8627cea0340e1, type: 3}
@@ -5580,8 +5584,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 4
-  m_fontSizeBase: 4
+  m_fontSize: 8
+  m_fontSizeBase: 8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5801,7 +5805,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 20.34
+      value: 20.2
       objectReference: {fileID: 0}
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalPosition.y

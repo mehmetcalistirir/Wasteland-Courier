@@ -8,6 +8,9 @@ public class EnemyMovementBoost : MonoBehaviour
     private BaseController zone;
     private float baseSpeed;
 
+public float zoneSlow = -2f;
+
+
     void Start()
     {
         baseSpeed = commander.stepSpeed;
@@ -19,12 +22,19 @@ public class EnemyMovementBoost : MonoBehaviour
     }
 
     void Update()
+{
+    float zoneEffect = 0f;
+
+    if (zone != null)
     {
-        // Anlık kontrol edilen buff sistemi
-        if (zone != null && zone.owner == Team.Enemy)
-            commander.stepSpeed = baseSpeed + zoneBonus;
-        else
-            commander.stepSpeed = baseSpeed;
+        if (zone.owner == Team.Enemy)
+            zoneEffect = zoneBonus;  // kendi bölgesi → hızlan
+        else if (zone.owner == Team.Player)
+            zoneEffect = zoneSlow;   // oyuncu bölgesi → yavaşla
     }
+
+    commander.stepSpeed = baseSpeed + zoneEffect;
+}
+
 }
 

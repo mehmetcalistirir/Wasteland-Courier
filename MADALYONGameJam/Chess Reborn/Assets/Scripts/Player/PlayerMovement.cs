@@ -16,10 +16,10 @@ public class PlayerMovement2D : MonoBehaviour
     private float buffAmount = 0f;
     private float zoneBuff = 0f;
     private float normalSpeed;
+    public float zoneBonus = 2f;   // Kendi köyünde hızlanma
+    public float zoneSlow = -1.5f;   // Düşman köyünde yavaşlama
+    private BaseController zone;   // içinde bulunduğu bölge referansı
 
-
-    private BaseController zone;
-    public float zoneBonus = 2f;
 
     private float stepCooldown;
     private bool canMove = true;
@@ -69,22 +69,30 @@ public class PlayerMovement2D : MonoBehaviour
     pawnCount = playerPiyon.GetCount();
     stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
 
-    // zone bonus sadece oyuncunun kendi köyü ise aktif olmalı
-    if (zone != null && zone.owner == Team.Player)
-        zoneBonus = 2f;
-    else
-        zoneBonus = 0f;
+    float zoneEffect = 0f;
 
-    // Tüm hız kaynaklarını birleştir
-    float finalSpeed = baseSpeed + speedBoostAmount + zoneBonus;
+    if (zone != null)
+    {
+        if (zone.owner == Team.Player)
+            zoneEffect = zoneBonus;     // Kendi bölgesi → hızlan
+        else if (zone.owner == Team.Enemy)
+            zoneEffect = zoneSlow;      // Düşman bölgesi → yavaşla
+    }
+
+    // FINAL HIZ FORMÜLÜ
+    float finalSpeed = baseSpeed + speedBoostAmount + zoneEffect;
+
+    // Hızı uygula
     moveSpeed = finalSpeed;
 
+    // Hareket sistemi
     if (canMove && moveInput != Vector2.zero)
     {
         Vector2 dir = NormalizeDirection(moveInput);
         StartCoroutine(MoveOneStep(dir));
     }
 }
+
 
 
     public void AddSpeedBuff(float amount)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MusicManager : MonoBehaviour
 {
@@ -19,6 +20,14 @@ public class MusicManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
         else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // 🔥 Eğer sahne ana menü ise MusicManager yok olsun
+        Scene current = SceneManager.GetActiveScene();
+        if (current.name == "AnaMenu")
         {
             Destroy(gameObject);
             return;
@@ -46,7 +55,6 @@ public class MusicManager : MonoBehaviour
     {
         int nextTrack = Random.Range(0, 2);
 
-        // Aynı şarkıyı 2 kere üst üste çalma
         if (nextTrack == lastPlayed)
             nextTrack = (nextTrack + 1) % 2;
 
@@ -56,7 +64,6 @@ public class MusicManager : MonoBehaviour
         source.Play();
     }
 
-    // 🔥 Restart'a basınca çağrılacak
     public void StopMusic()
     {
         if (source != null)

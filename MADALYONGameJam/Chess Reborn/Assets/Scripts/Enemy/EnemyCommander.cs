@@ -1,33 +1,37 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-
 
 public class EnemyCommander : MonoBehaviour
 {
     public static EnemyCommander instance;
     public TextMeshPro kingCountText;
 
-    [Header("Movement Settings")]
-    public float moveSpeed = 2f;
+    [Header("Movement Settings (Grid-Based)")]
+    public float stepSize = 1f;          // Bir adım = 1 kare
+    public float stepSpeed = 5f;         // Kareye doğru ilerleme hızı
+    public float stepCooldown = 0.3f;    // İki adım arası bekleme süresi
+    private bool canMove = true;
+
     private BaseController currentTargetVillage;
 
     [Header("Enemy Army")]
-    public EnemyArmy enemyArmy;      // Düşman ordusunu yöneten script
-    public Transform enemyKing;      // Düşman kral objesi (ordunun merkez noktası)
-    public GameObject piyonPrefab;   // Gerekirse spawn için
+    public EnemyArmy enemyArmy;
+    public Transform enemyKing;
+    public GameObject piyonPrefab;
 
     [Header("References")]
-    public BaseController[] villages;   // Sahnedeki TÜM köyler (köy + kaleler)
-    public BaseController enemyCastle;  // Düşmanın kendi kalesi
-    public BaseController playerCastle; // Oyuncunun kalesi
-    public Transform playerKing;        // Oyuncu kral objesi
+    public BaseController[] villages;
+    public BaseController enemyCastle;
+    public BaseController playerCastle;
+    public Transform playerKing;
 
     [Header("AI Settings")]
-    public int attackThreshold = 10;      // Ordu en az bu sayıya ulaşınca saldır
-    public int retreatThreshold = 3;      // Bundan azsa geri çekil
-    public float safeRadiusFromPlayer = 6f; // Köy - oyuncu mesafesi güvenli çember
-    public int weakVillageUnitThreshold = 5; // Zayıf köy eşiği
+    public int attackThreshold = 10;
+    public int retreatThreshold = 3;
+    public float safeRadiusFromPlayer = 6f;
+    public int weakVillageUnitThreshold = 5;
 
     private bool isRetreating = false;
 
@@ -38,14 +42,13 @@ public class EnemyCommander : MonoBehaviour
 
     void Start()
     {
-        // Her saniye bir kez “düşün”
         InvokeRepeating(nameof(Think), 1f, 1f);
     }
 
     void Update()
     {
-        // Sürekli, akıcı hareket
         MoveToTargetVillage();
+
         if (kingCountText != null)
             kingCountText.text = enemyArmy.GetCount().ToString();
             MoveToTargetVillage();
@@ -90,6 +93,95 @@ void StartKingBattle()
 
 
     // -----------------------------------------------------
+    // GRID YÖNLÜ NORMALİZE ETME (8 yön)
+    // -----------------------------------------------------
+    Vector2 NormalizeDirection(Vector2 input)
+    {
+        float x = Mathf.Sign(input.x);
+        float y = Mathf.Sign(input.y);
+
+        if (Mathf.Abs(input.x) < 0.3f) x = 0;
+        if (Mathf.Abs(input.y) < 0.3f) y = 0;
+
+        return new Vector2(x, y).normalized;
+    }
+
+    // -----------------------------------------------------
+    // GRID ADEDİM HAREKETİ
+    // -----------------------------------------------------
+    IEnumerator MoveOneStep(Vector2 targetPos)
+    {
+        canMove = false;
+
+        Vector2 startPos = enemyKing.position;
+        float t = 0f;
+        float duration = stepSize / stepSpeed;
+
+        // Smooth kare hareketi
+        while (t < duration)
+        {
+            enemyKing.position = Vector2.Lerp(startPos, targetPos, t / duration);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        enemyKing.position = targetPos;
+
+        // Adım sonrası bekleme
+        yield return new WaitForSeconds(stepCooldown);
+
+        canMove = true;
+    }
+
+    // -----------------------------------------------------
+    // 3) HAREKET — SATRANÇ ŞAHI GİBİ ADIM ADIM
+    // -----------------------------------------------------
+    void MoveToTargetVillage()
+    {
+        if (!canMove) return;
+        if (enemyKing == null || villages == null || villages.Length == 0) return;
+
+        // Hedef yoksa belirle
+        if (currentTargetVillage == null)
+        {
+            if (isRetreating)
+            {
+                currentTargetVillage = enemyCastle;
+            }
+            else
+            {
+                currentTargetVillage = PickSmartNeutralVillage();
+                if (currentTargetVillage == null)
+                    currentTargetVillage = PickAnyNeutralVillage();
+                if (currentTargetVillage == null)
+                    currentTargetVillage = PickOwnedVillage();
+            }
+        }
+
+        if (currentTargetVillage == null) return;
+
+        // Hedef yönünü hesapla
+        Vector2 diff = currentTargetVillage.transform.position - enemyKing.position;
+
+        // Hedefe zaten çok yakınsa → köyü ele aldı say
+        if (diff.magnitude < 0.5f)
+        {
+            OnReachVillage(currentTargetVillage);
+            currentTargetVillage = null;
+            return;
+        }
+
+        // Yönü 8 yöne yuvarla
+        Vector2 dir = NormalizeDirection(diff);
+
+        // Adım hedefi
+        Vector2 targetPos = (Vector2)enemyKing.position + dir * stepSize;
+
+        // Adım coroutine çağır
+        StartCoroutine(MoveOneStep(targetPos));
+    }
+
+    // -----------------------------------------------------
     // 1) DÜŞMANIN SAHİP OLDUĞU KÖYLER
     // -----------------------------------------------------
     public List<BaseController> GetOwnedVillages()
@@ -115,7 +207,6 @@ void StartKingBattle()
 
         List<BaseController> owned = GetOwnedVillages();
 
-        // Hiç köyü yoksa → tarafsız köy kovala
         if (owned.Count == 0)
         {
             isRetreating = false;
@@ -123,72 +214,11 @@ void StartKingBattle()
             return;
         }
 
-        // Ordunun durumuna göre geri çekilme kararı
         SmartRetreatCheck();
-
-        // Tehdit altındaki köyleri takviye et
         DefendThreatenedVillages(owned);
-
-        // Kendi köy ve kalesinden ordu toparla
         GatherArmy();
-
-        // Saldırı denemesi
         TryAttack();
     }
-
-    // -----------------------------------------------------
-    // 3) HAREKET
-    // -----------------------------------------------------
-    void MoveToTargetVillage()
-    {
-        if (enemyKing == null || villages == null || villages.Length == 0)
-            return;
-
-        // Hedef yoksa yeni hedef belirle
-        if (currentTargetVillage == null)
-        {
-            if (isRetreating)
-            {
-                // Geri çekiliyorsak öncelik kale
-                currentTargetVillage = enemyCastle;
-            }
-            else
-            {
-                // Önce akıllı nötr köy
-                currentTargetVillage = PickSmartNeutralVillage();
-
-                // Akıllı nötr köy yoksa, herhangi bir nötr köy
-                if (currentTargetVillage == null)
-                    currentTargetVillage = PickAnyNeutralVillage();
-
-                // O da yoksa, sahip olunan köylerden birine devriye
-                if (currentTargetVillage == null)
-                    currentTargetVillage = PickOwnedVillage();
-            }
-        }
-
-        if (currentTargetVillage == null)
-            return;
-
-        // Hedefe doğru yürü
-        enemyKing.position = Vector3.MoveTowards(
-            enemyKing.position,
-            currentTargetVillage.transform.position,
-            moveSpeed * Time.deltaTime
-        );
-
-        float dist = Vector3.Distance(enemyKing.position, currentTargetVillage.transform.position);
-
-        // Hedefe ulaştı
-        if (dist < 0.5f)
-        {
-            OnReachVillage(currentTargetVillage);
-
-            // Yeniden hedef seç
-            currentTargetVillage = null;
-        }
-    }
-    
 
     // -----------------------------------------------------
     // 4) KÖY SEÇME — AKILLI NÖTR KÖY
@@ -208,15 +238,12 @@ void StartKingBattle()
                 ? Vector2.Distance(playerKing.position, v.transform.position)
                 : Mathf.Infinity;
 
-            // Oyuncu bu köye bariz şekilde daha yakınsa → gitmeye değmez
             if (distPlayer + 1f < distEnemy)
                 continue;
 
-            // Köyün önemini üretim hızına göre arttır (daha hızlı üreten daha değerli)
             BaseController bc = v.GetComponent<BaseController>();
             float valueFactor = bc != null ? (1f / Mathf.Max(0.1f, bc.productionRate)) : 1f;
 
-            // Basit skor: mesafe + değer faktörü
             float score = distEnemy * 0.7f + valueFactor * 3f;
 
             if (score < bestScore)
@@ -252,122 +279,62 @@ void StartKingBattle()
     }
 
     // -----------------------------------------------------
-    // 5) KÖYE ULAŞINCA NE YAPACAK?
+    // 5) KÖYE ULAŞINCA NE YAPAR?
     // -----------------------------------------------------
     void OnReachVillage(BaseController village)
-{
-    if (village == null) return;
-
-    // Tarafsız köy → tek seferlik ele geçir
-    if (village.owner == Team.Neutral)
     {
-        village.owner = Team.Enemy;
-        return;
-    }
+        if (village == null) return;
 
-    // Kendi köyüne geldiyse → piyon toplama YASAK (bug engellendi)
-    if (village.owner == Team.Enemy)
-    {
-        // Artık hiçbir şey yapılmıyor
-        return;
-    }
-
-    // Player köyü → Saldırı başlat
-    if (village.owner == Team.Player)
-    {
-        EnemyAttack(village);
-        return;
-    }
-}
-
-
-    // -----------------------------------------------------
-    // 6) KÖYLERDEN ORDUYA ASKER TOPLAMA
-    // -----------------------------------------------------
-    void GatherArmy()
-{
-    foreach (var v in villages)
-    {
-        if (v != null && v.owner == Team.Enemy && EnemyIsAt(v))
+        if (village.owner == Team.Neutral)
         {
-            EnemyAddVillagePiyonsToArmy(v);
+            village.owner = Team.Enemy;
+            return;
+        }
+
+        if (village.owner == Team.Enemy)
+        {
+            return;
+        }
+
+        if (village.owner == Team.Player)
+        {
+            EnemyAttack(village);
+            return;
         }
     }
 
-    if (enemyCastle != null && EnemyIsAt(enemyCastle))
+    // -----------------------------------------------------
+    // 6) KÖYLERDEN ORDU TOPLAMA
+    // -----------------------------------------------------
+    void GatherArmy()
     {
-        EnemyAddVillagePiyonsToArmy(enemyCastle);
+        foreach (var v in villages)
+        {
+            if (v != null && v.owner == Team.Enemy && EnemyIsAt(v))
+            {
+                EnemyAddVillagePiyonsToArmy(v);
+            }
+        }
+
+        if (enemyCastle != null && EnemyIsAt(enemyCastle))
+        {
+            EnemyAddVillagePiyonsToArmy(enemyCastle);
+        }
     }
-}
 
-
-
-    // Bulunduğu köydeki piyonları ordusuna ekle
     public void EnemyAddVillagePiyonsToArmy(BaseController village)
-{
-    if (village == null) return;
-    if (village.unitCount <= 0) return;
+    {
+        if (village == null) return;
+        if (village.unitCount <= 0) return;
+        if (village.owner != Team.Enemy) return;
+        if (!EnemyIsAt(village)) return;
 
-    // ❗ Köy düşmana ait değilse çık
-    if (village.owner != Team.Enemy) return;
+        BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
+        if (bpm == null) return;
 
-    // ❗ King bu köyün üstünde değilse çık
-    if (!EnemyIsAt(village)) return;
+        bpm.TransferAllToEnemy(enemyKing);
+    }
 
-    BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
-    if (bpm == null) return;
-
-    bpm.TransferAllToEnemy(enemyKing);
-}
-
-
-
-
-
-    // Bulunduğu köydeki piyonları kendi kalesine gönder (istersen kullanırsın)
-    public void EnemySendVillagePiyonsToCastle(BaseController village)
-{
-    if (village == null || enemyCastle == null) return;
-
-    // ❗ Düşman köyü değilse yok
-    if (village.owner != Team.Enemy) return;
-
-    // ❗ King o köyde olmalı
-    if (!EnemyIsAt(village)) return;
-
-    BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
-    if (bpm == null) return;
-
-    bpm.SendAllToCastle(enemyCastle);
-}
-
-
-
-
-    // Bulunduğu köyden başka bir köye piyon gönder
-    public void EnemySendVillagePiyonsTo(BaseController from, BaseController to)
-{
-    if (from == null || to == null) return;
-
-    // ❗ Düşmana ait olmalı
-    if (from.owner != Team.Enemy) return;
-
-    // ❗ King 'from' köyünde olmalı
-    if (!EnemyIsAt(from)) return;
-
-    BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
-    if (bpm == null) return;
-
-    bpm.SendAllToCastle(to);
-}
-
-
-
-
-
-    // -----------------------------------------------------
-    // 7) TARAFSIZ KÖY ELE GEÇİRMEYE ÇALIŞMA
-    // -----------------------------------------------------
     void TryCaptureNeutralVillage()
     {
         if (villages == null) return;
@@ -383,7 +350,7 @@ void StartKingBattle()
     }
 
     // -----------------------------------------------------
-    // 8) TEHDİT ANALİZİ ve TAKVİYE
+    // 8) TEHDİT ANALİZİ
     // -----------------------------------------------------
     float EvaluateVillageThreat(BaseController v)
     {
@@ -398,21 +365,16 @@ void StartKingBattle()
             ? Vector2.Distance(playerKing.position, v.transform.position)
             : Mathf.Infinity;
 
-        // Düşmanın köyüyse:
         if (v.owner == Team.Enemy)
         {
-            // Az asker varsa daha tehlikeli
             threat += Mathf.Max(0, weakVillageUnitThreshold - v.unitCount) * 2f;
 
-            // Oyuncu çok yakınsa
             if (distPlayer < safeRadiusFromPlayer)
                 threat += (safeRadiusFromPlayer - distPlayer) * 2f;
 
-            // Player ordusu büyüdükçe genel tehdit artsın
             threat += playerArmyCount * 0.2f;
         }
 
-        // Eğer köy Player'a aitse, düşman açısından saldırı hedefi olabilir (ama savunma tehditi değil)
         return threat;
     }
 
@@ -433,7 +395,6 @@ void StartKingBattle()
             }
         }
 
-        // Tehdit belirli seviyenin üzerindeyse takviye gönder
         if (mostThreatened != null && maxThreat > 3f)
         {
             BaseController reinforceSource = FindStrongestOwnedVillage(owned);
@@ -461,25 +422,19 @@ void StartKingBattle()
         return best;
     }
 
-    // -----------------------------------------------------
-    // 9) SAVUNMA BİRLİĞİ GÖNDER (KÖYDEN KÖYE)
-    // -----------------------------------------------------
     void SendDefense(BaseController from, BaseController to)
-{
-    if (from == null || to == null) return;
+    {
+        if (from == null || to == null) return;
+        if (!EnemyIsAt(from)) return;
 
-    // ❗ King 'from' köyünde değilse savunma gönderemez
-    if (!EnemyIsAt(from)) return;
+        BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
+        if (bpm == null) return;
 
-    BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
-    if (bpm == null) return;
-
-    bpm.SendAllToCastle(to);
-}
-
+        bpm.SendAllToCastle(to);
+    }
 
     // -----------------------------------------------------
-    // 10) GERİ ÇEKİLME MANTIĞI
+    // 10) GERİ ÇEKİLME
     // -----------------------------------------------------
     void SmartRetreatCheck()
     {
@@ -487,7 +442,6 @@ void StartKingBattle()
 
         int count = enemyArmy.GetCount();
 
-        // Ordu çok zayıfladıysa → geri çekil
         if (count <= retreatThreshold)
         {
             isRetreating = true;
@@ -495,13 +449,12 @@ void StartKingBattle()
         }
         else if (count >= attackThreshold)
         {
-            // Yeterince güçlüysek saldırı moduna çık
             isRetreating = false;
         }
     }
 
     // -----------------------------------------------------
-    // 11) TAKTİKSEL SALDIRI / HEDEF SEÇME
+    // 11) SALDIRI
     // -----------------------------------------------------
     bool CanConquer(BaseController targetVillage)
     {
@@ -513,7 +466,6 @@ void StartKingBattle()
 
         int myArmy = enemyArmy.GetCount();
 
-        // Ordum köydeki piyonlardan fazlaysa saldırmaya değer
         return myArmy > villagePiyon;
     }
 
@@ -521,7 +473,6 @@ void StartKingBattle()
     {
         if (enemyArmy == null) return;
 
-        // Önce ele geçirebileceği Player köyü ara
         BaseController target = FindTargetPlayerVillage();
 
         if (target != null)
@@ -530,11 +481,9 @@ void StartKingBattle()
             return;
         }
 
-        // Hiç uygun Player köyü yoksa ve ordu zayıfsa → saldırma
         if (enemyArmy.GetCount() < attackThreshold)
             return;
 
-        // Son çare: Player kalesine saldır
         if (playerCastle != null && CanConquer(playerCastle))
         {
             SendArmyTo(playerCastle);
@@ -551,7 +500,6 @@ void StartKingBattle()
             if (v == null) continue;
             if (v.owner != Team.Player) continue;
 
-            // Köyü ele geçirecek gücü var mı?
             if (!CanConquer(v))
                 continue;
 
@@ -560,7 +508,6 @@ void StartKingBattle()
                 ? Vector2.Distance(playerKing.position, v.transform.position)
                 : Mathf.Infinity;
 
-            // Player çok yakınsa, saldırı riskli olabilir → skora ekle
             float score = distEnemy + Mathf.Max(0, safeRadiusFromPlayer - distPlayer) * 3f;
 
             if (score < bestScore)
@@ -574,36 +521,30 @@ void StartKingBattle()
     }
 
     // -----------------------------------------------------
-    // 12) ORDUNUN TAMAMINI HEDEFE SALDIRIYA GÖNDER
+    // 12) SALDIRI BAŞLATMA
     // -----------------------------------------------------
     public void SendArmyTo(BaseController target)
-{
-    if (target == null || enemyArmy == null) return;
+    {
+        if (target == null || enemyArmy == null) return;
 
-    int attackerCount = enemyArmy.GetCount();
+        int attackerCount = enemyArmy.GetCount();
 
-    // PlayerCommander ile aynı savaş sistemi
-    target.ResolveBattle(attackerCount, Team.Enemy);
+        target.ResolveBattle(attackerCount, Team.Enemy);
 
-    // Saldırıya katılan piyonlar yok edilir
-    enemyArmy.ExtractAll();
-}
+        enemyArmy.ExtractAll();
+    }
 
     bool EnemyIsAt(BaseController village)
     {
         return Vector2.Distance(enemyKing.position, village.transform.position) < 0.5f;
     }
 
-
     public void EnemyAttack(BaseController target)
-{
-    int attackerCount = enemyArmy.GetCount();
+    {
+        int attackerCount = enemyArmy.GetCount();
 
-    target.ResolveBattle(attackerCount, Team.Enemy);
+        target.ResolveBattle(attackerCount, Team.Enemy);
 
-    enemyArmy.ExtractAll();
-}
-
-
-
+        enemyArmy.ExtractAll();
+    }
 }

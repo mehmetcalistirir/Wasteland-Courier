@@ -1,21 +1,24 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class PlayerMovement2D : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed = 5f;     // bir kareye giderken hız
+    public float stepCooldown = 0.3f; // adımlar arası bekleme (0.2–0.5 arası)
+    public float stepSize = 1f;       // satranç karesi 1 birim
+
+    private bool canMove = true;
+    private Vector2 moveInput;
+    private Rigidbody2D rb;
 
     public AudioSource footstepSource;
-    public AudioClip lightFootstepLoop;   // 0–5 piyon
-    public AudioClip heavyFootstepLoop;   // >5 piyon
-    public int pawnCount = 0;
-    private PlayerPiyon playerPiyon; 
+    public AudioClip lightFootstepLoop;
+    public AudioClip heavyFootstepLoop;
 
-
-    private Rigidbody2D rb;
-    private Vector2 moveInput;
+    public int pawnCount;
+    private PlayerPiyon playerPiyon;
     private PlayerControls controls;
-       
 
     void Awake()
     {
@@ -37,54 +40,67 @@ public class PlayerMovement2D : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        footstepSource.loop = true;
+        footstepSource.loop = false; // adım sesini tek sefer çalacağız
         playerPiyon = FindObjectOfType<PlayerPiyon>();
     }
-  void Update()
+
+    void Update()
     {
-       pawnCount = playerPiyon.GetCount();
+        pawnCount = playerPiyon.GetCount();
 
-    Debug.Log("Pawn Count = " + pawnCount);
-
+        // input varsa ve hareket edebiliyorsak
+        if (canMove && moveInput != Vector2.zero)
+        {
+            Vector2 dir = NormalizeDirection(moveInput);
+            StartCoroutine(MoveOneStep(dir));
+        }
     }
 
-    void FixedUpdate()
+    Vector2 NormalizeDirection(Vector2 input)
     {
-        rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
-        HandleFootstepSound();
+        // Hareket yönünü 8 yönlü (grid) hale getiriyoruz
+        float x = Mathf.Sign(input.x);
+        float y = Mathf.Sign(input.y);
+
+        // eksenlerin mutlak değerleri küçükse sıfırla
+        if (Mathf.Abs(input.x) < 0.5f) x = 0;
+        if (Mathf.Abs(input.y) < 0.5f) y = 0;
+
+        return new Vector2(x, y).normalized;
     }
 
-    void HandleFootstepSound()
+    IEnumerator MoveOneStep(Vector2 direction)
     {
-        Debug.Log("Pawn Count = " + pawnCount);
+        canMove = false;
 
-        bool isMoving = moveInput != Vector2.zero;
+        // hedef nokta
+        Vector2 startPos = rb.position;
+        Vector2 targetPos = startPos + direction * stepSize;
 
-        if (isMoving)
+        float t = 0f;
+        float duration = stepSize / moveSpeed;
+
+        PlayFootstep();  // adım sesini çal
+
+        // kareye doğru smooth hareket
+        while (t < duration)
         {
-            // Piyon sayısına göre hangi loop çalacak?
-            AudioClip targetClip = (pawnCount > 5) ? heavyFootstepLoop : lightFootstepLoop;
-
-            // Eğer yanlış clip çalıyorsa, doğru olanla değiştir
-            if (footstepSource.clip != targetClip)
-            {
-                footstepSource.clip = targetClip;
-                footstepSource.Play();
-            }
-
-            // Eğer hiç çalmıyorsa başlat
-            if (!footstepSource.isPlaying)
-            {
-                footstepSource.Play();
-            }
+            rb.MovePosition(Vector2.Lerp(startPos, targetPos, t / duration));
+            t += Time.deltaTime;
+            yield return null;
         }
-        else
-        {
-            // Hareket durunca sesi anında kes
-            if (footstepSource.isPlaying)
-            {
-                footstepSource.Stop();
-            }
-        }
+
+        rb.MovePosition(targetPos);
+
+        // Adım bittikten sonra verilen cooldown kadar bekle
+        yield return new WaitForSeconds(stepCooldown);
+
+        canMove = true;
+    }
+
+    void PlayFootstep()
+    {
+        AudioClip clip = (pawnCount > 5) ? heavyFootstepLoop : lightFootstepLoop;
+        footstepSource.PlayOneShot(clip); // loop değil tek seferlik adım sesi
     }
 }

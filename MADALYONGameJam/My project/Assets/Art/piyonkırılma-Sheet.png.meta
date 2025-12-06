@@ -1,22 +1,22 @@
 fileFormatVersion: 2
-guid: 6f48572ac4ec65c43b0eb81274bd03d3
+guid: d799b99d51346a2448b849137cba2c72
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2763368229704798997
-    second: sah-Sheet_0
+      213: -901023288359080851
+    second: "piyonk\u0131r\u0131lma-Sheet_0"
   - first:
-      213: -3528712788757320860
-    second: sah-Sheet_1
+      213: -6136841503847297011
+    second: "piyonk\u0131r\u0131lma-Sheet_1"
   - first:
-      213: -1686524154645704782
-    second: sah-Sheet_2
+      213: -813616925842683657
+    second: "piyonk\u0131r\u0131lma-Sheet_2"
   - first:
-      213: -6838100583907821861
-    second: sah-Sheet_3
+      213: 3502042015078068076
+    second: "piyonk\u0131r\u0131lma-Sheet_3"
   - first:
-      213: 6205019486898782373
-    second: sah-Sheet_4
+      213: -7485112176637303451
+    second: "piyonk\u0131r\u0131lma-Sheet_4"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +49,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -63,7 +63,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 7
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -87,7 +87,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -112,13 +112,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sah-Sheet_0
+      name: "piyonk\u0131r\u0131lma-Sheet_0"
       rect:
         serializedVersion: 2
         x: 23
         y: 11
         width: 18
-        height: 31
+        height: 25
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,41 +127,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 513972393c4795620800000000000000
-      internalID: 2763368229704798997
+      spriteID: d6ca003d71cee73f0800000000000000
+      internalID: -901023288359080851
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sah-Sheet_1
+      name: "piyonk\u0131r\u0131lma-Sheet_1"
       rect:
         serializedVersion: 2
-        x: 77
-        y: 10
-        width: 24
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 46bedbf1a6e770fc0800000000000000
-      internalID: -3528712788757320860
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sah-Sheet_2
-      rect:
-        serializedVersion: 2
-        x: 134
-        y: 10
-        width: 30
+        x: 78
+        y: 9
+        width: 23
         height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -171,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2bf0a3987334898e0800000000000000
-      internalID: -1686524154645704782
+      spriteID: d00de48aa2f85daa0800000000000000
+      internalID: -6136841503847297011
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sah-Sheet_3
+      name: "piyonk\u0131r\u0131lma-Sheet_2"
       rect:
         serializedVersion: 2
-        x: 197
-        y: 10
-        width: 24
-        height: 31
+        x: 135
+        y: 9
+        width: 28
+        height: 25
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +171,42 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd678cdafbf2a11a0800000000000000
-      internalID: -6838100583907821861
+      spriteID: 7f8c6e777b375b4f0800000000000000
+      internalID: -813616925842683657
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sah-Sheet_4
+      name: "piyonk\u0131r\u0131lma-Sheet_3"
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 9
+        width: 23
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6fa83978a0c99030800000000000000
+      internalID: 3502042015078068076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "piyonk\u0131r\u0131lma-Sheet_4"
       rect:
         serializedVersion: 2
         x: 263
         y: 11
         width: 18
-        height: 31
+        height: 25
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,8 +215,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5a08af40958ac1650800000000000000
-      internalID: 6205019486898782373
+      spriteID: 5652597122a8f1890800000000000000
+      internalID: -7485112176637303451
       vertices: []
       indices: 
       edges: []
@@ -235,11 +235,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      sah-Sheet_0: 2763368229704798997
-      sah-Sheet_1: -3528712788757320860
-      sah-Sheet_2: -1686524154645704782
-      sah-Sheet_3: -6838100583907821861
-      sah-Sheet_4: 6205019486898782373
+      "piyonk\u0131r\u0131lma-Sheet_0": -901023288359080851
+      "piyonk\u0131r\u0131lma-Sheet_1": -6136841503847297011
+      "piyonk\u0131r\u0131lma-Sheet_2": -813616925842683657
+      "piyonk\u0131r\u0131lma-Sheet_3": 3502042015078068076
+      "piyonk\u0131r\u0131lma-Sheet_4": -7485112176637303451
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

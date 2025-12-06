@@ -226,7 +226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyArmy
   army: []
-  orbitRadius: 1.5
+  orbitRadius: 4
   orbitSpeed: 50
 --- !u!61 &38655329
 BoxCollider2D:
@@ -3335,7 +3335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCommander
   kingCountText: {fileID: 1402445068}
-  moveSpeed: 2
+  moveSpeed: 4
   enemyArmy: {fileID: 38655328}
   enemyKing: {fileID: 38655327}
   piyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
@@ -3343,9 +3343,10 @@ MonoBehaviour:
   - {fileID: 1236853730}
   - {fileID: 916286592}
   - {fileID: 1884006473}
+  - {fileID: 1176936361}
   enemyCastle: {fileID: 646027166}
   playerCastle: {fileID: 1176936361}
-  playerKing: {fileID: 1844597295}
+  playerKing: {fileID: 38655327}
   attackThreshold: 10
   retreatThreshold: 3
   safeRadiusFromPlayer: 6

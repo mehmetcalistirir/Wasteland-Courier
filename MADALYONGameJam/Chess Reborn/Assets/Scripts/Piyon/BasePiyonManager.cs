@@ -175,15 +175,19 @@ public class BasePiyonManager : MonoBehaviour
     }
 
     public void TransferAllToEnemy(Transform enemyKing)
+{
+    foreach (var p in piyonlar)
     {
-        foreach (var p in piyonlar)
-        {
-            if (p != null)
-                p.DusmanaKatıl(enemyKing);
-        }
-
-        piyonlar.Clear();
+        if (p != null)
+            p.DusmanaKatıl(enemyKing);
     }
+
+    piyonlar.Clear();
+
+    // --- KRİTİK FIX ---
+    baseController.unitCount = 0;   // ❗ piyonlar gerçekten köyden alındı
+}
+
 
 
 

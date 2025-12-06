@@ -19,11 +19,17 @@ public class EnemyArmy : MonoBehaviour
     }
 
     public GameObject[] ExtractAll()
-    {
-        GameObject[] arr = army.ToArray();
-        army.Clear();
-        return arr;
-    }
+{
+    GameObject[] arr = army.ToArray();
+
+    // ❗ Tüm objeleri sahneden temizle
+    foreach (GameObject p in arr)
+        if (p != null) Destroy(p);
+
+    army.Clear();
+    return arr;
+}
+
 
     public void RemovePiyons(int amount)
 {

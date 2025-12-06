@@ -87,29 +87,29 @@ public class Piyon : MonoBehaviour
 
     // ----------- SALDIRI AMAÇLI BASE’E GİTME ------------
     public void AttackBase(BaseController target, Team team)
-{
-    attackerTeam = team;
-    targetBase = target;
-    StartCoroutine(DoAttack());
-}
-
-IEnumerator DoAttack()
-{
-    while (Vector2.Distance(transform.position, targetBase.transform.position) > 0.15f)
     {
-        transform.position = Vector2.MoveTowards(transform.position, targetBase.transform.position, 5f * Time.deltaTime);
-        yield return null;
+        attackerTeam = team;
+        targetBase = target;
+        StartCoroutine(DoAttack());
     }
 
-    // SALDIRAN TARAF SAYISINI BUL
-    int attackerCount = 1;
+    IEnumerator DoAttack()
+    {
+        while (Vector2.Distance(transform.position, targetBase.transform.position) > 0.15f)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, targetBase.transform.position, 5f * Time.deltaTime);
+            yield return null;
+        }
 
-    // KÖYDE SAVAŞI ÇALIŞTIR
-    targetBase.ResolveBattle(attackerCount, attackerTeam);
+        // SALDIRAN TARAF SAYISINI BUL
+        int attackerCount = 1;
 
-    // Bu piyon artık saldırıya katıldığı için yok edilir
-    Destroy(gameObject);
-}
+        // KÖYDE SAVAŞI ÇALIŞTIR
+        targetBase.ResolveBattle(attackerCount, attackerTeam);
+
+        // Bu piyon artık saldırıya katıldığı için yok edilir
+        Destroy(gameObject);
+    }
 
     // ----------- SAVUNMA AMAÇLI KALEYE GİTME ------------
     public void GoDefendBase(BaseController castle)
@@ -120,32 +120,32 @@ IEnumerator DoAttack()
 
     // ----------- BASE'E DOĞRU HAREKET (SALDIRI + SAVUNMA) ------------
     void BaseeDogruGit()
-{
-    BaseController goal = defendBase != null ? defendBase : targetBase;
-
-    transform.position = Vector3.MoveTowards(
-        transform.position,
-        goal.transform.position,
-        joinSpeed * Time.deltaTime
-    );
-
-    // --- SAVUNMA (Oyuncu kalesine varınca) ---
-    if (defendBase != null &&
-        Vector3.Distance(transform.position, defendBase.transform.position) < 0.25f)
     {
-        defendBase.unitCount++;  // savunmaya ekle
-        Destroy(gameObject);
-        return;
-    }
+        BaseController goal = defendBase != null ? defendBase : targetBase;
 
-    // --- SALDIRI (düşman kaleye) ---
-    if (targetBase != null &&
-        Vector3.Distance(transform.position, targetBase.transform.position) < 0.25f)
-    {
-        targetBase.ReceiveAttack(1, attackerTeam);
-        Destroy(gameObject);
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            goal.transform.position,
+            joinSpeed * Time.deltaTime
+        );
+
+        // --- SAVUNMA (Oyuncu kalesine varınca) ---
+        if (defendBase != null &&
+            Vector3.Distance(transform.position, defendBase.transform.position) < 0.25f)
+        {
+            defendBase.unitCount++;  // savunmaya ekle
+            Destroy(gameObject);
+            return;
+        }
+
+        // --- SALDIRI (düşman kaleye) ---
+        if (targetBase != null &&
+            Vector3.Distance(transform.position, targetBase.transform.position) < 0.25f)
+        {
+            targetBase.ReceiveAttack(1, attackerTeam);
+            Destroy(gameObject);
+        }
     }
-}
 
 
     public void SetWanderSpeed(float s)
@@ -154,26 +154,33 @@ IEnumerator DoAttack()
     }
 
     public void DusmanaKatıl(Transform enemyKing)
-{
-    player = enemyKing;
-    currentMode = Mode.ToEnemy;
-
-    // hedef = enemy army
-}
-
-void DusmanaDogruGit()
-{
-    transform.position = Vector3.MoveTowards(
-        transform.position,
-        player.position,
-        joinSpeed * Time.deltaTime
-    );
-
-    if (Vector3.Distance(transform.position, player.position) < 0.25f)
     {
-        EnemyCommander.instance.enemyArmy.AddUnit(gameObject);
+        player = enemyKing;
+        currentMode = Mode.ToEnemy;
+
+        // hedef = enemy army
     }
-}
+
+    void DusmanaDogruGit()
+    {
+        if (Vector3.Distance(transform.position, player.position) < 0.25f)
+        {
+            EnemyCommander.instance.enemyArmy.AddUnit(gameObject);
+
+            Destroy(gameObject); // ❗ Artık GameObject yok edilmeli
+        }
+
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            player.position,
+            joinSpeed * Time.deltaTime
+        );
+
+        if (Vector3.Distance(transform.position, player.position) < 0.25f)
+        {
+            EnemyCommander.instance.enemyArmy.AddUnit(gameObject);
+        }
+    }
 
 
 }

@@ -56,6 +56,7 @@ public class PlayerPiyon : MonoBehaviour
             piyonListesi.RemoveAt(0);
         }
     }
+    
 
     void HesaplaRingBilgisi(int index, out int ring, out int indexInRing, out int ringSize)
     {

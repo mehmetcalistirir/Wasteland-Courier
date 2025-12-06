@@ -15,7 +15,10 @@ public class EnemyCommander : MonoBehaviour
     private bool canMove = true;
 
     private BaseController currentTargetVillage;
-    
+    [Header("Step Sizes")]
+    public float straightStepSize = 1f;
+    public float diagonalStepSize = 1.4f;
+
 
     [Header("Enemy Army")]
     public EnemyArmy enemyArmy;
@@ -37,9 +40,9 @@ public class EnemyCommander : MonoBehaviour
     private bool isRetreating = false;
 
     private Vector2 avoidDir = Vector2.zero;
-private float avoidTimer = 0f;
-public float avoidDuration = 0.5f;
-public float avoidSpeed = 2f;
+    private float avoidTimer = 0f;
+    public float avoidDuration = 0.5f;
+    public float avoidSpeed = 2f;
 
     void Awake()
     {
@@ -57,44 +60,61 @@ public float avoidSpeed = 2f;
 
         if (kingCountText != null)
             kingCountText.text = enemyArmy.GetCount().ToString();
-            MoveToTargetVillage();
+        MoveToTargetVillage();
         CheckFightWithPlayer();
     }
     void CheckFightWithPlayer()
-{
-    if (playerKing == null) return;
-
-    float dist = Vector2.Distance(enemyKing.position, playerKing.position);
-
-    // 👇 Savaş mesafesi
-    if (dist < 1.0f)
     {
-        StartKingBattle();
+        if (playerKing == null) return;
+
+        float dist = Vector2.Distance(enemyKing.position, playerKing.position);
+
+        // 👇 Savaş mesafesi
+        if (dist < 1.0f)
+        {
+            StartKingBattle();
+        }
     }
-}
 
-void StartKingBattle()
-{
-    int enemyCount = enemyArmy.GetCount();
-    int playerCount = PlayerCommander.instance.GetArmyCount();
+    void StartKingBattle()
+    {
+        int enemyCount = enemyArmy.GetCount();
+        int playerCount = PlayerCommander.instance.GetArmyCount();
 
-    // Aynı köy mantığı:
-    int kill = Mathf.Min(enemyCount, playerCount);
+        // 1'e 1 trade
+        int kill = Mathf.Min(enemyCount, playerCount);
 
-    int enemyRemaining = enemyCount - kill;
-    int playerRemaining = playerCount - kill;
+        enemyArmy.RemovePiyons(kill);
+        PlayerCommander.instance.playerArmy.RemovePiyons(kill);
 
-    // --- PLAYER KAYIPLARI ---
-    PlayerCommander.instance.playerArmy.ExtractAll(); // tüm piyonlar silinsin
+        // Güncel sayıları al
+        enemyCount = enemyArmy.GetCount();
+        playerCount = PlayerCommander.instance.GetArmyCount();
 
-    // --- ENEMY KAYIPLARI ---
-    enemyArmy.RemovePiyons(kill);
+        // Eğer enemy piyon bitti -> enemy kral ölür
+        if (enemyCount <= 0)
+        {
+            Debug.Log("Enemy King has been defeated!");
+            Destroy(enemyKing.gameObject);    // Düşman kral yok edildi
 
-    // Eğer ENEMY kazandıysa kalanları koru
-    // RemovePiyons zaten gerekeni sildiğinden ekstra işlem yok.
+            // Oyun kazanıldı
+            GameMode.Instance.WinGame();
+            return;
+        }
 
-    // Eğer PLAYER kazanırsa enemyRemaining = 0 zaten
-}
+        // Eğer player piyon bitti -> oyuncu kral ölür
+        if (playerCount <= 0)
+        {
+            Debug.Log("Player King has been defeated!");
+            Destroy(playerKing.gameObject);
+
+
+            // Oyun kaybedildi
+            GameMode.Instance.LoseGame();
+            return;
+        }
+    }
+
 
 
 
@@ -115,86 +135,91 @@ void StartKingBattle()
     // -----------------------------------------------------
     // GRID ADEDİM HAREKETİ
     // -----------------------------------------------------
-    IEnumerator MoveOneStep(Vector2 targetPos)
+    IEnumerator MoveOneStep(Vector2 direction)
+{
+    canMove = false;
+
+    float step = (direction.x != 0 && direction.y != 0)
+        ? diagonalStepSize
+        : straightStepSize;
+
+    Vector2 startPos = enemyKing.position;
+    Vector2 targetPos = startPos + direction * step;
+
+    float t = 0f;
+    float duration = step / stepSpeed;
+
+    while (t < duration)
     {
-        canMove = false;
-
-        Vector2 startPos = enemyKing.position;
-        float t = 0f;
-        float duration = stepSize / stepSpeed;
-
-        // Smooth kare hareketi
-        while (t < duration)
-        {
-            enemyKing.position = Vector2.Lerp(startPos, targetPos, t / duration);
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        enemyKing.position = targetPos;
-
-        // Adım sonrası bekleme
-        yield return new WaitForSeconds(stepCooldown);
-
-        canMove = true;
+        enemyKing.position = Vector2.Lerp(startPos, targetPos, t / duration);
+        t += Time.deltaTime;
+        yield return null;
     }
+
+    enemyKing.position = targetPos;
+
+    yield return new WaitForSeconds(stepCooldown);
+
+    canMove = true;
+}
+
+
 
     // -----------------------------------------------------
     // 3) HAREKET — SATRANÇ ŞAHI GİBİ ADIM ADIM
     // -----------------------------------------------------
     void MoveToTargetVillage()
-    {
-        if (avoidTimer > 0)
 {
-    avoidTimer -= Time.deltaTime;
+    if (avoidTimer > 0)
+    {
+        avoidTimer -= Time.deltaTime;
+        enemyKing.position += (Vector3)(avoidDir * avoidSpeed * Time.deltaTime);
+        return;
+    }
 
-    enemyKing.position += (Vector3)(avoidDir * avoidSpeed * Time.deltaTime);
+    if (!canMove) return;
+    if (enemyKing == null || villages == null || villages.Length == 0) return;
 
-    return; // Hedefe gitmeyi geçici olarak durdur
+    if (currentTargetVillage == null)
+    {
+        if (isRetreating)
+        {
+            currentTargetVillage = enemyCastle;
+        }
+        else
+        {
+            currentTargetVillage = PickSmartNeutralVillage();
+            if (currentTargetVillage == null)
+                currentTargetVillage = PickAnyNeutralVillage();
+            if (currentTargetVillage == null)
+                currentTargetVillage = PickOwnedVillage();
+        }
+    }
+
+    if (currentTargetVillage == null) return;
+
+    Vector2 diff = currentTargetVillage.transform.position - enemyKing.position;
+
+    if (diff.magnitude < 0.5f)
+    {
+        OnReachVillage(currentTargetVillage);
+        currentTargetVillage = null;
+        return;
+    }
+
+    Vector2 dir = NormalizeDirection(diff);
+
+    // 🔥 DÜZ / ÇAPRAZ ADIM HESABI
+    float step = (dir.x != 0 && dir.y != 0)
+        ? diagonalStepSize
+        : straightStepSize;
+
+    Vector2 targetPos = (Vector2)enemyKing.position + dir * step;
+
+    StartCoroutine(MoveOneStep(dir));
+
 }
 
-        if (!canMove) return;
-        if (enemyKing == null || villages == null || villages.Length == 0) return;
-
-        // Hedef yoksa belirle
-        if (currentTargetVillage == null)
-        {
-            if (isRetreating)
-            {
-                currentTargetVillage = enemyCastle;
-            }
-            else
-            {
-                currentTargetVillage = PickSmartNeutralVillage();
-                if (currentTargetVillage == null)
-                    currentTargetVillage = PickAnyNeutralVillage();
-                if (currentTargetVillage == null)
-                    currentTargetVillage = PickOwnedVillage();
-            }
-        }
-
-        if (currentTargetVillage == null) return;
-
-        // Hedef yönünü hesapla
-        Vector2 diff = currentTargetVillage.transform.position - enemyKing.position;
-
-        // Hedefe zaten çok yakınsa → köyü ele aldı say
-        if (diff.magnitude < 0.5f)
-        {
-            OnReachVillage(currentTargetVillage);
-            currentTargetVillage = null;
-            return;
-        }
-
-        // Yönü 8 yöne yuvarla
-        Vector2 dir = NormalizeDirection(diff);
-
-        // Adım hedefi
-        Vector2 targetPos = (Vector2)enemyKing.position + dir * stepSize;
-
-        // Adım coroutine çağır
-        StartCoroutine(MoveOneStep(targetPos));
-    }
 
     // -----------------------------------------------------
     // 1) DÜŞMANIN SAHİP OLDUĞU KÖYLER
@@ -564,20 +589,20 @@ void StartKingBattle()
     }
 
     public void OnObstacleDetected(Collider2D obstacle)
-{
-    Vector2 toObstacle = obstacle.transform.position - enemyKing.position;
-
-    // Engel x ekseninde ise → yukarı/aşağı kaç
-    if (Mathf.Abs(toObstacle.x) > Mathf.Abs(toObstacle.y))
     {
-        avoidDir = new Vector2(0, toObstacle.y > 0 ? -1 : 1);
-    }
-    else
-    {
-        // Engel y ekseninde ise → sağ/sol kaç
-        avoidDir = new Vector2(toObstacle.x > 0 ? -1 : 1, 0);
-    }
+        Vector2 toObstacle = obstacle.transform.position - enemyKing.position;
 
-    avoidTimer = avoidDuration;
-}
+        // Engel x ekseninde ise → yukarı/aşağı kaç
+        if (Mathf.Abs(toObstacle.x) > Mathf.Abs(toObstacle.y))
+        {
+            avoidDir = new Vector2(0, toObstacle.y > 0 ? -1 : 1);
+        }
+        else
+        {
+            // Engel y ekseninde ise → sağ/sol kaç
+            avoidDir = new Vector2(toObstacle.x > 0 ? -1 : 1, 0);
+        }
+
+        avoidTimer = avoidDuration;
+    }
 }

@@ -202,8 +202,8 @@ public class Piyon : MonoBehaviour
         if (Vector3.Distance(transform.position, player.position) < 0.25f)
         {
             EnemyCommanderCore.instance.enemyArmy.AddUnit(gameObject);
+currentMode = Mode.ToEnemy;
 
-            Destroy(gameObject);
         }
     }
 }

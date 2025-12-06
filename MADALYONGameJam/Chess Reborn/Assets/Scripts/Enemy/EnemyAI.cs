@@ -5,13 +5,11 @@ public class EnemyAI : MonoBehaviour
 {
     private EnemyCommanderCore core;
 
-    public int attackThreshold = 10;
-    public int retreatThreshold = 3;
-    public float safeRadiusFromPlayer = 6f;
-    public int weakVillageUnitThreshold = 5;
+    public float playerAvoidRange = 3f;
+    public int minAttackArmy = 3;
+    public int rushArmy = 7;
 
     public BaseController currentTargetVillage;
-    private bool isRetreating = false;
 
     public void Setup(EnemyCommanderCore c)
     {
@@ -19,128 +17,133 @@ public class EnemyAI : MonoBehaviour
     }
 
     public void Think()
+{
+    if (core == null || core.enemyArmy == null)
+        return;
+
+    int armyCount = core.enemyArmy.GetCount();
+
+    // -------------------------
+    // 0) ASLA boşta kalmamalı!
+    // Eğer tüm köyleri ele geçirmişse:
+    // - Asker toplasın
+    // - Player'a saldırıya geçsin
+    // -------------------------
+
+    if (AllVillagesOwnedByEnemy())
     {
-        if (core.enemyArmy == null) return;
+        GatherArmy();
 
-        List<BaseController> owned = GetOwnedVillages();
-
-        if (owned.Count == 0)
+        // Eğer ordusu küçükse player king’e saldır
+        if (armyCount < 4)
         {
-            isRetreating = false;
-            TryCaptureNeutralVillage();
+            currentTargetVillage = FindClosestTo(core.playerKing.position);
             return;
         }
 
-        SmartRetreatCheck();
-        DefendThreatenedVillages(owned);
+        // Ordu yeterliyse PLAYER CASTLE'a RUSH
+        currentTargetVillage = core.playerCastle;
+        return;
+    }
+
+    // -------------------------
+    // 1) Player tehdit oluşturuyorsa → Asker topla
+    // -------------------------
+    if (PlayerIsNear())
         GatherArmy();
-        TryAttack();
+
+    // -------------------------
+    // 2) Düşman köyü tehdit altında mı?
+    // -------------------------
+    BaseController threatened = FindThreatenedVillage();
+    if (threatened != null)
+    {
+        ReinforceVillage(threatened);
+        currentTargetVillage = threatened;
+        return;
     }
 
-    public List<BaseController> GetOwnedVillages()
+    // -------------------------
+    // 3) Büyük ordu → Castle Rush
+    // -------------------------
+    if (armyCount >= rushArmy)
     {
-        List<BaseController> list = new List<BaseController>();
+        PrepForCastleRush();
+        currentTargetVillage = core.playerCastle;
+        return;
+    }
+
+    // -------------------------
+    // 4) Player köylerine saldır
+    // -------------------------
+    if (TryAttackPlayerVillage()) return;
+
+    // -------------------------
+    // 5) Tarafsız köy varsa → hemen ele geçir
+    // -------------------------
+    if (TryCaptureNearestNeutral()) return;
+
+    // -------------------------
+    // 6) Hâlâ hedef yoksa → Player King’i takip et
+    // -------------------------
+    currentTargetVillage = FindClosestTo(core.playerKing.position);
+}
+
+
+
+    // ----------- 1) PLAYER KALESİNE RUSH -----------
+
+    bool TryRushPlayerCastle()
+    {
+        if (core.enemyArmy.GetCount() < rushArmy)
+            return false;
+
+        BaseController castle = core.playerCastle;
+        if (castle == null)
+            return false;
+
+        if (castle.unitCount < core.enemyArmy.GetCount())
+        {
+            currentTargetVillage = castle;
+            return true;
+        }
+
+        return false;
+    }
+
+    // ----------- 2) Tarafsız köyleri hızlıca ele geçir -----------
+
+    bool TryCaptureNearestNeutral()
+    {
+        BaseController best = null;
+        float bestDist = Mathf.Infinity;
 
         foreach (var v in core.villages)
-            if (v != null && v.owner == Team.Enemy && !v.isCastle)
-                list.Add(v);
-
-        return list;
-    }
-
-    public void OnReachVillage(BaseController v)
-    {
-        if (v.owner == Team.Neutral)
-            v.owner = Team.Enemy;
-        else if (v.owner == Team.Player)
-            EnemyAttack(v);
-    }
-
-    void EnemyAttack(BaseController v)
-    {
-        float dist = Vector2.Distance(core.enemyKing.position, v.transform.position);
-        if (dist > 0.8f) return;
-
-        int attackerCount = core.enemyArmy.GetCount();
-
-        v.ResolveBattle(attackerCount, Team.Enemy);
-        core.enemyArmy.ExtractAll();
-    }
-
-    void SmartRetreatCheck()
-    {
-        int count = core.enemyArmy.GetCount();
-
-        if (count <= retreatThreshold)
         {
-            isRetreating = true;
-            currentTargetVillage = core.enemyCastle;
-        }
-        else if (count >= attackThreshold)
-        {
-            isRetreating = false;
-        }
-    }
+            if (v.owner != Team.Neutral)
+                continue;
 
-    void TryCaptureNeutralVillage()
-    {
-        foreach (var v in core.villages)
-        {
-            if (v != null && v.owner == Team.Neutral)
+            float d = Vector2.Distance(core.enemyKing.position, v.transform.position);
+
+            if (d < bestDist)
             {
-                currentTargetVillage = v;
-                return;
+                bestDist = d;
+                best = v;
             }
         }
-    }
 
-    void GatherArmy()
-    {
-        foreach (var v in core.villages)
+        if (best != null)
         {
-            if (v != null && v.owner == Team.Enemy && EnemyIsAt(v))
-                AddVillageUnits(v);
+            currentTargetVillage = best;
+            return true;
         }
 
-        if (core.enemyCastle != null && EnemyIsAt(core.enemyCastle))
-            AddVillageUnits(core.enemyCastle);
+        return false;
     }
 
-    void AddVillageUnits(BaseController v)
-    {
-        BasePiyonManager bpm = v.GetComponent<BasePiyonManager>();
-        if (bpm == null) return;
+    // ----------- 3) Player köylerine saldır -----------
 
-        bpm.TransferAllToEnemy(core.enemyKing);
-    }
-
-    bool EnemyIsAt(BaseController v)
-    {
-        return Vector2.Distance(core.enemyKing.position, v.transform.position) < 0.5f;
-    }
-
-    // ----------------
-    // SALDIRI KARARLARI
-    // ----------------
-
-    void TryAttack()
-    {
-        BaseController target = FindTargetPlayerVillage();
-
-        if (target != null)
-        {
-            currentTargetVillage = target;
-            return;
-        }
-
-        if (core.enemyArmy.GetCount() < attackThreshold)
-            return;
-
-        if (core.playerCastle != null && CanConquer(core.playerCastle))
-            SendArmyTo(core.playerCastle);
-    }
-
-    BaseController FindTargetPlayerVillage()
+    bool TryAttackPlayerVillage()
     {
         BaseController best = null;
         float bestScore = Mathf.Infinity;
@@ -150,108 +153,174 @@ public class EnemyAI : MonoBehaviour
             if (v.owner != Team.Player)
                 continue;
 
-            if (!CanConquer(v))
+            float distPlayer = Vector2.Distance(core.playerKing.position, v.transform.position);
+            if (distPlayer < playerAvoidRange)
                 continue;
 
-            float distEnemy = Vector2.Distance(core.enemyKing.position, v.transform.position);
-            float distPlayer = Vector2.Distance(core.playerKing.position, v.transform.position);
+            if (core.enemyArmy.GetCount() <= v.unitCount)
+                continue;
 
-            float score = distEnemy + Mathf.Max(0, safeRadiusFromPlayer - distPlayer) * 3f;
+            float dist = Vector2.Distance(core.enemyKing.position, v.transform.position);
 
-            if (score < bestScore)
+            if (dist < bestScore)
             {
-                bestScore = score;
+                bestScore = dist;
                 best = v;
             }
         }
 
-        return best;
-    }
-    
-
-    public bool CanConquer(BaseController v)
-    {
-        BasePiyonManager bpm = v.GetComponent<BasePiyonManager>();
-        int villageUnits = bpm != null ? bpm.GetPiyonCount() : v.unitCount;
-
-        int myArmy = core.enemyArmy.GetCount();
-
-        return myArmy > villageUnits;
-    }
-
-    public void SendArmyTo(BaseController target)
-    {
-        if (core.enemyArmy.GetCount() <= 0) return;
-
-        float dist = Vector2.Distance(core.enemyKing.position, target.transform.position);
-        if (dist > 0.8f) return;
-
-        GameObject[] units = core.enemyArmy.ExtractAll();
-
-        foreach (var p in units)
+        if (best != null)
         {
-            if (p == null) continue;
-            p.GetComponent<Piyon>().AttackBase(target, Team.Enemy);
+            currentTargetVillage = best;
+            return true;
         }
+
+        return false;
     }
-    void DefendThreatenedVillages(List<BaseController> owned)
+
+    // ----------- 4) Sahip olduğu en yakın köye git -----------
+
+    void MoveToClosestOwnedVillage()
+    {
+        BaseController best = null;
+        float bestDist = Mathf.Infinity;
+
+        foreach (var v in core.villages)
+        {
+            if (v.owner != Team.Enemy)
+                continue;
+
+            float d = Vector2.Distance(core.enemyKing.position, v.transform.position);
+
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = v;
+            }
+        }
+
+        currentTargetVillage = best;
+    }
+    public void OnReachVillage(BaseController v)
 {
-    if (owned == null || owned.Count == 0) return;
+    if (v == null) return;
 
-    BaseController mostThreatened = null;
-    float maxThreat = 0f;
-
-    foreach (var v in owned)
+    // 1) Tarafsız köy -> direkt ele geçir
+    if (v.owner == Team.Neutral)
     {
-        float t = EvaluateVillageThreat(v);
-        if (t > maxThreat)
-        {
-            maxThreat = t;
-            mostThreatened = v;
-        }
+        v.owner = Team.Enemy;
+        v.unitCount = Mathf.Max(1, v.unitCount); 
+        return;
     }
 
-    if (mostThreatened != null && maxThreat > 3f)
+    // 2) PLAYER köyü -> saldır
+    if (v.owner == Team.Player)
     {
-        BaseController reinforceSource = FindStrongestOwnedVillage(owned);
-        if (reinforceSource != null && reinforceSource != mostThreatened)
-        {
-            SendDefense(reinforceSource, mostThreatened);
-        }
+        int attacker = core.enemyArmy.GetCount();
+        v.ResolveBattle(attacker, Team.Enemy);
+
+        // saldırıya katılan tüm piyonları ordudan düş
+        core.enemyArmy.ExtractAll();
+        return;
     }
-}
 
-float EvaluateVillageThreat(BaseController v)
-{
-    if (v == null) return 0f;
-
-    float threat = 0f;
-
-    float distPlayer = Vector2.Distance(core.playerKing.position, v.transform.position);
-    int playerArmyCount = PlayerCommander.instance.GetArmyCount();
-
+    // 3) KENDİ köyümüz -> köydeki piyonları army'e kat
     if (v.owner == Team.Enemy)
     {
-        threat += Mathf.Max(0, core.enemyArmy.GetCount() - v.unitCount);
-        if (distPlayer < 6f)
-            threat += 6f - distPlayer;
+        BasePiyonManager bpm = v.GetComponent<BasePiyonManager>();
+        if (bpm != null)
+            bpm.TransferAllToEnemy(core.enemyKing);
 
-        threat += playerArmyCount * 0.2f;
+        return;
     }
-
-    return threat;
 }
 
-BaseController FindStrongestOwnedVillage(List<BaseController> owned)
+// Oyuncu çok yakın mı?
+bool PlayerIsNear()
+{
+    float dist = Vector2.Distance(core.enemyKing.position, core.playerKing.position);
+    return dist < 4f;
+}
+
+// Köylerdeki tüm piyonları orduya ekleme
+void GatherArmy()
+{
+    foreach (var v in core.villages)
+    {
+        if (v.owner == Team.Enemy)
+        {
+            BasePiyonManager bpm = v.GetComponent<BasePiyonManager>();
+            if (bpm != null)
+                bpm.SendAllToEnemyArmy(core.enemyKing);
+        }
+    }
+}
+
+// Tehdit altındaki köyü bul
+BaseController FindThreatenedVillage()
+{
+    foreach (var v in core.villages)
+    {
+        if (v.owner == Team.Enemy)
+        {
+            float playerDist = Vector2.Distance(core.playerKing.position, v.transform.position);
+
+            if (playerDist < 3f)  // saldırı menzilinde
+                return v;
+        }
+    }
+
+    return null;
+}
+
+// Köyü savunmak için diğer köylerden piyon gönder
+void ReinforceVillage(BaseController threatened)
+{
+    foreach (var v in core.villages)
+    {
+        if (v.owner == Team.Enemy && v != threatened)
+        {
+            BasePiyonManager bpm = v.GetComponent<BasePiyonManager>();
+            if (bpm != null)
+                bpm.SendAllToEnemyVillage(threatened);
+        }
+    }
+}
+
+// Castle rush öncesi bütün piyonları orduya çek
+void PrepForCastleRush()
+{
+    foreach (var v in core.villages)
+    {
+        if (v.owner == Team.Enemy)
+        {
+            BasePiyonManager bpm = v.GetComponent<BasePiyonManager>();
+            if (bpm != null)
+                bpm.SendAllToEnemyArmy(core.enemyKing);
+        }
+    }
+}
+
+bool AllVillagesOwnedByEnemy()
+{
+    foreach (var v in core.villages)
+        if (v.owner != Team.Enemy)
+            return false;
+
+    return true;
+}
+
+BaseController FindClosestTo(Vector3 pos)
 {
     BaseController best = null;
-    int max = 0;
+    float bestDist = Mathf.Infinity;
 
-    foreach (var v in owned)
+    foreach (var v in core.villages)
     {
-        if (v.unitCount > max)
+        float d = Vector2.Distance(v.transform.position, pos);
+        if (d < bestDist)
         {
-            max = v.unitCount;
+            bestDist = d;
             best = v;
         }
     }
@@ -259,12 +328,5 @@ BaseController FindStrongestOwnedVillage(List<BaseController> owned)
     return best;
 }
 
-void SendDefense(BaseController from, BaseController to)
-{
-    BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
-    if (bpm == null) return;
-
-    bpm.SendAllToCastle(to);
-}
 
 }

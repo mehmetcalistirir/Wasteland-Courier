@@ -44,30 +44,41 @@ public class EnemyCommanderCore : MonoBehaviour
     }
 
     void Start()
-{
-    thinkTimer = 0.5f; // ilk düşünme süresi
-}
-
-    void Update()
-{
-    if (ai == null) return;
-    if (movement == null) return;
-
-    // AI döngüsü
-    aiTimer -= Time.deltaTime;
-    if (aiTimer <= 0f)
     {
-        aiTimer = ThinkInterval;
-        ai.Think();
+        enemyArmy.transform.SetParent(enemyKing);
+        enemyArmy.transform.localPosition = Vector3.zero;
+
+        thinkTimer = 0.5f;
+
+        // EnemyArmy merkezini enemyKing'e bağla
+        if (enemyArmy != null && enemyKing != null)
+        {
+            enemyArmy.transform.SetParent(enemyKing);
+            enemyArmy.transform.localPosition = Vector3.zero;
+        }
     }
 
-    // Hareket & savaş
-    movement.Tick();
-    combat.Tick();
-}
 
-bool coreMissing()
-{
-    return (movement == null || combat == null || ai == null || enemyArmy == null);
-}
+    void Update()
+    {
+        if (ai == null) return;
+        if (movement == null) return;
+
+        // AI döngüsü
+        aiTimer -= Time.deltaTime;
+        if (aiTimer <= 0f)
+        {
+            aiTimer = ThinkInterval;
+            ai.Think();
+        }
+
+        // Hareket & savaş
+        movement.Tick();
+        combat.Tick();
+    }
+
+    bool coreMissing()
+    {
+        return (movement == null || combat == null || ai == null || enemyArmy == null);
+    }
 }

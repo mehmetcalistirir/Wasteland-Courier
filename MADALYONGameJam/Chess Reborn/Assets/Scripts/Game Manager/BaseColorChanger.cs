@@ -1,14 +1,18 @@
 using UnityEngine;
+using UnityEngine.UI; // Image için gerekli
 
 public class BaseColorChanger : MonoBehaviour
 {
-    public BaseController baseController; // Köy/kale scripti
+    public BaseController baseController;
     public SpriteRenderer spriteRenderer;
 
     [Header("Colors")]
     public Color playerColor = Color.blue;
     public Color enemyColor = Color.red;
     public Color neutralColor = Color.gray;
+
+    [Header("Neutral Icon (Image)")]
+    public SpriteRenderer neutralIcon;   // 👈 Yeni eklenen alan
 
     void Awake()
     {
@@ -22,6 +26,7 @@ public class BaseColorChanger : MonoBehaviour
     void Update()
     {
         UpdateColor();
+        UpdateIcon();
     }
 
     void UpdateColor()
@@ -40,5 +45,16 @@ public class BaseColorChanger : MonoBehaviour
                 spriteRenderer.color = neutralColor;
                 break;
         }
+    }
+
+    void UpdateIcon()
+    {
+        if (neutralIcon == null) return;
+
+        // Taraf tarafsız ise ikon görünür, değilse gizlenir
+        if (baseController.owner == Team.Neutral)
+            neutralIcon.gameObject.SetActive(true);
+        else
+            neutralIcon.gameObject.SetActive(false);
     }
 }

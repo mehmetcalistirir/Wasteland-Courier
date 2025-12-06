@@ -138,7 +138,7 @@ public class BaseController : MonoBehaviour
         }
         else
         {
-            EnemyCommander.instance.enemyArmy.RemovePiyons(kill);
+            EnemyCommanderCore.instance.enemyArmy.RemovePiyons(kill);
         }
 
         // Eğer saldıran kazandıysa köyü ele geçir
@@ -192,7 +192,7 @@ public class BaseController : MonoBehaviour
         // ENEMY ORDUSU rakip köye girerse savaş
         if (other.CompareTag("Enemy") && owner == Team.Player)
         {
-            int attackerCount = EnemyCommander.instance.enemyArmy.GetCount();
+            int attackerCount = EnemyCommanderCore.instance.enemyArmy.GetCount();
             StartBattle(attackerCount, Team.Enemy);
             return;
         }

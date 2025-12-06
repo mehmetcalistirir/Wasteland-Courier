@@ -2,63 +2,42 @@ using UnityEngine;
 
 public class EnemyMovementBoost : MonoBehaviour
 {
-    public EnemyCommander commander;
+    public EnemyCommanderCore commander;
+
     public float zoneBonus = 2f;
+    public float zoneSlow = -2f;
 
-    private BaseController zone;
-    private float baseSpeed;
     private BaseController insideZone = null;
-    private bool slowApplied = false;
-    private float originalSpeed;
-    public float moveSpeed = 3f; // örnek
-
     private bool zoneApplied = false;
     private float zoneSpeedModifier = 0f;
 
-
-
-    public float zoneSlow = -2f;
-
-
     void Start()
     {
-        baseSpeed = commander.stepSpeed;
+        // Başlangıçta biraz hız bonusu verebilirsin
+        commander.movement.moveSpeed *= 1.2f;
     }
 
-    public void SetInsideZone(BaseController newZone)
-{
-    zone = newZone;        // 🔥 asıl alanı set et
-    insideZone = newZone;  // istiyorsan bunu da tutabilirsin
-
-    if (newZone != null && !zoneApplied)
+    public void SetInsideZone(BaseController zone)
     {
-        zoneApplied = true;
-        zoneSpeedModifier = -1f; // yavaşlatma örneği
-        moveSpeed += zoneSpeedModifier;
-    }
-    else if (newZone == null && zoneApplied)
-    {
-        moveSpeed -= zoneSpeedModifier;
-        zoneApplied = false;
-        zoneSpeedModifier = 0f;
-    }
-}
+        insideZone = zone;
 
-
-    void Update()
-    {
-        float zoneEffect = 0f;
-
-        if (zone != null)
+        if (zone != null && !zoneApplied)
         {
+            zoneApplied = true;
+
+            // Eğer düşmanın kendi bölgesiyse hız arttır
             if (zone.owner == Team.Enemy)
-                zoneEffect = zoneBonus;  // kendi bölgesi → hızlan
-            else if (zone.owner == Team.Player)
-                zoneEffect = zoneSlow;   // oyuncu bölgesi → yavaşla
+                zoneSpeedModifier = zoneBonus;
+            else
+                zoneSpeedModifier = zoneSlow;
+
+            commander.movement.moveSpeed += zoneSpeedModifier;
         }
-
-        commander.stepSpeed = baseSpeed + zoneEffect;
+        else if (zone == null && zoneApplied)
+        {
+            commander.movement.moveSpeed -= zoneSpeedModifier;
+            zoneApplied = false;
+            zoneSpeedModifier = 0f;
+        }
     }
-
 }
-

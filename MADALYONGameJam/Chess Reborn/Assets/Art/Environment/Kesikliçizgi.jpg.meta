@@ -1,0 +1,754 @@
+fileFormatVersion: 2
+guid: 261c2e8c828c90b4fa5ad07296aeeb76
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1024397530992178550
+    second: "Kesikli\xE7izgi_0"
+  - first:
+      213: 8619068011220889467
+    second: "Kesikli\xE7izgi_1"
+  - first:
+      213: -4226418151571178187
+    second: "Kesikli\xE7izgi_2"
+  - first:
+      213: 1651339412881281164
+    second: "Kesikli\xE7izgi_3"
+  - first:
+      213: 3929435335896656079
+    second: "Kesikli\xE7izgi_4"
+  - first:
+      213: 3445198988669671696
+    second: "Kesikli\xE7izgi_5"
+  - first:
+      213: 6565307118391332202
+    second: "Kesikli\xE7izgi_6"
+  - first:
+      213: 805498618207029859
+    second: "Kesikli\xE7izgi_7"
+  - first:
+      213: 8793005330476487719
+    second: "Kesikli\xE7izgi_8"
+  - first:
+      213: -3416933635682997220
+    second: "Kesikli\xE7izgi_9"
+  - first:
+      213: 4794824846609323298
+    second: "Kesikli\xE7izgi_10"
+  - first:
+      213: 1677484768999145795
+    second: "Kesikli\xE7izgi_11"
+  - first:
+      213: 1461061069294761964
+    second: "Kesikli\xE7izgi_12"
+  - first:
+      213: 189337708641450140
+    second: "Kesikli\xE7izgi_13"
+  - first:
+      213: -1292989993284410966
+    second: "Kesikli\xE7izgi_14"
+  - first:
+      213: 839806566101522402
+    second: "Kesikli\xE7izgi_15"
+  - first:
+      213: -7306712018187491980
+    second: "Kesikli\xE7izgi_16"
+  - first:
+      213: 7462463970892104619
+    second: "Kesikli\xE7izgi_17"
+  - first:
+      213: -5713166573513966937
+    second: "Kesikli\xE7izgi_18"
+  - first:
+      213: 4935511278841713305
+    second: "Kesikli\xE7izgi_19"
+  - first:
+      213: 1667026544405750951
+    second: "Kesikli\xE7izgi_20"
+  - first:
+      213: -5805354892796489234
+    second: "Kesikli\xE7izgi_21"
+  - first:
+      213: -9102500254659290149
+    second: "Kesikli\xE7izgi_22"
+  - first:
+      213: -3686956188596837683
+    second: "Kesikli\xE7izgi_23"
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_0"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 278
+        width: 27
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 675739f7024673e00800000000000000
+      internalID: 1024397530992178550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_1"
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 300
+        width: 33
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7fe0cfb0b41d9770800000000000000
+      internalID: 8619068011220889467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_2"
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 300
+        width: 41
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53d365b651fb855c0800000000000000
+      internalID: -4226418151571178187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_3"
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 300
+        width: 34
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c801464627cbae610800000000000000
+      internalID: 1651339412881281164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_4"
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 301
+        width: 36
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc8ecf37e98288630800000000000000
+      internalID: 3929435335896656079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_5"
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 301
+        width: 36
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 019d03c0a3ecfcf20800000000000000
+      internalID: 3445198988669671696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_6"
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 273
+        width: 30
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6d0f092a08ac1b50800000000000000
+      internalID: 6565307118391332202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_7"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 238
+        width: 9
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36a4c4db9b4bd2b00800000000000000
+      internalID: 805498618207029859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_8"
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 234
+        width: 9
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 724da2fb2c7070a70800000000000000
+      internalID: 8793005330476487719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_9"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 200
+        width: 10
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1ce70846fc9490d0800000000000000
+      internalID: -3416933635682997220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_10"
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 195
+        width: 9
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2259d5e3bc3aa8240800000000000000
+      internalID: 4794824846609323298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_11"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 163
+        width: 10
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 341825c728f974710800000000000000
+      internalID: 1677484768999145795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_12"
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 158
+        width: 9
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce7777e2d4bb64410800000000000000
+      internalID: 1461061069294761964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_13"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 119
+        width: 10
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c98f82294a9a0a200800000000000000
+      internalID: 189337708641450140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_14"
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 114
+        width: 9
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa1e520a3706e0ee0800000000000000
+      internalID: -1292989993284410966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_15"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 84
+        width: 10
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e795845f9797ab00800000000000000
+      internalID: 839806566101522402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_16"
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 79
+        width: 9
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4756bdfc128599a90800000000000000
+      internalID: -7306712018187491980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_17"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 53
+        width: 27
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba3cc26917fff8760800000000000000
+      internalID: 7462463970892104619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_18"
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 53
+        width: 33
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7aa70136541c6b0b0800000000000000
+      internalID: -5713166573513966937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_19"
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 53
+        width: 41
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9925b40db557e7440800000000000000
+      internalID: 4935511278841713305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_20"
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 53
+        width: 34
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a4a3725fc7722710800000000000000
+      internalID: 1667026544405750951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_21"
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 53
+        width: 36
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee11acbab7c3f6fa0800000000000000
+      internalID: -5805354892796489234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_22"
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 53
+        width: 36
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdb5129de3c6da180800000000000000
+      internalID: -9102500254659290149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "Kesikli\xE7izgi_23"
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 53
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc2e14c71ec45dcc0800000000000000
+      internalID: -3686956188596837683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      "Kesikli\xE7izgi_0": 1024397530992178550
+      "Kesikli\xE7izgi_1": 8619068011220889467
+      "Kesikli\xE7izgi_10": 4794824846609323298
+      "Kesikli\xE7izgi_11": 1677484768999145795
+      "Kesikli\xE7izgi_12": 1461061069294761964
+      "Kesikli\xE7izgi_13": 189337708641450140
+      "Kesikli\xE7izgi_14": -1292989993284410966
+      "Kesikli\xE7izgi_15": 839806566101522402
+      "Kesikli\xE7izgi_16": -7306712018187491980
+      "Kesikli\xE7izgi_17": 7462463970892104619
+      "Kesikli\xE7izgi_18": -5713166573513966937
+      "Kesikli\xE7izgi_19": 4935511278841713305
+      "Kesikli\xE7izgi_2": -4226418151571178187
+      "Kesikli\xE7izgi_20": 1667026544405750951
+      "Kesikli\xE7izgi_21": -5805354892796489234
+      "Kesikli\xE7izgi_22": -9102500254659290149
+      "Kesikli\xE7izgi_23": -3686956188596837683
+      "Kesikli\xE7izgi_3": 1651339412881281164
+      "Kesikli\xE7izgi_4": 3929435335896656079
+      "Kesikli\xE7izgi_5": 3445198988669671696
+      "Kesikli\xE7izgi_6": 6565307118391332202
+      "Kesikli\xE7izgi_7": 805498618207029859
+      "Kesikli\xE7izgi_8": 8793005330476487719
+      "Kesikli\xE7izgi_9": -3416933635682997220
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

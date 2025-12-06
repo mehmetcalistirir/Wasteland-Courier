@@ -1,0 +1,73 @@
+using UnityEngine;
+using TMPro;
+
+public class EnemyCommanderCore : MonoBehaviour
+{
+    public static EnemyCommanderCore instance;
+
+    [Header("References")]
+    public EnemyMovement movement;
+    public EnemyCombat combat;
+    public EnemyAI ai;
+
+    [Header("Core Data")]
+    public EnemyArmy enemyArmy;
+    public Transform enemyKing;
+    public Transform playerKing;
+
+    public BaseController[] villages;
+    public BaseController enemyCastle;
+    public BaseController playerCastle;
+
+    [Header("UI")]
+    public TextMeshPro kingCountText;
+
+    [Header("AI Tick Settings")]
+    public float thinkInterval = 1f;  // AI her kaç saniyede bir düşünsün
+    private float thinkTimer;
+    private float aiTimer = 0f;
+    public float ThinkInterval = 1f;
+
+    void Awake()
+    {
+        instance = this;
+
+        // Null guard
+        if (movement != null) movement.Setup(this);
+        else Debug.LogError("EnemyCommanderCore: movement referansı atanmadı!");
+
+        if (combat != null) combat.Setup(this);
+        else Debug.LogError("EnemyCommanderCore: combat referansı atanmadı!");
+
+        if (ai != null) ai.Setup(this);
+        else Debug.LogError("EnemyCommanderCore: ai referansı atanmadı!");
+    }
+
+    void Start()
+{
+    thinkTimer = 0.5f; // ilk düşünme süresi
+}
+
+    void Update()
+{
+    if (ai == null) return;
+    if (movement == null) return;
+
+    // AI döngüsü
+    aiTimer -= Time.deltaTime;
+    if (aiTimer <= 0f)
+    {
+        aiTimer = ThinkInterval;
+        ai.Think();
+    }
+
+    // Hareket & savaş
+    movement.Tick();
+    combat.Tick();
+}
+
+bool coreMissing()
+{
+    return (movement == null || combat == null || ai == null || enemyArmy == null);
+}
+}

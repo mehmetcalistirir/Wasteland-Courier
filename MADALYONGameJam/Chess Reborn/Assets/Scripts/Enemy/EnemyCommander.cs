@@ -597,33 +597,28 @@ public class EnemyCommander : MonoBehaviour
 {
     if (target == null || enemyArmy == null) return;
 
-    // Eğer hiç piyon yoksa saldırı yapma!
+    // Eğer hiç piyon yoksa saldırı yapma
     int attackerCount = enemyArmy.GetCount();
     if (attackerCount <= 0) return;
 
-    // 1) Tüm piyonları ordudan çıkar
+    // 🔥 Kral köyün yanında değilse saldırı başlamaz
+    float dist = Vector2.Distance(enemyKing.position, target.transform.position);
+    if (dist > 0.8f)
+        return;
+
+    // --- TELEPORT YOK! ---
+    // Burada fiziksel piyon gönderme versiyonu:
     GameObject[] units = enemyArmy.ExtractAll();
 
-    // 2) Her piyonu hedefe yürümeye gönder
     foreach (var p in units)
     {
         if (p == null) continue;
 
-        int attackerCount = enemyArmy.GetCount();
-
-        float dist = Vector2.Distance(enemyKing.position, target.transform.position);
-
-if (dist > 0.8f)
-{
-    // 🔥 Kral köyde değil → savaş başlamaz
-    return;
-}
-
-target.ResolveBattle(attackerCount, Team.Enemy);
-enemyArmy.ExtractAll();
-
+        Piyon pawn = p.GetComponent<Piyon>();
+        pawn.AttackBase(target, Team.Enemy); // Piyon köye yürür
     }
 }
+
 
 
 

@@ -203,6 +203,6 @@ public class Piyon : MonoBehaviour
         {
             EnemyCommander.instance.enemyArmy.AddUnit(gameObject);
             Destroy(gameObject);
-        }
-    }
+        }
+    }
 }

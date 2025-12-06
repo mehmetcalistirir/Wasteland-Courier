@@ -6,7 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/AnaMenu.unity
+    path: Assets/Scenes/Intro Scene.unity
+    guid: 4f54488c6d82e26479d708cf1bafafdd
+  - enabled: 1
+    path: Assets/Scenes/Main Menu.unity
     guid: 913f3af4b077c5e4990d100ef1fd153e
   - enabled: 1
     path: Assets/Scenes/Oyun Sahnesi.unity

@@ -13,6 +13,9 @@ public class EnemyCommander : MonoBehaviour
     public float stepSpeed = 5f;         // Kareye doğru ilerleme hızı
     public float stepCooldown = 0.3f;    // İki adım arası bekleme süresi
     private bool canMove = true;
+    public float chaseRange = 4f;   // oyuncuyu görünce kovalama mesafesi
+    public float attackRange = 1.2f; // orduların savaşacağı mesafe
+
 
     private BaseController currentTargetVillage;
     [Header("Step Sizes")]
@@ -56,6 +59,9 @@ public class EnemyCommander : MonoBehaviour
 
     void Update()
     {
+        CheckChasePlayer();
+        CheckFightWithPlayer();
+
         MoveToTargetVillage();
 
         if (kingCountText != null)
@@ -65,55 +71,78 @@ public class EnemyCommander : MonoBehaviour
     }
     void CheckFightWithPlayer()
     {
-        if (playerKing == null) return;
-
         float dist = Vector2.Distance(enemyKing.position, playerKing.position);
 
-        // 👇 Savaş mesafesi
-        if (dist < 1.0f)
+        if (dist < attackRange)
         {
             StartKingBattle();
         }
     }
 
-    void StartKingBattle()
+
+    void CheckChasePlayer()
     {
-        int enemyCount = enemyArmy.GetCount();
-        int playerCount = PlayerCommander.instance.GetArmyCount();
+        if (playerKing == null) return;
 
-        // 1'e 1 trade
-        int kill = Mathf.Min(enemyCount, playerCount);
+        float dist = Vector2.Distance(enemyKing.position, playerKing.position);
 
-        enemyArmy.RemovePiyons(kill);
-        PlayerCommander.instance.playerArmy.RemovePiyons(kill);
-
-        // Güncel sayıları al
-        enemyCount = enemyArmy.GetCount();
-        playerCount = PlayerCommander.instance.GetArmyCount();
-
-        // Eğer enemy piyon bitti -> enemy kral ölür
-        if (enemyCount <= 0)
+        if (dist < chaseRange)
         {
-            Debug.Log("Enemy King has been defeated!");
-            Destroy(enemyKing.gameObject);    // Düşman kral yok edildi
-
-            // Oyun kazanıldı
-            GameMode.Instance.WinGame();
-            return;
-        }
-
-        // Eğer player piyon bitti -> oyuncu kral ölür
-        if (playerCount <= 0)
-        {
-            Debug.Log("Player King has been defeated!");
-            Destroy(playerKing.gameObject);
-
-
-            // Oyun kaybedildi
-            GameMode.Instance.LoseGame();
-            return;
+            // Oyuncuya doğru hareket et
+            Vector2 dir = (playerKing.position - enemyKing.position).normalized;
+            enemyKing.position += (Vector3)dir * Time.deltaTime * 2f; // 2f → hız
         }
     }
+
+    void StartKingBattle()
+{
+    int enemyCount = enemyArmy.GetCount();
+    int playerCount = PlayerCommander.instance.GetArmyCount();
+
+    // --- ÖZEL ÖLÜM KURALI ---
+    // Oyuncunun piyonları bittiyse ve düşmanın en az 2 piyonu varsa → Oyuncu ölür
+    if (playerCount == 0 && enemyCount >= 2)
+    {
+        Debug.Log("OYUNCU KRAL ÖLDÜ — OYUN KAYIP!");
+        GameMode.Instance.LoseGame();
+        return;
+    }
+
+    // Düşmanın piyonları bittiyse ve oyuncunun en az 2 piyonu varsa → Düşman ölür
+    if (enemyCount == 0 && playerCount >= 2)
+    {
+        Debug.Log("DÜŞMAN KRAL ÖLDÜ — OYUN KAZANILDI!");
+        GameMode.Instance.WinGame();
+        return;
+    }
+
+    // --- NORMAL 1'e 1 PIYON SAVAŞI ---
+    int kill = Mathf.Min(enemyCount, playerCount);
+
+    // Piyon kayıpları
+    PlayerCommander.instance.playerArmy.RemovePiyons(kill);
+    enemyArmy.RemovePiyons(kill);
+
+    // Güncel sayıları tekrar çek
+    enemyCount = enemyArmy.GetCount();
+    playerCount = PlayerCommander.instance.GetArmyCount();
+
+    // --- Savaş sonrası ölüm kuralını tekrar kontrol et ---
+    if (playerCount == 0 && enemyCount >= 2)
+    {
+        Debug.Log("OYUNCU KRAL ÖLDÜ — OYUN KAYIP!");
+        GameMode.Instance.LoseGame();
+        return;
+    }
+
+    if (enemyCount == 0 && playerCount >= 2)
+    {
+        Debug.Log("DÜŞMAN KRAL ÖLDÜ — OYUN KAZANILDI!");
+        GameMode.Instance.WinGame();
+        return;
+    }
+}
+
 
 
 
@@ -136,32 +165,32 @@ public class EnemyCommander : MonoBehaviour
     // GRID ADEDİM HAREKETİ
     // -----------------------------------------------------
     IEnumerator MoveOneStep(Vector2 direction)
-{
-    canMove = false;
-
-    float step = (direction.x != 0 && direction.y != 0)
-        ? diagonalStepSize
-        : straightStepSize;
-
-    Vector2 startPos = enemyKing.position;
-    Vector2 targetPos = startPos + direction * step;
-
-    float t = 0f;
-    float duration = step / stepSpeed;
-
-    while (t < duration)
     {
-        enemyKing.position = Vector2.Lerp(startPos, targetPos, t / duration);
-        t += Time.deltaTime;
-        yield return null;
+        canMove = false;
+
+        float step = (direction.x != 0 && direction.y != 0)
+            ? diagonalStepSize
+            : straightStepSize;
+
+        Vector2 startPos = enemyKing.position;
+        Vector2 targetPos = startPos + direction * step;
+
+        float t = 0f;
+        float duration = step / stepSpeed;
+
+        while (t < duration)
+        {
+            enemyKing.position = Vector2.Lerp(startPos, targetPos, t / duration);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        enemyKing.position = targetPos;
+
+        yield return new WaitForSeconds(stepCooldown);
+
+        canMove = true;
     }
-
-    enemyKing.position = targetPos;
-
-    yield return new WaitForSeconds(stepCooldown);
-
-    canMove = true;
-}
 
 
 
@@ -169,56 +198,56 @@ public class EnemyCommander : MonoBehaviour
     // 3) HAREKET — SATRANÇ ŞAHI GİBİ ADIM ADIM
     // -----------------------------------------------------
     void MoveToTargetVillage()
-{
-    if (avoidTimer > 0)
     {
-        avoidTimer -= Time.deltaTime;
-        enemyKing.position += (Vector3)(avoidDir * avoidSpeed * Time.deltaTime);
-        return;
-    }
-
-    if (!canMove) return;
-    if (enemyKing == null || villages == null || villages.Length == 0) return;
-
-    if (currentTargetVillage == null)
-    {
-        if (isRetreating)
+        if (avoidTimer > 0)
         {
-            currentTargetVillage = enemyCastle;
+            avoidTimer -= Time.deltaTime;
+            enemyKing.position += (Vector3)(avoidDir * avoidSpeed * Time.deltaTime);
+            return;
         }
-        else
+
+        if (!canMove) return;
+        if (enemyKing == null || villages == null || villages.Length == 0) return;
+
+        if (currentTargetVillage == null)
         {
-            currentTargetVillage = PickSmartNeutralVillage();
-            if (currentTargetVillage == null)
-                currentTargetVillage = PickAnyNeutralVillage();
-            if (currentTargetVillage == null)
-                currentTargetVillage = PickOwnedVillage();
+            if (isRetreating)
+            {
+                currentTargetVillage = enemyCastle;
+            }
+            else
+            {
+                currentTargetVillage = PickSmartNeutralVillage();
+                if (currentTargetVillage == null)
+                    currentTargetVillage = PickAnyNeutralVillage();
+                if (currentTargetVillage == null)
+                    currentTargetVillage = PickOwnedVillage();
+            }
         }
+
+        if (currentTargetVillage == null) return;
+
+        Vector2 diff = currentTargetVillage.transform.position - enemyKing.position;
+
+        if (diff.magnitude < 0.5f)
+        {
+            OnReachVillage(currentTargetVillage);
+            currentTargetVillage = null;
+            return;
+        }
+
+        Vector2 dir = NormalizeDirection(diff);
+
+        // 🔥 DÜZ / ÇAPRAZ ADIM HESABI
+        float step = (dir.x != 0 && dir.y != 0)
+            ? diagonalStepSize
+            : straightStepSize;
+
+        Vector2 targetPos = (Vector2)enemyKing.position + dir * step;
+
+        StartCoroutine(MoveOneStep(dir));
+
     }
-
-    if (currentTargetVillage == null) return;
-
-    Vector2 diff = currentTargetVillage.transform.position - enemyKing.position;
-
-    if (diff.magnitude < 0.5f)
-    {
-        OnReachVillage(currentTargetVillage);
-        currentTargetVillage = null;
-        return;
-    }
-
-    Vector2 dir = NormalizeDirection(diff);
-
-    // 🔥 DÜZ / ÇAPRAZ ADIM HESABI
-    float step = (dir.x != 0 && dir.y != 0)
-        ? diagonalStepSize
-        : straightStepSize;
-
-    Vector2 targetPos = (Vector2)enemyKing.position + dir * step;
-
-    StartCoroutine(MoveOneStep(dir));
-
-}
 
 
     // -----------------------------------------------------

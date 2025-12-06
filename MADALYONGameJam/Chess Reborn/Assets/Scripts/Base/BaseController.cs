@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public enum Team { Neutral, Player, Enemy }
 
@@ -13,6 +14,9 @@ public class BaseController : MonoBehaviour
 
     private float timer = 0f;
     public bool isCastle = false;
+    [Header("Capture Shake Settings")]
+    public float shakeDuration = 0.2f;
+    public float shakeMagnitude = 0.1f;
 
 
     void Update()
@@ -75,6 +79,8 @@ public class BaseController : MonoBehaviour
         {
             owner = attackerTeam;
             unitCount = attackerRemaining;
+            StartCoroutine(Shake());
+
 
             if (bpm != null)
                 bpm.SyncTo(unitCount);
@@ -136,6 +142,7 @@ public class BaseController : MonoBehaviour
         if (other.CompareTag("Player") && owner == Team.Neutral)
         {
             owner = Team.Player;
+            StartCoroutine(Shake());
             return;
         }
 
@@ -143,6 +150,7 @@ public class BaseController : MonoBehaviour
         if (other.CompareTag("Enemy") && owner == Team.Neutral)
         {
             owner = Team.Enemy;
+            StartCoroutine(Shake());
             return;
         }
 
@@ -162,6 +170,25 @@ public class BaseController : MonoBehaviour
             return;
         }
     }
+    IEnumerator Shake()
+    {
+        Vector3 originalPos = transform.localPosition;
+
+        float elapsed = 0f;
+        while (elapsed < shakeDuration)
+        {
+            float x = Random.Range(-1f, 1f) * shakeMagnitude;
+            float y = Random.Range(-1f, 1f) * shakeMagnitude;
+
+            transform.localPosition = originalPos + new Vector3(x, y, 0);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localPosition = originalPos;
+    }
+
 
 
 

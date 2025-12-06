@@ -29,6 +29,10 @@ public class PlayerMovement2D : MonoBehaviour
     private Vector2 mobileInput;    // mobil UI input
 
     private Rigidbody2D rb;
+    private BaseController insideZone = null;
+private bool slowApplied = false;
+private float originalSpeed;
+
 
     public AudioSource footstepSource;
     public AudioClip lightFootstepLoop;
@@ -37,9 +41,12 @@ public class PlayerMovement2D : MonoBehaviour
     public int pawnCount;
     private PlayerPiyon playerPiyon;
     private PlayerControls controls;
+    public float baseSpeed = 5f;        // Normal hız
+    public float speedBoostAmount = 0f; // Geçici buff (+3 gibi)
 
-    public float baseSpeed = 5f;
-    public float speedBoostAmount = 0f;
+private bool zoneApplied = false;
+private float zoneSpeedModifier = 0f; // eklenen/çıkarılan değer
+
 
 
     void Awake()
@@ -127,11 +134,33 @@ public class PlayerMovement2D : MonoBehaviour
 
         Debug.Log("BUFF REMOVED");
     }
+    public void SetInsideZone(BaseController zone)
+{
+    // Bölge bilgisi
+    insideZone = zone;
 
-    public void SetInsideZone(BaseController b)
+    // Eğer bölgeye yeni giriyorsa
+    if (zone != null && !zoneApplied)
     {
-        zone = b;
+        zoneApplied = true;
+
+        // Ne kadar hız değişecek?
+        zoneSpeedModifier = -1.5f;  // örnek: 1.5 yavaşlat
+        // zoneSpeedModifier = +2f; // hız arttırmak istersen
+
+        moveSpeed += zoneSpeedModifier;
     }
+
+    // Bölgeden çıkıyorsa
+    else if (zone == null && zoneApplied)
+    {
+        moveSpeed -= zoneSpeedModifier; // eklenen değer geri alınır
+        zoneApplied = false;
+        zoneSpeedModifier = 0f;
+    }
+}
+
+
 
     Vector2 NormalizeDirection(Vector2 input)
     {

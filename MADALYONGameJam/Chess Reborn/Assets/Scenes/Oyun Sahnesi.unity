@@ -316,6 +316,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovementBoost
   commander: {fileID: 1765772752}
   zoneBonus: 2
+  moveSpeed: 3
   zoneSlow: -2
 --- !u!1 &47551433
 GameObject:
@@ -510,6 +511,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: baseController
+      value: 
+      objectReference: {fileID: 1884006473}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: spriteRenderer
+      value: 
+      objectReference: {fileID: 2097821308}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1391,6 +1400,8 @@ MonoBehaviour:
   maxUnits: 150
   productionRate: 0.25
   isCastle: 1
+  shakeDuration: 0.2
+  shakeMagnitude: 0.1
 --- !u!61 &646027167
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2367,6 +2378,11 @@ MonoBehaviour:
 --- !u!4 &916286596 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+  m_PrefabInstance: {fileID: 1280577658}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &916286600 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7223378416952209013, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
   m_PrefabInstance: {fileID: 1280577658}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &976226709
@@ -3536,6 +3552,8 @@ MonoBehaviour:
   maxUnits: 150
   productionRate: 0.5
   isCastle: 1
+  shakeDuration: 0.2
+  shakeMagnitude: 0.1
 --- !u!61 &1176936362
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4142,6 +4160,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: baseController
+      value: 
+      objectReference: {fileID: 916286592}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: spriteRenderer
+      value: 
+      objectReference: {fileID: 916286600}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4742,6 +4768,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
   m_PrefabInstance: {fileID: 5125443612880835342}
   m_PrefabAsset: {fileID: 0}
+--- !u!212 &1465407608 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7223378416952209013, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+  m_PrefabInstance: {fileID: 5125443612880835342}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1509175842
 GameObject:
   m_ObjectHideFlags: 0
@@ -5163,6 +5194,8 @@ MonoBehaviour:
   stepSize: 1
   stepSpeed: 3
   stepCooldown: 0.2
+  chaseRange: 4
+  attackRange: 1.2
   straightStepSize: 2.5
   diagonalStepSize: 3.7
   enemyArmy: {fileID: 38655328}
@@ -5829,6 +5862,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
   m_PrefabInstance: {fileID: 132783054}
   m_PrefabAsset: {fileID: 0}
+--- !u!212 &2097821308 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7223378416952209013, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+  m_PrefabInstance: {fileID: 132783054}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2101500102
 GameObject:
   m_ObjectHideFlags: 0
@@ -6005,6 +6043,14 @@ PrefabInstance:
       propertyPath: oyuncu
       value: 
       objectReference: {fileID: 1844597295}
+    - target: {fileID: 2862569594179929421, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: shakeDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2862569594179929421, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: shakeMagnitude
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 6755009063189951648, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_Name
       value: Village
@@ -6049,6 +6095,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: baseController
+      value: 
+      objectReference: {fileID: 1236853730}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: spriteRenderer
+      value: 
+      objectReference: {fileID: 1465407608}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

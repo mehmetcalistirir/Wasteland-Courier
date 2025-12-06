@@ -141,15 +141,23 @@ public class BasePiyonManager : MonoBehaviour
     }
 
     public void TransferAllToPlayer(Transform player)
-    {
-        foreach (var p in piyonlar)
-        {
-            if (p != null)
-                p.OyuncuyaKatıl(player);
-        }
+{
+    PlayerPiyon army = PlayerCommander.instance.playerArmy;
+    if (army == null) return;
 
-        piyonlar.Clear();
-    }
+    int count = baseController.unitCount;
+
+    army.PiyonEkle(count);
+
+    baseController.unitCount = 0;
+
+    foreach (var p in piyonlar)
+        if (p != null) Destroy(p.gameObject);
+
+    piyonlar.Clear();
+}
+
+
 
     public int GetPiyonCount()
     {

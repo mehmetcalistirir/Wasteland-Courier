@@ -15,6 +15,7 @@ public class EnemyCommander : MonoBehaviour
     private bool canMove = true;
 
     private BaseController currentTargetVillage;
+    
 
     [Header("Enemy Army")]
     public EnemyArmy enemyArmy;

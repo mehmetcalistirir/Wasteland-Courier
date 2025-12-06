@@ -115,4 +115,14 @@ public class PlayerMovement2D : MonoBehaviour
         AudioClip clip = (pawnCount > 5) ? heavyFootstepLoop : lightFootstepLoop;
         footstepSource.PlayOneShot(clip); // loop değil tek seferlik adım sesi
     }
+
+    public IEnumerator TemporarySpeedBoost(float amount, float duration)
+    {
+        moveSpeed += amount;
+
+        yield return new WaitForSeconds(duration);
+
+        moveSpeed -= amount;
+    }
+
 }

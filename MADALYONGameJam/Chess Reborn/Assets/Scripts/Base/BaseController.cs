@@ -133,21 +133,21 @@ public class BaseController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         // PLAYER KING tarafsız köye girerse → savaş yok → direkt ele geçir
-        if (other.CompareTag("PlayerKing") && owner == Team.Neutral)
+        if (other.CompareTag("Player") && owner == Team.Neutral)
         {
             owner = Team.Player;
             return;
         }
 
         // ENEMY KING tarafsız köye girerse → savaş yok → direkt ele geçir
-        if (other.CompareTag("EnemyKing") && owner == Team.Neutral)
+        if (other.CompareTag("Enemy") && owner == Team.Neutral)
         {
             owner = Team.Enemy;
             return;
         }
 
         // PLAYER ORDUSU rakip köye girerse savaş
-        if (other.CompareTag("PlayerKing") && owner == Team.Enemy)
+        if (other.CompareTag("Player") && owner == Team.Enemy)
         {
             int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
             StartBattle(attackerCount, Team.Player);
@@ -155,7 +155,7 @@ public class BaseController : MonoBehaviour
         }
 
         // ENEMY ORDUSU rakip köye girerse savaş
-        if (other.CompareTag("EnemyKing") && owner == Team.Player)
+        if (other.CompareTag("Enemy") && owner == Team.Player)
         {
             int attackerCount = EnemyCommander.instance.enemyArmy.GetCount();
             StartBattle(attackerCount, Team.Enemy);

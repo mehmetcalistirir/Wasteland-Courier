@@ -79,7 +79,7 @@ public class PlayerCommandUI : MonoBehaviour
     // ---------------------------------------------------
     // BUTTON DURUMLARINI GÜNCELLE
     // ---------------------------------------------------
-    void UpdateButtons()
+void UpdateButtons()
 {
     if (currentBase == null)
     {
@@ -88,29 +88,47 @@ public class PlayerCommandUI : MonoBehaviour
     }
 
     bool hasUnits = currentBase.unitCount > 0;
-    bool ownAnyVillage = PlayerCommander.instance.GetOwnedVillages().Count > 0;
+    bool ownedByPlayer = currentBase.owner == Team.Player;
 
-    // Orduna ekle
-    btnAddToArmy.interactable = (currentBase.owner == Team.Player);
-
-    // Kale ise
-    if (currentBase.isCastle)
+    // ---------------------------------------------
+    // 1) ORDUNA EKLE BUTONU (Sadece Player köyünde ve piyon varsa)
+    // ---------------------------------------------
+    if (ownedByPlayer && hasUnits)
     {
-        btnSendCastle.gameObject.SetActive(false);
+        btnAddToArmy.gameObject.SetActive(true);
+        btnAddToArmy.interactable = true;
     }
     else
     {
-       btnSendCastle.gameObject.SetActive(true);
-btnSendCastle.interactable = hasUnits;   // ✔ Piyon varsa aktif
-
+        btnAddToArmy.gameObject.SetActive(false);
     }
 
-    // 🔥 NORMALE DÖNÜŞ BURADA
-    // Manuel köy butonlarını mutlaka güncelle!
+    // ---------------------------------------------
+    // 2) KALEYE GÖNDER BUTONU
+    // ---------------------------------------------
+    // Şartlar:
+    // - Köy bize ait olmalı
+    // - Köy kale olmamalı
+    // - Köyde piyon olmalı
+    if (ownedByPlayer && !currentBase.isCastle && hasUnits)
+    {
+        btnSendCastle.gameObject.SetActive(true);
+        btnSendCastle.interactable = true;
+    }
+    else
+    {
+        btnSendCastle.gameObject.SetActive(false);
+    }
+
+    // ---------------------------------------------
+    // 3) ÖZEL KÖY BUTONLARI
+    // ---------------------------------------------
     UpdateVillageButton(btnSendToA, targetVillageA);
     UpdateVillageButton(btnSendToB, targetVillageB);
     UpdateVillageButton(btnSendToC, targetVillageC);
 }
+
+
 
 
 
@@ -121,28 +139,23 @@ btnSendCastle.interactable = hasUnits;   // ✔ Piyon varsa aktif
 {
     if (btn == null || targetVillage == null)
     {
-        if (btn != null) btn.interactable = false;
+        if (btn != null) btn.gameObject.SetActive(false);
         return;
     }
 
     bool owned = targetVillage.owner == Team.Player;
     bool hasUnits = currentBase.unitCount > 0;
     bool sameVillage = (currentBase == targetVillage);
-    bool ownsAny = PlayerCommander.instance.GetOwnedVillages().Count > 0;
 
-    // Kale → hiç köy yoksa kapat
-    if (currentBase.isCastle && !ownsAny)
-    {
-        btn.interactable = false;
-        return;
-    }
+    // Gönderme kuralları:
+    // - Hedef köy bize ait olacak
+    // - Gönderen köyde piyon olacak
+    // - Kendine gönderemez
+    bool canSend = owned && hasUnits && !sameVillage;
 
-    // Kural:
-    // 1) hedef köy bize ait olmalı
-    // 2) gönderen köyde piyon olmalı
-    // 3) kendine gönderemez
-    btn.interactable = (owned && hasUnits && !sameVillage);
+    btn.gameObject.SetActive(canSend);
 }
+
 
 
 
@@ -177,6 +190,7 @@ btnSendCastle.interactable = hasUnits;   // ✔ Piyon varsa aktif
 
     UpdateButtons();
 }
+
 
 
     // ---------------------------------------------------
@@ -219,12 +233,13 @@ btnSendCastle.interactable = hasUnits;   // ✔ Piyon varsa aktif
 
     // ---------------------------------------------------
     void DisableAllButtons()
-    {
-        btnAddToArmy.interactable = false;
-        btnSendCastle.gameObject.SetActive(false);
+{
+    btnAddToArmy.gameObject.SetActive(false);
+    btnSendCastle.gameObject.SetActive(false);
 
-        if (btnSendToA != null) btnSendToA.interactable = false;
-        if (btnSendToB != null) btnSendToB.interactable = false;
-        if (btnSendToC != null) btnSendToC.interactable = false;
-    }
+    if (btnSendToA != null) btnSendToA.gameObject.SetActive(false);
+    if (btnSendToB != null) btnSendToB.gameObject.SetActive(false);
+    if (btnSendToC != null) btnSendToC.gameObject.SetActive(false);
+}
+
 }

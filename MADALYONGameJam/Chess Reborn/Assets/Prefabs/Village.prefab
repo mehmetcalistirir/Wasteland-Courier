@@ -294,6 +294,8 @@ MonoBehaviour:
   maxUnits: 20
   productionRate: 0.25
   isCastle: 0
+  shakeDuration: 1
+  shakeMagnitude: 0.2
 --- !u!114 &936910618713132973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,8 +328,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63bb02dd3876be4489e8668615335d9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseColorChanger
-  baseController: {fileID: 0}
-  spriteRenderer: {fileID: 0}
+  baseController: {fileID: 2862569594179929421}
+  spriteRenderer: {fileID: 7223378416952209013}
   playerColor: {r: 1, g: 1, b: 1, a: 1}
   enemyColor: {r: 0, g: 0, b: 0, a: 1}
   neutralColor: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}

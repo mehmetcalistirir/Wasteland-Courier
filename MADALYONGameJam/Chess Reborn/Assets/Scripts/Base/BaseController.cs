@@ -73,6 +73,27 @@ public class BaseController : MonoBehaviour
         BasePiyonManager bpm = GetComponent<BasePiyonManager>();
         if (bpm != null)
             bpm.SyncTo(unitCount);
+        if (attackerRemaining > 0)
+        {
+            owner = attackerTeam;
+            unitCount = attackerRemaining;
+
+            StartCoroutine(Shake());
+
+            // 🔥 GÖREV KONTROLÜ
+            if (attackerTeam == Team.Player)
+                TaskManager.instance.CheckBaseCapture(this);
+        }
+        if (attackerRemaining > 0)
+        {
+            owner = attackerTeam;
+
+            // 🔥 Sadece attacker PLAYER ise görev kontrolü yapılır
+            if (attackerTeam == Team.Player)
+                TaskManager.instance.CheckBaseCapture(this);
+        }
+
+
 
         // ---- Saldıran kazandı ----
         if (attackerRemaining > 0)
@@ -143,8 +164,13 @@ public class BaseController : MonoBehaviour
         {
             owner = Team.Player;
             StartCoroutine(Shake());
+
+            // 🔥 Görev kontrolü (BURAYA DOĞRU!)
+            TaskManager.instance.CheckBaseCapture(this);
+
             return;
         }
+
 
         // ENEMY KING tarafsız köye girerse → savaş yok → direkt ele geçir
         if (other.CompareTag("Enemy") && owner == Team.Neutral)

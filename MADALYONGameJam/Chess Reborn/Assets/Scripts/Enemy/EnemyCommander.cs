@@ -593,15 +593,27 @@ public class EnemyCommander : MonoBehaviour
     // 12) SALDIRI BAŞLATMA
     // -----------------------------------------------------
     public void SendArmyTo(BaseController target)
+{
+    if (target == null || enemyArmy == null) return;
+
+    // Eğer hiç piyon yoksa saldırı yapma!
+    int attackerCount = enemyArmy.GetCount();
+    if (attackerCount <= 0) return;
+
+    // 1) Tüm piyonları ordudan çıkar
+    GameObject[] units = enemyArmy.ExtractAll();
+
+    // 2) Her piyonu hedefe yürümeye gönder
+    foreach (var p in units)
     {
-        if (target == null || enemyArmy == null) return;
+        if (p == null) continue;
 
-        int attackerCount = enemyArmy.GetCount();
-
-        target.ResolveBattle(attackerCount, Team.Enemy);
-
-        enemyArmy.ExtractAll();
+        Piyon pawn = p.GetComponent<Piyon>();
+        pawn.AttackBase(target, Team.Enemy);
     }
+}
+
+
 
     bool EnemyIsAt(BaseController village)
     {

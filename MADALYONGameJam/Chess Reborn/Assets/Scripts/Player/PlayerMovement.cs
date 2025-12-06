@@ -5,9 +5,13 @@ using System.Collections;
 public class PlayerMovement2D : MonoBehaviour
 {
     public float moveSpeed = 5f;     // bir kareye giderken hız
-    public float stepCooldown = 0.3f; // adımlar arası bekleme (0.2–0.5 arası)
+
+    [Header("Dynamic Step Settings")]
+    public float baseStepCooldown = 0.2f;
+    public float cooldownPerPawn = 0.01f;
     public float stepSize = 1f;       // satranç karesi 1 birim
 
+    private float stepCooldown;       // 🔹 EKSİK OLAN ALAN BUYDU
     private bool canMove = true;
     private Vector2 moveInput;
     private Rigidbody2D rb;
@@ -46,7 +50,15 @@ public class PlayerMovement2D : MonoBehaviour
 
     void Update()
     {
+        // 🔹 Önce piyon sayısını güncelle
         pawnCount = playerPiyon.GetCount();
+
+        // 🔹 Sonra dinamik cooldown hesapla
+        stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
+        // İstersen minimum / maksimum sınır koyabilirsin:
+        // stepCooldown = Mathf.Clamp(stepCooldown, 0.1f, 1.0f);
+
+        Debug.Log("pawnCount = " + pawnCount + " | stepCooldown = " + stepCooldown);
 
         // input varsa ve hareket edebiliyorsak
         if (canMove && moveInput != Vector2.zero)

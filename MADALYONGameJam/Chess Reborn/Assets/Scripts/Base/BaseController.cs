@@ -28,12 +28,12 @@ public class BaseController : MonoBehaviour
         }
     }
     void LateUpdate()
-{
-    if (countText != null)
     {
-        countText.text = unitCount.ToString();
+        if (countText != null)
+        {
+            countText.text = unitCount.ToString();
+        }
     }
-}
 
 
     // 1v1 kayıp sistemi
@@ -52,110 +52,116 @@ public class BaseController : MonoBehaviour
         }
     }
     public void ResolveBattle(int attackerCount, Team attackerTeam)
-{
-    // SAVUNMA GÜCÜ = gerçek piyon sayısı
-    int defenderCount = unitCount;
-
-    // 1) Karşılıklı öldürme
-    int kill = Mathf.Min(attackerCount, defenderCount);
-
-    int attackerRemaining = attackerCount - kill;
-    int defenderRemaining = defenderCount - kill;
-
-    // ---- Savunmacı kaybı ----
-    unitCount = defenderRemaining;
-
-    // BPM varsa görsel piyonları da azalt
-    BasePiyonManager bpm = GetComponent<BasePiyonManager>();
-    if (bpm != null)
-        bpm.SyncTo(unitCount);
-
-    // ---- Saldıran kazandı ----
-    if (attackerRemaining > 0)
     {
-        owner = attackerTeam;
-        unitCount = attackerRemaining;
+        // SAVUNMA GÜCÜ = gerçek piyon sayısı
+        int defenderCount = unitCount;
 
+        // 1) Karşılıklı öldürme
+        int kill = Mathf.Min(attackerCount, defenderCount);
+
+        int attackerRemaining = attackerCount - kill;
+        int defenderRemaining = defenderCount - kill;
+
+        // ---- Savunmacı kaybı ----
+        unitCount = defenderRemaining;
+
+        // BPM varsa görsel piyonları da azalt
+        BasePiyonManager bpm = GetComponent<BasePiyonManager>();
         if (bpm != null)
             bpm.SyncTo(unitCount);
-    }
-}
 
-void StartBattle(int attackerCount, Team attackerTeam)
-{
-    BasePiyonManager bpm = GetComponent<BasePiyonManager>();
+        // ---- Saldıran kazandı ----
+        if (attackerRemaining > 0)
+        {
+            owner = attackerTeam;
+            unitCount = attackerRemaining;
 
-    int defenderCount = bpm != null ? bpm.GetPiyonCount() : unitCount;
+            if (bpm != null)
+                bpm.SyncTo(unitCount);
+        }
+        // --- KALE ELE GEÇİRME KONTROLÜ ---
+        if (isCastle)
+        {
+            GameMode.Instance.CheckCastleWinLose(this);
+        }
 
-    int kill = Mathf.Min(attackerCount, defenderCount);
-
-    int attackerRemaining = attackerCount - kill;
-    int defenderRemaining = defenderCount - kill;
-
-    // Savunma kayıpları
-    if (bpm != null)
-        bpm.RemovePiyons(kill);
-    unitCount = defenderRemaining;
-
-    // Saldıran taraf kayıpları
-    if (attackerTeam == Team.Player)
-    {
-        PlayerCommander.instance.playerArmy.RemovePiyons(kill);
-    }
-    else
-    {
-        EnemyCommander.instance.enemyArmy.RemovePiyons(kill);
     }
 
-    // Eğer saldıran kazandıysa köyü ele geçir
-    if (attackerRemaining > 0)
+    void StartBattle(int attackerCount, Team attackerTeam)
     {
-        owner = attackerTeam;
+        BasePiyonManager bpm = GetComponent<BasePiyonManager>();
 
-        // Kazanan taraf köye kalan ordusunu yerleştirir
-        unitCount = attackerRemaining;
+        int defenderCount = bpm != null ? bpm.GetPiyonCount() : unitCount;
 
+        int kill = Mathf.Min(attackerCount, defenderCount);
+
+        int attackerRemaining = attackerCount - kill;
+        int defenderRemaining = defenderCount - kill;
+
+        // Savunma kayıpları
         if (bpm != null)
-            bpm.SyncTo(attackerRemaining);
+            bpm.RemovePiyons(kill);
+        unitCount = defenderRemaining;
+
+        // Saldıran taraf kayıpları
+        if (attackerTeam == Team.Player)
+        {
+            PlayerCommander.instance.playerArmy.RemovePiyons(kill);
+        }
+        else
+        {
+            EnemyCommander.instance.enemyArmy.RemovePiyons(kill);
+        }
+
+        // Eğer saldıran kazandıysa köyü ele geçir
+        if (attackerRemaining > 0)
+        {
+            owner = attackerTeam;
+
+            // Kazanan taraf köye kalan ordusunu yerleştirir
+            unitCount = attackerRemaining;
+
+            if (bpm != null)
+                bpm.SyncTo(attackerRemaining);
+        }
     }
-}
 
 
 
 
     // --- ELE GEÇİRME SİSTEMİ ---
     private void OnTriggerEnter2D(Collider2D other)
-{
-    // PLAYER KING tarafsız köye girerse → savaş yok → direkt ele geçir
-    if (other.CompareTag("PlayerKing") && owner == Team.Neutral)
     {
-        owner = Team.Player;
-        return;
-    }
+        // PLAYER KING tarafsız köye girerse → savaş yok → direkt ele geçir
+        if (other.CompareTag("PlayerKing") && owner == Team.Neutral)
+        {
+            owner = Team.Player;
+            return;
+        }
 
-    // ENEMY KING tarafsız köye girerse → savaş yok → direkt ele geçir
-    if (other.CompareTag("EnemyKing") && owner == Team.Neutral)
-    {
-        owner = Team.Enemy;
-        return;
-    }
+        // ENEMY KING tarafsız köye girerse → savaş yok → direkt ele geçir
+        if (other.CompareTag("EnemyKing") && owner == Team.Neutral)
+        {
+            owner = Team.Enemy;
+            return;
+        }
 
-    // PLAYER ORDUSU rakip köye girerse savaş
-    if (other.CompareTag("PlayerKing") && owner == Team.Enemy)
-    {
-        int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
-        StartBattle(attackerCount, Team.Player);
-        return;
-    }
+        // PLAYER ORDUSU rakip köye girerse savaş
+        if (other.CompareTag("PlayerKing") && owner == Team.Enemy)
+        {
+            int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
+            StartBattle(attackerCount, Team.Player);
+            return;
+        }
 
-    // ENEMY ORDUSU rakip köye girerse savaş
-    if (other.CompareTag("EnemyKing") && owner == Team.Player)
-    {
-        int attackerCount = EnemyCommander.instance.enemyArmy.GetCount();
-        StartBattle(attackerCount, Team.Enemy);
-        return;
+        // ENEMY ORDUSU rakip köye girerse savaş
+        if (other.CompareTag("EnemyKing") && owner == Team.Player)
+        {
+            int attackerCount = EnemyCommander.instance.enemyArmy.GetCount();
+            StartBattle(attackerCount, Team.Enemy);
+            return;
+        }
     }
-}
 
 
 

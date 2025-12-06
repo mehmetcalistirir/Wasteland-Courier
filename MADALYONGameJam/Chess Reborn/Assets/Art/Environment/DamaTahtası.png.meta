@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e5b2b327d959b4541bd03379f60c918c
+guid: 33c37f95d2b5d06478978c4a29506a7a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5986173442565616167
-    second: 4708a0d3-75a5-4360-9c43-abd4df0755dc_0
+      213: 5523546009248521881
+    second: "DamaTahtas\u0131_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -96,11 +96,24 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 4708a0d3-75a5-4360-9c43-abd4df0755dc_0
+      name: "DamaTahtas\u0131_0"
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7223008a709231350800000000000000
-      internalID: 5986173442565616167
+      spriteID: 99ed8c594d397ac40800000000000000
+      internalID: 5523546009248521881
       vertices: []
       indices: 
       edges: []
@@ -135,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      4708a0d3-75a5-4360-9c43-abd4df0755dc_0: 5986173442565616167
+      "DamaTahtas\u0131_0": 5523546009248521881
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

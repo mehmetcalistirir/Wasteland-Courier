@@ -12,6 +12,7 @@ public class GameMode : MonoBehaviour
     [Header("UI Panels")]
     public GameObject winPanel;
     public GameObject losePanel;
+    public GameObject taskPanel;
 
     void Awake()
     {
@@ -25,11 +26,12 @@ public class GameMode : MonoBehaviour
     {
         if (winPanel != null) winPanel.SetActive(false);
         if (losePanel != null) losePanel.SetActive(false);
+        if (taskPanel != null) taskPanel.SetActive(true);
 
         // Eğer başka UI panellerin varsa buraya ekleyebilirsin:
         // commandPanel.SetActive(false);
         // abilityPanel.SetActive(false);
-        // questPanel.SetActive(false);
+        // taskPanel.SetActive(false);
     }
 
     public void CheckCastleWinLose(BaseController castle)
@@ -66,4 +68,43 @@ public class GameMode : MonoBehaviour
         Time.timeScale = 1f;
         SceneManager.LoadScene("AnaMenu");
     }
+
+
+public void KingBattle()
+{
+    EnemyArmy enemyArmy = EnemyCommanderCore.instance.enemyArmy;
+    PlayerPiyon playerArmy = PlayerCommander.instance.playerArmy;
+
+    int enemyCount = enemyArmy.GetCount();
+    int playerCount = playerArmy.GetCount();
+
+    int trades = Mathf.Min(enemyCount, playerCount);
+
+    // 1'e 1 takas
+    enemyArmy.RemovePiyons(trades);
+    playerArmy.RemovePiyons(trades);
+
+    enemyCount -= trades;
+    playerCount -= trades;
+
+    if (enemyCount > playerCount)
+    {
+        Debug.Log("Enemy King Kazandı!");
+        LoseGame();         // ✅ direkt oyun kaybet
+    }
+    else if (playerCount > enemyCount)
+    {
+        Debug.Log("Player King Kazandı!");
+        WinGame();          // ✅ direkt oyun kazan
+    }
+    else
+    {
+        Debug.Log("Berabere → iki kral da geri itilsin.");
+        // İstersen burada her iki kralı hafif geri itebilirsin.
+    }
+}
+
+
+
+
 }

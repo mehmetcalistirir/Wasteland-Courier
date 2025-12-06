@@ -9,6 +9,7 @@ public class EnemyArmy : MonoBehaviour
 
     void Update()
     {
+        
         OrbitUnits();
     }
 

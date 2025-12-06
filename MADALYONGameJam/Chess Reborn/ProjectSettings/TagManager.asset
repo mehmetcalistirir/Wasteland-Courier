@@ -5,7 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - Barrier
-  - Enemy
+  - EnemyKing
+  - PlayerKing
+  - EnemySoldier
+  - PlayerSoldier
   layers:
   - Default
   - TransparentFX

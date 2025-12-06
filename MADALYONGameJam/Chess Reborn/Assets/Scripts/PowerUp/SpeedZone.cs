@@ -11,39 +11,39 @@ public class SpeedZone : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // PLAYER buff alanına girdi
-        if (other.CompareTag("Player"))
+        // PLAYER KING buff alanına girdi
+        if (other.CompareTag("PlayerKing"))
         {
             PlayerMovement2D mov = other.GetComponent<PlayerMovement2D>();
             if (mov != null)
-                mov.SetInsideZone(baseCtrl); // sadece referans ver
+                mov.SetInsideZone(baseCtrl);  // referans ver → hız hesaplaması orada yapılır
         }
 
-        // ENEMY buff alanına girdi
-        if (other.CompareTag("Enemy"))
+        // ENEMY KING buff alanına girdi
+        if (other.CompareTag("EnemyKing"))
         {
             EnemyMovementBoost boost = other.GetComponent<EnemyMovementBoost>();
             if (boost != null)
-                boost.SetInsideZone(baseCtrl); // sadece referans ver
+                boost.SetInsideZone(baseCtrl);  // referans ver
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        // PLAYER buff alanından çıktı
-        if (other.CompareTag("Player"))
+        // PLAYER KING buff alanından çıktı
+        if (other.CompareTag("PlayerKing"))
         {
             PlayerMovement2D mov = other.GetComponent<PlayerMovement2D>();
             if (mov != null)
-                mov.SetInsideZone(null);  // referansı kaldır
+                mov.SetInsideZone(null);  // buff kaldır
         }
 
-        // ENEMY buff alanından çıktı
-        if (other.CompareTag("Enemy"))
+        // ENEMY KING buff alanından çıktı
+        if (other.CompareTag("EnemyKing"))
         {
             EnemyMovementBoost boost = other.GetComponent<EnemyMovementBoost>();
             if (boost != null)
-                boost.SetInsideZone(null); // referansı kaldır
+                boost.SetInsideZone(null); // buff kaldır
         }
     }
 }

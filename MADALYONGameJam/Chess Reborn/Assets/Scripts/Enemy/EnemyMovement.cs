@@ -36,23 +36,45 @@ public class EnemyMovement : MonoBehaviour
     // AI hedefi doğrultusunda hareket
     // ------------------------------
     void MoveTowardTarget()
+{
+    BaseController target = core.ai.currentTargetVillage;
+    if (target == null || !canMove)
+        return;
+
+    Vector2 diff = target.transform.position - core.enemyKing.position;
+
+    // ❗ 1) Hedefe tamamen ulaştı → köy etkileşimi
+    if (diff.magnitude < 0.5f)
     {
-        BaseController target = core.ai.currentTargetVillage;
-        if (target == null || !canMove)
-            return;
+        core.ai.OnReachVillage(target);
 
-        Vector2 diff = target.transform.position - core.enemyKing.position;
+        // hedefi temizle
+        core.ai.currentTargetVillage = null;
 
-        if (diff.magnitude < 0.5f)
-        {
-            core.ai.OnReachVillage(target);
-            core.ai.currentTargetVillage = null;
-            return;
-        }
-
-        Vector2 dir = NormalizeDirection(diff);
-        StartCoroutine(MoveOneStep(dir));
+        // ✔ AI tekrar hedef seçsin
+        core.ai.Think();
+        return;
     }
+
+    // ❗ 2) Eğer diff çok küçükse (0,0) → yön bulunamıyor → yeni hedef seç
+    if (diff.magnitude < 0.1f)
+    {
+        core.ai.currentTargetVillage = core.ai.FindNextTarget();
+        return;
+    }
+
+    // ❗ 3) Normalize edilmiş yön 0,0 dönüyorsa da hedef değiştir
+    Vector2 dir = NormalizeDirection(diff);
+    if (dir == Vector2.zero)
+    {
+        core.ai.currentTargetVillage = core.ai.FindNextTarget();
+        return;
+    }
+
+    // ❗ 4) Normal hareket
+    StartCoroutine(MoveOneStep(dir));
+}
+
 
     // ------------------------------
     // Grid tabanlı 1 adım hareket

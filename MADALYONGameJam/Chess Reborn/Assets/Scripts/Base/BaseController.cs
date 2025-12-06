@@ -158,45 +158,50 @@ public class BaseController : MonoBehaviour
 
 
     // --- ELE GEÇİRME SİSTEMİ ---
-    private void OnTriggerEnter2D(Collider2D other)
+private void OnTriggerEnter2D(Collider2D other)
+{
+    // -------------------------
+    // PLAYER KING → Tarafsız köy alır
+    // -------------------------
+    if (other.CompareTag("PlayerKing") && owner == Team.Neutral)
     {
-        // PLAYER KING tarafsız köye girerse → savaş yok → direkt ele geçir
-        if (other.CompareTag("Player") && owner == Team.Neutral)
-        {
-            owner = Team.Player;
-            StartCoroutine(Shake());
-
-            // 🔥 Görev kontrolü (BURAYA DOĞRU!)
-            TaskManager.instance.CheckBaseCapture(this);
-
-            return;
-        }
-
-
-        // ENEMY KING tarafsız köye girerse → savaş yok → direkt ele geçir
-        if (other.CompareTag("Enemy") && owner == Team.Neutral)
-        {
-            owner = Team.Enemy;
-            StartCoroutine(Shake());
-            return;
-        }
-
-        // PLAYER ORDUSU rakip köye girerse savaş
-        if (other.CompareTag("Player") && owner == Team.Enemy)
-        {
-            int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
-            StartBattle(attackerCount, Team.Player);
-            return;
-        }
-
-        // ENEMY ORDUSU rakip köye girerse savaş
-        if (other.CompareTag("Enemy") && owner == Team.Player)
-        {
-            int attackerCount = EnemyCommanderCore.instance.enemyArmy.GetCount();
-            StartBattle(attackerCount, Team.Enemy);
-            return;
-        }
+        owner = Team.Player;
+        StartCoroutine(Shake());
+        TaskManager.instance.CheckBaseCapture(this);
+        return;
     }
+
+    // -------------------------
+    // ENEMY KING → Tarafsız köy alır
+    // -------------------------
+    if (other.CompareTag("EnemyKing") && owner == Team.Neutral)
+    {
+        owner = Team.Enemy;
+        StartCoroutine(Shake());
+        return;
+    }
+
+    // -------------------------
+    // PLAYER ORDUSU → Düşman köye saldırı
+    // -------------------------
+    if (other.CompareTag("PlayerSoldier") && owner == Team.Enemy)
+    {
+        int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
+        StartBattle(attackerCount, Team.Player);
+        return;
+    }
+
+    // -------------------------
+    // ENEMY ORDUSU → Oyuncu köyüne saldırı
+    // -------------------------
+    if (other.CompareTag("EnemySoldier") && owner == Team.Player)
+    {
+        int attackerCount = EnemyCommanderCore.instance.enemyArmy.GetCount();
+        StartBattle(attackerCount, Team.Enemy);
+        return;
+    }
+}
+
     IEnumerator Shake()
     {
         Vector3 originalPos = transform.localPosition;

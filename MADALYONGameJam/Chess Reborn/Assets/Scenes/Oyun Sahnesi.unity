@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 38655332}
   m_Layer: 8
   m_Name: Enemy King
-  m_TagString: Enemy
+  m_TagString: EnemyKing
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7985,6 +7985,7 @@ MonoBehaviour:
   enemyCastle: {fileID: 646027166}
   winPanel: {fileID: 1675324540}
   losePanel: {fileID: 978696035}
+  taskPanel: {fileID: 1745212041}
 --- !u!114 &1765772754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8146,7 +8147,7 @@ GameObject:
   - component: {fileID: 1844597301}
   m_Layer: 6
   m_Name: Player King
-  m_TagString: Player
+  m_TagString: PlayerKing
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9386,6 +9387,18 @@ PrefabInstance:
     - target: {fileID: 6866452397394162711, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: enemyColor.b
+      value: 0.13725491
+      objectReference: {fileID: 0}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: enemyColor.g
+      value: 0.27058825
+      objectReference: {fileID: 0}
+    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
+      propertyPath: enemyColor.r
+      value: 0.43137258
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

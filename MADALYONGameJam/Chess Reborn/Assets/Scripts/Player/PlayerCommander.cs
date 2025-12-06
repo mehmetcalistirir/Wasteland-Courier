@@ -103,10 +103,19 @@ public void FormFightLine(Vector3 playerPos, Vector3 enemyPos)
 
 
 
-
     public void SendArmyToCastle()
     {
         if (enemyCastle != null)
             SendArmyTo(enemyCastle);
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.CompareTag("EnemyKing"))   // Tag ismini sen nasıl verdiysen ona göre
+    {
+        GameMode.Instance.KingBattle();
+    }
+}
+
+
 }

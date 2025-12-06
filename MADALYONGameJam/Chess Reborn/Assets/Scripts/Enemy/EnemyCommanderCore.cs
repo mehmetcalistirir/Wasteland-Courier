@@ -45,15 +45,17 @@ public class EnemyCommanderCore : MonoBehaviour
 
     void Start()
     {
-        enemyArmy.transform.SetParent(enemyKing);
-        enemyArmy.transform.localPosition = Vector3.zero;
+        enemyArmy.transform.SetParent(null); // bağımsız obje olsun
+        enemyArmy.transform.position = enemyKing.position; // sadece pozisyon takibi
+
 
         thinkTimer = 0.5f;
 
         // EnemyArmy merkezini enemyKing'e bağla
         if (enemyArmy != null && enemyKing != null)
         {
-            enemyArmy.transform.SetParent(enemyKing);
+            enemyArmy.transform.SetParent(null); // artık king pozisyonunu bozmaz
+
             enemyArmy.transform.localPosition = Vector3.zero;
         }
     }
@@ -77,8 +79,13 @@ public class EnemyCommanderCore : MonoBehaviour
         combat.Tick();
     }
 
-    bool coreMissing()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        return (movement == null || combat == null || ai == null || enemyArmy == null);
+        if (other.CompareTag("PlayerKing"))  // Tag ismini sen nasıl verdiysen ona göre
+        {
+            GameMode.Instance.KingBattle();
+        }
     }
+
+
 }

@@ -5,6 +5,7 @@ public class BasePiyonManager : MonoBehaviour
 {
     [Header("References")]
     public BaseController baseController;
+
     [Header("Piyon Prefabs")]
     public GameObject playerPiyonPrefab;
     public GameObject enemyPiyonPrefab;
@@ -15,6 +16,9 @@ public class BasePiyonManager : MonoBehaviour
     public float wanderRadius = 2f;
     public float wanderSpeed = 1.5f;
     public int maxVisualPiyon = 30;
+
+    [Header("Enemy Collect Settings")]
+    public float collectRange = 0.8f;   // 🔥 King bu mesafedeyse piyon toplayabilir
 
     public List<Piyon> piyonlar = new List<Piyon>();
 
@@ -207,7 +211,15 @@ public class BasePiyonManager : MonoBehaviour
         piyonlar.Clear();
     }
 
-    public void TransferAllToEnemy(Transform enemyKing)
+    // ------------------------------------------
+    // 🔥 TÜM PIYONLARI DÜŞMAN ORDUSUNA VER
+    //    (SADECE KING YAKINDA İSE!)
+    // ------------------------------------------
+  public void TransferAllToEnemy(Transform enemyKing)
+{
+    Debug.Log("[BPM] TransferAllToEnemy çağrıldı → " + baseController.name);
+
+    foreach (var p in piyonlar)
     {
         foreach (var p in piyonlar)
         {

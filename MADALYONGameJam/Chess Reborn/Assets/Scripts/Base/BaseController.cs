@@ -41,20 +41,21 @@ public class BaseController : MonoBehaviour
 
 
     // 1v1 kayıp sistemi
-    public void ReceiveAttack(int attackingUnits, Team attacker)
-    {
-        int result = attackingUnits - unitCount;
+    public void ReceiveAttack(int count, Team team, Transform attackerKing)
+{
+    // 🔥 Saldıran kral köye yakın değilse SAVAŞ YOK
+    if (Vector2.Distance(attackerKing.position, transform.position) > 0.8f)
+        return;
 
-        if (result > 0)
-        {
-            owner = attacker;
-            unitCount = result;
-        }
-        else
-        {
-            unitCount = Mathf.Abs(result);
-        }
+    unitCount -= count;
+
+    if (unitCount <= 0)
+    {
+        owner = team;
+        unitCount = 0;
     }
+}
+
     public void ResolveBattle(int attackerCount, Team attackerTeam)
     {
         // SAVUNMA GÜCÜ = gerçek piyon sayısı

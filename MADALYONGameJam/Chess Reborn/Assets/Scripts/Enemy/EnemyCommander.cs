@@ -51,7 +51,46 @@ public class EnemyCommander : MonoBehaviour
 
         if (kingCountText != null)
             kingCountText.text = enemyArmy.GetCount().ToString();
+            MoveToTargetVillage();
+        CheckFightWithPlayer();
     }
+    void CheckFightWithPlayer()
+{
+    if (playerKing == null) return;
+
+    float dist = Vector2.Distance(enemyKing.position, playerKing.position);
+
+    // 👇 Savaş mesafesi
+    if (dist < 1.0f)
+    {
+        StartKingBattle();
+    }
+}
+
+void StartKingBattle()
+{
+    int enemyCount = enemyArmy.GetCount();
+    int playerCount = PlayerCommander.instance.GetArmyCount();
+
+    // Aynı köy mantığı:
+    int kill = Mathf.Min(enemyCount, playerCount);
+
+    int enemyRemaining = enemyCount - kill;
+    int playerRemaining = playerCount - kill;
+
+    // --- PLAYER KAYIPLARI ---
+    PlayerCommander.instance.playerArmy.ExtractAll(); // tüm piyonlar silinsin
+
+    // --- ENEMY KAYIPLARI ---
+    enemyArmy.RemovePiyons(kill);
+
+    // Eğer ENEMY kazandıysa kalanları koru
+    // RemovePiyons zaten gerekeni sildiğinden ekstra işlem yok.
+
+    // Eğer PLAYER kazanırsa enemyRemaining = 0 zaten
+}
+
+
 
     // -----------------------------------------------------
     // GRID YÖNLÜ NORMALİZE ETME (8 yön)

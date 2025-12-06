@@ -2727,7 +2727,7 @@ MonoBehaviour:
   baseController: {fileID: 646027166}
   playerPiyonPrefab: {fileID: 3174025525024426083, guid: 75ea13f7b5b0c5e4caf2fe3ee870a3ea, type: 3}
   enemyPiyonPrefab: {fileID: 3174025525024426083, guid: 58961356ba7f84f48929c9ceb5a3bc83, type: 3}
-  oyuncu: {fileID: 1844597295}
+  oyuncu: {fileID: 38655327}
   wanderRadius: 4
   wanderSpeed: 1.5
   maxVisualPiyon: 30
@@ -7608,10 +7608,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a8a5760ea5a594489710597fe2c5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  attackThreshold: 10
-  retreatThreshold: 3
-  safeRadiusFromPlayer: 6
-  weakVillageUnitThreshold: 5
+  playerAvoidRange: 3
+  minAttackArmy: 3
+  rushArmy: 7
   currentTargetVillage: {fileID: 0}
 --- !u!114 &1642151945
 MonoBehaviour:
@@ -8001,8 +8000,8 @@ MonoBehaviour:
   powerUpPrefabs:
   - {fileID: 1160818652734762702, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
   - {fileID: 3777269538912959058, guid: 78443333f3545b74a83e85dfce0ae63b, type: 3}
-  spawnAreaMin: {x: -10, y: -10}
-  spawnAreaMax: {x: 10, y: 10}
+  spawnAreaMin: {x: -50, y: -50}
+  spawnAreaMax: {x: 50, y: 50}
   spawnInterval: 10
 --- !u!114 &1765772755
 MonoBehaviour:

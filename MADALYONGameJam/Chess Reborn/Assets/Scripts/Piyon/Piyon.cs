@@ -191,7 +191,6 @@ public class Piyon : MonoBehaviour
     // ------------------------------------------------------------
     public void DusmanaKatıl(Transform enemyKing)
     {
-       Debug.LogWarning("[JOIN] " + gameObject.name + " düşmana katılıyor, çağıran: " + baseController?.name);
 
         player = enemyKing;
         currentMode = Mode.ToEnemy;

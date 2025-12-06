@@ -17,9 +17,6 @@ public class BasePiyonManager : MonoBehaviour
     public float wanderSpeed = 1.5f;
     public int maxVisualPiyon = 30;
 
-    [Header("Enemy Collect Settings")]
-    public float collectRange = 0.8f;   // 🔥 King bu mesafedeyse piyon toplayabilir
-
     public List<Piyon> piyonlar = new List<Piyon>();
 
     void Update()
@@ -62,10 +59,8 @@ public class BasePiyonManager : MonoBehaviour
         {
             case Team.Player:
                 return playerPiyonPrefab;
-
             case Team.Enemy:
                 return enemyPiyonPrefab;
-
             default:
                 return null; // Neutral bölge piyon üretmez
         }
@@ -171,6 +166,9 @@ public class BasePiyonManager : MonoBehaviour
         piyonlar.Add(p);
     }
 
+    // ------------------------------------------
+    // TÜM PİYONLARI OYUNCU ORDUSUNA AKTAR
+    // ------------------------------------------
     public void TransferAllToPlayer(Transform player)
     {
         PlayerPiyon army = PlayerCommander.instance.playerArmy;
@@ -193,6 +191,9 @@ public class BasePiyonManager : MonoBehaviour
         return piyonlar.Count;
     }
 
+    // ------------------------------------------
+    // TÜM PİYONLARI BELİRLİ BİR KALEYE GÖNDER (SAVUNMA)
+    // ------------------------------------------
     public void SendAllToCastle(BaseController castle)
     {
         if (castle == null) return;
@@ -212,14 +213,10 @@ public class BasePiyonManager : MonoBehaviour
     }
 
     // ------------------------------------------
-    // 🔥 TÜM PIYONLARI DÜŞMAN ORDUSUNA VER
-    //    (SADECE KING YAKINDA İSE!)
+    // TÜM PİYONLARI DÜŞMAN ORDUSUNA KAT
+    // (Enemy King etrafındaki orduya)
     // ------------------------------------------
-  public void TransferAllToEnemy(Transform enemyKing)
-{
-    Debug.Log("[BPM] TransferAllToEnemy çağrıldı → " + baseController.name);
-
-    foreach (var p in piyonlar)
+    public void TransferAllToEnemy(Transform enemyKing)
     {
         foreach (var p in piyonlar)
         {
@@ -228,10 +225,12 @@ public class BasePiyonManager : MonoBehaviour
         }
 
         piyonlar.Clear();
-        baseController.unitCount = 0;   // piyonlar gerçekten köyden alındı
+        baseController.unitCount = 0;
     }
 
-    // --- DÜŞMAN ORDUSUNA GÖNDER (KING ETRAFINA) ---
+    // ------------------------------------------
+    // DÜŞMAN ORDUSUNA GÖNDER (KING ETRAFINA)
+    // ------------------------------------------
     public void SendAllToEnemyArmy(Transform enemyKing)
     {
         if (baseController.unitCount <= 0) return;
@@ -246,7 +245,9 @@ public class BasePiyonManager : MonoBehaviour
         baseController.unitCount = 0;
     }
 
-    // --- BAŞKA BİR ENEMY KÖYÜNE GÖNDER (DEFANS) ---
+    // ------------------------------------------
+    // BAŞKA BİR ENEMY KÖYÜNE GÖNDER (DEFANS)
+    // ------------------------------------------
     public void SendAllToEnemyVillage(BaseController targetVillage)
     {
         if (targetVillage == null) return;

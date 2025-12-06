@@ -176,7 +176,6 @@ public class EnemyCommander : MonoBehaviour
     // -------------------------------------------------------
     public List<BaseController> GetOwnedVillages()
     {
-        Debug.Log("[CHECK] villages listesi eleman: " + v.name);
 
         List<BaseController> result = new List<BaseController>();
         foreach (var v in villages)

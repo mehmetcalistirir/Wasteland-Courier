@@ -25,24 +25,25 @@ public class EnemyMovementBoost : MonoBehaviour
         baseSpeed = commander.stepSpeed;
     }
 
-    public void SetInsideZone(BaseController zone)
+    public void SetInsideZone(BaseController newZone)
+{
+    zone = newZone;        // 🔥 asıl alanı set et
+    insideZone = newZone;  // istiyorsan bunu da tutabilirsin
+
+    if (newZone != null && !zoneApplied)
     {
-        insideZone = zone;
-
-        if (zone != null && !zoneApplied)
-        {
-            zoneApplied = true;
-
-            zoneSpeedModifier = -1f; // yavaşlatma örneği
-            moveSpeed += zoneSpeedModifier;
-        }
-        else if (zone == null && zoneApplied)
-        {
-            moveSpeed -= zoneSpeedModifier;
-            zoneApplied = false;
-            zoneSpeedModifier = 0f;
-        }
+        zoneApplied = true;
+        zoneSpeedModifier = -1f; // yavaşlatma örneği
+        moveSpeed += zoneSpeedModifier;
     }
+    else if (newZone == null && zoneApplied)
+    {
+        moveSpeed -= zoneSpeedModifier;
+        zoneApplied = false;
+        zoneSpeedModifier = 0f;
+    }
+}
+
 
     void Update()
     {

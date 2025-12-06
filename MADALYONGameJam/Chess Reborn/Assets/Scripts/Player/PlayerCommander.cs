@@ -73,6 +73,34 @@ public class PlayerCommander : MonoBehaviour
 }
 
 
+public void FormFightLine(Vector3 playerPos, Vector3 enemyPos)
+{
+    // İki kralın tam ortası
+    Vector3 center = (playerPos + enemyPos) / 2f;
+
+    // Oyuncuya ait piyonları bulmak için bir yarıçap
+    float radius = 3f;
+
+    // Sahnede tüm Piyon’ları bul
+    Piyon[] allPions = FindObjectsOfType<Piyon>();
+    List<Piyon> playerSidePions = new List<Piyon>();
+
+    foreach (var p in allPions)
+    {
+        // Oyuncu kralına yakın olanları oyuncu hattı sayıyoruz
+        if (Vector2.Distance(p.transform.position, playerPos) < radius)
+        {
+            playerSidePions.Add(p);
+        }
+    }
+
+    int count = playerSidePions.Count;
+    for (int i = 0; i < count; i++)
+    {
+        playerSidePions[i].EnterFightLine(center, i, count, true); // true = player tarafı
+    }
+}
+
 
 
 

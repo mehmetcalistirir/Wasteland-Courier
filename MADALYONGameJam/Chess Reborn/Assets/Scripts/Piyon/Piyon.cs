@@ -1,14 +1,13 @@
 using UnityEngine;
 using System.Collections;
 
-
 public class Piyon : MonoBehaviour
 {
     public float wanderRadius = 2f;
     public float wanderSpeed = 1f;
     public float joinSpeed = 4f;
 
-    // GRID HAREKETİ PARAMETRELERİ
+    // GRID HAREKETİ
     public float stepSize = 1f;
     public float stepSpeed = 6f;
     public float stepCooldown = 0.15f;
@@ -17,37 +16,68 @@ public class Piyon : MonoBehaviour
     private Vector3 hedefPozisyon;
     private Transform villageCenter;
 
-    private enum Mode { Wander, ToPlayer, ToEnemy, ToBase }
+    private enum Mode { Wander, ToPlayer, ToEnemy, ToBase, FightLine }
     private Mode currentMode = Mode.Wander;
 
     private Transform player;
 
-    // --- SALDIRI ---
+    // Base saldırı/savunma
     private BaseController targetBase;
     private Team attackerTeam = Team.Player;
-
-    // --- SAVUNMA ---
     private BaseController defendBase;
 
+    // ------------------------------------------------------------
+    // SAVAŞ ÇİZGİSİ
+    // ------------------------------------------------------------
+    public void EnterFightLine(Vector3 lineCenter, int index, int totalCount, bool isPlayerSide)
+    {
+        currentMode = Mode.FightLine;
 
+        float spacing = 0.7f;
+        float dir = isPlayerSide ? 1f : -1f;
+
+        float offsetIndex = index - (totalCount - 1) / 2f;
+        Vector3 offset = new Vector3(offsetIndex * spacing * dir, 0f, 0f);
+
+        hedefPozisyon = lineCenter + offset;
+    }
+
+    void FightLineMove()
+    {
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            hedefPozisyon,
+            joinSpeed * Time.deltaTime
+        );
+    }
+
+    // ------------------------------------------------------------
+    // KÖY WANDER
+    // ------------------------------------------------------------
     public void SetVillageCenter(Transform center)
     {
+         Debug.Log("[PİYON] Village center set: " + center.name + " pawn=" + gameObject.name);
         villageCenter = center;
         YeniHedefBelirle();
     }
 
     void Update()
     {
+        if (currentMode == Mode.ToEnemy && player == null)
+{
+    Debug.LogError("[AUTO-JOIN DETECTED] Pawn " + gameObject.name + " ToEnemy modunda ama manuel tetikleme yok!");
+}
+
         switch (currentMode)
         {
-            case Mode.Wander: Wander(); break;
-            case Mode.ToPlayer: OyuncuyaDogruGit(); break;
-            case Mode.ToEnemy: DusmanaDogruGit(); break;
-            case Mode.ToBase: BaseGridMovement(); break;   // 🔥 SATRANÇ MANTIĞI BURADA
+            case Mode.Wander:    Wander(); break;
+            case Mode.ToPlayer:  OyuncuyaDogruGit(); break;
+            case Mode.ToEnemy:   DusmanaDogruGit(); break;
+            case Mode.ToBase:    BaseGridMovement(); break;
+            case Mode.FightLine: FightLineMove(); break;
         }
     }
 
-    // ---------------- WANDER ----------------
     void Wander()
     {
         if (villageCenter == null) return;
@@ -68,7 +98,9 @@ public class Piyon : MonoBehaviour
         hedefPozisyon = villageCenter.position + (Vector3)random;
     }
 
-    // ---------------- PLAYER’A KATILMA ----------------
+    // ------------------------------------------------------------
+    // PLAYER’A KATILMA
+    // ------------------------------------------------------------
     public void OyuncuyaKatıl(Transform p)
     {
         player = p;
@@ -77,7 +109,6 @@ public class Piyon : MonoBehaviour
 
     void OyuncuyaDogruGit()
     {
-        // ❗ Oyuncuya giderken eski MoveTowards sistemi kullanılacak
         transform.position = Vector3.MoveTowards(
             transform.position,
             player.position,
@@ -91,7 +122,9 @@ public class Piyon : MonoBehaviour
         }
     }
 
-    // ---------------- SALDIRI (BASE’E GİDİŞ) ----------------
+    // ------------------------------------------------------------
+    // BASE’E SALDIRI veya SAVUNMA
+    // ------------------------------------------------------------
     public void AttackBase(BaseController target, Team team)
     {
         attackerTeam = team;
@@ -100,7 +133,6 @@ public class Piyon : MonoBehaviour
         currentMode = Mode.ToBase;
     }
 
-    // ---------------- SAVUNMA (KALEYE GİDİŞ) ----------------
     public void GoDefendBase(BaseController castle)
     {
         defendBase = castle;
@@ -108,35 +140,13 @@ public class Piyon : MonoBehaviour
         currentMode = Mode.ToBase;
     }
 
-    // ============================================================
-    // 🔥 BASE'E DOĞRU SATRANÇ HAREKETİ (1 BİRİM + COOLDOWN)
-    // ============================================================
     void BaseGridMovement()
     {
         BaseController goal = defendBase != null ? defendBase : targetBase;
         if (goal == null) return;
 
-        // VARRIŞ
-        if (Vector2.Distance(transform.position, goal.transform.position) < 0.2f)
-        {
-            if (defendBase != null)
-            {
-                defendBase.unitCount++;
-                Destroy(gameObject);
-            }
-            else if (targetBase != null)
-            {
-                targetBase.ReceiveAttack(1, attackerTeam);
-                Destroy(gameObject);
-            }
-            return;
-        }
-
-        // 🔥 sadece cooldown yoksa hareket edebilir
         if (canStep)
-        {
             StartCoroutine(GridStep(goal.transform.position));
-        }
     }
 
     IEnumerator GridStep(Vector3 hedef)
@@ -145,6 +155,7 @@ public class Piyon : MonoBehaviour
 
         Vector2 diff = hedef - transform.position;
         Vector2 dir = NormalizeDirection(diff);
+
         Vector2 start = transform.position;
         Vector2 end = start + dir * stepSize;
 
@@ -161,17 +172,9 @@ public class Piyon : MonoBehaviour
         transform.position = end;
 
         yield return new WaitForSeconds(stepCooldown);
-
         canStep = true;
     }
 
-    public void SetWanderSpeed(float s)
-{
-    wanderSpeed = s;
-}
-
-
-    // 8 yönlü normalize — satranç şahı gibi hareket
     Vector2 NormalizeDirection(Vector2 input)
     {
         float x = Mathf.Sign(input.x);
@@ -183,16 +186,32 @@ public class Piyon : MonoBehaviour
         return new Vector2(x, y).normalized;
     }
 
-    // ---------------- ENEMY'E KATILMA ----------------
+    // ------------------------------------------------------------
+    // DÜŞMANA KATILMA (SADECE TransferAllToEnemy ile)
+    // ------------------------------------------------------------
     public void DusmanaKatıl(Transform enemyKing)
     {
+       Debug.LogWarning("[JOIN] " + gameObject.name + " düşmana katılıyor, çağıran: " + baseController?.name);
+
         player = enemyKing;
         currentMode = Mode.ToEnemy;
     }
+    public void SetWanderSpeed(float s)
+{
+    wanderSpeed = s;
+}
+
+
+
 
     void DusmanaDogruGit()
     {
-        // ❗ Düşmana giderken de MoveTowards devam edecek
+        if (player == null)
+        {
+            currentMode = Mode.Wander;
+            return;
+        }
+
         transform.position = Vector3.MoveTowards(
             transform.position,
             player.position,
@@ -203,6 +222,6 @@ public class Piyon : MonoBehaviour
         {
             EnemyCommander.instance.enemyArmy.AddUnit(gameObject);
             Destroy(gameObject);
-        }
-    }
+        }
+    }
 }

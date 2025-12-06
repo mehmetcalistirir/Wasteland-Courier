@@ -5,6 +5,7 @@ public class BasePiyonManager : MonoBehaviour
 {
     [Header("References")]
     public BaseController baseController;
+
     [Header("Piyon Prefabs")]
     public GameObject playerPiyonPrefab;
     public GameObject enemyPiyonPrefab;
@@ -15,6 +16,9 @@ public class BasePiyonManager : MonoBehaviour
     public float wanderRadius = 2f;
     public float wanderSpeed = 1.5f;
     public int maxVisualPiyon = 30;
+
+    [Header("Enemy Collect Settings")]
+    public float collectRange = 0.8f;   // 🔥 King bu mesafedeyse piyon toplayabilir
 
     public List<Piyon> piyonlar = new List<Piyon>();
 
@@ -53,41 +57,39 @@ public class BasePiyonManager : MonoBehaviour
     }
 
     GameObject GetCorrectPrefab()
-{
-    switch (baseController.owner)
     {
-        case Team.Player:
-            return playerPiyonPrefab;
+        switch (baseController.owner)
+        {
+            case Team.Player:
+                return playerPiyonPrefab;
 
-        case Team.Enemy:
-            return enemyPiyonPrefab;
+            case Team.Enemy:
+                return enemyPiyonPrefab;
 
-        default:
-            return null; // Neutral bölge piyon üretmez
+            default:
+                return null; // Neutral bölge piyon üretmez
+        }
     }
-}
-
 
     // ------------------------------------------
     // Wander eden asker üret
     // ------------------------------------------
     void SpawnWanderPiyon()
-{
-    GameObject prefab = GetCorrectPrefab();
-    if (prefab == null) return;
+    {
+        GameObject prefab = GetCorrectPrefab();
+        if (prefab == null) return;
 
-    Vector2 rand = Random.insideUnitCircle * wanderRadius;
-    Vector3 pos = transform.position + new Vector3(rand.x, rand.y, 0);
+        Vector2 rand = Random.insideUnitCircle * wanderRadius;
+        Vector3 pos = transform.position + new Vector3(rand.x, rand.y, 0);
 
-    GameObject obj = Instantiate(prefab, pos, Quaternion.identity);
-    Piyon p = obj.GetComponent<Piyon>();
+        GameObject obj = Instantiate(prefab, pos, Quaternion.identity);
+        Piyon p = obj.GetComponent<Piyon>();
 
-    p.SetVillageCenter(transform);
-    p.SetWanderSpeed(wanderSpeed);
+        p.SetVillageCenter(transform);
+        p.SetWanderSpeed(wanderSpeed);
 
-    piyonlar.Add(p);
-}
-
+        piyonlar.Add(p);
+    }
 
     // ------------------------------------------
     // Tüm piyonları temizle
@@ -102,37 +104,35 @@ public class BasePiyonManager : MonoBehaviour
 
     // ------------------------------------------
     // Oyuncuya bir asker gönder
-    // (Progress bar yok — komutla çalışacak)
     // ------------------------------------------
     public void SendOneToPlayer()
-{
-    if (baseController.unitCount <= 0)
-        return;
-
-    baseController.unitCount--;
-
-    // Eğer wander listesinde piyon varsa → onu gönder
-    if (piyonlar.Count > 0)
     {
-        Piyon p = piyonlar[0];
-        piyonlar.RemoveAt(0);
-        p.OyuncuyaKatıl(oyuncu);
-        return;
+        if (baseController.unitCount <= 0)
+            return;
+
+        baseController.unitCount--;
+
+        // Eğer wander listesinde piyon varsa → onu gönder
+        if (piyonlar.Count > 0)
+        {
+            Piyon p = piyonlar[0];
+            piyonlar.RemoveAt(0);
+            p.OyuncuyaKatıl(oyuncu);
+            return;
+        }
+
+        // Eğer wander piyon kalmadıysa → owner’a uygun yeni piyon spawn et
+        GameObject prefab = GetCorrectPrefab();
+        if (prefab == null)
+        {
+            Debug.LogWarning("This base has no valid piyon prefab assigned for its team!");
+            return;
+        }
+
+        GameObject obj = Instantiate(prefab, transform.position, Quaternion.identity);
+        Piyon newP = obj.GetComponent<Piyon>();
+        newP.OyuncuyaKatıl(oyuncu);
     }
-
-    // Eğer wander piyon kalmadıysa → owner’a uygun yeni piyon spawn et
-    GameObject prefab = GetCorrectPrefab();
-    if (prefab == null)
-    {
-        Debug.LogWarning("This base has no valid piyon prefab assigned for its team!");
-        return;
-    }
-
-    GameObject obj = Instantiate(prefab, transform.position, Quaternion.identity);
-    Piyon newP = obj.GetComponent<Piyon>();
-    newP.OyuncuyaKatıl(oyuncu);
-}
-
 
     public void RemovePiyons(int amount)
     {
@@ -146,6 +146,7 @@ public class BasePiyonManager : MonoBehaviour
             piyonlar.RemoveAt(0);
         }
     }
+
     public void SyncTo(int count)
     {
         while (piyonlar.Count > count)
@@ -158,20 +159,17 @@ public class BasePiyonManager : MonoBehaviour
             AddFakePiyon();
     }
 
-
-
     public void AddFakePiyon()
-{
-    GameObject prefab = GetCorrectPrefab();
-    if (prefab == null) return;
+    {
+        GameObject prefab = GetCorrectPrefab();
+        if (prefab == null) return;
 
-    GameObject obj = Instantiate(prefab, transform.position, Quaternion.identity);
-    Piyon p = obj.GetComponent<Piyon>();
+        GameObject obj = Instantiate(prefab, transform.position, Quaternion.identity);
+        Piyon p = obj.GetComponent<Piyon>();
 
-    p.SetVillageCenter(transform);
-    piyonlar.Add(p);
-}
-
+        p.SetVillageCenter(transform);
+        piyonlar.Add(p);
+    }
 
     public void TransferAllToPlayer(Transform player)
     {
@@ -190,8 +188,6 @@ public class BasePiyonManager : MonoBehaviour
         piyonlar.Clear();
     }
 
-
-
     public int GetPiyonCount()
     {
         return piyonlar.Count;
@@ -209,29 +205,29 @@ public class BasePiyonManager : MonoBehaviour
         foreach (var p in piyonlar)
         {
             if (p != null)
-                p.GoDefendBase(castle);   // SALDIRI değil → SAVUNMA
+                p.GoDefendBase(castle);   // SAVUNMA
         }
 
         piyonlar.Clear();
     }
 
-    public void TransferAllToEnemy(Transform enemyKing)
+    // ------------------------------------------
+    // 🔥 TÜM PIYONLARI DÜŞMAN ORDUSUNA VER
+    //    (SADECE KING YAKINDA İSE!)
+    // ------------------------------------------
+  public void TransferAllToEnemy(Transform enemyKing)
+{
+    Debug.Log("[BPM] TransferAllToEnemy çağrıldı → " + baseController.name);
+
+    foreach (var p in piyonlar)
     {
-        foreach (var p in piyonlar)
-        {
-            if (p != null)
-                p.DusmanaKatıl(enemyKing);
-        }
-
-        piyonlar.Clear();
-
-        // --- KRİTİK FIX ---
-        baseController.unitCount = 0;   // ❗ piyonlar gerçekten köyden alındı
+        if (p != null)
+            p.DusmanaKatıl(enemyKing);
     }
 
-
-
-
+    piyonlar.Clear();
+    baseController.unitCount = 0;
+}
 
 
 }

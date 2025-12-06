@@ -116,6 +116,19 @@ public class BasePiyonManager : MonoBehaviour
             piyonlar.RemoveAt(0);
         }
     }
+    public void SyncTo(int count)
+{
+    while (piyonlar.Count > count)
+    {
+        Destroy(piyonlar[0].gameObject);
+        piyonlar.RemoveAt(0);
+    }
+
+    while (piyonlar.Count < count)
+        AddFakePiyon();
+}
+
+
 
     public void AddFakePiyon()
     {
@@ -162,15 +175,19 @@ public class BasePiyonManager : MonoBehaviour
     }
 
     public void TransferAllToEnemy(Transform enemyKing)
+{
+    foreach (var p in piyonlar)
     {
-        foreach (var p in piyonlar)
-        {
-            if (p != null)
-                p.DusmanaKatıl(enemyKing);
-        }
-
-        piyonlar.Clear();
+        if (p != null)
+            p.DusmanaKatıl(enemyKing);
     }
+
+    piyonlar.Clear();
+
+    // --- KRİTİK FIX ---
+    baseController.unitCount = 0;   // ❗ piyonlar gerçekten köyden alındı
+}
+
 
 
 

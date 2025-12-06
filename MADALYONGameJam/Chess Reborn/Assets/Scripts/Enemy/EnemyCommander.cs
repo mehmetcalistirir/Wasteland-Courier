@@ -1,9 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
+
 
 public class EnemyCommander : MonoBehaviour
 {
     public static EnemyCommander instance;
+    public TextMeshPro kingCountText;
 
     [Header("Movement Settings")]
     public float moveSpeed = 2f;
@@ -43,6 +46,8 @@ public class EnemyCommander : MonoBehaviour
     {
         // Sürekli, akıcı hareket
         MoveToTargetVillage();
+        if (kingCountText != null)
+            kingCountText.text = enemyArmy.GetCount().ToString();
     }
 
     // -----------------------------------------------------
@@ -144,6 +149,7 @@ public class EnemyCommander : MonoBehaviour
             currentTargetVillage = null;
         }
     }
+    
 
     // -----------------------------------------------------
     // 4) KÖY SEÇME — AKILLI NÖTR KÖY
@@ -210,84 +216,114 @@ public class EnemyCommander : MonoBehaviour
     // 5) KÖYE ULAŞINCA NE YAPACAK?
     // -----------------------------------------------------
     void OnReachVillage(BaseController village)
+{
+    if (village == null) return;
+
+    // Tarafsız köy → tek seferlik ele geçir
+    if (village.owner == Team.Neutral)
     {
-        if (village == null) return;
-
-        // Tarafsız köy → ele geçir
-        if (village.owner == Team.Neutral)
-        {
-            village.owner = Team.Enemy;
-        }
-
-        // Kendi köyü veya kalesi → piyonları ordusuna ekle
-        if (village.owner == Team.Enemy)
-        {
-            EnemyAddVillagePiyonsToArmy(village);
-        }
-
-        // Oyuncu köyü → ordu ile saldır
-        if (village.owner == Team.Player)
-        {
-            SendArmyTo(village);
-        }
+        village.owner = Team.Enemy;
+        return;
     }
+
+    // Kendi köyüne geldiyse → piyon toplama YASAK (bug engellendi)
+    if (village.owner == Team.Enemy)
+    {
+        // Artık hiçbir şey yapılmıyor
+        return;
+    }
+
+    // Player köyü → Saldırı başlat
+    if (village.owner == Team.Player)
+    {
+        EnemyAttack(village);
+        return;
+    }
+}
+
 
     // -----------------------------------------------------
     // 6) KÖYLERDEN ORDUYA ASKER TOPLAMA
     // -----------------------------------------------------
     void GatherArmy()
+{
+    foreach (var v in villages)
     {
-        foreach (var v in villages)
+        if (v != null && v.owner == Team.Enemy && EnemyIsAt(v))
         {
-            if (EnemyIsAt(v) && v.owner == Team.Enemy)
-            {
-                EnemyAddVillagePiyonsToArmy(v);
-            }
-        }
-
-        if (EnemyIsAt(enemyCastle))
-        {
-            EnemyAddVillagePiyonsToArmy(enemyCastle);
+            EnemyAddVillagePiyonsToArmy(v);
         }
     }
+
+    if (enemyCastle != null && EnemyIsAt(enemyCastle))
+    {
+        EnemyAddVillagePiyonsToArmy(enemyCastle);
+    }
+}
+
 
 
     // Bulunduğu köydeki piyonları ordusuna ekle
     public void EnemyAddVillagePiyonsToArmy(BaseController village)
-    {
-        if (!EnemyIsAt(village)) return;  // Uzaksa komut yasak!
+{
+    if (village == null) return;
+    if (village.unitCount <= 0) return;
 
-        BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
-        if (bpm == null) return;
+    // ❗ Köy düşmana ait değilse çık
+    if (village.owner != Team.Enemy) return;
 
-        bpm.TransferAllToEnemy(enemyKing);
-    }
+    // ❗ King bu köyün üstünde değilse çık
+    if (!EnemyIsAt(village)) return;
+
+    BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
+    if (bpm == null) return;
+
+    bpm.TransferAllToEnemy(enemyKing);
+}
+
+
+
 
 
     // Bulunduğu köydeki piyonları kendi kalesine gönder (istersen kullanırsın)
     public void EnemySendVillagePiyonsToCastle(BaseController village)
-    {
-        if (!EnemyIsAt(village)) return; // King köyde değil → gönderemez
+{
+    if (village == null || enemyCastle == null) return;
 
-        BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
-        if (bpm == null) return;
+    // ❗ Düşman köyü değilse yok
+    if (village.owner != Team.Enemy) return;
 
-        bpm.SendAllToCastle(enemyCastle);
-    }
+    // ❗ King o köyde olmalı
+    if (!EnemyIsAt(village)) return;
+
+    BasePiyonManager bpm = village.GetComponent<BasePiyonManager>();
+    if (bpm == null) return;
+
+    bpm.SendAllToCastle(enemyCastle);
+}
+
+
 
 
     // Bulunduğu köyden başka bir köye piyon gönder
     public void EnemySendVillagePiyonsTo(BaseController from, BaseController to)
-    {
-        if (!EnemyIsAt(from)) return; // Uzaksa izin yok
+{
+    if (from == null || to == null) return;
 
-        BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
-        if (bpm == null) return;
+    // ❗ Düşmana ait olmalı
+    if (from.owner != Team.Enemy) return;
 
-        if (!EnemyIsAt(from)) return;
-        bpm.SendAllToCastle(to);
+    // ❗ King 'from' köyünde olmalı
+    if (!EnemyIsAt(from)) return;
 
-    }
+    BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
+    if (bpm == null) return;
+
+    bpm.SendAllToCastle(to);
+}
+
+
+
 
 
     // -----------------------------------------------------
@@ -390,14 +426,18 @@ public class EnemyCommander : MonoBehaviour
     // 9) SAVUNMA BİRLİĞİ GÖNDER (KÖYDEN KÖYE)
     // -----------------------------------------------------
     void SendDefense(BaseController from, BaseController to)
-    {
-        if (from == null || to == null) return;
+{
+    if (from == null || to == null) return;
 
-        BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
-        if (bpm == null) return;
+    // ❗ King 'from' köyünde değilse savunma gönderemez
+    if (!EnemyIsAt(from)) return;
 
-        bpm.SendAllToCastle(to); // savunma piyonlarını gönder
-    }
+    BasePiyonManager bpm = from.GetComponent<BasePiyonManager>();
+    if (bpm == null) return;
+
+    bpm.SendAllToCastle(to);
+}
+
 
     // -----------------------------------------------------
     // 10) GERİ ÇEKİLME MANTIĞI
@@ -498,23 +538,18 @@ public class EnemyCommander : MonoBehaviour
     // 12) ORDUNUN TAMAMINI HEDEFE SALDIRIYA GÖNDER
     // -----------------------------------------------------
     public void SendArmyTo(BaseController target)
-    {
-        if (target == null || enemyArmy == null) return;
+{
+    if (target == null || enemyArmy == null) return;
 
-        GameObject[] arr = enemyArmy.ExtractAll(); // Ordunun tamamını al
+    int attackerCount = enemyArmy.GetCount();
 
-        foreach (GameObject go in arr)
-        {
-            if (go == null) continue;
+    // PlayerCommander ile aynı savaş sistemi
+    target.ResolveBattle(attackerCount, Team.Enemy);
 
-            Piyon p = go.GetComponent<Piyon>();
-            if (p != null)
-            {
-                // SALDIRI MODU → Team.Enemy ile
-                p.AttackBase(target, Team.Enemy);
-            }
-        }
-    }
+    // Saldırıya katılan piyonlar yok edilir
+    enemyArmy.ExtractAll();
+}
+
     bool EnemyIsAt(BaseController village)
     {
         return Vector2.Distance(enemyKing.position, village.transform.position) < 0.5f;
@@ -522,13 +557,14 @@ public class EnemyCommander : MonoBehaviour
 
 
     public void EnemyAttack(BaseController target)
-    {
-        int attackerCount = enemyArmy.GetCount();
+{
+    int attackerCount = enemyArmy.GetCount();
 
-        target.ResolveBattle(attackerCount, Team.Enemy);
+    target.ResolveBattle(attackerCount, Team.Enemy);
 
-        // Saldırıya katılan düşman piyonlarını yok et
-        enemyArmy.ExtractAll();
-    }
+    enemyArmy.ExtractAll();
+}
+
+
 
 }

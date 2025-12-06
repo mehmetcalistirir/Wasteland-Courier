@@ -546,7 +546,8 @@ public class EnemyCommander : MonoBehaviour
 
         if (target != null)
         {
-            SendArmyTo(target);
+            currentTargetVillage = target;
+
             return;
         }
 
@@ -608,8 +609,19 @@ public class EnemyCommander : MonoBehaviour
     {
         if (p == null) continue;
 
-        Piyon pawn = p.GetComponent<Piyon>();
-        pawn.AttackBase(target, Team.Enemy);
+        int attackerCount = enemyArmy.GetCount();
+
+        float dist = Vector2.Distance(enemyKing.position, target.transform.position);
+
+if (dist > 0.8f)
+{
+    // 🔥 Kral köyde değil → savaş başlamaz
+    return;
+}
+
+target.ResolveBattle(attackerCount, Team.Enemy);
+enemyArmy.ExtractAll();
+
     }
 }
 
@@ -622,6 +634,10 @@ public class EnemyCommander : MonoBehaviour
 
     public void EnemyAttack(BaseController target)
     {
+        float dist = Vector2.Distance(enemyKing.position, target.transform.position);
+if (dist > 0.8f)
+    return;
+
         int attackerCount = enemyArmy.GetCount();
 
         target.ResolveBattle(attackerCount, Team.Enemy);

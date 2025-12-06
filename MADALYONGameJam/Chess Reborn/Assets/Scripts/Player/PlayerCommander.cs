@@ -59,17 +59,20 @@ public class PlayerCommander : MonoBehaviour
     }
 
     public void SendArmyTo(BaseController target)
-    {
-        if (target == null || playerArmy == null) return;
+{
+    if (target == null || playerArmy == null) return;
 
-        int attackerCount = playerArmy.GetCount();
+    // 1) Oyuncu ordusunun gücünü al
+    int attackerCount = playerArmy.GetCount();
 
-        // Savaş burada çözülüyor
-        target.ResolveBattle(attackerCount, Team.Player);
+    // 2) Savaşı başlat (OYUNCU tarafı)
+    target.ResolveBattle(attackerCount, Team.Player);
 
-        // Saldırıya katılan tüm piyonları ordudan çıkar
-        playerArmy.ExtractAll();
-    }
+    // 3) Saldırıya katılan tüm piyonları ordudan çıkar
+    playerArmy.ExtractAll();
+}
+
+
 
 
 

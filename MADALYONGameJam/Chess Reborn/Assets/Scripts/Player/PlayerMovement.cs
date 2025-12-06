@@ -4,14 +4,17 @@ using System.Collections;
 
 public class PlayerMovement2D : MonoBehaviour
 {
-    public float moveSpeed = 5f;     // bir kareye giderken hız
+    public float moveSpeed = 5f;
 
     [Header("Dynamic Step Settings")]
     public float baseStepCooldown = 0.2f;
     public float cooldownPerPawn = 0.01f;
-    public float stepSize = 1f;       // satranç karesi 1 birim
 
-    private float stepCooldown;       // 🔹 EKSİK OLAN ALAN BUYDU
+    [Header("Step Sizes")]
+    public float straightStepSize = 1f;    // düz hareket mesafesi
+    public float diagonalStepSize = 1.4f;  // çapraz hareket mesafesi
+
+    private float stepCooldown;
     private bool canMove = true;
     private Vector2 moveInput;
     private Rigidbody2D rb;
@@ -44,21 +47,16 @@ public class PlayerMovement2D : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        footstepSource.loop = false; // adım sesini tek sefer çalacağız
+        footstepSource.loop = false;
         playerPiyon = FindObjectOfType<PlayerPiyon>();
     }
 
     void Update()
     {
-        // 🔹 Önce piyon sayısını güncelle
         pawnCount = playerPiyon.GetCount();
 
-        // 🔹 Sonra dinamik cooldown hesapla
         stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
-        // İstersen minimum / maksimum sınır koyabilirsin:
-        // stepCooldown = Mathf.Clamp(stepCooldown, 0.1f, 1.0f);
 
-        // input varsa ve hareket edebiliyorsak
         if (canMove && moveInput != Vector2.zero)
         {
             Vector2 dir = NormalizeDirection(moveInput);
@@ -68,11 +66,9 @@ public class PlayerMovement2D : MonoBehaviour
 
     Vector2 NormalizeDirection(Vector2 input)
     {
-        // Hareket yönünü 8 yönlü (grid) hale getiriyoruz
         float x = Mathf.Sign(input.x);
         float y = Mathf.Sign(input.y);
 
-        // eksenlerin mutlak değerleri küçükse sıfırla
         if (Mathf.Abs(input.x) < 0.5f) x = 0;
         if (Mathf.Abs(input.y) < 0.5f) y = 0;
 
@@ -83,16 +79,19 @@ public class PlayerMovement2D : MonoBehaviour
     {
         canMove = false;
 
-        // hedef nokta
+        // 🔥 yön düz mü çapraz mı?
+        float step = (direction.x != 0 && direction.y != 0)
+            ? diagonalStepSize      // çapraz
+            : straightStepSize;     // düz
+
         Vector2 startPos = rb.position;
-        Vector2 targetPos = startPos + direction * stepSize;
+        Vector2 targetPos = startPos + direction * step;
 
         float t = 0f;
-        float duration = stepSize / moveSpeed;
+        float duration = step / moveSpeed;
 
-        PlayFootstep();  // adım sesini çal
+        PlayFootstep();
 
-        // kareye doğru smooth hareket
         while (t < duration)
         {
             rb.MovePosition(Vector2.Lerp(startPos, targetPos, t / duration));
@@ -102,7 +101,6 @@ public class PlayerMovement2D : MonoBehaviour
 
         rb.MovePosition(targetPos);
 
-        // Adım bittikten sonra verilen cooldown kadar bekle
         yield return new WaitForSeconds(stepCooldown);
 
         canMove = true;
@@ -111,16 +109,13 @@ public class PlayerMovement2D : MonoBehaviour
     void PlayFootstep()
     {
         AudioClip clip = (pawnCount > 5) ? heavyFootstepLoop : lightFootstepLoop;
-        footstepSource.PlayOneShot(clip); // loop değil tek seferlik adım sesi
+        footstepSource.PlayOneShot(clip);
     }
 
     public IEnumerator TemporarySpeedBoost(float amount, float duration)
     {
         moveSpeed += amount;
-
         yield return new WaitForSeconds(duration);
-
         moveSpeed -= amount;
     }
-
 }

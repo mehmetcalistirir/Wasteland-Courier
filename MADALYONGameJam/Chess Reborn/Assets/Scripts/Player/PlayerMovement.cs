@@ -13,6 +13,13 @@ public class PlayerMovement2D : MonoBehaviour
     [Header("Step Sizes")]
     public float straightStepSize = 1f;    // düz hareket mesafesi
     public float diagonalStepSize = 1.4f;  // çapraz hareket mesafesi
+    private float buffAmount = 0f;
+    private float zoneBuff = 0f;
+    private float normalSpeed;
+
+
+    private BaseController zone;
+    public float zoneBonus = 2f;
 
     private float stepCooldown;
     private bool canMove = true;
@@ -26,6 +33,9 @@ public class PlayerMovement2D : MonoBehaviour
     public int pawnCount;
     private PlayerPiyon playerPiyon;
     private PlayerControls controls;
+    public float baseSpeed = 5f;        // Normal hız
+    public float speedBoostAmount = 0f; // Geçici buff (+3 gibi)
+
 
     void Awake()
     {
@@ -46,22 +56,63 @@ public class PlayerMovement2D : MonoBehaviour
 
     void Start()
     {
+        normalSpeed = moveSpeed;
+
         rb = GetComponent<Rigidbody2D>();
         footstepSource.loop = false;
         playerPiyon = FindObjectOfType<PlayerPiyon>();
+        baseSpeed = moveSpeed; // inspector'dan gelen değer
     }
 
     void Update()
+{
+    pawnCount = playerPiyon.GetCount();
+    stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
+
+    // zone bonus sadece oyuncunun kendi köyü ise aktif olmalı
+    if (zone != null && zone.owner == Team.Player)
+        zoneBonus = 2f;
+    else
+        zoneBonus = 0f;
+
+    // Tüm hız kaynaklarını birleştir
+    float finalSpeed = baseSpeed + speedBoostAmount + zoneBonus;
+    moveSpeed = finalSpeed;
+
+    if (canMove && moveInput != Vector2.zero)
     {
-        pawnCount = playerPiyon.GetCount();
+        Vector2 dir = NormalizeDirection(moveInput);
+        StartCoroutine(MoveOneStep(dir));
+    }
+}
 
-        stepCooldown = baseStepCooldown + (pawnCount * cooldownPerPawn);
 
-        if (canMove && moveInput != Vector2.zero)
-        {
-            Vector2 dir = NormalizeDirection(moveInput);
-            StartCoroutine(MoveOneStep(dir));
-        }
+    public void AddSpeedBuff(float amount)
+    {
+        // buff zaten aktifse ikinci kez ekleme
+        if (zoneBuff > 0f)
+            return;
+
+        zoneBuff = amount;
+        moveSpeed += amount;
+
+        Debug.Log("BUFF APPLIED: +" + amount);
+    }
+
+    public void RemoveSpeedBuff(float amount)
+    {
+        // buff aktif değilse çıkma
+        if (zoneBuff <= 0f)
+            return;
+
+        moveSpeed -= zoneBuff;
+        zoneBuff = 0f;
+
+        Debug.Log("BUFF REMOVED");
+    }
+    public void SetInsideZone(BaseController b)
+    {
+        zone = b;
     }
 
     Vector2 NormalizeDirection(Vector2 input)

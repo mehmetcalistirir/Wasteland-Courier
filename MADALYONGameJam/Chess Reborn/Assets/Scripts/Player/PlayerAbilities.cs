@@ -86,12 +86,14 @@ public class PlayerAbilities : MonoBehaviour
 
     IEnumerator SpeedBoostRoutine()
 {
-    float original = movement.moveSpeed;
-
-    movement.moveSpeed += 3f;
+    movement.speedBoostAmount += 3f;
 
     yield return new WaitForSeconds(5f);
 
-    movement.moveSpeed = original;
+    movement.speedBoostAmount -= 3f;
+
+    if (movement.speedBoostAmount < 0f)
+        movement.speedBoostAmount = 0f;
 }
+
 }

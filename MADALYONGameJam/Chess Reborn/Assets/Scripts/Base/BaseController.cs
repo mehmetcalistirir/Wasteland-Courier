@@ -41,20 +41,25 @@ public class BaseController : MonoBehaviour
 
 
     // 1v1 kayıp sistemi
-    public void ReceiveAttack(int count, Team team, Transform attackerKing)
+    public void ReceiveAttack(int count, Team team)
 {
-    // 🔥 Saldıran kral köye yakın değilse SAVAŞ YOK
-    if (Vector2.Distance(attackerKing.position, transform.position) > 0.8f)
-        return;
-
     unitCount -= count;
 
+    // Köy savunması bittiyse takım değiştir
     if (unitCount <= 0)
     {
         owner = team;
         unitCount = 0;
+
+        StartCoroutine(Shake());
+        if (team == Team.Player)
+            TaskManager.instance.CheckBaseCapture(this);
+
+        if (isCastle)
+            GameMode.Instance.CheckCastleWinLose(this);
     }
 }
+
 
     public void ResolveBattle(int attackerCount, Team attackerTeam)
     {
@@ -115,44 +120,41 @@ public class BaseController : MonoBehaviour
 
     }
 
-    void StartBattle(int attackerCount, Team attackerTeam)
+    private void HandleKingBattle(int attackerCount, Team attackerTeam)
+{
+    int defenderCount = unitCount;
+
+    // 1v1 öldürme
+    int kill = Mathf.Min(attackerCount, defenderCount);
+
+    int attackerRemaining = attackerCount - kill;
+    int defenderRemaining = defenderCount - kill;
+
+    // Köy savunma kaybı
+    unitCount = defenderRemaining;
+
+    // King ordusu piyonlarını yok et
+    if (attackerTeam == Team.Player)
+        PlayerCommander.instance.playerArmy.RemovePiyons(kill);
+    else
+        EnemyCommanderCore.instance.enemyArmy.RemovePiyons(kill);
+
+    // --- Eğer saldıran kazandıysa ---
+    if (attackerRemaining > 0)
     {
-        BasePiyonManager bpm = GetComponent<BasePiyonManager>();
+        owner = attackerTeam;
+        unitCount = attackerRemaining;
+        StartCoroutine(Shake());
 
-        int defenderCount = bpm != null ? bpm.GetPiyonCount() : unitCount;
-
-        int kill = Mathf.Min(attackerCount, defenderCount);
-
-        int attackerRemaining = attackerCount - kill;
-        int defenderRemaining = defenderCount - kill;
-
-        // Savunma kayıpları
-        if (bpm != null)
-            bpm.RemovePiyons(kill);
-        unitCount = defenderRemaining;
-
-        // Saldıran taraf kayıpları
         if (attackerTeam == Team.Player)
-        {
-            PlayerCommander.instance.playerArmy.RemovePiyons(kill);
-        }
-        else
-        {
-            EnemyCommanderCore.instance.enemyArmy.RemovePiyons(kill);
-        }
-
-        // Eğer saldıran kazandıysa köyü ele geçir
-        if (attackerRemaining > 0)
-        {
-            owner = attackerTeam;
-
-            // Kazanan taraf köye kalan ordusunu yerleştirir
-            unitCount = attackerRemaining;
-
-            if (bpm != null)
-                bpm.SyncTo(attackerRemaining);
-        }
+            TaskManager.instance.CheckBaseCapture(this);
     }
+
+    // Kale kontrolü
+    if (isCastle)
+        GameMode.Instance.CheckCastleWinLose(this);
+}
+
 
 
 
@@ -161,46 +163,26 @@ public class BaseController : MonoBehaviour
 private void OnTriggerEnter2D(Collider2D other)
 {
     // -------------------------
-    // PLAYER KING → Tarafsız köy alır
+    // PLAYER KING → Köye girdi
     // -------------------------
-    if (other.CompareTag("PlayerKing") && owner == Team.Neutral)
+    if (other.CompareTag("PlayerKing"))
     {
-        owner = Team.Player;
-        StartCoroutine(Shake());
-        TaskManager.instance.CheckBaseCapture(this);
+        int attackerCount = PlayerCommander.instance.GetArmyCount();
+        HandleKingBattle(attackerCount, Team.Player);
         return;
     }
 
     // -------------------------
-    // ENEMY KING → Tarafsız köy alır
+    // ENEMY KING → Köye girdi
     // -------------------------
-    if (other.CompareTag("EnemyKing") && owner == Team.Neutral)
-    {
-        owner = Team.Enemy;
-        StartCoroutine(Shake());
-        return;
-    }
-
-    // -------------------------
-    // PLAYER ORDUSU → Düşman köye saldırı
-    // -------------------------
-    if (other.CompareTag("PlayerSoldier") && owner == Team.Enemy)
-    {
-        int attackerCount = PlayerCommander.instance.playerArmy.GetCount();
-        StartBattle(attackerCount, Team.Player);
-        return;
-    }
-
-    // -------------------------
-    // ENEMY ORDUSU → Oyuncu köyüne saldırı
-    // -------------------------
-    if (other.CompareTag("EnemySoldier") && owner == Team.Player)
+    if (other.CompareTag("EnemyKing"))
     {
         int attackerCount = EnemyCommanderCore.instance.enemyArmy.GetCount();
-        StartBattle(attackerCount, Team.Enemy);
+        HandleKingBattle(attackerCount, Team.Enemy);
         return;
     }
 }
+
 
     IEnumerator Shake()
     {

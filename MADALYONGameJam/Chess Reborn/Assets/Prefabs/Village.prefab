@@ -422,7 +422,7 @@ MonoBehaviour:
   baseController: {fileID: 2862569594179929421}
   spriteRenderer: {fileID: 7223378416952209013}
   playerColor: {r: 1, g: 1, b: 1, a: 1}
-  enemyColor: {r: 0, g: 0, b: 0, a: 1}
+  enemyColor: {r: 0.43137258, g: 0.27058825, b: 0.13725491, a: 1}
   neutralColor: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}
   neutralIcon: {fileID: 9202514120790679012}
 --- !u!61 &1080387212103267662

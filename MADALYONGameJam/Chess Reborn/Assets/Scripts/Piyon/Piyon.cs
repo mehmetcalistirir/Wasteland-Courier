@@ -141,13 +141,33 @@ public class Piyon : MonoBehaviour
     }
 
     void BaseGridMovement()
-    {
-        BaseController goal = defendBase != null ? defendBase : targetBase;
-        if (goal == null) return;
+{
+    BaseController goal = defendBase != null ? defendBase : targetBase;
+    if (goal == null) return;
 
-        if (canStep)
-            StartCoroutine(GridStep(goal.transform.position));
+    // 🔥 HEDEFE VARINCA SALDIR veya SAVUN
+    if (Vector2.Distance(transform.position, goal.transform.position) < 0.2f)
+    {
+        if (defendBase != null)
+        {
+            defendBase.unitCount++;
+            Destroy(gameObject);
+            return;
+        }
+
+        if (targetBase != null)
+        {
+            targetBase.ReceiveAttack(1, attackerTeam);
+            Destroy(gameObject);
+            return;
+        }
     }
+
+    // Grid-step ile yürü
+    if (canStep)
+        StartCoroutine(GridStep(goal.transform.position));
+}
+
 
     IEnumerator GridStep(Vector3 hedef)
     {

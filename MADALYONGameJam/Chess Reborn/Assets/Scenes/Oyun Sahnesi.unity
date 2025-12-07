@@ -5966,6 +5966,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1245976308}
   m_CullTransparentMesh: 1
+--- !u!1 &1271107441
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1271107442}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1271107442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1271107441}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 50, y: -30, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1276958145
 GameObject:
   m_ObjectHideFlags: 0
@@ -8001,9 +8032,9 @@ MonoBehaviour:
   powerUpPrefabs:
   - {fileID: 1160818652734762702, guid: 1b49cd3ebdb30834e8f73037719cf80e, type: 3}
   - {fileID: 3777269538912959058, guid: 78443333f3545b74a83e85dfce0ae63b, type: 3}
-  spawnAreaMin: {x: -50, y: -50}
-  spawnAreaMax: {x: 50, y: 50}
-  spawnInterval: 10
+  spawnAreaMin: {x: -50, y: -30}
+  spawnAreaMax: {x: 50, y: 30}
+  spawnInterval: 8
 --- !u!114 &1765772755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9388,18 +9419,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
-      propertyPath: enemyColor.b
-      value: 0.13725491
-      objectReference: {fileID: 0}
-    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
-      propertyPath: enemyColor.g
-      value: 0.27058825
-      objectReference: {fileID: 0}
-    - target: {fileID: 8657346435598693987, guid: bba09e845a312d64db4c2ad45eb10b93, type: 3}
-      propertyPath: enemyColor.r
-      value: 0.43137258
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9429,3 +9448,4 @@ SceneRoots:
   - {fileID: 768876189}
   - {fileID: 1242062476}
   - {fileID: 1642151948}
+  - {fileID: 1271107442}

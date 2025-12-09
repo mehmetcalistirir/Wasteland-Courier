@@ -1,0 +1,1040 @@
+fileFormatVersion: 2
+guid: 0e2cbe4cc14c4504380882e58f09b599
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3338801036398717453
+    second: MiniGun_0
+  - first:
+      213: -2335660830617342041
+    second: MiniGun_1
+  - first:
+      213: 2353152932000380814
+    second: MiniGun_2
+  - first:
+      213: 5750663845658374682
+    second: MiniGun_3
+  - first:
+      213: 2990571703466117894
+    second: MiniGun_4
+  - first:
+      213: -1765318736157243593
+    second: MiniGun_5
+  - first:
+      213: -326556345003893594
+    second: MiniGun_6
+  - first:
+      213: -989526317913202612
+    second: MiniGun_7
+  - first:
+      213: 4969344539910687573
+    second: MiniGun_8
+  - first:
+      213: 5235278808948697936
+    second: MiniGun_9
+  - first:
+      213: -1826421647723999052
+    second: MiniGun_10
+  - first:
+      213: -2962928164732774090
+    second: MiniGun_11
+  - first:
+      213: -6755421436460302742
+    second: MiniGun_12
+  - first:
+      213: 8760054831639076767
+    second: MiniGun_13
+  - first:
+      213: 1171715938474176548
+    second: MiniGun_14
+  - first:
+      213: 5476075229359598618
+    second: MiniGun_15
+  - first:
+      213: -7789289522959918968
+    second: MiniGun_16
+  - first:
+      213: -6342246919955960469
+    second: MiniGun_17
+  - first:
+      213: -4907735497563269999
+    second: MiniGun_18
+  - first:
+      213: 7750758193185105124
+    second: MiniGun_19
+  - first:
+      213: -5528610261132893254
+    second: MiniGun_20
+  - first:
+      213: -4627814599834513816
+    second: MiniGun_21
+  - first:
+      213: 2845652696424312095
+    second: MiniGun_22
+  - first:
+      213: -7336424476356670797
+    second: MiniGun_23
+  - first:
+      213: -497370994047626594
+    second: MiniGun_24
+  - first:
+      213: 2326060081845932381
+    second: MiniGun_25
+  - first:
+      213: -7609461440046914610
+    second: MiniGun_26
+  - first:
+      213: 4215478331996726801
+    second: MiniGun_27
+  - first:
+      213: -3495159197331273723
+    second: MiniGun_28
+  - first:
+      213: -5750484761896689071
+    second: MiniGun_29
+  - first:
+      213: 8370297671262931825
+    second: MiniGun_30
+  - first:
+      213: 1197242529171975211
+    second: MiniGun_31
+  - first:
+      213: 7108881784223146865
+    second: MiniGun_32
+  - first:
+      213: -4914923606247387751
+    second: MiniGun_33
+  - first:
+      213: 1622207097330292399
+    second: MiniGun_34
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 400
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MiniGun_0
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 27
+        width: 39
+        height: 18
+      alignment: 9
+      pivot: {x: 0.20375514, y: 0.61496013}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0a60465addc55e20800000000000000
+      internalID: 3338801036398717453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7af624379d0169fd0800000000000000
+      internalID: -2335660830617342041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_2
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e873d06cf1418a020800000000000000
+      internalID: 2353152932000380814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_3
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a12362f9c467ecf40800000000000000
+      internalID: 5750663845658374682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_4
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60bce6c9e15a08920800000000000000
+      internalID: 2990571703466117894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_5
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 737810866f35087e0800000000000000
+      internalID: -1765318736157243593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_6
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac94e00cb6d77bf0800000000000000
+      internalID: -326556345003893594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_7
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4022ec7e0f7442f0800000000000000
+      internalID: -989526317913202612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_8
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 27
+        width: 42
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55b47e3c788a6f440800000000000000
+      internalID: 4969344539910687573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_9
+      rect:
+        serializedVersion: 2
+        x: 578
+        y: 27
+        width: 44
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05b648bc65277a840800000000000000
+      internalID: 5235278808948697936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_10
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 27
+        width: 55
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b0d35d203f37a6e0800000000000000
+      internalID: -1826421647723999052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_11
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 27
+        width: 43
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6395a1e488091e6d0800000000000000
+      internalID: -2962928164732774090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_12
+      rect:
+        serializedVersion: 2
+        x: 747
+        y: 27
+        width: 71
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6e79bbcefbef32a0800000000000000
+      internalID: -6755421436460302742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_13
+      rect:
+        serializedVersion: 2
+        x: 817
+        y: 27
+        width: 62
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9f9ac4e477f19970800000000000000
+      internalID: 8760054831639076767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_14
+      rect:
+        serializedVersion: 2
+        x: 879
+        y: 24
+        width: 73
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 420ba622075c24010800000000000000
+      internalID: 1171715938474176548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_15
+      rect:
+        serializedVersion: 2
+        x: 953
+        y: 27
+        width: 50
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1c6b49586deefb40800000000000000
+      internalID: 5476075229359598618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_16
+      rect:
+        serializedVersion: 2
+        x: 1003
+        y: 27
+        width: 71
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8885d43c272e6e390800000000000000
+      internalID: -7789289522959918968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_17
+      rect:
+        serializedVersion: 2
+        x: 1073
+        y: 27
+        width: 62
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6da53a6700dbf7a0800000000000000
+      internalID: -6342246919955960469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_18
+      rect:
+        serializedVersion: 2
+        x: 1135
+        y: 24
+        width: 73
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1949a28319834ebb0800000000000000
+      internalID: -4907735497563269999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_19
+      rect:
+        serializedVersion: 2
+        x: 1209
+        y: 27
+        width: 50
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e42fbce289309b60800000000000000
+      internalID: 7750758193185105124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_20
+      rect:
+        serializedVersion: 2
+        x: 1259
+        y: 27
+        width: 71
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab32893624e6643b0800000000000000
+      internalID: -5528610261132893254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_21
+      rect:
+        serializedVersion: 2
+        x: 1329
+        y: 27
+        width: 62
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86e4f720423b6cfb0800000000000000
+      internalID: -4627814599834513816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_22
+      rect:
+        serializedVersion: 2
+        x: 1391
+        y: 24
+        width: 73
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1de08cec0acd7720800000000000000
+      internalID: 2845652696424312095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_23
+      rect:
+        serializedVersion: 2
+        x: 1465
+        y: 27
+        width: 54
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ba874d0fc8cf2a90800000000000000
+      internalID: -7336424476356670797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_24
+      rect:
+        serializedVersion: 2
+        x: 1519
+        y: 24
+        width: 73
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e92553257bbf819f0800000000000000
+      internalID: -497370994047626594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_25
+      rect:
+        serializedVersion: 2
+        x: 1593
+        y: 27
+        width: 51
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5194a80253d74020800000000000000
+      internalID: 2326060081845932381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_26
+      rect:
+        serializedVersion: 2
+        x: 1668
+        y: 27
+        width: 41
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec3a8fd0323c56690800000000000000
+      internalID: -7609461440046914610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_27
+      rect:
+        serializedVersion: 2
+        x: 1732
+        y: 27
+        width: 41
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11665095533608a30800000000000000
+      internalID: 4215478331996726801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_28
+      rect:
+        serializedVersion: 2
+        x: 1796
+        y: 27
+        width: 44
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50841a96a33be7fc0800000000000000
+      internalID: -3495159197331273723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_29
+      rect:
+        serializedVersion: 2
+        x: 1860
+        y: 27
+        width: 39
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 152e9d0939c2230b0800000000000000
+      internalID: -5750484761896689071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_30
+      rect:
+        serializedVersion: 2
+        x: 1897
+        y: 40
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17b08ef5265492470800000000000000
+      internalID: 8370297671262931825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_31
+      rect:
+        serializedVersion: 2
+        x: 1924
+        y: 27
+        width: 40
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2c294dacb57d9010800000000000000
+      internalID: 1197242529171975211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_32
+      rect:
+        serializedVersion: 2
+        x: 1962
+        y: 41
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 173adda7152d7a260800000000000000
+      internalID: 7108881784223146865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_33
+      rect:
+        serializedVersion: 2
+        x: 1988
+        y: 27
+        width: 44
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99d417f350faacbb0800000000000000
+      internalID: -4914923606247387751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MiniGun_34
+      rect:
+        serializedVersion: 2
+        x: 2052
+        y: 27
+        width: 44
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa65d7c92cc338610800000000000000
+      internalID: 1622207097330292399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: fdaa7c99da287314397d698ca2ada66d
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      MiniGun_0: 3338801036398717453
+      MiniGun_1: -2335660830617342041
+      MiniGun_10: -1826421647723999052
+      MiniGun_11: -2962928164732774090
+      MiniGun_12: -6755421436460302742
+      MiniGun_13: 8760054831639076767
+      MiniGun_14: 1171715938474176548
+      MiniGun_15: 5476075229359598618
+      MiniGun_16: -7789289522959918968
+      MiniGun_17: -6342246919955960469
+      MiniGun_18: -4907735497563269999
+      MiniGun_19: 7750758193185105124
+      MiniGun_2: 2353152932000380814
+      MiniGun_20: -5528610261132893254
+      MiniGun_21: -4627814599834513816
+      MiniGun_22: 2845652696424312095
+      MiniGun_23: -7336424476356670797
+      MiniGun_24: -497370994047626594
+      MiniGun_25: 2326060081845932381
+      MiniGun_26: -7609461440046914610
+      MiniGun_27: 4215478331996726801
+      MiniGun_28: -3495159197331273723
+      MiniGun_29: -5750484761896689071
+      MiniGun_3: 5750663845658374682
+      MiniGun_30: 8370297671262931825
+      MiniGun_31: 1197242529171975211
+      MiniGun_32: 7108881784223146865
+      MiniGun_33: -4914923606247387751
+      MiniGun_34: 1622207097330292399
+      MiniGun_4: 2990571703466117894
+      MiniGun_5: -1765318736157243593
+      MiniGun_6: -326556345003893594
+      MiniGun_7: -989526317913202612
+      MiniGun_8: 4969344539910687573
+      MiniGun_9: 5235278808948697936
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

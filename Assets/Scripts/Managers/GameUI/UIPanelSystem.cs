@@ -5,13 +5,10 @@ public class UIPanelSystem : MonoBehaviour
 {
     public static UIPanelSystem Instance;
 
-    [Header("Ana Canvas (Canvas kök)")]
-    public Canvas mainCanvas;
-
-    [Header("Tüm Paneller (Inspector’dan ekle)")]
     public List<GameObject> allPanels;
 
     private GameObject currentPanel;
+    private List<GameObject> hiddenCanvases = new List<GameObject>();
 
     private void Awake()
     {
@@ -20,20 +17,21 @@ public class UIPanelSystem : MonoBehaviour
 
     public bool IsPanelOpen() => currentPanel != null;
 
-    // ------------------ PANEL AÇMA ------------------
+    // ---------------- PANEL AÇMA ----------------
 
     public void OpenPanel(GameObject panel)
     {
-        CloseAllPanels();             // Önce hepsini kapat
-        currentPanel = panel;
+        CloseAllPanels();
 
+        currentPanel = panel;
         panel.SetActive(true);
 
-        HideEverythingExcept(panel);
+        HideAllCanvasExceptPanel(panel);
+
         Time.timeScale = 0f;
     }
 
-    // ------------------ PANEL KAPATMA ------------------
+    // ---------------- PANEL KAPATMA ----------------
 
     public void CloseCurrentPanel()
     {
@@ -43,7 +41,8 @@ public class UIPanelSystem : MonoBehaviour
             currentPanel = null;
         }
 
-        ShowEverything();
+        RestoreHiddenCanvas();
+
         Time.timeScale = 1f;
     }
 
@@ -55,20 +54,28 @@ public class UIPanelSystem : MonoBehaviour
         currentPanel = null;
     }
 
-    // ------------------ TÜM UI’Yİ GİZLE / GÖSTER ------------------
+    // -------------- KAPATMA MANTIĞI ----------------
 
-    private void HideEverythingExcept(GameObject panel)
+    private void HideAllCanvasExceptPanel(GameObject panel)
     {
-        foreach (Transform t in mainCanvas.transform)
+        hiddenCanvases.Clear();
+
+        foreach (Canvas c in FindObjectsOfType<Canvas>())
         {
-            if (t.gameObject != panel)
-                t.gameObject.SetActive(false);
+            if (c.gameObject == panel) 
+                continue;
+
+            // Canvas’ı kapat
+            c.gameObject.SetActive(false);
+            hiddenCanvases.Add(c.gameObject);
         }
     }
 
-    private void ShowEverything()
+    private void RestoreHiddenCanvas()
     {
-        foreach (Transform t in mainCanvas.transform)
-            t.gameObject.SetActive(true);
+        foreach (var go in hiddenCanvases)
+            go.SetActive(true);
+
+        hiddenCanvases.Clear();
     }
 }

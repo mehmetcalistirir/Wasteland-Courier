@@ -24,8 +24,7 @@ public class GameSceneBootstrap : MonoBehaviour
         var pm = PauseMenu.Instance ?? FindObjectOfType<PauseMenu>();
         if (pm != null) pm.ResumeGame();
 
-        // (İsteğe bağlı) Diğer panelleri de kapat
-        if (NPCInteraction.Instance != null)       NPCInteraction.Instance.CloseTradePanel();
+        
 
         // PlayerInput action map'i Gameplay'e zorla (kullanıyorsan)
         foreach (var pi in FindObjectsOfType<PlayerInput>(includeInactive: true))

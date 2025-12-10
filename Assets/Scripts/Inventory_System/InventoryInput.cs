@@ -15,12 +15,25 @@ public class InventoryInput : MonoBehaviour
         controls = new PlayerControls();
     }
 
+
     private void OnEnable()
     {
         controls.Gameplay.Enable();
         controls.Gameplay.Inventory.performed += OnInventoryPressed;
     }
 
+
+    private bool isOpen = false;
+
+    public void Toggle()
+    {
+        // Craft UI açıksa kapat
+        if (craftUI != null && craftUI.craftPanel.activeSelf)
+            craftUI.Close();
+
+        isOpen = !isOpen;
+        inventoryPanel.SetActive(isOpen);
+    }
     private void OnDisable()
     {
         controls.Gameplay.Inventory.performed -= OnInventoryPressed;

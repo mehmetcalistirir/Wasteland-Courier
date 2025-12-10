@@ -11,6 +11,48 @@ public class CraftInput : MonoBehaviour
 
     private PlayerControls controls;
 
+    public void ToggleCraft()
+    {
+        if (caravan != null && !caravan.playerInRange)
+            return;
+
+        bool open = craftUI.craftPanel.activeSelf;
+
+        if (!open)
+        {
+            // Diğer UI'ları kapat
+            if (inventoryPanel != null && inventoryPanel.activeSelf)
+                inventoryPanel.SetActive(false);
+
+            if (caravanWeaponPanel != null && caravanWeaponPanel.activeSelf)
+                caravanWeaponPanel.SetActive(false);
+        }
+
+        if (open)
+            craftUI.Close();
+        else
+            craftUI.Open();
+    }
+
+     public void ToggleCaravanWeapons()
+    {
+        if (caravan == null || !caravan.playerInRange)
+            return;
+
+        bool open = caravanWeaponPanel.activeSelf;
+
+        if (!open)
+        {
+            if (craftUI.craftPanel.activeSelf)
+                craftUI.Close();
+
+            if (inventoryPanel.activeSelf)
+                inventoryPanel.SetActive(false);
+        }
+
+        caravanWeaponPanel.SetActive(!open);
+    }
+
     private void Awake()
     {
         controls = new PlayerControls();

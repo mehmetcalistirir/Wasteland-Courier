@@ -8,8 +8,12 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     [Header("Panels")]
     public GameObject inventoryPanel;
     public GameObject craftPanel;
-    public GameObject tradePanel;      // NPCInteraction bunu açıp kapatıyor
+    public GameObject tradePanel;
     public GameObject pauseMenuPanel;
+
+   
+    [Header("References")]
+    public CaravanInteraction caravan; // Craft için gerekecek
 
     private void Awake()
     {
@@ -31,6 +35,7 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
         TogglePanel(inventoryPanel);
     }
 
+
     // ================================
     // CRAFT (C)
     // ================================
@@ -38,8 +43,16 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     {
         if (!ctx.performed) return;
 
+        // ❗ Craft sadece karavana yakınken açılabilir
+        if (caravan != null && !caravan.playerInRange)
+        {
+            Debug.Log("Craft açılamadı → Karavana yakın olmalısın.");
+            return;
+        }
+
         TogglePanel(craftPanel);
     }
+
 
     // ================================
     // TRADE (E)
@@ -48,25 +61,25 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     {
         if (!ctx.performed) return;
 
-        // Oyuncu NPC yakınında değilse açma
-        if (NPCInteraction.Instance == null || !NPCInteraction.Instance.PlayerIsNear())
-            return;
+        if (NPCInteraction.Instance == null) return;
+        if (!NPCInteraction.Instance.PlayerIsNear()) return;
 
-        // Trade panelini NPCInteraction yönetiyor
         NPCInteraction.Instance.ToggleTradePanel();
     }
 
+
     // ================================
-    // ESCAPE
+    // ESC (PAUSE + PANEL KAPAMA)
     // ================================
     public void OnEscape(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
 
-        // 1) Trade açık ise önce onu kapat
+        // 1) Trade açık → kapat
         if (tradePanel != null && tradePanel.activeSelf)
         {
             tradePanel.SetActive(false);
+            
             return;
         }
 
@@ -74,6 +87,7 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
         if (inventoryPanel != null && inventoryPanel.activeSelf)
         {
             inventoryPanel.SetActive(false);
+            
             return;
         }
 
@@ -81,10 +95,19 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
         if (craftPanel != null && craftPanel.activeSelf)
         {
             craftPanel.SetActive(false);
+            
             return;
         }
 
-        // 4) Pause aç/kapa
+        // 4) Pause açık → kapat
+        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+        {
+            pauseMenuPanel.SetActive(false);
+            Time.timeScale = 0f;
+            return;
+        }
+
+        // 5) Hiç panel yok → pause aç
         TogglePanel(pauseMenuPanel);
     }
 
@@ -96,10 +119,18 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     {
         if (panel == null) return;
 
-        bool next = !panel.activeSelf;
+        bool open = !panel.activeSelf;
 
         CloseAllPanels();
-        panel.SetActive(next);
+        panel.SetActive(open);
+
+        // Pause logic
+        if (panel == pauseMenuPanel)
+        {
+            Time.timeScale = open ? 0f : 1f;
+        }
+
+        
     }
 
     private void CloseAllPanels()
@@ -107,7 +138,15 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
         if (inventoryPanel) inventoryPanel.SetActive(false);
         if (craftPanel) craftPanel.SetActive(false);
         if (tradePanel) tradePanel.SetActive(false);
-        if (pauseMenuPanel) pauseMenuPanel.SetActive(false);
+
+        // HUD geri gelsin
+        
+        // Pause kapandıysa oyun devam etsin
+        if (pauseMenuPanel && pauseMenuPanel.activeSelf)
+        {
+            pauseMenuPanel.SetActive(false);
+            Time.timeScale = 1f;
+        }
     }
 
 

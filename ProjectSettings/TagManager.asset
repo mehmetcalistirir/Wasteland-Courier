@@ -53,5 +53,11 @@ TagManager:
   - name: Shadows
     uniqueID: 2706341657
     locked: 0
+  - name: BackgroundDust
+    uniqueID: 1925618961
+    locked: 0
+  - name: Fog
+    uniqueID: 2637333911
+    locked: 0
   m_RenderingLayers:
   - Default

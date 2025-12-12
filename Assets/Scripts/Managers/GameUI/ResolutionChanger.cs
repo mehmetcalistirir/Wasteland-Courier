@@ -3,7 +3,8 @@ using TMPro;
 
 public class ResolutionChanger : MonoBehaviour
 {
-    public TMP_Dropdown resolutionDropdown;
+    private TMP_Dropdown resolutionDropdown;
+    private int lastIndex = -1;
 
     private readonly Vector2[] resolutions =
     {
@@ -29,25 +30,35 @@ public class ResolutionChanger : MonoBehaviour
         new Vector2(1600,900),
         new Vector2(1680,1050),
         new Vector2(1920,1080),
-        
     };
+
+    private void Awake()
+    {
+        resolutionDropdown = GetComponent<TMP_Dropdown>();
+    }
 
     private void Start()
     {
         int saved = PlayerPrefs.GetInt("ResolutionIndex", 0);
+
+        resolutionDropdown.onValueChanged.RemoveAllListeners();
         resolutionDropdown.value = saved;
+        lastIndex = saved;
+
         resolutionDropdown.onValueChanged.AddListener(SetResolution);
     }
 
     private void SetResolution(int index)
     {
-        Vector2 res = resolutions[index];
+        if (index == lastIndex) return;
+        lastIndex = index;
 
-        PlayerPrefs.SetFloat("ResX", res.x);
-        PlayerPrefs.SetFloat("ResY", res.y);
+        Vector2 res = resolutions[index];
+        Screen.SetResolution((int)res.x, (int)res.y, FullScreenMode.Windowed);
+
         PlayerPrefs.SetInt("ResolutionIndex", index);
         PlayerPrefs.Save();
 
-        CanvasScalerUpdater.UpdateAllCanvasScalers();
+        Debug.Log($"Resolution changed to {res.x}x{res.y}");
     }
 }

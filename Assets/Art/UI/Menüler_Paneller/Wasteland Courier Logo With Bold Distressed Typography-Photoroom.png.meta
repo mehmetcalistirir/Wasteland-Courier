@@ -1,0 +1,572 @@
+fileFormatVersion: 2
+guid: 33ef359fc77170f45ac356090a54fb75
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5330280944124806470
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_0
+  - first:
+      213: -1207162727945749902
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_1
+  - first:
+      213: 2235116568580350147
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_2
+  - first:
+      213: -5607264533514388722
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_3
+  - first:
+      213: -8256270837926388043
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_4
+  - first:
+      213: 8476252484100663689
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_5
+  - first:
+      213: -1417451940110923447
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_6
+  - first:
+      213: -7871308748980050176
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_7
+  - first:
+      213: -5876734287456538690
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_8
+  - first:
+      213: 5011476998406599631
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_9
+  - first:
+      213: 9073864392545372087
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_10
+  - first:
+      213: -2166949348322899939
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_11
+  - first:
+      213: 861451244148407246
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_12
+  - first:
+      213: -1448136658225110917
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_13
+  - first:
+      213: 4733615676439893422
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_14
+  - first:
+      213: 7739926122907382770
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_15
+  - first:
+      213: 1673418516530176711
+    second: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_0
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 457
+        width: 149
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aba386ce8b90706b0800000000000000
+      internalID: -5330280944124806470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_1
+      rect:
+        serializedVersion: 2
+        x: 333
+        y: 457
+        width: 99
+        height: 160
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27ab3be05eb4f3fe0800000000000000
+      internalID: -1207162727945749902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_2
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 455
+        width: 86
+        height: 164
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c062dd4daab40f10800000000000000
+      internalID: 2235116568580350147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_3
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 456
+        width: 86
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0b7a368d9efe22b0800000000000000
+      internalID: -5607264533514388722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_4
+      rect:
+        serializedVersion: 2
+        x: 608
+        y: 457
+        width: 74
+        height: 160
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5be1bff9a65db6d80800000000000000
+      internalID: -8256270837926388043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_5
+      rect:
+        serializedVersion: 2
+        x: 689
+        y: 457
+        width: 73
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 989a755a9b2b1a570800000000000000
+      internalID: 8476252484100663689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_6
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 457
+        width: 99
+        height: 160
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 949008f68f2345ce0800000000000000
+      internalID: -1417451940110923447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_7
+      rect:
+        serializedVersion: 2
+        x: 866
+        y: 457
+        width: 91
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 007ae93956e73c290800000000000000
+      internalID: -7871308748980050176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_8
+      rect:
+        serializedVersion: 2
+        x: 966
+        y: 457
+        width: 90
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebf6bc44d45a17ea0800000000000000
+      internalID: -5876734287456538690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_9
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 237
+        width: 112
+        height: 205
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc3f01237c75c8540800000000000000
+      internalID: 5011476998406599631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_10
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 237
+        width: 113
+        height: 205
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b78bb1f697dced70800000000000000
+      internalID: 9073864392545372087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_11
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 238
+        width: 114
+        height: 202
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1803f67c037de1e0800000000000000
+      internalID: -2166949348322899939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_12
+      rect:
+        serializedVersion: 2
+        x: 582
+        y: 241
+        width: 114
+        height: 199
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecbb8c6a75d74fb00800000000000000
+      internalID: 861451244148407246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_13
+      rect:
+        serializedVersion: 2
+        x: 706
+        y: 242
+        width: 46
+        height: 198
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b706544c16f27ebe0800000000000000
+      internalID: -1448136658225110917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_14
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 241
+        width: 136
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea59b61c06e21b140800000000000000
+      internalID: 4733615676439893422
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_15
+      rect:
+        serializedVersion: 2
+        x: 893
+        y: 233
+        width: 127
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f339a70dcdb96b60800000000000000
+      internalID: 7739926122907382770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wasteland Courier Logo With Bold Distressed Typography-Photoroom_16
+      rect:
+        serializedVersion: 2
+        x: 899
+        y: 258
+        width: 171
+        height: 183
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c2a75e464d293710800000000000000
+      internalID: 1673418516530176711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_0: -5330280944124806470
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_1: -1207162727945749902
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_10: 9073864392545372087
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_11: -2166949348322899939
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_12: 861451244148407246
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_13: -1448136658225110917
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_14: 4733615676439893422
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_15: 7739926122907382770
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_16: 1673418516530176711
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_2: 2235116568580350147
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_3: -5607264533514388722
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_4: -8256270837926388043
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_5: 8476252484100663689
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_6: -1417451940110923447
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_7: -7871308748980050176
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_8: -5876734287456538690
+      Wasteland Courier Logo With Bold Distressed Typography-Photoroom_9: 5011476998406599631
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

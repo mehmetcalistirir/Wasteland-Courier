@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;
 
 public class MainMenu : MonoBehaviour
 {
@@ -14,52 +13,46 @@ public class MainMenu : MonoBehaviour
     public GameObject creditsPanel;
     public GameObject levelPanel;
 
-    private bool isInSettings = false;
-    private bool isInLevels = false;
-    private bool isInCredits = false;
-
-    private void Start()
+    void Start()
     {
-        // 🔥 Oyun sahnesinden gelen MusicManager varsa yok et
+        // Menüde oyun müziği kalmasın
         if (MusicManager.Instance != null)
             Destroy(MusicManager.Instance.gameObject);
 
-        // 🔥 TimeScale sıfır kalmış olabilir. Menüde kesinlikle 1 olsun.
         Time.timeScale = 1f;
 
-        StartCoroutine(PlayMusicWithDelay(0.25f));  
+        PlayMenuMusic();
 
-        // Devam Et butonunu aktif/pasif yap
-        var continueBtn = GameObject.Find("Continue Button")?.GetComponent<UnityEngine.UI.Button>();
-        if (continueBtn != null)
-            continueBtn.interactable = SaveSystem.HasSave();
+        InitContinueButton();
     }
 
-    private System.Collections.IEnumerator PlayMusicWithDelay(float delay)
+    // ---------------- MUSIC ----------------
+
+    void PlayMenuMusic()
     {
-        yield return new WaitForSecondsRealtime(delay);
-
-        if (musicSource != null && menuMusic != null)
+        if (musicSource == null || menuMusic == null)
         {
-            musicSource.clip = menuMusic;
-            musicSource.loop = true;
-            musicSource.volume = 1f;
-
-            // Mixer çıkışını bypass et → test için en temiz yöntem
-            musicSource.outputAudioMixerGroup = null;
-
-            musicSource.Play();
-            Debug.Log("🎵 Ana Menü müziği BAŞLADI!");
+            Debug.LogError("❌ Menü müziği atanmadı!");
+            return;
         }
-        else
-        {
-            Debug.LogError("❌ musicSource veya menuMusic atanmadı!");
-        }
+
+        musicSource.clip = menuMusic;
+        musicSource.loop = true;
+        musicSource.volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        musicSource.outputAudioMixerGroup = null;
+        musicSource.Play();
     }
 
-    // -----------------------------------
-    //           OYUN BAŞLATMA
-    // -----------------------------------
+    // ---------------- BUTTONS ----------------
+
+    void InitContinueButton()
+    {
+        var btn = GameObject.Find("Continue Button")
+            ?.GetComponent<UnityEngine.UI.Button>();
+
+        if (btn != null)
+            btn.interactable = SaveSystem.HasSave();
+    }
 
     public void YeniOyunaBasla()
     {
@@ -70,60 +63,49 @@ public class MainMenu : MonoBehaviour
 
     public void DevamEt()
     {
-        if (!SaveSystem.HasSave())
-            return;
+        if (!SaveSystem.HasSave()) return;
 
         SaveBootstrap.ShouldLoadFromSave = true;
         SceneManager.LoadScene("Bolum1");
-    }
-
-    // -----------------------------------
-    //           PANEL KONTROLÜ
-    // -----------------------------------
-    public void OpenSettings()
-    {
-        mainPanel.SetActive(false);
-        settingsPanel.SetActive(true);
-        isInSettings = true;
-    }
-
-    public void CloseSettings()
-    {
-        settingsPanel.SetActive(false);
-        mainPanel.SetActive(true);
-        isInSettings = false;
-    }
-
-    public void OpenLevels()
-    {
-        mainPanel.SetActive(false);
-        levelPanel.SetActive(true);
-        isInLevels = true;
-    }
-
-    public void CloseLevels()
-    {
-        levelPanel.SetActive(false);
-        mainPanel.SetActive(true);
-        isInLevels = false;
-    }
-
-    public void OpenCredits()
-    {
-        mainPanel.SetActive(false);
-        creditsPanel.SetActive(true);
-        isInCredits = true;
-    }
-
-    public void CloseCredits()
-    {
-        creditsPanel.SetActive(false);
-        mainPanel.SetActive(true);
-        isInCredits = false;
     }
 
     public void QuitGame()
     {
         Application.Quit();
     }
+
+    // ---------------- PANELS ----------------
+
+    public void OpenSettings()
+    {
+        OpenPanel(settingsPanel);
+    }
+
+    public void OpenLevels()
+    {
+        OpenPanel(levelPanel);
+    }
+
+    public void OpenCredits()
+    {
+        OpenPanel(creditsPanel);
+    }
+
+    public void CloseSubPanel(GameObject panel)
+    {
+        panel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
+
+    void OpenPanel(GameObject panel)
+    {
+        mainPanel.SetActive(false);
+        panel.SetActive(true);
+    }
+    public void CloseSettings()
+{
+    settingsPanel.SetActive(false);
+    mainPanel.SetActive(true);
+}
+
 }

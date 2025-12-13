@@ -1,15 +1,18 @@
-// Assets/Scripts/Managers/GameStateManager.cs
+using UnityEngine;
 public static class GameStateManager
 {
-    public static bool IsGamePaused =>
-        PauseMenu.IsPaused ||
-        (UIPanelSystem.Instance != null && UIPanelSystem.Instance.IsPanelOpen());
-    public static bool IsGameOver = false;
+    public static bool IsGamePaused { get; private set; }
+    public static bool IsGameOver { get; set; }
+
+    public static void SetPaused(bool paused)
+    {
+        IsGamePaused = paused;
+        Time.timeScale = paused ? 0f : 1f;
+    }
 
     public static void ResetGameState()
     {
         IsGameOver = false;
+        SetPaused(false);
     }
-
-
 }

@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
 {
+    public static PlayerInputRouter Instance;
+
     private PlayerControls controls;
 
     [Header("Panels")]
@@ -14,9 +16,34 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
    
     [Header("References")]
     public CaravanInteraction caravan; // Craft için gerekecek
+    
+
+
+private void Update()
+{
+    // Craft açıksa ama artık menzilde değilsek → kapat
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        if (caravan == null || !caravan.playerInRange)
+        {
+            craftPanel.SetActive(false);
+            GameStateManager.SetPaused(false);
+        }
+    }
+}
+public void ForceCloseCraft()
+{
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        craftPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+    }
+}
+
 
     private void Awake()
     {
+        Instance = this;
         controls = new PlayerControls();
         controls.Gameplay.SetCallbacks(this);
     }
@@ -40,19 +67,27 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     // CRAFT (C)
     // ================================
     public void OnCraft(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+
+    // ❌ Caravan yoksa veya menzilde değilse → açma
+    if (caravan == null || !caravan.playerInRange)
     {
-        if (!ctx.performed) return;
-
-        // ❗ Craft sadece karavana yakınken açılabilir
-        if (caravan != null && !caravan.playerInRange)
-        {
-            Debug.Log("Craft açılamadı → Karavana yakın olmalısın.");
-            return;
-        }
-
-        TogglePanel(craftPanel);
+        Debug.Log("Craft açılamadı → Caravan menzilinde değilsin.");
+        return;
     }
 
+    TogglePanel(craftPanel);
+}
+
+
+public void SetGameplayInput(bool enabled)
+{
+    if (enabled)
+        controls.Gameplay.Enable();
+    else
+        controls.Gameplay.Disable();
+}
 
     // ================================
     // TRADE (E)
@@ -71,45 +106,29 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     // ================================
     // ESC (PAUSE + PANEL KAPAMA)
     // ================================
-    public void OnEscape(InputAction.CallbackContext ctx)
+ public void OnEscape(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (GameStateManager.IsGameOver) return;
+
+    if (!GameStateManager.IsGamePaused)
     {
-        if (!ctx.performed) return;
-
-        // 1) Trade açık → kapat
-        if (tradePanel != null && tradePanel.activeSelf)
-        {
-            tradePanel.SetActive(false);
-            
-            return;
-        }
-
-        // 2) Inventory kapat
-        if (inventoryPanel != null && inventoryPanel.activeSelf)
-        {
-            inventoryPanel.SetActive(false);
-            
-            return;
-        }
-
-        // 3) Craft kapat
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            
-            return;
-        }
-
-        // 4) Pause açık → kapat
-        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-        {
-            pauseMenuPanel.SetActive(false);
-            Time.timeScale = 0f;
-            return;
-        }
-
-        // 5) Hiç panel yok → pause aç
-        TogglePanel(pauseMenuPanel);
+        // PAUSE AÇ
+        GameStateManager.SetPaused(true);
+        PauseMenu.Instance.ShowPause();
     }
+    else
+    {
+        // PAUSE KAPAT
+        GameStateManager.SetPaused(false);
+        PauseMenu.Instance.HidePause();
+    }
+}
+
+
+
+
+
 
 
     // ================================

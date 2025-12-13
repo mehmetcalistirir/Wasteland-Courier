@@ -9,33 +9,23 @@ public class GameSceneBootstrap : MonoBehaviour
     public CursorLockMode lockMode = CursorLockMode.Confined;
 
     void Awake()
+{
+    Time.timeScale = 1f;
+
+    Cursor.visible   = !hideCursorInGame;
+    Cursor.lockState = lockMode;
+
+    // SADECE input map ayarı (pause state'e dokunmaz)
+    foreach (var pi in FindObjectsOfType<PlayerInput>(includeInactive: true))
     {
-        // Oyun akışı açık olsun
-        Time.timeScale = 1f;
-
-        // Cursor ayarı
-        Cursor.visible   = !hideCursorInGame;
-        Cursor.lockState = lockMode;
-
-        // 🔧 HATA VEREN SATIRI SİL:
-        // PauseMenu.IsPaused = false;
-
-        // ✅ Yerine şunu kullan:
-        var pm = PauseMenu.Instance ?? FindObjectOfType<PauseMenu>();
-        if (pm != null) pm.ResumeGame();
-
-        
-
-        // PlayerInput action map'i Gameplay'e zorla (kullanıyorsan)
-        foreach (var pi in FindObjectsOfType<PlayerInput>(includeInactive: true))
-        {
-            if (pi.actions != null && pi.actions.FindActionMap("Gameplay") != null)
-                pi.SwitchCurrentActionMap("Gameplay");
-        }
-
-        // EventSystem çakışmasını önle
-        var allEventSystems = FindObjectsOfType<EventSystem>();
-        for (int i = 1; i < allEventSystems.Length; i++)
-            Destroy(allEventSystems[i].gameObject);
+        if (pi.actions != null && pi.actions.FindActionMap("Gameplay") != null)
+            pi.SwitchCurrentActionMap("Gameplay");
     }
+
+    // EventSystem temizliği
+    var allEventSystems = FindObjectsOfType<EventSystem>();
+    for (int i = 1; i < allEventSystems.Length; i++)
+        Destroy(allEventSystems[i].gameObject);
+}
+
 }

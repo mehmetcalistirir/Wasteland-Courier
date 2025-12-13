@@ -1,27 +1,34 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class CaravanInteraction : MonoBehaviour
 {
-    [Header("Ayarlar")]
-    public float interactDistance = 2f;
+    public bool playerInRange { get; private set; }
 
-    [Header("Durum")]
-    public bool playerInRange = false;   // CraftInput burayı kontrol edecek
-
-    private Transform player;
-
-    private void Start()
+    private void Awake()
     {
-        player = GameObject.FindWithTag("Player")?.transform;
+        // Güvenlik: collider trigger olmak zorunda
+        var col = GetComponent<Collider2D>();
+        col.isTrigger = true;
     }
 
-    private void Update()
+    private void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.GetComponentInParent<PlayerMovement>() != null)
     {
-        if (player == null) return;
-
-        float dist = Vector2.Distance(player.position, transform.position);
-
-        // Oyuncu karavana yakın mı?
-        playerInRange = dist <= interactDistance;
+        playerInRange = true;
+        Debug.Log("Caravan → Player MENZİLE GİRDİ");
     }
+}
+
+private void OnTriggerExit2D(Collider2D other)
+{
+    if (other.GetComponentInParent<PlayerMovement>() != null)
+    {
+        playerInRange = false;
+        Debug.Log("Caravan → Player MENZİLDEN ÇIKTI");
+        PlayerInputRouter.Instance?.ForceCloseCraft();
+    }
+}
+
 }

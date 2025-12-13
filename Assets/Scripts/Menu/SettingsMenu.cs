@@ -67,7 +67,7 @@ public class SettingsMenu : MonoBehaviour
         panel.SetActive(false);
 
         // Eğer ayarlar menüsü pause menüsünden açıldıysa, geri dön
-        if (PauseMenu.Instance != null && PauseMenu.IsPaused)
+        if (PauseMenu.Instance != null && GameStateManager.IsGamePaused)
         {
             PauseMenu.Instance.CloseSettings();
         }

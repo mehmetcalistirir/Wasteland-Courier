@@ -129,7 +129,7 @@ public class PlayerWeapon : MonoBehaviour
 
     private void Update()
 {
-    if (PauseMenu.IsPaused || weaponData == null || isReloading)
+    if (GameStateManager.IsGamePaused || weaponData == null || isReloading)
         return;
 
     // 🔫 Tekli atış (semi-auto)

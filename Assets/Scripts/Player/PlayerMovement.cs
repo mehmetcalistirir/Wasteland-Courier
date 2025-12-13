@@ -63,6 +63,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
 {
+    if (GameStateManager.IsGamePaused)
+    {
+        rb.linearVelocity = Vector2.zero;
+        return;
+    }
     float currentSpeed = moveSpeed;
     bool isMoving = moveInput.magnitude > 0.1f;
 

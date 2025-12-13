@@ -94,35 +94,10 @@ MonoBehaviour:
   tradeButton: {fileID: -3698824970608379714}
   iconImage: {fileID: 0}
   gap: 1
-  textPosX: 750
+  textPosX: 1475
   textWidth: 1000
   textHeight: 50
-  partSprites:
-  - part: 0
-    sprite: {fileID: -2267804674928059229, guid: 39494afa23058aa42a4b0fa243746885, type: 3}
-  - part: 1
-    sprite: {fileID: -5831313474200163870, guid: e779809b87cd2f8438b4cf82de533e5f, type: 3}
-  - part: 2
-    sprite: {fileID: -4643683588241954007, guid: cac0ff5432852b947adc7b6267c164c3, type: 3}
-  - part: 3
-    sprite: {fileID: 6578920044585285803, guid: 237e62b5ffdcdde44b01d9900a92d960, type: 3}
-  - part: 4
-    sprite: {fileID: -4901058146157018188, guid: d076b048e3265394ba44193d7fef36f3, type: 3}
-  - part: 5
-    sprite: {fileID: 5987873526447811542, guid: 4e6aea3b0d04c8a468e2b011fa5c4c1c, type: 3}
-  resourceSprites:
-  - resource: 4
-    sprite: {fileID: 6379611409930678245, guid: a7fefffc35c010e439b1bd7111bd84b8, type: 3}
-  - resource: 5
-    sprite: {fileID: 8391118260101108325, guid: 2acf16eb47c7d034ea7cf2e443c55495, type: 3}
-  - resource: 9
-    sprite: {fileID: 7197166346137737418, guid: 05c1449a5e92e2541ad47673af16f37f, type: 3}
-  - resource: 3
-    sprite: {fileID: 2061463952765711529, guid: 51d7a088f00869b4f9079428e8bcccb6, type: 3}
-  - resource: 10
-    sprite: {fileID: 7099938498034595887, guid: 8fdc62a739e828a4c961fa8c5a6424b4, type: 3}
   fallbackSprite: {fileID: 0}
-  rowMinHeight: 240
   offerTextSlot: {fileID: 0}
 --- !u!114 &-3698824970608379714
 MonoBehaviour:

@@ -18,6 +18,10 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     public CaravanInteraction caravan; // Craft için gerekecek
     
 
+private bool IsPauseOpen()
+{
+    return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
+}
 
 private void Update()
 {
@@ -58,6 +62,7 @@ public void ForceCloseCraft()
     public void OnInventory(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
+        if (IsPauseOpen()) return;
 
         TogglePanel(inventoryPanel);
     }
@@ -69,6 +74,7 @@ public void ForceCloseCraft()
     public void OnCraft(InputAction.CallbackContext ctx)
 {
     if (!ctx.performed) return;
+    if (IsPauseOpen()) return;
 
     // ❌ Caravan yoksa veya menzilde değilse → açma
     if (caravan == null || !caravan.playerInRange)
@@ -95,6 +101,7 @@ public void SetGameplayInput(bool enabled)
     public void OnInteract(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
+        if (IsPauseOpen()) return;
 
         if (NPCInteraction.Instance == null) return;
         if (!NPCInteraction.Instance.PlayerIsNear()) return;
@@ -111,7 +118,15 @@ public void SetGameplayInput(bool enabled)
     if (!ctx.performed) return;
     if (GameStateManager.IsGameOver) return;
 
-    // 1️⃣ Trade açıksa → kapat
+    // 1️⃣ Pause AÇIKSA → sadece Pause kapansın
+    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+    {
+        PauseMenu.Instance.HidePause();
+        GameStateManager.SetPaused(false);
+        return;
+    }
+
+    // 2️⃣ Trade açıksa → kapat
     if (tradePanel != null && tradePanel.activeSelf)
     {
         tradePanel.SetActive(false);
@@ -119,7 +134,7 @@ public void SetGameplayInput(bool enabled)
         return;
     }
 
-    // 2️⃣ Craft açıksa → kapat
+    // 3️⃣ Craft açıksa → kapat
     if (craftPanel != null && craftPanel.activeSelf)
     {
         craftPanel.SetActive(false);
@@ -127,7 +142,7 @@ public void SetGameplayInput(bool enabled)
         return;
     }
 
-    // 3️⃣ Inventory açıksa → kapat
+    // 4️⃣ Inventory açıksa → kapat
     if (inventoryPanel != null && inventoryPanel.activeSelf)
     {
         inventoryPanel.SetActive(false);
@@ -135,18 +150,12 @@ public void SetGameplayInput(bool enabled)
         return;
     }
 
-    // 4️⃣ Pause açıksa → kapat
-    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-    {
-        GameStateManager.SetPaused(false);
-        PauseMenu.Instance.HidePause();
-        return;
-    }
-
-    // 5️⃣ Hiçbiri açık değil → Pause aç
-    GameStateManager.SetPaused(true);
+    // 5️⃣ Hiçbir panel açık değil → Pause aç
+    CloseAllPanels();                 // 🔒 Güvenlik: başka panel kalmasın
     PauseMenu.Instance.ShowPause();
+    GameStateManager.SetPaused(true);
 }
+
 
 
 

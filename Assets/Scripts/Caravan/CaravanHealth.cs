@@ -17,6 +17,7 @@ public class CaravanHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        Debug.Log("Karavanın canı: " + currentHealth);
         UpdateUI();
 
         if (currentHealth <= 0)

@@ -111,19 +111,43 @@ public void SetGameplayInput(bool enabled)
     if (!ctx.performed) return;
     if (GameStateManager.IsGameOver) return;
 
-    if (!GameStateManager.IsGamePaused)
+    // 1️⃣ Trade açıksa → kapat
+    if (tradePanel != null && tradePanel.activeSelf)
     {
-        // PAUSE AÇ
-        GameStateManager.SetPaused(true);
-        PauseMenu.Instance.ShowPause();
+        tradePanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+        return;
     }
-    else
+
+    // 2️⃣ Craft açıksa → kapat
+    if (craftPanel != null && craftPanel.activeSelf)
     {
-        // PAUSE KAPAT
+        craftPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+        return;
+    }
+
+    // 3️⃣ Inventory açıksa → kapat
+    if (inventoryPanel != null && inventoryPanel.activeSelf)
+    {
+        inventoryPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+        return;
+    }
+
+    // 4️⃣ Pause açıksa → kapat
+    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+    {
         GameStateManager.SetPaused(false);
         PauseMenu.Instance.HidePause();
+        return;
     }
+
+    // 5️⃣ Hiçbiri açık değil → Pause aç
+    GameStateManager.SetPaused(true);
+    PauseMenu.Instance.ShowPause();
 }
+
 
 
 

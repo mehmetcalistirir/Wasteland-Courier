@@ -4,21 +4,23 @@ using TMPro;
 public class DamagePopup : MonoBehaviour
 {
     public TextMeshProUGUI textMesh;
-    private float floatSpeed = 25f;
+
+    private RectTransform rect;
+    private float floatSpeed = 40f;
     private float fadeDuration = 1.2f;
     private float elapsed = 0f;
+
     private Color startColor = Color.red;
+
+    private void Awake()
+    {
+        rect = GetComponent<RectTransform>();
+    }
 
     public void Setup(int damage)
     {
         if (textMesh == null)
             textMesh = GetComponent<TextMeshProUGUI>();
-
-        if (textMesh == null)
-        {
-            Debug.LogError("❌ TextMeshProUGUI bileşeni yok!");
-            return;
-        }
 
         textMesh.text = damage.ToString();
         textMesh.color = startColor;
@@ -26,14 +28,13 @@ public class DamagePopup : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(Vector3.up * floatSpeed * Time.deltaTime);
+        // 🔥 UI UZAYINDA YUKARI KAY
+        rect.anchoredPosition += Vector2.up * floatSpeed * Time.deltaTime;
+
         elapsed += Time.deltaTime;
 
-        if (textMesh != null)
-        {
-            float t = elapsed / fadeDuration;
-            textMesh.color = Color.Lerp(startColor, Color.clear, t);
-        }
+        float t = elapsed / fadeDuration;
+        textMesh.color = Color.Lerp(startColor, Color.clear, t);
 
         if (elapsed >= fadeDuration)
             Destroy(gameObject);

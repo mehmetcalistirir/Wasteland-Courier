@@ -91,6 +91,11 @@ public class MainMenu : MonoBehaviour
         OpenPanel(creditsPanel);
     }
 
+public void CloseCredits()
+    {
+        creditsPanel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
     public void CloseSubPanel(GameObject panel)
     {
         panel.SetActive(false);

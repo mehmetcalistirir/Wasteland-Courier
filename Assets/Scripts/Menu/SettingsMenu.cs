@@ -10,6 +10,10 @@ public class SettingsMenu : MonoBehaviour
     public Slider musicSlider;
     public Slider sfxSlider;
 
+    [Header("Panel")]
+public GameObject panel;
+
+
     [Header("Video")]
     public TMP_Dropdown qualityDropdown;
     public Toggle fullscreenToggle;
@@ -110,6 +114,21 @@ public class SettingsMenu : MonoBehaviour
         int savedIndex = PlayerPrefs.GetInt("ResolutionIndex", currentIndex);
         resolutionDropdown.SetValueWithoutNotify(savedIndex);
         resolutionDropdown.RefreshShownValue();
+    }
+public void OpenPanel()
+    {
+        panel.SetActive(true);
+    }
+
+    public void ClosePanel()
+    {
+        panel.SetActive(false);
+
+        // Eğer ayarlar menüsü pause menüsünden açıldıysa, geri dön
+        if (PauseMenu.Instance != null && GameStateManager.IsGamePaused)
+        {
+            PauseMenu.Instance.CloseSettings();
+        }
     }
 
     void SetResolution(int index)

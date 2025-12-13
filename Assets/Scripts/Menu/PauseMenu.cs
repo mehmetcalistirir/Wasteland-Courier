@@ -17,6 +17,8 @@ public class PauseMenu : MonoBehaviour
     public GameObject pausePanel;
     public GameObject settingsPanel;
 
+
+
     public void ShowPause()
     {
         pausePanel.SetActive(true);
@@ -27,6 +29,7 @@ public class PauseMenu : MonoBehaviour
     {
         pausePanel.SetActive(false);
         settingsPanel.SetActive(false);
+        Time.timeScale = 1f;
     }
 
     public void CloseSettings()

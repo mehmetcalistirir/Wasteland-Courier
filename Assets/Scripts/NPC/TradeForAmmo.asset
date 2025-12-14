@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ee571c4d90443c4f85439d50d1be434, type: 3}
   m_Name: TradeForAmmo
   m_EditorClassIdentifier: 
-  stoneSO: {fileID: 11400000, guid: d1b4eb59deb9eea449a078661fde2354, type: 2}
+  stoneSO: {fileID: 11400000, guid: b2d31cee7f457ea4c93c724e7fe405a2, type: 2}
   requiredStone: 0
-  woodSO: {fileID: 11400000, guid: 241e72043066a074c9d13e406f796c00, type: 2}
+  woodSO: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
   requiredWood: 0
-  scrapSO: {fileID: 11400000, guid: 314077d7c5cd09a48b4fc1a29a338684, type: 2}
+  scrapSO: {fileID: 11400000, guid: f6720403b8cb9e74f926cc9c220a7e48, type: 2}
   requiredScrapMetal: 0
   ammoSO: {fileID: 11400000, guid: 50a3c1bc2fa5bc64e9a373324ae08cbb, type: 2}
   requiredAmmo: 0
@@ -29,7 +29,7 @@ MonoBehaviour:
   herbSO: {fileID: 0}
   requiredHerb: 0
   rewardKind: 0
-  partToGive: 0
+  partToGive: {fileID: 0}
   amountToGive: 1
   rewardItemSO: {fileID: 0}
   rewardAmount: 1

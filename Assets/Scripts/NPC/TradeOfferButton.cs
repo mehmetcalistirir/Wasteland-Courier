@@ -28,11 +28,26 @@ public class TradeOfferButton : MonoBehaviour
 
     void Awake()
     {
-        if (!iconImage && tradeButton)
-            iconImage = tradeButton.GetComponent<Image>();
+        
 
         EnsureOfferText();
     }
+
+    void OnEnable()
+{
+    EnsureOfferText();
+    ForceRebuild();
+}
+
+private void ForceRebuild()
+{
+    Canvas.ForceUpdateCanvases();
+
+    var rt = GetComponent<RectTransform>();
+    if (rt)
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+}
+
 
     private void EnsureOfferText()
     {
@@ -116,32 +131,24 @@ public class TradeOfferButton : MonoBehaviour
 
         var le = offerTextInstance.GetComponent<LayoutElement>();
         if (!le) le = offerTextInstance.gameObject.AddComponent<LayoutElement>();
-        le.ignoreLayout = true;
+        le.ignoreLayout = false;
     }
 
     private void ApplyIconForOffer(TradeOffer offer)
-    {
-        if (!iconImage) return;
+{
+    if (!iconImage) return;
 
-        Sprite s = null;
+    Sprite s = null;
 
-        if (offer.rewardKind == RewardKind.WeaponPart)
-        {
-            if (offer.partToGive != null)
-                s = offer.partToGive.icon;
-        }
-        else if (offer.rewardKind == RewardKind.Resource)
-        {
-            if (offer.rewardItemSO != null)
-                s = offer.rewardItemSO.icon;
-        }
+    if (offer.rewardKind == RewardKind.WeaponPart)
+        s = offer.partToGive?.icon;
+    else if (offer.rewardKind == RewardKind.Resource)
+        s = offer.rewardItemSO?.icon;
 
-        iconImage.sprite = s ? s : fallbackSprite;
-        iconImage.enabled = iconImage.sprite != null;
+    iconImage.sprite = s ? s : fallbackSprite;
+    iconImage.enabled = iconImage.sprite != null;
+}
 
-        if (iconImage.enabled)
-            iconImage.preserveAspect = true;
-    }
 
     private void OnTradeClicked()
     {

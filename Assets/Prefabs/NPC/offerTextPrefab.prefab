@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 490, y: 0}
+  m_AnchoredPosition: {x: 1000, y: 0}
   m_SizeDelta: {x: 1000, y: 50}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &3690413049508104270
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0130stenen: 10 Odun, 5 Ta\u015F, 15 Metal\nVerilen: 1 x TriggerGuard"
+  m_text: "\u0130stenen: 10 Odun, 5 Ta\u015F, 15 Metal\n\nVerilen: 1 x TriggerGuard"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 62941d2a1aa6ccb4a84d96cac0da034c, type: 2}
   m_sharedMaterial: {fileID: 1257540780552356421, guid: 62941d2a1aa6ccb4a84d96cac0da034c, type: 2}
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4284392387
   m_fontColor: {r: 0.7647059, g: 0.6392157, b: 0.36862746, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -93,8 +93,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -131,7 +131,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -3.629303, w: -7.9505997}
+  m_margin: {x: -1125.1791, y: 0, z: 718.98804, w: -1986.5139}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

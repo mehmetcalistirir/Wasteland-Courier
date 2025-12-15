@@ -1,22 +1,9 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Items/Ammo Data")]
+[CreateAssetMenu(menuName = "Items/Ammo Item")]
 public class AmmoItemData : ItemData
 {
     [Header("Ammo Settings")]
-    public string ammoType;          // 9mm, 5.56, 7.62
-    public int ammoAmount = 10;      // Bir kutudan gelen toplam mermi miktarı
+    public AmmoTypeData ammoType;
+    public int ammoAmount;
 }
-
-
-
-
-[CreateAssetMenu(menuName = "Items/Ammo Type")]
-public class AmmoType : ScriptableObject
-{
-    public string ammoId;     // dictionary için benzersiz ID
-    public string ammoName;
-    public Sprite icon;
-}
-
-

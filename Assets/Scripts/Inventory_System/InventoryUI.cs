@@ -9,6 +9,9 @@ public class InventoryUI : MonoBehaviour
 
     [Header("Visual")]
     public int slotCount = 30;
+    public MagazineInstance selectedMagazine;
+    public MagazineLoadPanel magazineLoadPanel;
+
 
     private InventorySlotUI[] slots;
 
@@ -38,7 +41,18 @@ public class InventoryUI : MonoBehaviour
     
 }
 
-
+    public void SelectMagazine(MagazineInstance mag)
+{
+    selectedMagazine = mag;
+    UpdateMagazinePanel();
+}
+void UpdateMagazinePanel()
+{
+    if (selectedMagazine != null)
+        magazineLoadPanel.Show(selectedMagazine);
+    else
+        magazineLoadPanel.Hide();
+}
 
     void OnEnable()
     {

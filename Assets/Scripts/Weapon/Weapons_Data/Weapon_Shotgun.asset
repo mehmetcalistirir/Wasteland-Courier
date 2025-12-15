@@ -36,7 +36,8 @@ MonoBehaviour:
   isSniper: 0
   sniperCooldown: 3
   sniperPenetrationCount: 2
-  ammoType: 9
+  ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
+  acceptedMagazines: 
   isMolotov: 0
   fireEffectPrefab: {fileID: 0}
   explosionRadius: 2.5

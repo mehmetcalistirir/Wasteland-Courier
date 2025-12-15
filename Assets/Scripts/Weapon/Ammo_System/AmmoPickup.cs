@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class AmmoPickup : MonoBehaviour
 {
-    public AmmoType ammoType;
+    public AmmoTypeData ammoType;
     public int amount = 15;
+    public float pickupRange = 1.5f;
 
     private Transform player;
 
@@ -14,12 +15,13 @@ public class AmmoPickup : MonoBehaviour
 
     void Update()
     {
-        if (!player) return;
+        if (!player || ammoType == null || Inventory.Instance == null) return;
 
-        if (Vector3.Distance(player.position, transform.position) < 1.5f)
+        if (Vector3.Distance(player.position, transform.position) <= pickupRange)
         {
-            Inventory.Instance.AddAmmo(ammoType.ammoId, amount);
+            Inventory.Instance.AddAmmo(ammoType, amount);
             Destroy(gameObject);
         }
     }
 }
+

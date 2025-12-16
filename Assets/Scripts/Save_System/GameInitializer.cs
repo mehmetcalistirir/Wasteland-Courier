@@ -26,42 +26,48 @@ public class GameInitializer : MonoBehaviour
     }
 
     private void Start()
-{
-    Debug.Log("GameInitializer: ShouldLoad = " + SaveBootstrap.ShouldLoadFromSave);
-    Debug.Log("GameInitializer: HasSave = " + SaveSystem.HasSave());
-
-    // 1) Save yükleme...
-    if (SaveBootstrap.ShouldLoadFromSave && SaveSystem.HasSave())
     {
-        SaveSystem.LoadPlayerAndInventory(player, inventory, stats);
-        SaveBootstrap.ShouldLoadFromSave = false;
-        return;
+        Debug.Log("GameInitializer: ShouldLoad = " + SaveBootstrap.ShouldLoadFromSave);
+        Debug.Log("GameInitializer: HasSave = " + SaveSystem.HasSave());
+
+        // 1) Save yükleme...
+        if (SaveBootstrap.ShouldLoadFromSave && SaveSystem.HasSave())
+        {
+            SaveSystem.LoadPlayerAndInventory(
+        player,
+        inventory,
+        stats,
+        FindObjectOfType<PlayerWeapon>()
+    );
+
+            SaveBootstrap.ShouldLoadFromSave = false;
+            return;
+        }
+
+        // 2) Yeni oyun → default spawn
+        Vector3 spawnPos = player.position;
+
+        if (defaultSpawnPoint != null)
+            spawnPos = defaultSpawnPoint.position;
+        else if (fallbackSpawnPosition != Vector3.zero)
+            spawnPos = fallbackSpawnPosition;
+
+        player.position = spawnPos;
+
+
+        // 3) BAŞLANGIÇ PİSTOL
+        ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
+        if (pistolItem != null)
+        {
+            WeaponSlotManager.Instance.EquipWeapon(pistolItem);
+            Debug.Log("▶ Yeni oyun → Başlangıç silahı verildi: Pistol");
+        }
+
+
+
+        // Aktif slot pistol olsun
+        WeaponSlotManager.Instance.activeSlotIndex = 0;
     }
-
-    // 2) Yeni oyun → default spawn
-    Vector3 spawnPos = player.position;
-
-    if (defaultSpawnPoint != null)
-        spawnPos = defaultSpawnPoint.position;
-    else if (fallbackSpawnPosition != Vector3.zero)
-        spawnPos = fallbackSpawnPosition;
-
-    player.position = spawnPos;
-
-
-    // 3) BAŞLANGIÇ PİSTOL
-    ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
-    if (pistolItem != null)
-    {
-        WeaponSlotManager.Instance.EquipWeapon(pistolItem);
-        Debug.Log("▶ Yeni oyun → Başlangıç silahı verildi: Pistol");
-    }
-
-
-   
-    // Aktif slot pistol olsun
-    WeaponSlotManager.Instance.activeSlotIndex = 0;
-}
 
 
 }

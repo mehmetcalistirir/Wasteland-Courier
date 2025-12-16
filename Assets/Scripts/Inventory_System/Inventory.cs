@@ -37,6 +37,12 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
     }
 
+
+public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
+{
+    ammoPool = data;
+}
+
     // ---------------- ADD ----------------
     public bool TryAdd(ItemData data, int amount = 1)
 {
@@ -150,6 +156,18 @@ public class Inventory : MonoBehaviour
         if (!string.IsNullOrEmpty(id))
             unlockedBlueprints.Add(id);
     }
+    // Inventory.cs
+public Dictionary<AmmoTypeData, int> GetAmmoPool()
+{
+    return ammoPool;
+}
+
+public void ClearAmmoPool()
+{
+    ammoPool.Clear();
+}
+
+
 
     // Blueprint var mı?
     public bool HasBlueprint(string id)
@@ -186,6 +204,30 @@ public class Inventory : MonoBehaviour
         RaiseChanged();
         return true;
     }
+    public bool TryAddMagazine(MagazineInstance mag)
+{
+    if (mag == null || mag.data == null)
+        return false;
+
+    for (int i = 0; i < slots.Length; i++)
+    {
+        if (slots[i].data == null)
+        {
+            slots[i] = new InventoryItem
+            {
+                data = mag.data,
+                count = 1,
+                magazineInstance = mag
+            };
+
+            RaiseChanged();
+            return true;
+        }
+    }
+
+    Debug.Log("Envanter dolu! Şarjör alınamadı.");
+    return false;
+}
 
     public bool TryMoveOrMerge(int from, int to)
     {

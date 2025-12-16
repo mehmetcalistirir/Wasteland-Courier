@@ -129,6 +129,12 @@ public class InventorySlotUI : MonoBehaviour,
             cached.magazineInstance
         );
     }
+    if (cached.magazineInstance != null)
+{
+    owner.SelectMagazine(cached.magazineInstance);
+    return;
+}
+
 }
 
 

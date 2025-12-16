@@ -138,8 +138,9 @@ public class CraftUIController : MonoBehaviour
         }
 
         WeaponSlotManager.Instance.slots[slotIndex] = weapon;
-        WeaponSlotManager.Instance.clip[slotIndex] = weapon.clipSize;
-        WeaponSlotManager.Instance.reserve[slotIndex] = weapon.maxAmmoCapacity;
+        WeaponSlotManager.Instance.slots[slotIndex] = weapon;
+        WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+
 
         WeaponSlotManager.Instance.SwitchSlot(slotIndex);
     }

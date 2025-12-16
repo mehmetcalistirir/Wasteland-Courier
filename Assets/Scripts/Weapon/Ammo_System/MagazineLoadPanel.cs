@@ -16,12 +16,22 @@ public class MagazineLoadPanel : MonoBehaviour
     private void Awake()
     {
         gameObject.SetActive(false);
+
+        loadSlider.onValueChanged.AddListener(_ =>
+        {
+            RefreshText();
+        });
     }
 
     public void Show(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
             return;
+        if (loadSlider.maxValue <= 0)
+{
+    btnLoad.interactable = false;
+    btnFullLoad.interactable = false;
+}
 
         currentMag = mag;
         gameObject.SetActive(true);
@@ -34,9 +44,12 @@ public class MagazineLoadPanel : MonoBehaviour
 
         int space = mag.data.capacity - mag.currentAmmo;
 
-        loadSlider.minValue = 1;
+        loadSlider.minValue = 0;
         loadSlider.maxValue = Mathf.Min(space, availableAmmo);
         loadSlider.value = loadSlider.maxValue;
+        btnLoad.interactable = loadSlider.maxValue > 0;
+        btnFullLoad.interactable = loadSlider.maxValue > 0;
+
 
         RefreshText();
     }

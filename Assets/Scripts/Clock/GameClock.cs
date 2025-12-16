@@ -34,20 +34,20 @@ public class GameClock : MonoBehaviour
     }
 
     private void Awake()
-{
-if (player == null)
-{
-    player = GameObject.FindWithTag("Player")?.transform;
-    if (player == null) return;
-}
+    {
+        if (player == null)
+        {
+            player = GameObject.FindWithTag("Player")?.transform;
+            if (player == null) return;
+        }
 
-}
+    }
 
-    
-    
+
+
     void Update()
     {
-    
+
 
         // ---- ZAMAN İLERLETME ----
         if (dayNightCycle.IsDay)
@@ -82,8 +82,10 @@ if (player == null)
                 SaveSystem.SavePlayerAndInventory(
     player,
     Inventory.Instance,
-    FindObjectOfType<PlayerStats>()
+    FindObjectOfType<PlayerStats>(),
+    FindObjectOfType<PlayerWeapon>()
 );
+
 
 
                 Debug.Log("🟢 08:00 → Otomatik kayıt alındı!");

@@ -93,8 +93,9 @@ public class CaravanWeaponUI : MonoBehaviour
         // 4) Yeni silahı oyuncuya tak
         WeaponSlotManager.Instance.slots[slotIndex] = selected;
 
-        WeaponSlotManager.Instance.clip[slotIndex] = selected.clipSize;
-        WeaponSlotManager.Instance.reserve[slotIndex] = selected.maxAmmoCapacity;
+        WeaponSlotManager.Instance.slots[slotIndex] = selected;
+        WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+
 
         // 5) Eğer aktif slot ise handler’ı güncelle
         if (WeaponSlotManager.Instance.activeSlotIndex == slotIndex)

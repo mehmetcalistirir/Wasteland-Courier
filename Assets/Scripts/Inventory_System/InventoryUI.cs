@@ -17,6 +17,7 @@ public class InventoryUI : MonoBehaviour
 
     void Awake()
     {
+        
         if (inventory == null)
             inventory = Inventory.Instance;
 

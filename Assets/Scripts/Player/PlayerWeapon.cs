@@ -41,6 +41,15 @@ public class PlayerWeapon : MonoBehaviour
 
     private MagazineInstance lastUsedMagazine;
     private int lastMagIndex = -1;
+    public event System.Action<int, int> OnMagazineChanged;
+    // currentAmmo, capacity
+
+    public event System.Action<int> OnSpareMagazineCountChanged;
+    // yedek şarjör sayısı
+
+    public event System.Action<string> OnAmmoCheckFeedback;
+    // "Az mermi var", "Tam dolu" vs.
+
 
 
     [Header("Audio")]
@@ -142,6 +151,7 @@ public class PlayerWeapon : MonoBehaviour
         }
 
         inv.RaiseChanged();
+        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
     }
 
     private MagazineInstance SelectNextMagazine()
@@ -233,57 +243,56 @@ public class PlayerWeapon : MonoBehaviour
     // SHOOT (NEW INPUT SYSTEM)
     // ============================
 
-    private void HandleShootStart()
-    {
 
-        if (!weaponData.isAutomatic)
+
+private void Update()
+{
+    if (GameStateManager.IsGamePaused || weaponData == null)
+        return;
+
+    // 🔫 Tekli atış
+    if (!weaponData.isAutomatic)
+    {
+        if (Input.GetMouseButtonDown(0))
             Shoot();
     }
 
-
-    private void Update()
+    // 🔥 Otomatik atış
+    if (weaponData.isAutomatic)
     {
-        if (GameStateManager.IsGamePaused || weaponData == null || isReloading || isCheckingMag)
+        if (Input.GetMouseButton(0))
+            AutoFire();
+    }
+
+    // 🔁 R BASILDI
+    if (Input.GetKeyDown(KeyCode.R))
+    {
+        reloadPressTime = Time.time;
+        reloadPressed = true;
+    }
+
+    // 🔁 R BIRAKILDI
+    if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
+    {
+        reloadPressed = false;
+
+        float heldTime = Time.time - reloadPressTime;
+
+        // ⛔ Reload / Check çakışması burada engellenir
+        if (isReloading || isCheckingMag)
             return;
 
-
-        // 🔫 Tekli atış (semi-auto)
-        if (!weaponData.isAutomatic)
+        if (heldTime >= reloadHoldThreshold)
         {
-            if (Input.GetMouseButtonDown(0))
-                Shoot();
+            StartCoroutine(MagCheck());
         }
-
-        // 🔥 Otomatik atış (auto)
-        if (weaponData.isAutomatic)
+        else
         {
-            if (Input.GetMouseButton(0))
-                AutoFire();
-        }
-
-        // R basıldı
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            reloadPressTime = Time.time;
-            reloadPressed = true;
-        }
-
-        // R bırakıldı
-        if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
-        {
-            reloadPressed = false;
-            float heldTime = Time.time - reloadPressTime;
-
-            if (heldTime >= reloadHoldThreshold)
-            {
-                StartCoroutine(MagCheck());
-            }
-            else
-            {
-                TryReload();
-            }
+            TryReload();
         }
     }
+}
+
     public bool TryEquipMagazineFromInventory(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
@@ -317,6 +326,9 @@ public class PlayerWeapon : MonoBehaviour
 
     private void AutoFire()
     {
+        if (isReloading || isCheckingMag)
+    return;
+
         float fireDelay = 1f / weaponData.fireRate;
 
         if (Time.time - lastAutoFireTime >= fireDelay)
@@ -328,15 +340,23 @@ public class PlayerWeapon : MonoBehaviour
 
     private void TryReload()
     {
+        if (isCheckingMag)
+    return;
+
         if (isReloading || isCheckingMag)
             return;
+        if (inventoryMags.Count == 0)
+{
+    ammoCheckUI?.Show("Yedek şarjör yok.");
+    return;
+}
 
         if (currentMagazine == null || currentMagazine.data == null)
         {
             ammoCheckUI?.Show("Şarjör takılı değil.");
             return;
         }
-
+        
         if (!CanEquipMagazine(currentMagazine))
         {
             ammoCheckUI?.Show("Uyumsuz şarjör!");
@@ -359,6 +379,16 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     public void Shoot()
     {
+        if (currentMagazine == null)
+{
+    PlayEmptyClipSound();
+    ammoCheckUI?.Show("Şarjör yok.");
+    return;
+}
+
+        if (isReloading || isCheckingMag)
+    return;
+
         if (currentMagazine == null || currentMagazine.data == null)
         {
             Debug.Log("Şarjör takılı değil.");
@@ -398,11 +428,33 @@ public class PlayerWeapon : MonoBehaviour
             Debug.Log("Şarjör boş.");
             return;
         }
+        if (currentMagazine == null || currentMagazine.currentAmmo <= 0)
+        {
+            PlayEmptyClipSound();
+            Debug.Log("Boş şarjör!");
+            return;
+        }
+
 
         currentMagazine.currentAmmo--;
         RangedAttack();
         lastUsedMagazine = currentMagazine;
+        OnMagazineChanged?.Invoke(
+            currentMagazine.currentAmmo,
+            currentMagazine.data.capacity
+        );
 
+
+
+    }
+    public MagazineInstance GetCurrentMagazine()
+    {
+        return currentMagazine;
+    }
+
+    public void SetCurrentMagazine(MagazineInstance mag)
+    {
+        currentMagazine = mag;
     }
 
     public bool CanEquipMagazine(MagazineInstance mag)
@@ -533,14 +585,18 @@ public class PlayerWeapon : MonoBehaviour
         lastUsedMagazine = currentMagazine;
 
 
-        inventoryMags.Remove(nextMag);
-        currentMagazine = nextMag;
-
         Debug.Log(
             $"Yeni şarjör takıldı → {currentMagazine.currentAmmo}/{currentMagazine.data.capacity}"
         );
 
         isReloading = false;
+        OnMagazineChanged?.Invoke(
+    currentMagazine.currentAmmo,
+    currentMagazine.data.capacity
+);
+
+        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+
     }
 
     private bool IsMagazineCompatible(MagazineInstance mag)
@@ -557,46 +613,69 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     private IEnumerator MagCheck()
     {
-        if (isCheckingMag) yield break;
+        // Zaten kontrol ediliyorsa tekrar girme
+        if (isCheckingMag)
+            yield break;
 
+        // Reload sırasında check yapılamaz
+        if (isReloading)
+            yield break;
+
+        // Şarjör yok
         if (currentMagazine == null || currentMagazine.data == null)
         {
             ammoCheckUI?.Show("Şarjör takılı değil.");
+            OnAmmoCheckFeedback?.Invoke("Şarjör takılı değil.");
             yield break;
         }
 
-        // Uyumluluk (sertleştirilmiş)
+        // Uyumsuz şarjör (sert kontrol)
         if (!CanEquipMagazine(currentMagazine))
         {
             ammoCheckUI?.Show("Uyumsuz şarjör!");
+            OnAmmoCheckFeedback?.Invoke("Uyumsuz şarjör!");
             yield break;
         }
 
         isCheckingMag = true;
 
-        // Ses
+        // 🔊 Ses
         if (ammoCheckSound != null)
             audioSource.PlayOneShot(ammoCheckSound);
 
-        // Anim
+        // 🎞 Animasyon
         if (!string.IsNullOrEmpty(ammoCheckAnimTrigger))
             animator?.SetTrigger(ammoCheckAnimTrigger);
 
+        // ⏱ Gerçekçi kontrol süresi
         yield return new WaitForSeconds(ammoCheckDuration);
 
-        float ratio = (float)currentMagazine.currentAmmo / currentMagazine.data.capacity;
+        // 📊 Doluluk oranı
+        int ammo = currentMagazine.currentAmmo;
+        int cap = currentMagazine.data.capacity;
+
+        float ratio = cap > 0 ? (float)ammo / cap : 0f;
 
         string msg;
-        if (ratio <= 0f) msg = "Boş gibi.";
-        else if (ratio < 0.25f) msg = "Az mermi var.";
-        else if (ratio < 0.6f) msg = "Yarısı dolu.";
-        else if (ratio < 1f) msg = "Neredeyse dolu.";
-        else msg = "Tam dolu.";
 
+        if (ammo <= 0)
+            msg = "Boş gibi.";
+        else if (ratio < 0.25f)
+            msg = "Az mermi var.";
+        else if (ratio < 0.6f)
+            msg = "Yarısı dolu.";
+        else if (ratio < 1f)
+            msg = "Neredeyse dolu.";
+        else
+            msg = "Tam dolu.";
+
+        // 📢 UI + Event
         ammoCheckUI?.Show(msg);
+        OnAmmoCheckFeedback?.Invoke(msg);
 
         isCheckingMag = false;
     }
+
 
 
 
@@ -659,6 +738,10 @@ public class PlayerWeapon : MonoBehaviour
 
     public void SetWeapon(WeaponData data)
     {
+        StopAllCoroutines();
+isReloading = false;
+isCheckingMag = false;
+
         if (data == null)
             return;
 

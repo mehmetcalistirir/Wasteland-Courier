@@ -39,6 +39,9 @@ public class InventoryItemData
 {
     public string itemID;
     public int amount;
+    public bool hasMagazineInstance;
+    public int magazineCurrentAmmo;
+
 }
 
 [System.Serializable]

@@ -14,7 +14,8 @@ public class MagazineInstance
             if (data == null)
             {
                 Debug.LogError("MagazineInstance.data NULL!");
-                return true; // güvenli fallback
+                return data != null && currentAmmo >= data.capacity;
+
             }
 
             return currentAmmo >= data.capacity;

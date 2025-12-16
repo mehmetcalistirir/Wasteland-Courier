@@ -53,12 +53,26 @@ public static class SaveSystem
         {
             if (slot == null || slot.data == null) continue;
 
-            data.inventory.Add(new InventoryItemData
+            InventoryItemData itemData = new InventoryItemData
             {
                 itemID = slot.data.itemID,
                 amount = slot.count
-            });
+            };
+
+            if (slot.magazineInstance != null)
+            {
+                itemData.hasMagazineInstance = true;
+                itemData.magazineCurrentAmmo =
+                    slot.magazineInstance.currentAmmo;
+            }
+            else
+            {
+                itemData.hasMagazineInstance = false;
+            }
+
+            data.inventory.Add(itemData);
         }
+
 
         // Ammo Pool
         data.ammoTypeIDs.Clear();
@@ -162,9 +176,24 @@ public static class SaveSystem
         foreach (var it in data.inventory)
         {
             ItemData so = ItemDatabase.Get(it.itemID);
-            if (so != null)
-                inventory.TryAdd(so, it.amount);
+            if (so == null) continue;
+
+            inventory.TryAdd(so, it.amount);
+
+            // 🔥 Şarjörse, instance’ı düzelt
+            if (it.hasMagazineInstance)
+            {
+                // En son eklenen slotu bul
+                InventoryItem slot = inventory.GetLastAddedSlot();
+
+                if (slot != null && slot.magazineInstance != null)
+                {
+                    slot.magazineInstance.currentAmmo =
+                        it.magazineCurrentAmmo;
+                }
+            }
         }
+
 
         // Ammo pool
         inventory.ClearAmmoPool();
@@ -222,6 +251,7 @@ public static class SaveSystem
         {
             CaravanInventory.Instance.LoadFromData(data.caravanSave);
         }
+
 
         Debug.Log("📥 LOAD → Başarılı");
     }

@@ -2702,6 +2702,15 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
     }
 
+public bool IsMagazineEquipped(MagazineInstance mag)
+{
+    if (mag == null) return false;
+
+    PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
+    if (pw == null) return false;
+
+    return pw.GetCurrentMagazine() == mag;
+}
 
 public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
 {
@@ -2807,6 +2816,84 @@ public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
                 total += s.count;
         return total;
     }
+    public InventoryItem GetLastAddedSlot()
+{
+    for (int i = slots.Length - 1; i >= 0; i--)
+    {
+        if (slots[i] != null && slots[i].data != null)
+            return slots[i];
+    }
+    return null;
+}
+
+public bool UnloadOneFromMagazine(MagazineInstance mag)
+{
+    if (IsMagazineEquipped(mag))
+{
+    Debug.Log("TakÄ±lÄ± ÅŸarjÃ¶r boÅŸaltÄ±lamaz!");
+    return false;
+}
+
+    if (mag == null || mag.data == null)
+        return false;
+
+    if (mag.currentAmmo <= 0)
+        return false;
+
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
+
+    // ğŸ”« ÅarjÃ¶rden Ã§Ä±kar
+    mag.currentAmmo -= 1;
+
+    // ğŸ” AmmoPool'a geri koy
+    AddAmmo(ammoType, 1);
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] ÅarjÃ¶rden 1 mermi Ã§Ä±karÄ±ldÄ± â†’ " +
+        $"{mag.currentAmmo}/{mag.data.capacity}"
+    );
+
+    return true;
+}
+
+public bool UnloadAllFromMagazine(MagazineInstance mag)
+{
+    if (IsMagazineEquipped(mag))
+{
+    Debug.Log("TakÄ±lÄ± ÅŸarjÃ¶r boÅŸaltÄ±lamaz!");
+    return false;
+}
+
+    if (mag == null || mag.data == null)
+        return false;
+
+    int amount = mag.currentAmmo;
+    if (amount <= 0)
+        return false;
+
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
+
+    // ğŸ” AmmoPool'a geri koy
+    AddAmmo(ammoType, amount);
+
+    // ğŸ”« ÅarjÃ¶rÃ¼ boÅŸalt
+    mag.currentAmmo = 0;
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] ÅarjÃ¶r tamamen boÅŸaltÄ±ldÄ± â†’ +{amount} mermi"
+    );
+
+    return true;
+}
+
 
     // Envanterde yeterince var mÄ±?
     public bool HasEnough(ItemData data, int amount)
@@ -3017,7 +3104,6 @@ public void ClearAmmoPool()
     int load = Mathf.Min(needed, available);
     return LoadAmmoIntoMagazine(mag, load);
 }
-
 
 
 
@@ -6455,7 +6541,6 @@ public class PlayerWeapon : MonoBehaviour
     // "Az mermi var", "Tam dolu" vs.
 
 
-
     [Header("Audio")]
     public AudioClip shootSound;
     public AudioClip reloadSound;
@@ -6531,8 +6616,6 @@ public class PlayerWeapon : MonoBehaviour
             {
                 inventoryMags.Add(mag);
 
-                // inventory’den çıkar
-                inv.slots[i] = new InventoryItem();
             }
         }
 
@@ -6711,11 +6794,6 @@ private void Update()
         if (isReloading || isCheckingMag)
             return false;
 
-        // Eski şarjörü geri koy
-        if (currentMagazine != null)
-            inventoryMags.Add(currentMagazine);
-
-        inventoryMags.Remove(mag);
         currentMagazine = mag;
 
         Debug.Log(
@@ -6968,12 +7046,7 @@ private void Update()
 
         yield return new WaitForSeconds(weaponData.reloadTime);
 
-        // Eski şarjörü geri koy (uyumluysa)
-        if (currentMagazine != null)
-        {
-            inventoryMags.Add(currentMagazine);
-            currentMagazine = null;
-        }
+        currentMagazine = null;
 
         MagazineInstance nextMag = SelectNextMagazine();
 
@@ -7642,6 +7715,9 @@ public class InventoryItemData
 {
     public string itemID;
     public int amount;
+    public bool hasMagazineInstance;
+    public int magazineCurrentAmmo;
+
 }
 
 [System.Serializable]
@@ -7712,12 +7788,26 @@ public static class SaveSystem
         {
             if (slot == null || slot.data == null) continue;
 
-            data.inventory.Add(new InventoryItemData
+            InventoryItemData itemData = new InventoryItemData
             {
                 itemID = slot.data.itemID,
                 amount = slot.count
-            });
+            };
+
+            if (slot.magazineInstance != null)
+            {
+                itemData.hasMagazineInstance = true;
+                itemData.magazineCurrentAmmo =
+                    slot.magazineInstance.currentAmmo;
+            }
+            else
+            {
+                itemData.hasMagazineInstance = false;
+            }
+
+            data.inventory.Add(itemData);
         }
+
 
         // Ammo Pool
         data.ammoTypeIDs.Clear();
@@ -7821,9 +7911,24 @@ public static class SaveSystem
         foreach (var it in data.inventory)
         {
             ItemData so = ItemDatabase.Get(it.itemID);
-            if (so != null)
-                inventory.TryAdd(so, it.amount);
+            if (so == null) continue;
+
+            inventory.TryAdd(so, it.amount);
+
+            // ğŸ”¥ ÅarjÃ¶rse, instanceâ€™Ä± dÃ¼zelt
+            if (it.hasMagazineInstance)
+            {
+                // En son eklenen slotu bul
+                InventoryItem slot = inventory.GetLastAddedSlot();
+
+                if (slot != null && slot.magazineInstance != null)
+                {
+                    slot.magazineInstance.currentAmmo =
+                        it.magazineCurrentAmmo;
+                }
+            }
         }
+
 
         // Ammo pool
         inventory.ClearAmmoPool();
@@ -7881,6 +7986,7 @@ public static class SaveSystem
         {
             CaravanInventory.Instance.LoadFromData(data.caravanSave);
         }
+
 
         Debug.Log("ğŸ“¥ LOAD â†’ BaÅŸarÄ±lÄ±");
     }
@@ -8865,8 +8971,6 @@ public class WeaponData : ItemData
     public float fireRate = 2f;
     public int damage;
 
-    public int clipSize;
-    public int maxAmmoCapacity;
     public float reloadTime = 1.5f;
 
     public float attackRange = 1.5f;
@@ -9445,6 +9549,7 @@ public class MagazineData : ItemData
     }
 
 }
+
 using UnityEngine;
 
 
@@ -9461,7 +9566,8 @@ public class MagazineInstance
             if (data == null)
             {
                 Debug.LogError("MagazineInstance.data NULL!");
-                return true; // gÃ¼venli fallback
+                return data != null && currentAmmo >= data.capacity;
+
             }
 
             return currentAmmo >= data.capacity;
@@ -9597,8 +9703,8 @@ public class MagazinePickup : MonoBehaviour
 public enum MagazineType
 {
     None,
-    Glock9mm,
-    MP5_9mm,
+    Pistol9mm,
+    SMG9mm,
     STANAG_556,
     Drum_556,
     ShotgunTube

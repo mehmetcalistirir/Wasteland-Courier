@@ -51,7 +51,6 @@ public class PlayerWeapon : MonoBehaviour
     // "Az mermi var", "Tam dolu" vs.
 
 
-
     [Header("Audio")]
     public AudioClip shootSound;
     public AudioClip reloadSound;
@@ -78,6 +77,9 @@ public class PlayerWeapon : MonoBehaviour
 
     private float reloadPressTime;
     private bool reloadPressed;
+    private Coroutine holdCheckCo;
+    private bool magCheckTriggered;
+
 
 
     private void Awake()
@@ -104,55 +106,45 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     private void CollectMagazinesFromInventory()
+{
+    inventoryMags.Clear();
+    currentMagazine = null;
+
+    var inv = Inventory.Instance;
+    if (inv == null) return;
+
+    for (int i = 0; i < inv.slots.Length; i++)
     {
-        inventoryMags.Clear();
-        currentMagazine = null;
+        var slot = inv.slots[i];
 
-        var inv = Inventory.Instance;
-        if (inv == null) return;
+        if (slot == null || slot.magazineInstance == null)
+            continue;
 
-        for (int i = 0; i < inv.slots.Length; i++)
+        var mag = slot.magazineInstance;
+
+        if (weaponData != null && mag.data != null && mag.data.ammoType == weaponData.ammoType)
         {
-            var slot = inv.slots[i];
-
-            if (slot == null || slot.magazineInstance == null)
-                continue;
-
-            var mag = slot.magazineInstance;
-
-            // 🔒 silaha uygun mu?
-            if (weaponData != null &&
-                mag.data != null &&
-                mag.data.ammoType == weaponData.ammoType)
-            {
-                inventoryMags.Add(mag);
-
-                // inventory’den çıkar
-                inv.slots[i] = new InventoryItem();
-            }
+            inventoryMags.Add(mag);
         }
-
-        // 🔥 otomatik en dolu şarjörü tak
-        if (inventoryMags.Count > 0)
-        {
-            currentMagazine = inventoryMags
-                .OrderByDescending(m => m.currentAmmo)
-                .First();
-
-            inventoryMags.Remove(currentMagazine);
-
-            Debug.Log(
-                $"[Weapon] Şarjör takıldı → {currentMagazine.currentAmmo}/{currentMagazine.data.capacity}"
-            );
-        }
-        else
-        {
-            Debug.Log("[Weapon] Uygun şarjör bulunamadı.");
-        }
-
-        inv.RaiseChanged();
-        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
     }
+
+    if (inventoryMags.Count > 0)
+    {
+        currentMagazine = inventoryMags
+            .OrderByDescending(m => m.currentAmmo)
+            .First();
+
+        inventoryMags.Remove(currentMagazine);
+    }
+    else
+    {
+        Debug.Log("[Weapon] Uygun şarjör bulunamadı.");
+    }
+
+    inv.RaiseChanged();
+    OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+}
+
 
     private MagazineInstance SelectNextMagazine()
     {
@@ -265,34 +257,45 @@ private void Update()
     }
 
     // 🔁 R BASILDI
-    if (Input.GetKeyDown(KeyCode.R))
+if (Input.GetKeyDown(KeyCode.R) && !isCheckingMag && !isReloading)
+{
+    reloadPressed = true;
+    magCheckTriggered = false;
+
+    if (holdCheckCo != null)
+        StopCoroutine(holdCheckCo);
+
+    holdCheckCo = StartCoroutine(HoldMagCheckRoutine());
+}
+
+// 🔁 R BIRAKILDI
+if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
+{
+    reloadPressed = false;
+
+    // Eğer hold ile mag check tetiklenmediyse → reload
+    if (!magCheckTriggered)
     {
-        reloadPressTime = Time.time;
-        reloadPressed = true;
-    }
-
-    // 🔁 R BIRAKILDI
-    if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
-    {
-        reloadPressed = false;
-
-        float heldTime = Time.time - reloadPressTime;
-
-        // ⛔ Reload / Check çakışması burada engellenir
-        if (isReloading || isCheckingMag)
-            return;
-
-        if (heldTime >= reloadHoldThreshold)
-        {
-            StartCoroutine(MagCheck());
-        }
-        else
-        {
-            TryReload();
-        }
+        TryReload();
     }
 }
 
+}
+
+// ============================
+// MAGAZINE CHECK (HOLD R)
+// ============================
+
+private IEnumerator HoldMagCheckRoutine()
+{
+    yield return new WaitForSeconds(reloadHoldThreshold);
+
+    if (reloadPressed && !magCheckTriggered)
+    {
+        magCheckTriggered = true;
+        StartCoroutine(MagCheck());
+    }
+}
     public bool TryEquipMagazineFromInventory(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
@@ -307,11 +310,6 @@ private void Update()
         if (isReloading || isCheckingMag)
             return false;
 
-        // Eski şarjörü geri koy
-        if (currentMagazine != null)
-            inventoryMags.Add(currentMagazine);
-
-        inventoryMags.Remove(mag);
         currentMagazine = mag;
 
         Debug.Log(
@@ -339,38 +337,36 @@ private void Update()
     }
 
     private void TryReload()
-    {
-        if (isCheckingMag)
-    return;
-
-        if (isReloading || isCheckingMag)
-            return;
-        if (inventoryMags.Count == 0)
 {
-    ammoCheckUI?.Show("Yedek şarjör yok.");
-    return;
-}
+    if (isCheckingMag || isReloading)
+        return;
 
-        if (currentMagazine == null || currentMagazine.data == null)
-        {
-            ammoCheckUI?.Show("Şarjör takılı değil.");
-            return;
-        }
-        
-        if (!CanEquipMagazine(currentMagazine))
-        {
-            ammoCheckUI?.Show("Uyumsuz şarjör!");
-            return;
-        }
-
-        if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
-        {
-            ammoCheckUI?.Show("Şarjör zaten dolu.");
-            return;
-        }
-
-        StartCoroutine(ReloadRoutine());
+    if (inventoryMags.Count == 0)
+    {
+        ammoCheckUI?.Show("Yedek şarjör yok.");
+        return;
     }
+
+    if (currentMagazine == null || currentMagazine.data == null)
+    {
+        ammoCheckUI?.Show("Şarjör takılı değil.");
+        return;
+    }
+    
+    if (!CanEquipMagazine(currentMagazine))
+    {
+        ammoCheckUI?.Show("Uyumsuz şarjör!");
+        return;
+    }
+
+    if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
+    {
+        ammoCheckUI?.Show("Şarjör zaten dolu.");
+        return;
+    }
+
+    StartCoroutine(ReloadRoutine());
+}
 
 
 
@@ -564,12 +560,7 @@ private void Update()
 
         yield return new WaitForSeconds(weaponData.reloadTime);
 
-        // Eski şarjörü geri koy (uyumluysa)
-        if (currentMagazine != null)
-        {
-            inventoryMags.Add(currentMagazine);
-            currentMagazine = null;
-        }
+        currentMagazine = null;
 
         MagazineInstance nextMag = SelectNextMagazine();
 
@@ -600,12 +591,18 @@ private void Update()
     }
 
     private bool IsMagazineCompatible(MagazineInstance mag)
-    {
-        if (mag == null || mag.data == null || weaponData == null)
-            return false;
+{
+    if (mag == null || mag.data == null || weaponData == null)
+        return false;
 
-        return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
-    }
+    // acceptedMagazines null veya boş kontrolü
+    if (weaponData.acceptedMagazines == null || weaponData.acceptedMagazines.Count == 0)
+        return false;
+
+    return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
+}
+
+
 
 
     // ============================

@@ -14,8 +14,6 @@ public class WeaponData : ItemData
     public float fireRate = 2f;
     public int damage;
 
-    public int clipSize;
-    public int maxAmmoCapacity;
     public float reloadTime = 1.5f;
 
     public float attackRange = 1.5f;
@@ -31,7 +29,9 @@ public class WeaponData : ItemData
 
     [Header("Ammo & Magazine")]
     public AmmoTypeData ammoType;
-    public List<MagazineType> acceptedMagazines;
+public List<MagazineType> acceptedMagazines = new List<MagazineType>();
+
+
 
 
     public bool isMolotov;

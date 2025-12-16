@@ -4,38 +4,39 @@ using UnityEngine;
 [CustomEditor(typeof(WeaponData))]
 public class WeaponDataEditor : Editor
 {
+    // Core
     SerializedProperty prefab;
     SerializedProperty weaponType;
 
+    // Combat
     SerializedProperty knockbackForce;
     SerializedProperty knockbackDuration;
-
     SerializedProperty isAutomatic;
     SerializedProperty fireRate;
     SerializedProperty damage;
-
-    SerializedProperty clipSize;
-    SerializedProperty maxAmmoCapacity;
     SerializedProperty reloadTime;
-
     SerializedProperty attackRange;
 
+    // Shotgun
     SerializedProperty pelletsPerShot;
     SerializedProperty pelletSpreadAngle;
     SerializedProperty shotgunCooldown;
 
+    // Sniper
     SerializedProperty sniperCooldown;
     SerializedProperty sniperPenetrationCount;
 
+    // Ammo & Magazine
     SerializedProperty ammoType;
+    SerializedProperty acceptedMagazines;
 
+    // Molotov
+    SerializedProperty isMolotov;
     SerializedProperty fireEffectPrefab;
     SerializedProperty explosionRadius;
     SerializedProperty burnDamage;
     SerializedProperty burnDuration;
     SerializedProperty tickInterval;
-
-    SerializedProperty isMolotov;
 
     void OnEnable()
     {
@@ -48,11 +49,7 @@ public class WeaponDataEditor : Editor
         isAutomatic = serializedObject.FindProperty("isAutomatic");
         fireRate = serializedObject.FindProperty("fireRate");
         damage = serializedObject.FindProperty("damage");
-
-        clipSize = serializedObject.FindProperty("clipSize");
-        maxAmmoCapacity = serializedObject.FindProperty("maxAmmoCapacity");
         reloadTime = serializedObject.FindProperty("reloadTime");
-
         attackRange = serializedObject.FindProperty("attackRange");
 
         pelletsPerShot = serializedObject.FindProperty("pelletsPerShot");
@@ -63,70 +60,71 @@ public class WeaponDataEditor : Editor
         sniperPenetrationCount = serializedObject.FindProperty("sniperPenetrationCount");
 
         ammoType = serializedObject.FindProperty("ammoType");
+        acceptedMagazines = serializedObject.FindProperty("acceptedMagazines");
 
+        isMolotov = serializedObject.FindProperty("isMolotov");
         fireEffectPrefab = serializedObject.FindProperty("fireEffectPrefab");
         explosionRadius = serializedObject.FindProperty("explosionRadius");
         burnDamage = serializedObject.FindProperty("burnDamage");
         burnDuration = serializedObject.FindProperty("burnDuration");
         tickInterval = serializedObject.FindProperty("tickInterval");
-
-        isMolotov = serializedObject.FindProperty("isMolotov");
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
+        // ---------------- BASIC ----------------
         EditorGUILayout.PropertyField(prefab);
         EditorGUILayout.PropertyField(weaponType);
 
         WeaponType wt = (WeaponType)weaponType.enumValueIndex;
 
-        EditorGUILayout.Space(5);
-        EditorGUILayout.LabelField("Stats", EditorStyles.boldLabel);
+        EditorGUILayout.Space(6);
+        EditorGUILayout.LabelField("Combat Stats", EditorStyles.boldLabel);
 
         EditorGUILayout.PropertyField(knockbackForce);
         EditorGUILayout.PropertyField(knockbackDuration);
-
         EditorGUILayout.PropertyField(fireRate);
         EditorGUILayout.PropertyField(damage);
-        EditorGUILayout.PropertyField(clipSize);
-        EditorGUILayout.PropertyField(maxAmmoCapacity);
         EditorGUILayout.PropertyField(reloadTime);
         EditorGUILayout.PropertyField(attackRange);
 
-        // ---- Normal / Pistol / Rifle / MG vb. (Shotgun, Sniper, Molotov HARİÇ hepsi) ----
-        if (wt != WeaponType.Shotgun && wt != WeaponType.Sniper && wt != WeaponType.Molotov)
+        // ---------------- AUTOMATIC ----------------
+        if (wt != WeaponType.Shotgun &&
+            wt != WeaponType.Sniper &&
+            wt != WeaponType.Molotov)
         {
             EditorGUILayout.PropertyField(isAutomatic);
         }
 
-        // ---- Shotgun ----
+        // ---------------- SHOTGUN ----------------
         if (wt == WeaponType.Shotgun)
         {
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Shotgun Settings", EditorStyles.boldLabel);
+
             EditorGUILayout.PropertyField(pelletsPerShot);
             EditorGUILayout.PropertyField(pelletSpreadAngle);
             EditorGUILayout.PropertyField(shotgunCooldown);
         }
 
-        // ---- Sniper ----
+        // ---------------- SNIPER ----------------
         if (wt == WeaponType.Sniper)
         {
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Sniper Settings", EditorStyles.boldLabel);
+
             EditorGUILayout.PropertyField(sniperCooldown);
             EditorGUILayout.PropertyField(sniperPenetrationCount);
         }
 
-        // ---- Molotov ----
+        // ---------------- MOLOTOV ----------------
         if (wt == WeaponType.Molotov)
         {
-            // İstersen runtime için bool’u da senkron tut:
             isMolotov.boolValue = true;
 
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Molotov Settings", EditorStyles.boldLabel);
 
             EditorGUILayout.PropertyField(fireEffectPrefab);
@@ -137,12 +135,23 @@ public class WeaponDataEditor : Editor
         }
         else
         {
-            // Diğer tüm silahlarda false
             isMolotov.boolValue = false;
         }
 
-        EditorGUILayout.Space(10);
+        // ---------------- AMMO & MAGAZINE ----------------
+        EditorGUILayout.Space(8);
+        EditorGUILayout.LabelField("Ammo & Magazine", EditorStyles.boldLabel);
+
         EditorGUILayout.PropertyField(ammoType);
+
+        if (acceptedMagazines != null)
+        {
+            EditorGUILayout.PropertyField(
+                acceptedMagazines,
+                new GUIContent("Accepted Magazines"),
+                true
+            );
+        }
 
         serializedObject.ApplyModifiedProperties();
     }

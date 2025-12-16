@@ -16,26 +16,28 @@ public class AmmoCheckUI : MonoBehaviour
     }
 
     public void Show(string msg)
-    {
-        if (co != null) StopCoroutine(co);
-        co = StartCoroutine(ShowRoutine(msg));
-    }
+{
+    if (co != null) StopCoroutine(co);
+    co = StartCoroutine(ShowRoutine(msg));
+}
 
     IEnumerator ShowRoutine(string msg)
-    {
-        text.text = msg;
-        group.alpha = 1f;
-        group.blocksRaycasts = false;
-        group.interactable = false;
+{
+    text.text = msg;
+    group.alpha = 1f;
+    group.blocksRaycasts = false;
+    group.interactable = false;
 
-        yield return new WaitForSeconds(showTime);
+    yield return new WaitForSeconds(showTime);
 
-        HideInstant();
-    }
+    HideInstant();
+}
 
     void HideInstant()
-    {
-        if (group != null) group.alpha = 0f;
-        if (text != null) text.text = "";
-    }
+{
+    if (group != null) 
+        group.alpha = 0f;
+    if (text != null) 
+        text.text = "";
+}
 }

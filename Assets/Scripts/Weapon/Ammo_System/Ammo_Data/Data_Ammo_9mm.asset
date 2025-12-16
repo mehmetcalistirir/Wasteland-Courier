@@ -9,15 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7414632ebfae8d43a363f7cb055aa8a, type: 3}
-  m_Name: Mag_Glock_9mm
-  m_EditorClassIdentifier: Assembly-CSharp::MagazineData
-  itemName: 
-  itemID: 
+  m_Script: {fileID: 11500000, guid: ffe0e5cd070981f46804759725a8c710, type: 3}
+  m_Name: Data_Ammo_9mm
+  m_EditorClassIdentifier: Assembly-CSharp::AmmoItemData
+  itemName: 9mm
+  itemID: 9mm
   icon: {fileID: 0}
-  category: 0
-  stackable: 0
-  maxStack: 1
+  category: 1
+  stackable: 1
+  maxStack: 99
   ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
-  magazineType: 0
-  capacity: 12
+  ammoAmount: 0

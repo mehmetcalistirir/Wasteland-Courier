@@ -37,6 +37,15 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
     }
 
+public bool IsMagazineEquipped(MagazineInstance mag)
+{
+    if (mag == null) return false;
+
+    PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
+    if (pw == null) return false;
+
+    return pw.GetCurrentMagazine() == mag;
+}
 
 public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
 {
@@ -142,6 +151,84 @@ public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
                 total += s.count;
         return total;
     }
+    public InventoryItem GetLastAddedSlot()
+{
+    for (int i = slots.Length - 1; i >= 0; i--)
+    {
+        if (slots[i] != null && slots[i].data != null)
+            return slots[i];
+    }
+    return null;
+}
+
+public bool UnloadOneFromMagazine(MagazineInstance mag)
+{
+    if (IsMagazineEquipped(mag))
+{
+    Debug.Log("Takılı şarjör boşaltılamaz!");
+    return false;
+}
+
+    if (mag == null || mag.data == null)
+        return false;
+
+    if (mag.currentAmmo <= 0)
+        return false;
+
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
+
+    // 🔫 Şarjörden çıkar
+    mag.currentAmmo -= 1;
+
+    // 🔁 AmmoPool'a geri koy
+    AddAmmo(ammoType, 1);
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] Şarjörden 1 mermi çıkarıldı → " +
+        $"{mag.currentAmmo}/{mag.data.capacity}"
+    );
+
+    return true;
+}
+
+public bool UnloadAllFromMagazine(MagazineInstance mag)
+{
+    if (IsMagazineEquipped(mag))
+{
+    Debug.Log("Takılı şarjör boşaltılamaz!");
+    return false;
+}
+
+    if (mag == null || mag.data == null)
+        return false;
+
+    int amount = mag.currentAmmo;
+    if (amount <= 0)
+        return false;
+
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
+
+    // 🔁 AmmoPool'a geri koy
+    AddAmmo(ammoType, amount);
+
+    // 🔫 Şarjörü boşalt
+    mag.currentAmmo = 0;
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] Şarjör tamamen boşaltıldı → +{amount} mermi"
+    );
+
+    return true;
+}
+
 
     // Envanterde yeterince var mı?
     public bool HasEnough(ItemData data, int amount)
@@ -352,7 +439,6 @@ public void ClearAmmoPool()
     int load = Mathf.Min(needed, available);
     return LoadAmmoIntoMagazine(mag, load);
 }
-
 
 
 

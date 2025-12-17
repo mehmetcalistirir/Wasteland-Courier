@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MagazineData
   itemName: GlockSarjor
   itemID: mag_glock_9mm_12
-  icon: {fileID: 0}
+  icon: {fileID: 3910470184942907236, guid: 57209bfc03c33ee4799ad065bc715717, type: 3}
   category: 1
   stackable: 0
   maxStack: 1

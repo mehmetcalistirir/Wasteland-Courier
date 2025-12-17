@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AmmoTypeData
   ammoId: 556mm
   ammoName: 5.56mm
-  icon: {fileID: 0}
+  icon: {fileID: 5699242917808476451, guid: a4e8e966e4cb381468047b282d6dc6ab, type: 3}

@@ -6567,6 +6567,9 @@ public class PlayerWeapon : MonoBehaviour
 
     private float reloadPressTime;
     private bool reloadPressed;
+    private Coroutine holdCheckCo;
+    private bool magCheckTriggered;
+
 
 
     private void Awake()
@@ -6593,53 +6596,45 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     private void CollectMagazinesFromInventory()
+{
+    inventoryMags.Clear();
+    currentMagazine = null;
+
+    var inv = Inventory.Instance;
+    if (inv == null) return;
+
+    for (int i = 0; i < inv.slots.Length; i++)
     {
-        inventoryMags.Clear();
-        currentMagazine = null;
+        var slot = inv.slots[i];
 
-        var inv = Inventory.Instance;
-        if (inv == null) return;
+        if (slot == null || slot.magazineInstance == null)
+            continue;
 
-        for (int i = 0; i < inv.slots.Length; i++)
+        var mag = slot.magazineInstance;
+
+        if (weaponData != null && mag.data != null && mag.data.ammoType == weaponData.ammoType)
         {
-            var slot = inv.slots[i];
-
-            if (slot == null || slot.magazineInstance == null)
-                continue;
-
-            var mag = slot.magazineInstance;
-
-            // 🔒 silaha uygun mu?
-            if (weaponData != null &&
-                mag.data != null &&
-                mag.data.ammoType == weaponData.ammoType)
-            {
-                inventoryMags.Add(mag);
-
-            }
+            inventoryMags.Add(mag);
         }
-
-        // 🔥 otomatik en dolu şarjörü tak
-        if (inventoryMags.Count > 0)
-        {
-            currentMagazine = inventoryMags
-                .OrderByDescending(m => m.currentAmmo)
-                .First();
-
-            inventoryMags.Remove(currentMagazine);
-
-            Debug.Log(
-                $"[Weapon] Şarjör takıldı → {currentMagazine.currentAmmo}/{currentMagazine.data.capacity}"
-            );
-        }
-        else
-        {
-            Debug.Log("[Weapon] Uygun şarjör bulunamadı.");
-        }
-
-        inv.RaiseChanged();
-        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
     }
+
+    if (inventoryMags.Count > 0)
+    {
+        currentMagazine = inventoryMags
+            .OrderByDescending(m => m.currentAmmo)
+            .First();
+
+        inventoryMags.Remove(currentMagazine);
+    }
+    else
+    {
+        Debug.Log("[Weapon] Uygun şarjör bulunamadı.");
+    }
+
+    inv.RaiseChanged();
+    OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+}
+
 
     private MagazineInstance SelectNextMagazine()
     {
@@ -6752,34 +6747,45 @@ private void Update()
     }
 
     // 🔁 R BASILDI
-    if (Input.GetKeyDown(KeyCode.R))
+if (Input.GetKeyDown(KeyCode.R) && !isCheckingMag && !isReloading)
+{
+    reloadPressed = true;
+    magCheckTriggered = false;
+
+    if (holdCheckCo != null)
+        StopCoroutine(holdCheckCo);
+
+    holdCheckCo = StartCoroutine(HoldMagCheckRoutine());
+}
+
+// 🔁 R BIRAKILDI
+if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
+{
+    reloadPressed = false;
+
+    // Eğer hold ile mag check tetiklenmediyse → reload
+    if (!magCheckTriggered)
     {
-        reloadPressTime = Time.time;
-        reloadPressed = true;
-    }
-
-    // 🔁 R BIRAKILDI
-    if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
-    {
-        reloadPressed = false;
-
-        float heldTime = Time.time - reloadPressTime;
-
-        // ⛔ Reload / Check çakışması burada engellenir
-        if (isReloading || isCheckingMag)
-            return;
-
-        if (heldTime >= reloadHoldThreshold)
-        {
-            StartCoroutine(MagCheck());
-        }
-        else
-        {
-            TryReload();
-        }
+        TryReload();
     }
 }
 
+}
+
+// ============================
+// MAGAZINE CHECK (HOLD R)
+// ============================
+
+private IEnumerator HoldMagCheckRoutine()
+{
+    yield return new WaitForSeconds(reloadHoldThreshold);
+
+    if (reloadPressed && !magCheckTriggered)
+    {
+        magCheckTriggered = true;
+        StartCoroutine(MagCheck());
+    }
+}
     public bool TryEquipMagazineFromInventory(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
@@ -6821,38 +6827,36 @@ private void Update()
     }
 
     private void TryReload()
-    {
-        if (isCheckingMag)
-    return;
-
-        if (isReloading || isCheckingMag)
-            return;
-        if (inventoryMags.Count == 0)
 {
-    ammoCheckUI?.Show("Yedek şarjör yok.");
-    return;
-}
+    if (isCheckingMag || isReloading)
+        return;
 
-        if (currentMagazine == null || currentMagazine.data == null)
-        {
-            ammoCheckUI?.Show("Şarjör takılı değil.");
-            return;
-        }
-        
-        if (!CanEquipMagazine(currentMagazine))
-        {
-            ammoCheckUI?.Show("Uyumsuz şarjör!");
-            return;
-        }
-
-        if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
-        {
-            ammoCheckUI?.Show("Şarjör zaten dolu.");
-            return;
-        }
-
-        StartCoroutine(ReloadRoutine());
+    if (inventoryMags.Count == 0)
+    {
+        ammoCheckUI?.Show("Yedek şarjör yok.");
+        return;
     }
+
+    if (currentMagazine == null || currentMagazine.data == null)
+    {
+        ammoCheckUI?.Show("Şarjör takılı değil.");
+        return;
+    }
+    
+    if (!CanEquipMagazine(currentMagazine))
+    {
+        ammoCheckUI?.Show("Uyumsuz şarjör!");
+        return;
+    }
+
+    if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
+    {
+        ammoCheckUI?.Show("Şarjör zaten dolu.");
+        return;
+    }
+
+    StartCoroutine(ReloadRoutine());
+}
 
 
 
@@ -7077,12 +7081,18 @@ private void Update()
     }
 
     private bool IsMagazineCompatible(MagazineInstance mag)
-    {
-        if (mag == null || mag.data == null || weaponData == null)
-            return false;
+{
+    if (mag == null || mag.data == null || weaponData == null)
+        return false;
 
-        return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
-    }
+    // acceptedMagazines null veya boş kontrolü
+    if (weaponData.acceptedMagazines == null || weaponData.acceptedMagazines.Count == 0)
+        return false;
+
+    return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
+}
+
+
 
 
     // ============================
@@ -8986,7 +8996,9 @@ public class WeaponData : ItemData
 
     [Header("Ammo & Magazine")]
     public AmmoTypeData ammoType;
-    public List<MagazineType> acceptedMagazines;
+public List<MagazineType> acceptedMagazines = new List<MagazineType>();
+
+
 
 
     public bool isMolotov;
@@ -9437,28 +9449,30 @@ public class AmmoCheckUI : MonoBehaviour
     }
 
     public void Show(string msg)
-    {
-        if (co != null) StopCoroutine(co);
-        co = StartCoroutine(ShowRoutine(msg));
-    }
+{
+    if (co != null) StopCoroutine(co);
+    co = StartCoroutine(ShowRoutine(msg));
+}
 
     IEnumerator ShowRoutine(string msg)
-    {
-        text.text = msg;
-        group.alpha = 1f;
-        group.blocksRaycasts = false;
-        group.interactable = false;
+{
+    text.text = msg;
+    group.alpha = 1f;
+    group.blocksRaycasts = false;
+    group.interactable = false;
 
-        yield return new WaitForSeconds(showTime);
+    yield return new WaitForSeconds(showTime);
 
-        HideInstant();
-    }
+    HideInstant();
+}
 
     void HideInstant()
-    {
-        if (group != null) group.alpha = 0f;
-        if (text != null) text.text = "";
-    }
+{
+    if (group != null) 
+        group.alpha = 0f;
+    if (text != null) 
+        text.text = "";
+}
 }
 using UnityEngine;
 
@@ -9809,38 +9823,39 @@ using UnityEngine;
 [CustomEditor(typeof(WeaponData))]
 public class WeaponDataEditor : Editor
 {
+    // Core
     SerializedProperty prefab;
     SerializedProperty weaponType;
 
+    // Combat
     SerializedProperty knockbackForce;
     SerializedProperty knockbackDuration;
-
     SerializedProperty isAutomatic;
     SerializedProperty fireRate;
     SerializedProperty damage;
-
-    SerializedProperty clipSize;
-    SerializedProperty maxAmmoCapacity;
     SerializedProperty reloadTime;
-
     SerializedProperty attackRange;
 
+    // Shotgun
     SerializedProperty pelletsPerShot;
     SerializedProperty pelletSpreadAngle;
     SerializedProperty shotgunCooldown;
 
+    // Sniper
     SerializedProperty sniperCooldown;
     SerializedProperty sniperPenetrationCount;
 
+    // Ammo & Magazine
     SerializedProperty ammoType;
+    SerializedProperty acceptedMagazines;
 
+    // Molotov
+    SerializedProperty isMolotov;
     SerializedProperty fireEffectPrefab;
     SerializedProperty explosionRadius;
     SerializedProperty burnDamage;
     SerializedProperty burnDuration;
     SerializedProperty tickInterval;
-
-    SerializedProperty isMolotov;
 
     void OnEnable()
     {
@@ -9853,11 +9868,7 @@ public class WeaponDataEditor : Editor
         isAutomatic = serializedObject.FindProperty("isAutomatic");
         fireRate = serializedObject.FindProperty("fireRate");
         damage = serializedObject.FindProperty("damage");
-
-        clipSize = serializedObject.FindProperty("clipSize");
-        maxAmmoCapacity = serializedObject.FindProperty("maxAmmoCapacity");
         reloadTime = serializedObject.FindProperty("reloadTime");
-
         attackRange = serializedObject.FindProperty("attackRange");
 
         pelletsPerShot = serializedObject.FindProperty("pelletsPerShot");
@@ -9868,70 +9879,71 @@ public class WeaponDataEditor : Editor
         sniperPenetrationCount = serializedObject.FindProperty("sniperPenetrationCount");
 
         ammoType = serializedObject.FindProperty("ammoType");
+        acceptedMagazines = serializedObject.FindProperty("acceptedMagazines");
 
+        isMolotov = serializedObject.FindProperty("isMolotov");
         fireEffectPrefab = serializedObject.FindProperty("fireEffectPrefab");
         explosionRadius = serializedObject.FindProperty("explosionRadius");
         burnDamage = serializedObject.FindProperty("burnDamage");
         burnDuration = serializedObject.FindProperty("burnDuration");
         tickInterval = serializedObject.FindProperty("tickInterval");
-
-        isMolotov = serializedObject.FindProperty("isMolotov");
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
+        // ---------------- BASIC ----------------
         EditorGUILayout.PropertyField(prefab);
         EditorGUILayout.PropertyField(weaponType);
 
         WeaponType wt = (WeaponType)weaponType.enumValueIndex;
 
-        EditorGUILayout.Space(5);
-        EditorGUILayout.LabelField("Stats", EditorStyles.boldLabel);
+        EditorGUILayout.Space(6);
+        EditorGUILayout.LabelField("Combat Stats", EditorStyles.boldLabel);
 
         EditorGUILayout.PropertyField(knockbackForce);
         EditorGUILayout.PropertyField(knockbackDuration);
-
         EditorGUILayout.PropertyField(fireRate);
         EditorGUILayout.PropertyField(damage);
-        EditorGUILayout.PropertyField(clipSize);
-        EditorGUILayout.PropertyField(maxAmmoCapacity);
         EditorGUILayout.PropertyField(reloadTime);
         EditorGUILayout.PropertyField(attackRange);
 
-        // ---- Normal / Pistol / Rifle / MG vb. (Shotgun, Sniper, Molotov HARÄ°Ã‡ hepsi) ----
-        if (wt != WeaponType.Shotgun && wt != WeaponType.Sniper && wt != WeaponType.Molotov)
+        // ---------------- AUTOMATIC ----------------
+        if (wt != WeaponType.Shotgun &&
+            wt != WeaponType.Sniper &&
+            wt != WeaponType.Molotov)
         {
             EditorGUILayout.PropertyField(isAutomatic);
         }
 
-        // ---- Shotgun ----
+        // ---------------- SHOTGUN ----------------
         if (wt == WeaponType.Shotgun)
         {
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Shotgun Settings", EditorStyles.boldLabel);
+
             EditorGUILayout.PropertyField(pelletsPerShot);
             EditorGUILayout.PropertyField(pelletSpreadAngle);
             EditorGUILayout.PropertyField(shotgunCooldown);
         }
 
-        // ---- Sniper ----
+        // ---------------- SNIPER ----------------
         if (wt == WeaponType.Sniper)
         {
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Sniper Settings", EditorStyles.boldLabel);
+
             EditorGUILayout.PropertyField(sniperCooldown);
             EditorGUILayout.PropertyField(sniperPenetrationCount);
         }
 
-        // ---- Molotov ----
+        // ---------------- MOLOTOV ----------------
         if (wt == WeaponType.Molotov)
         {
-            // Ä°stersen runtime iÃ§in boolâ€™u da senkron tut:
             isMolotov.boolValue = true;
 
-            EditorGUILayout.Space(5);
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Molotov Settings", EditorStyles.boldLabel);
 
             EditorGUILayout.PropertyField(fireEffectPrefab);
@@ -9942,12 +9954,23 @@ public class WeaponDataEditor : Editor
         }
         else
         {
-            // DiÄŸer tÃ¼m silahlarda false
             isMolotov.boolValue = false;
         }
 
-        EditorGUILayout.Space(10);
+        // ---------------- AMMO & MAGAZINE ----------------
+        EditorGUILayout.Space(8);
+        EditorGUILayout.LabelField("Ammo & Magazine", EditorStyles.boldLabel);
+
         EditorGUILayout.PropertyField(ammoType);
+
+        if (acceptedMagazines != null)
+        {
+            EditorGUILayout.PropertyField(
+                acceptedMagazines,
+                new GUIContent("Accepted Magazines"),
+                true
+            );
+        }
 
         serializedObject.ApplyModifiedProperties();
     }

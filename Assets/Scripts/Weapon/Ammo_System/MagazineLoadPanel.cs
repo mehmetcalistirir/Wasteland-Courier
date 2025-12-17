@@ -10,6 +10,8 @@ public class MagazineLoadPanel : MonoBehaviour
 
     public Button btnLoad;
     public Button btnFullLoad;
+    public Button btnClose; // 🔥 YENİ
+
 
     private MagazineInstance currentMag;
 
@@ -21,23 +23,32 @@ public class MagazineLoadPanel : MonoBehaviour
         {
             RefreshText();
         });
+
+        if (btnClose != null)
+            btnClose.onClick.AddListener(Hide);
+    }
+
+    private void Update()
+    {
+        // 🔥 ESC ile kapatma
+        if (!gameObject.activeSelf)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Hide();
+        }
     }
 
     public void Show(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
             return;
-        if (loadSlider.maxValue <= 0)
-{
-    btnLoad.interactable = false;
-    btnFullLoad.interactable = false;
-}
 
         currentMag = mag;
         gameObject.SetActive(true);
 
         titleText.text = mag.data.itemName;
-
 
         int availableAmmo =
             Inventory.Instance.GetAmmoAmount(mag.data.ammoType);
@@ -47,12 +58,14 @@ public class MagazineLoadPanel : MonoBehaviour
         loadSlider.minValue = 0;
         loadSlider.maxValue = Mathf.Min(space, availableAmmo);
         loadSlider.value = loadSlider.maxValue;
-        btnLoad.interactable = loadSlider.maxValue > 0;
-        btnFullLoad.interactable = loadSlider.maxValue > 0;
 
+        bool canLoad = loadSlider.maxValue > 0;
+        btnLoad.interactable = canLoad;
+        btnFullLoad.interactable = canLoad;
 
         RefreshText();
     }
+
 
     public void Hide()
     {

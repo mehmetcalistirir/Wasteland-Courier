@@ -18,6 +18,7 @@ public class WeaponSlotManager : MonoBehaviour
 
     [Header("Equipped Weapons (WeaponData)")]
     public WeaponData[] slots = new WeaponData[3];
+    public PlayerWeapon ActiveWeapon { get; private set; }
 
 
     [Header("Active Slot")]
@@ -31,7 +32,6 @@ public class WeaponSlotManager : MonoBehaviour
         Instance = this;
 
     }
-
 
 
     // -------------------------------
@@ -111,38 +111,41 @@ public class WeaponSlotManager : MonoBehaviour
     // PlayerWeapon'a silahı aktar
     // -------------------------------
     private void ApplyToHandler(int slot)
-{
-    // Tüm handler’ları kapat
-    pistolHandler.gameObject.SetActive(false);
-    rifleHandler.gameObject.SetActive(false);
-    meleeHandler.gameObject.SetActive(false);
-
-    // Yeni handler
-    PlayerWeapon handler = GetHandler(slot);
-    if (handler == null)
     {
-        Debug.LogError("Handler bulunamadı! Slot: " + slot);
-        return;
+        // Tüm handler’ları kapat
+        pistolHandler.gameObject.SetActive(false);
+        rifleHandler.gameObject.SetActive(false);
+        meleeHandler.gameObject.SetActive(false);
+
+        // Yeni handler
+        PlayerWeapon handler = GetHandler(slot);
+        if (handler == null)
+        {
+            Debug.LogError("Handler bulunamadı! Slot: " + slot);
+            return;
+        }
+
+        // Handler’ı aktif et
+        handler.gameObject.SetActive(true);
+
+        // Silahı yükle
+        WeaponData weapon = slots[slot];
+        if (weapon != null)
+        {
+            handler.SetWeapon(weapon);
+
+            Debug.Log("Handler açıldı ve silah verildi: " + weapon.name);
+        }
+        else
+        {
+            Debug.LogWarning("Slot boş ama handler aktif edildi: " + slot);
+        }
     }
 
-    // Handler’ı aktif et
-    handler.gameObject.SetActive(true);
-
-    // Silahı yükle
-    WeaponData weapon = slots[slot];
-    if (weapon != null)
+    public void SetActiveWeapon(PlayerWeapon weapon)
     {
-        handler.SetWeapon(weapon);
-
-        Debug.Log("Handler açıldı ve silah verildi: " + weapon.name);
+        ActiveWeapon = weapon;
     }
-    else
-    {
-        Debug.LogWarning("Slot boş ama handler aktif edildi: " + slot);
-    }
-}
-
-
 
     private PlayerWeapon GetHandler(int slot)
     {
@@ -179,75 +182,81 @@ public class WeaponSlotManager : MonoBehaviour
     }
 
     public void EquipCraftedWeapon(WeaponData newWeapon)
-{
-    int slot = (int)GetSlotForWeapon(newWeapon);
-
-    Debug.Log($"[EquipCraftedWeapon] Yeni silah: {newWeapon.itemName}, Slot: {slot}");
-
-    // 1) Eski silahı karavana gönder
-    WeaponData oldWeapon = slots[slot];
-    if (oldWeapon != null)
     {
-        CaravanInventory.Instance.StoreWeapon(oldWeapon);
-        Debug.Log("Eski silah karavana gönderildi: " + oldWeapon.itemName);
-    }
+        int slot = (int)GetSlotForWeapon(newWeapon);
 
-    // 2) Yeni silah slota ekle
-    slots[slot] = newWeapon;
+        Debug.Log($"[EquipCraftedWeapon] Yeni silah: {newWeapon.itemName}, Slot: {slot}");
 
-    // 4) Eğer aktif slot buysa hemen güncelle
-    if (activeSlotIndex == slot)
-    {
-        ApplyToHandler(slot);
-    }
-    else
-    {
-        // Craft edilen silaha otomatik geçmek istiyorsan:
-        activeSlotIndex = slot;
-        ApplyToHandler(slot);
-    }
-
-    Debug.Log("Yeni silah oyuncuya takıldı: " + newWeapon.itemName);
-}
-
-// ----------------------------------------------------
-//  SAVE
-// ----------------------------------------------------
-public WeaponSlotSaveData GetSaveData()
-{
-    WeaponSlotSaveData data = new WeaponSlotSaveData();
-
-    for (int i = 0; i < 3; i++)
-    {
-        if (slots[i] != null)
-            data.equippedWeaponIDs[i] = slots[i].itemID;
-        else
-            data.equippedWeaponIDs[i] = "";
-
-    }
-
-    data.activeSlotIndex = activeSlotIndex;
-
-    return data;
-}
-
-
-// ----------------------------------------------------
-//  LOAD
-// ----------------------------------------------------
-public void LoadData(WeaponSlotSaveData data)
-{
-    for (int i = 0; i < 3; i++)
-    {
-        string id = data.equippedWeaponIDs[i];
-
-        if (!string.IsNullOrEmpty(id))
+        // 1) Eski silahı karavana gönder
+        WeaponData oldWeapon = slots[slot];
+        if (oldWeapon != null)
         {
-            ItemData item = ItemDatabase.Get(id);
-            if (item is WeaponItemData wid)
-            {
-                slots[i] = wid.weaponData;
+            CaravanInventory.Instance.StoreWeapon(oldWeapon);
+            Debug.Log("Eski silah karavana gönderildi: " + oldWeapon.itemName);
+        }
 
+        // 2) Yeni silah slota ekle
+        slots[slot] = newWeapon;
+
+        // 4) Eğer aktif slot buysa hemen güncelle
+        if (activeSlotIndex == slot)
+        {
+            ApplyToHandler(slot);
+        }
+        else
+        {
+            // Craft edilen silaha otomatik geçmek istiyorsan:
+            activeSlotIndex = slot;
+            ApplyToHandler(slot);
+        }
+
+        Debug.Log("Yeni silah oyuncuya takıldı: " + newWeapon.itemName);
+    }
+
+    // ----------------------------------------------------
+    //  SAVE
+    // ----------------------------------------------------
+    public WeaponSlotSaveData GetSaveData()
+    {
+        WeaponSlotSaveData data = new WeaponSlotSaveData();
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (slots[i] != null)
+                data.equippedWeaponIDs[i] = slots[i].itemID;
+            else
+                data.equippedWeaponIDs[i] = "";
+
+        }
+
+        data.activeSlotIndex = activeSlotIndex;
+
+        return data;
+    }
+
+
+    // ----------------------------------------------------
+    //  LOAD
+    // ----------------------------------------------------
+    public void LoadData(WeaponSlotSaveData data)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            string id = data.equippedWeaponIDs[i];
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                ItemData item = ItemDatabase.Get(id);
+                if (item is WeaponItemData wid)
+                {
+                    slots[i] = wid.weaponData;
+
+                }
+                else
+                {
+                    slots[i] = null;
+
+                }
             }
             else
             {
@@ -255,18 +264,12 @@ public void LoadData(WeaponSlotSaveData data)
 
             }
         }
-        else
-        {
-            slots[i] = null;
 
-        }
+        activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
+
+        // handler'ı güncelle
+        SwitchSlot(activeSlotIndex);
     }
-
-    activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
-
-    // handler'ı güncelle
-    SwitchSlot(activeSlotIndex);
-}
 
 
 

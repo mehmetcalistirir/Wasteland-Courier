@@ -1,73 +1,140 @@
-using UnityEngine;
+using System.Linq;
 using TMPro;
+using UnityEngine;
 
 public class WeaponHUD : MonoBehaviour
 {
     [Header("Texts")]
-    public TMP_Text magazineText;   // 12 / 30
-    public TMP_Text spareMagText;   // x3
-    public TMP_Text ammoPoolText;   // 90
+    public TMP_Text magazineText;   // "8 / 12" gibi
+    public TMP_Text spareMagText;   // İstersen "x3" gösterebiliriz (opsiyonel)
 
-    private PlayerWeapon playerWeapon;
+    private PlayerWeapon pw;
+    private Inventory inv;
 
-    void Start()
+    private void Awake()
     {
-        playerWeapon = FindObjectOfType<PlayerWeapon>();
+        inv = Inventory.Instance;
     }
 
+    private void OnEnable()
+    {
+            inv = Inventory.Instance;
+
+    var sm = WeaponSlotManager.Instance;
+    if (sm != null)
+        pw = sm.ActiveWeapon;
+
+    BindEvents();
+    RefreshAll();
+
+        // Weapon eventleri
+        if (pw != null)
+        {
+            pw.OnMagazineChanged += OnWeaponAmmoChanged;
+            pw.OnSpareMagazineCountChanged += OnSpareMagCountChanged;
+        }
+
+        // Inventory event
+        if (inv != null)
+            inv.OnChanged += RefreshAll;
+
+        RefreshAll();
+    }
+
+    private void OnDisable()
+    {
+        if (pw != null)
+        {
+            pw.OnMagazineChanged -= OnWeaponAmmoChanged;
+            pw.OnSpareMagazineCountChanged -= OnSpareMagCountChanged;
+        }
+
+        if (inv != null)
+            inv.OnChanged -= RefreshAll;
+    }
+
+    private void OnWeaponAmmoChanged(int current, int capacity)
+    {
+        // current değişince ikisini de yeniden hesaplamak daha güvenli
+        RefreshAll();
+    }
+    void BindEvents()
+{
+    if (pw == null) return;
+
+    pw.OnMagazineChanged += OnWeaponAmmoChanged;
+    pw.OnSpareMagazineCountChanged += OnSpareMagCountChanged;
+
+    if (inv != null)
+        inv.OnChanged += RefreshAll;
+}
+
+    private void OnSpareMagCountChanged(int count)
+    {
+        // Sadece count yazmak istersen:
+        if (spareMagText != null)
+            spareMagText.text = $"x{count}";
+
+        // Ama esas değerler yine güncellensin:
+        RefreshAll();
+    }
     void Update()
-    {
-        if (playerWeapon == null)
-            return;
+{
+    var sm = WeaponSlotManager.Instance;
+    if (sm == null) return;
 
-        UpdateMagazine();
-        UpdateSpareMags();
-        UpdateAmmoPool();
+    if (pw != sm.ActiveWeapon)
+    {
+        UnbindEvents();
+        pw = sm.ActiveWeapon;
+        BindEvents();
+        RefreshAll();
     }
+}
 
-    void UpdateMagazine()
+void UnbindEvents()
+{
+    if (pw == null) return;
+
+    pw.OnMagazineChanged -= OnWeaponAmmoChanged;
+    pw.OnSpareMagazineCountChanged -= OnSpareMagCountChanged;
+
+    if (inv != null)
+        inv.OnChanged -= RefreshAll;
+}
+
+    private void RefreshAll()
     {
-        var mag = playerWeapon.currentMagazine;
-
-        if (mag == null || mag.data == null)
+        if (pw == null || pw.weaponData == null)
         {
-            magazineText.text = "-- / --";
+            if (magazineText != null) magazineText.text = "-- / --";
+            if (spareMagText != null) spareMagText.text = "x0";
             return;
         }
 
-        magazineText.text =
-            $"{mag.currentAmmo} / {mag.data.capacity}";
-    }
+        // 1) Takılı mermi
+        int equippedAmmo = 0;
+        if (pw.currentMagazine != null && pw.currentMagazine.data != null)
+            equippedAmmo = pw.currentMagazine.currentAmmo;
 
-    void UpdateSpareMags()
-    {
-        if (playerWeapon.weaponData == null)
+        // 2) Envanterdeki diğer uyumlu şarjörlerdeki toplam mermi
+        int inventoryAmmo = 0;
+
+        // ÖNEMLİ: List güncel değilse önce refresh
+        pw.CollectMagazinesFromInventory();
+
+        // pw.inventoryMags zaten “uyumlu şarjörler” listesi (takılı olan çıkarılmış olmalı)
+        for (int i = 0; i < pw.inventoryMags.Count; i++)
         {
-            spareMagText.text = "x0";
-            return;
+            var m = pw.inventoryMags[i];
+            if (m == null || m.data == null) continue;
+            inventoryAmmo += m.currentAmmo;
         }
 
-        int count = playerWeapon.inventoryMags.FindAll(m =>
-            m != null &&
-            m.data != null &&
-            m.data.ammoType == playerWeapon.weaponData.ammoType
-        ).Count;
+        if (magazineText != null)
+            magazineText.text = $"{equippedAmmo} / {inventoryAmmo}";
 
-        spareMagText.text = $"x{count}";
-    }
-
-    void UpdateAmmoPool()
-    {
-        if (playerWeapon.weaponData == null)
-        {
-            ammoPoolText.text = "0";
-            return;
-        }
-
-        int ammo = Inventory.Instance.GetAmmoAmount(
-            playerWeapon.weaponData.ammoType
-        );
-
-        ammoPoolText.text = ammo.ToString();
+        if (spareMagText != null)
+            spareMagText.text = $"x{pw.inventoryMags.Count}";
     }
 }

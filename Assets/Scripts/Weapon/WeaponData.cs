@@ -26,10 +26,12 @@ public class WeaponData : ItemData
     public bool isSniper = false;
     public float sniperCooldown = 3.0f;
     public int sniperPenetrationCount = 2;
+    [Header("Projectile")]
+    public GameObject projectilePrefab;
 
     [Header("Ammo & Magazine")]
     public AmmoTypeData ammoType;
-public List<MagazineType> acceptedMagazines = new List<MagazineType>();
+    public List<MagazineType> acceptedMagazines = new List<MagazineType>();
 
 
 

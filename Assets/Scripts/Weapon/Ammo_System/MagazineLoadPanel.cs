@@ -11,6 +11,8 @@ public class MagazineLoadPanel : MonoBehaviour
     public Button btnLoad;
     public Button btnFullLoad;
     public Button btnClose; // 🔥 YENİ
+    private PlayerWeapon playerWeapon;
+
 
 
     private MagazineInstance currentMag;
@@ -46,6 +48,12 @@ public class MagazineLoadPanel : MonoBehaviour
             return;
 
         currentMag = mag;
+        currentMag = mag;
+
+        var sm = WeaponSlotManager.Instance;
+        if (sm != null)
+            playerWeapon = sm.ActiveWeapon;
+
         gameObject.SetActive(true);
 
         titleText.text = mag.data.itemName;
@@ -83,22 +91,26 @@ public class MagazineLoadPanel : MonoBehaviour
     }
 
     public void OnLoadPressed()
-    {
-        if (currentMag == null) return;
+{
+    if (currentMag == null) return;
 
-        Inventory.Instance.LoadAmmoIntoMagazine(
-            currentMag,
-            (int)loadSlider.value
-        );
+    Inventory.Instance.LoadAmmoIntoMagazine(
+        currentMag,
+        (int)loadSlider.value
+    );
 
-        Show(currentMag); // refresh
-    }
+    playerWeapon?.NotifyMagazineAmmoChanged();
+    Show(currentMag);
+}
 
     public void OnFullLoadPressed()
-    {
-        if (currentMag == null) return;
+{
+    if (currentMag == null) return;
 
-        Inventory.Instance.FullLoadMagazine(currentMag);
-        Show(currentMag);
-    }
+    Inventory.Instance.FullLoadMagazine(currentMag);
+
+    playerWeapon?.NotifyMagazineAmmoChanged();
+    Show(currentMag);
+}
+
 }

@@ -7,6 +7,8 @@ public class WeaponDataEditor : Editor
     // Core
     SerializedProperty prefab;
     SerializedProperty weaponType;
+    // Projectile
+    SerializedProperty projectilePrefab;
 
     // Combat
     SerializedProperty knockbackForce;
@@ -42,6 +44,8 @@ public class WeaponDataEditor : Editor
     {
         prefab = serializedObject.FindProperty("prefab");
         weaponType = serializedObject.FindProperty("weaponType");
+        projectilePrefab = serializedObject.FindProperty("projectilePrefab");
+
 
         knockbackForce = serializedObject.FindProperty("knockbackForce");
         knockbackDuration = serializedObject.FindProperty("knockbackDuration");
@@ -89,6 +93,8 @@ public class WeaponDataEditor : Editor
         EditorGUILayout.PropertyField(damage);
         EditorGUILayout.PropertyField(reloadTime);
         EditorGUILayout.PropertyField(attackRange);
+        EditorGUILayout.PropertyField(projectilePrefab);
+
 
         // ---------------- AUTOMATIC ----------------
         if (wt != WeaponType.Shotgun &&

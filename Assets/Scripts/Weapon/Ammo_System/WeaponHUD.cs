@@ -104,37 +104,28 @@ void UnbindEvents()
 }
 
     private void RefreshAll()
+{
+    if (pw == null || pw.weaponData == null)
     {
-        if (pw == null || pw.weaponData == null)
-        {
-            if (magazineText != null) magazineText.text = "-- / --";
-            if (spareMagText != null) spareMagText.text = "x0";
-            return;
-        }
-
-        // 1) Takılı mermi
-        int equippedAmmo = 0;
-        if (pw.currentMagazine != null && pw.currentMagazine.data != null)
-            equippedAmmo = pw.currentMagazine.currentAmmo;
-
-        // 2) Envanterdeki diğer uyumlu şarjörlerdeki toplam mermi
-        int inventoryAmmo = 0;
-
-        // ÖNEMLİ: List güncel değilse önce refresh
-        pw.CollectMagazinesFromInventory();
-
-        // pw.inventoryMags zaten “uyumlu şarjörler” listesi (takılı olan çıkarılmış olmalı)
-        for (int i = 0; i < pw.inventoryMags.Count; i++)
-        {
-            var m = pw.inventoryMags[i];
-            if (m == null || m.data == null) continue;
-            inventoryAmmo += m.currentAmmo;
-        }
-
-        if (magazineText != null)
-            magazineText.text = $"{equippedAmmo} / {inventoryAmmo}";
-
-        if (spareMagText != null)
-            spareMagText.text = $"x{pw.inventoryMags.Count}";
+        magazineText.text = "-- / --";
+        spareMagText.text = "x0";
+        return;
     }
+
+    int equippedAmmo = 0;
+    if (pw.currentMagazine != null && pw.currentMagazine.data != null)
+        equippedAmmo = pw.currentMagazine.currentAmmo;
+
+    int inventoryAmmo = 0;
+    for (int i = 0; i < pw.inventoryMags.Count; i++)
+    {
+        var m = pw.inventoryMags[i];
+        if (m == null || m.data == null) continue;
+        inventoryAmmo += m.currentAmmo;
+    }
+
+    magazineText.text = $"{equippedAmmo} / {inventoryAmmo}";
+    spareMagText.text = $"x{pw.inventoryMags.Count}";
+}
+
 }

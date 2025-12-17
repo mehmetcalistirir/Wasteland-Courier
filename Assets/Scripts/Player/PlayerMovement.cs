@@ -6,10 +6,10 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
-    public float sprintMultiplier = 1.7f; // Koşarken hız artışı
+    public float sprintMultiplier = 1.7f; // KoÅŸarken hÄ±z artÄ±ÅŸÄ±
     private bool isSprinting = false;
 
-    // --- Bileşen Referansları ---
+    // --- BileÅŸen ReferanslarÄ± ---
     private Rigidbody2D rb;
     private PlayerStats stats;
     private Animator animator;
@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
     private PlayerControls controls;
     private Vector2 moveInput;
 
-    // --- Ek Özellikler ---
+    // --- Ek Ã–zellikler ---
     public static float FacingDirection { get; private set; } = 1f;
     public float soundRadius = 5f;
 
@@ -63,15 +63,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
 {
-    if (GameStateManager.IsGamePaused)
-    {
-        rb.linearVelocity = Vector2.zero;
-        return;
-    }
     float currentSpeed = moveSpeed;
     bool isMoving = moveInput.magnitude > 0.1f;
 
-    // PlayerStats'a koşu/yürüme bilgisini HER FRAME gönder
+    // PlayerStats'a koÅŸu/yÃ¼rÃ¼me bilgisini HER FRAME gÃ¶nder
     stats.SetMovementState(isMoving, isSprinting);
 
     if (isSprinting && stats.HasStamina() && isMoving)
@@ -94,25 +89,25 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-    // --- 360° Fareye Dönük Animasyon ve Rotasyon ---
+    // --- 360Â° Fareye DÃ¶nÃ¼k Animasyon ve Rotasyon ---
     private void UpdateRotationAndAnimation()
     {
         if (animator == null || mainCamera == null) return;
 
-        // 🧭 Fare konumunu al ve yönü hesapla
+        // ğŸ§­ Fare konumunu al ve yÃ¶nÃ¼ hesapla
         Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
         Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(mouseScreenPos);
         Vector2 aimDirection = (mouseWorldPos - transform.position).normalized;
 
-        // 🌀 Karakteri fareye çevir (360°)
+        // ğŸŒ€ Karakteri fareye Ã§evir (360Â°)
         float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarı bakıyorsa -90f uygundur
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarÄ± bakÄ±yorsa -90f uygundur
 
-        // 🎞 Animasyon durumu
+        // ğŸ Animasyon durumu
         bool isMoving = moveInput.magnitude > 0.1f;
         animator.SetBool("IsMoving", isMoving);
 
-        // 🔁 FacingDirection flip kontrolü (silah veya atış yönü için)
+        // ğŸ” FacingDirection flip kontrolÃ¼ (silah veya atÄ±ÅŸ yÃ¶nÃ¼ iÃ§in)
         FacingDirection = aimDirection.x >= 0 ? 1f : -1f;
     }
 }

@@ -50,10 +50,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e47013a3b6486e4aa6c5d4e17fbf5b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ammoData: {fileID: 11400000, guid: 0d0e264f70aa9e542b1a601d26ecfefc, type: 2}
-  itemCount: 1
-  pickupRange: 1.5
-  rotateSpeed: 60
+  ammoType: {fileID: 11400000, guid: caf8f52e76b055f49b813bffac5e864a, type: 2}
+  amount: 15
 --- !u!222 &7811431994733177639
 CanvasRenderer:
   m_ObjectHideFlags: 0

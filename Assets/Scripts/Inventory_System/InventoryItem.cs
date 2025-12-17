@@ -6,6 +6,7 @@ public class InventoryItem
 {
     public ItemData data;
     public int count = 1;
+    public MagazineInstance magazineInstance;
 
     [Serializable]
     public class WeaponInstancePayload
@@ -24,11 +25,13 @@ public class InventoryItem
     {
         data = null;
         count = 0;
+        magazineInstance = null;
     }
 
     public InventoryItem(ItemData data, int count = 1)
     {
         this.data = data;
         this.count = count;
+        magazineInstance = null;
     }
 }

@@ -25,8 +25,6 @@ MonoBehaviour:
   isAutomatic: 0
   fireRate: 5
   damage: 8
-  clipSize: 15
-  maxAmmoCapacity: 30
   reloadTime: 1.5
   attackRange: 1.5
   isShotgun: 0
@@ -36,7 +34,8 @@ MonoBehaviour:
   isSniper: 0
   sniperCooldown: 3
   sniperPenetrationCount: 2
-  ammoType: 8
+  ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
+  acceptedMagazines: 
   isMolotov: 0
   fireEffectPrefab: {fileID: 0}
   explosionRadius: 2.5

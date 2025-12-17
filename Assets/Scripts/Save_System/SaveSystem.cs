@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using System.Collections.Generic;
 
 public static class SaveSystem
 {
-    private static string savePath = Path.Combine(Application.persistentDataPath, "save.json");
+    private static readonly string savePath =
+        Path.Combine(Application.persistentDataPath, "save.json");
 
     public static bool HasSave() => File.Exists(savePath);
 
@@ -15,15 +16,15 @@ public static class SaveSystem
     }
 
     // ============================================================
-    //                          SAVE
+    // SAVE
     // ============================================================
-
     public static void SavePlayerAndInventory(
         Transform player,
         Inventory inventory,
-        PlayerStats stats)
+        PlayerStats stats,
+        PlayerWeapon playerWeapon)
     {
-        if (player == null || inventory == null || stats == null)
+        if (!player || !inventory || !stats)
         {
             Debug.LogWarning("SavePlayerAndInventory: Eksik referans!");
             return;
@@ -31,39 +32,88 @@ public static class SaveSystem
 
         SaveData data = new SaveData();
 
-        // ---- Pozisyon ----
-        data.posX = player.position.x;
-        data.posY = player.position.y;
-        data.posZ = player.position.z;
+        // Position
+        Vector3 p = player.position;
+        data.posX = p.x;
+        data.posY = p.y;
+        data.posZ = p.z;
 
-        // ---- Statlar ----
+        // Stats
         data.currentHealth = stats.currentHealth;
         data.maxHealth = stats.maxHealth;
-
         data.currentStamina = stats.GetStamina();
         data.maxStamina = stats.GetMaxStamina();
-
         data.currentHunger = stats.currentHunger;
         data.maxHunger = stats.maxHunger;
-
         data.gold = stats.gold;
 
-        // ---- Envanter ----
+        // Inventory items
         data.inventory.Clear();
         foreach (var slot in inventory.slots)
         {
-            if (slot.data == null) continue;
+            if (slot == null || slot.data == null) continue;
 
-            var saved = new InventoryItemData
+            InventoryItemData itemData = new InventoryItemData
             {
                 itemID = slot.data.itemID,
                 amount = slot.count
             };
 
-            data.inventory.Add(saved);
+            if (slot.magazineInstance != null)
+            {
+                itemData.hasMagazineInstance = true;
+                itemData.magazineCurrentAmmo =
+                    slot.magazineInstance.currentAmmo;
+            }
+            else
+            {
+                itemData.hasMagazineInstance = false;
+            }
+
+            data.inventory.Add(itemData);
         }
 
-        // ---- Craft ile açılmış silahlar ----
+
+        // Ammo Pool
+        data.ammoTypeIDs.Clear();
+        data.ammoAmounts.Clear();
+        foreach (var pair in inventory.GetAmmoPool())
+        {
+            data.ammoTypeIDs.Add(pair.Key.ammoId);
+            data.ammoAmounts.Add(pair.Value);
+        }
+
+        // Weapons
+        WeaponSlotManager wsm = WeaponSlotManager.Instance;
+        if (wsm != null)
+        {
+            for (int i = 0; i < 3; i++)
+                data.equippedWeaponIDs[i] =
+                    wsm.slots[i] != null ? wsm.slots[i].itemID : "";
+
+            data.activeSlotIndex = wsm.activeSlotIndex;
+        }
+
+        // Equipped magazine (slot index + ammo)
+        data.equippedMagazineSlotIndex = -1;
+        data.equippedMagazineAmmo = 0;
+
+        if (playerWeapon != null && playerWeapon.GetCurrentMagazine() != null)
+        {
+            MagazineInstance mag = playerWeapon.GetCurrentMagazine();
+
+            for (int i = 0; i < inventory.slots.Length; i++)
+            {
+                if (inventory.slots[i].magazineInstance == mag)
+                {
+                    data.equippedMagazineSlotIndex = i;
+                    data.equippedMagazineAmmo = mag.currentAmmo;
+                    break;
+                }
+            }
+        }
+
+        // Craft unlocks
         data.unlockedWeaponIDs.Clear();
         if (CraftingSystem.Instance != null)
         {
@@ -71,48 +121,24 @@ public static class SaveSystem
                 data.unlockedWeaponIDs.Add(id);
         }
 
-        // ---- Ekipman Silah Slotları (WeaponSlotManager) ----
-        WeaponSlotManager wsm = WeaponSlotManager.Instance;
-        if (wsm != null)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                WeaponData wd = wsm.slots[i];
-
-                if (wd != null)
-                    data.equippedWeaponIDs[i] = wd.itemID;
-                else
-                    data.equippedWeaponIDs[i] = "";
-
-                var ammo = wsm.GetAmmo(i);
-                data.slotClip[i] = ammo.clip;
-                data.slotReserve[i] = ammo.reserve;
-            }
-
-            data.activeSlotIndex = wsm.activeSlotIndex;
-        }
-
-        // ---- Karavan Envanteri ----
+        // Caravan
         if (CaravanInventory.Instance != null)
             data.caravanSave = CaravanInventory.Instance.GetSaveData();
 
-        // ---- JSON Yaz ----
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(savePath, json);
-
-        Debug.Log("💾 SAVE → Tüm veriler kaydedildi.");
+        File.WriteAllText(savePath, JsonUtility.ToJson(data, true));
+        Debug.Log("💾 SAVE → Başarılı");
     }
 
     // ============================================================
-    //                          LOAD
+    // LOAD
     // ============================================================
-
     public static void LoadPlayerAndInventory(
         Transform player,
         Inventory inventory,
-        PlayerStats stats)
+        PlayerStats stats,
+        PlayerWeapon playerWeapon)
     {
-        if (player == null || inventory == null || stats == null)
+        if (!player || !inventory || !stats)
         {
             Debug.LogWarning("LoadPlayerAndInventory: Eksik referans!");
             return;
@@ -120,19 +146,19 @@ public static class SaveSystem
 
         if (!HasSave())
         {
-            Debug.LogWarning("LoadPlayerAndInventory: Kayıt bulunamadı.");
+            Debug.LogWarning("LoadPlayerAndInventory: Kayıt yok.");
             return;
         }
 
-        string json = File.ReadAllText(savePath);
-        SaveData data = JsonUtility.FromJson<SaveData>(json);
+        SaveData data =
+            JsonUtility.FromJson<SaveData>(File.ReadAllText(savePath));
 
-        // ---- Pozisyon ----
-        Vector3 loadedPos = new Vector3(data.posX, data.posY, data.posZ);
-        if (loadedPos.y < 1f) loadedPos.y = 1f;  // yere gömülme önlemi
-        player.position = loadedPos;
+        // Position
+        Vector3 pos = new Vector3(data.posX, data.posY, data.posZ);
+        if (pos.y < 1f) pos.y = 1f;
+        player.position = pos;
 
-        // ---- Statlar ----
+        // Stats
         stats.maxHealth = data.maxHealth;
         stats.currentHealth = data.currentHealth;
         stats.RefreshHealthUI();
@@ -143,22 +169,75 @@ public static class SaveSystem
 
         stats.maxHunger = data.maxHunger;
         stats.currentHunger = data.currentHunger;
-
         stats.gold = data.gold;
 
-        // ---- Envanter ----
+        // Inventory
         inventory.ClearInventory();
-        foreach (var item in data.inventory)
+        foreach (var it in data.inventory)
         {
-            if (string.IsNullOrEmpty(item.itemID) || item.amount <= 0) continue;
-
-            ItemData so = ItemDatabase.Get(item.itemID);
+            ItemData so = ItemDatabase.Get(it.itemID);
             if (so == null) continue;
 
-            inventory.TryAdd(so, item.amount);
+            inventory.TryAdd(so, it.amount);
+
+            // 🔥 Şarjörse, instance’ı düzelt
+            if (it.hasMagazineInstance)
+            {
+                // En son eklenen slotu bul
+                InventoryItem slot = inventory.GetLastAddedSlot();
+
+                if (slot != null && slot.magazineInstance != null)
+                {
+                    slot.magazineInstance.currentAmmo =
+                        it.magazineCurrentAmmo;
+                }
+            }
         }
 
-        // ---- Craft ile açılmış silahlar ----
+
+        // Ammo pool
+        inventory.ClearAmmoPool();
+        for (int i = 0; i < data.ammoTypeIDs.Count; i++)
+        {
+            AmmoTypeData ammoType =
+                AmmoTypeRegistry.Get(data.ammoTypeIDs[i]);
+            if (ammoType != null)
+                inventory.AddAmmo(ammoType, data.ammoAmounts[i]);
+        }
+
+        // Weapons
+        WeaponSlotManager wsm = WeaponSlotManager.Instance;
+        if (wsm != null)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                ItemData so = ItemDatabase.Get(data.equippedWeaponIDs[i]);
+                wsm.slots[i] =
+                    so is WeaponItemData wid ? wid.weaponData : null;
+            }
+
+            wsm.activeSlotIndex =
+                Mathf.Clamp(data.activeSlotIndex, 0, 2);
+            wsm.SwitchSlot(wsm.activeSlotIndex);
+        }
+
+        // Equipped magazine
+        if (playerWeapon != null &&
+            data.equippedMagazineSlotIndex >= 0 &&
+            data.equippedMagazineSlotIndex < inventory.slots.Length)
+        {
+            var mag =
+                inventory.slots[data.equippedMagazineSlotIndex]
+                    .magazineInstance;
+
+            if (mag != null)
+            {
+                mag.currentAmmo = data.equippedMagazineAmmo;
+                playerWeapon.SetCurrentMagazine(mag);
+            }
+        }
+
+        // Craft unlocks
         if (CraftingSystem.Instance != null)
         {
             CraftingSystem.Instance.unlockedWeapons.Clear();
@@ -166,49 +245,14 @@ public static class SaveSystem
                 CraftingSystem.Instance.unlockedWeapons.Add(id);
         }
 
-        // ---- WeaponSlotManager yükleme ----
-        WeaponSlotManager wsm = WeaponSlotManager.Instance;
-        if (wsm != null)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                string id = data.equippedWeaponIDs[i];
-
-                if (!string.IsNullOrEmpty(id))
-                {
-                    ItemData so = ItemDatabase.Get(id);
-                    if (so is WeaponItemData wid)
-                    {
-                        wsm.slots[i] = wid.weaponData;
-                        wsm.clip[i] = data.slotClip[i];
-                        wsm.reserve[i] = data.slotReserve[i];
-                    }
-                    else
-                    {
-                        wsm.slots[i] = null;
-                        wsm.clip[i] = 0;
-                        wsm.reserve[i] = 0;
-                    }
-                }
-                else
-                {
-                    wsm.slots[i] = null;
-                    wsm.clip[i] = 0;
-                    wsm.reserve[i] = 0;
-                }
-            }
-
-            // Aktif slotu uygula
-            wsm.activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
-            wsm.SwitchSlot(wsm.activeSlotIndex);
-        }
-
-        // ---- Karavan Yükleme ----
-        if (data.caravanSave != null && CaravanInventory.Instance != null)
+        // Caravan
+        if (data.caravanSave != null &&
+            CaravanInventory.Instance != null)
         {
             CaravanInventory.Instance.LoadFromData(data.caravanSave);
         }
 
-        Debug.Log("📥 LOAD → Tüm veriler geri yüklendi.");
+
+        Debug.Log("📥 LOAD → Başarılı");
     }
 }

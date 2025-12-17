@@ -19,10 +19,6 @@ public class WeaponSlotManager : MonoBehaviour
     [Header("Equipped Weapons (WeaponData)")]
     public WeaponData[] slots = new WeaponData[3];
 
-    // Mermi durumu (clip + reserve)
-    [Header("Ammo State per Slot")]
-    public int[] clip = new int[3];
-    public int[] reserve = new int[3];
 
     [Header("Active Slot")]
     public int activeSlotIndex = 0;
@@ -34,12 +30,6 @@ public class WeaponSlotManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        // Mermileri 0 başlat
-        for (int i = 0; i < 3; i++)
-        {
-            clip[i] = 0;
-            reserve[i] = 0;
-        }
     }
 
 
@@ -99,8 +89,6 @@ public class WeaponSlotManager : MonoBehaviour
         int slot = (int)GetSlotForWeapon(weapon);
         slots[slot] = weapon;
 
-        clip[slot] = weapon.clipSize;
-        reserve[slot] = weapon.maxAmmoCapacity;
 
         ApplyToHandler(slot);
 
@@ -170,15 +158,10 @@ public class WeaponSlotManager : MonoBehaviour
     // -------------------------------
     // Ammo state
     // -------------------------------
-    public (int clip, int reserve) GetAmmo(int slot)
-    {
-        return (clip[slot], reserve[slot]);
-    }
+
 
     public void SetAmmo(int slot, int newClip, int newReserve)
     {
-        clip[slot] = newClip;
-        reserve[slot] = newReserve;
 
         // aktif slot ise PlayerWeapon’ı güncelle
         if (slot == activeSlotIndex)
@@ -212,10 +195,6 @@ public class WeaponSlotManager : MonoBehaviour
     // 2) Yeni silah slota ekle
     slots[slot] = newWeapon;
 
-    // 3) Mermi bilgilerini sıfırla
-    clip[slot] = newWeapon.clipSize;
-    reserve[slot] = newWeapon.maxAmmoCapacity;
-
     // 4) Eğer aktif slot buysa hemen güncelle
     if (activeSlotIndex == slot)
     {
@@ -245,8 +224,6 @@ public WeaponSlotSaveData GetSaveData()
         else
             data.equippedWeaponIDs[i] = "";
 
-        data.clip[i] = clip[i];
-        data.reserve[i] = reserve[i];
     }
 
     data.activeSlotIndex = activeSlotIndex;
@@ -270,21 +247,18 @@ public void LoadData(WeaponSlotSaveData data)
             if (item is WeaponItemData wid)
             {
                 slots[i] = wid.weaponData;
-                clip[i] = data.clip[i];
-                reserve[i] = data.reserve[i];
+
             }
             else
             {
                 slots[i] = null;
-                clip[i] = 0;
-                reserve[i] = 0;
+
             }
         }
         else
         {
             slots[i] = null;
-            clip[i] = 0;
-            reserve[i] = 0;
+
         }
     }
 

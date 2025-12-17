@@ -16,6 +16,11 @@ public class InventorySlotUI : MonoBehaviour,
     private InventoryItem cached;
     private RectTransform rt;
     private GameObject dragIcon;
+    [Header("Magazine Highlight")]
+    public Image highlightImage;
+    public Color equippedColor = Color.yellow;
+    public Color normalColor = Color.clear;
+
 
     private void Awake()
     {
@@ -40,6 +45,40 @@ public class InventorySlotUI : MonoBehaviour,
     {
         cached = item;
 
+        // 🔫 MAGAZINE SLOT
+        if (item.magazineInstance != null)
+        {
+            var mag = item.magazineInstance;
+
+            icon.enabled = true;
+            icon.sprite = mag.data.icon;
+            icon.preserveAspect = true;
+
+            countText.text =
+                $"{mag.currentAmmo}/{mag.data.capacity}";
+
+            return;
+        }
+        if (highlightImage != null)
+{
+    var pw = FindObjectOfType<PlayerWeapon>();
+
+    if (pw != null && pw.currentMagazine == item.magazineInstance)
+        highlightImage.color = equippedColor;
+    else
+        highlightImage.color = normalColor;
+}
+
+
+        // 🔫 ŞARJÖRSE → MERMİ GÖSTER
+        if (item.magazineInstance != null)
+        {
+            countText.text =
+                $"{item.magazineInstance.currentAmmo}/" +
+                $"{item.magazineInstance.data.capacity}";
+            return;
+        }
+
         if (item == null || item.data == null)
         {
             icon.enabled = false;
@@ -51,27 +90,54 @@ public class InventorySlotUI : MonoBehaviour,
         icon.sprite = item.data.icon;
         icon.preserveAspect = true;
 
-        // Ammo ise: item.count * ammoPerItem göster
+        // 🔥 1️⃣ MAGAZINE HER ZAMAN ÖNCELİKLİ
+        if (item.magazineInstance != null)
+        {
+            countText.text =
+                $"{item.magazineInstance.currentAmmo}/{item.magazineInstance.data.capacity}";
+            return;
+        }
+
+        // 2️⃣ AMMO ITEM
         if (item.data is AmmoItemData ammoData)
         {
             int totalAmmo = item.count * ammoData.ammoAmount;
             countText.text = $"x{totalAmmo}";
+            return;
         }
-        else
-        {
-            countText.text = $"x{item.count}";
-        }
+
+        // 3️⃣ NORMAL ITEM
+        countText.text = $"x{item.count}";
     }
+
+
 
     // Sağ tık / sol tık davranışı
     public void OnPointerClick(PointerEventData eventData)
-    {
-        if (cached == null || cached.data == null)
-            return;
+{
+    if (cached == null)
+        return;
 
-        // Şimdilik: sağ tıkla hiçbir özel işlem yapmıyoruz.
-        // İleride buraya "yemek ye / bandaj kullan / ammo yükle" gibi davranışlar eklenebilir.
+    // 🔫 MAGAZINE LEFT CLICK → TAK
+    if (cached.magazineInstance != null &&
+        eventData.button == PointerEventData.InputButton.Left)
+    {
+        var pw = FindObjectOfType<PlayerWeapon>();
+        if (pw == null) return;
+
+        pw.TryEquipMagazineFromInventory(
+            cached.magazineInstance
+        );
     }
+    if (cached.magazineInstance != null)
+{
+    owner.SelectMagazine(cached.magazineInstance);
+    return;
+}
+
+}
+
+
 
     // ---- DRAG & DROP ----
 

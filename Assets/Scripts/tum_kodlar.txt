@@ -845,6 +845,7 @@ public class CaravanHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        Debug.Log("KaravanÄ±n canÄ±: " + currentHealth);
         UpdateUI();
 
         if (currentHealth <= 0)
@@ -930,30 +931,37 @@ public class CaravanIndicator : MonoBehaviour
 }
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class CaravanInteraction : MonoBehaviour
 {
-    [Header("Ayarlar")]
-    public float interactDistance = 2f;
+    public bool playerInRange { get; private set; }
 
-    [Header("Durum")]
-    public bool playerInRange = false;   // CraftInput burayÄ± kontrol edecek
-
-    private Transform player;
-
-    private void Start()
+    private void Awake()
     {
-        player = GameObject.FindWithTag("Player")?.transform;
+        // GÃ¼venlik: collider trigger olmak zorunda
+        var col = GetComponent<Collider2D>();
+        col.isTrigger = true;
     }
 
-    private void Update()
+    private void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.GetComponentInParent<PlayerMovement>() != null)
     {
-        if (player == null) return;
-
-        float dist = Vector2.Distance(player.position, transform.position);
-
-        // Oyuncu karavana yakÄ±n mÄ±?
-        playerInRange = dist <= interactDistance;
+        playerInRange = true;
+        Debug.Log("Caravan â†’ Player MENZÄ°LE GÄ°RDÄ°");
     }
+}
+
+private void OnTriggerExit2D(Collider2D other)
+{
+    if (other.GetComponentInParent<PlayerMovement>() != null)
+    {
+        playerInRange = false;
+        Debug.Log("Caravan â†’ Player MENZÄ°LDEN Ã‡IKTI");
+        PlayerInputRouter.Instance?.ForceCloseCraft();
+    }
+}
+
 }
 using System.Collections.Generic;
 using UnityEngine;
@@ -1204,8 +1212,9 @@ public class CaravanWeaponUI : MonoBehaviour
         // 4) Yeni silahÄ± oyuncuya tak
         WeaponSlotManager.Instance.slots[slotIndex] = selected;
 
-        WeaponSlotManager.Instance.clip[slotIndex] = selected.clipSize;
-        WeaponSlotManager.Instance.reserve[slotIndex] = selected.maxAmmoCapacity;
+        WeaponSlotManager.Instance.slots[slotIndex] = selected;
+        WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+
 
         // 5) EÄŸer aktif slot ise handlerâ€™Ä± gÃ¼ncelle
         if (WeaponSlotManager.Instance.activeSlotIndex == slotIndex)
@@ -1255,20 +1264,20 @@ public class GameClock : MonoBehaviour
     }
 
     private void Awake()
-{
-if (player == null)
-{
-    player = GameObject.FindWithTag("Player")?.transform;
-    if (player == null) return;
-}
+    {
+        if (player == null)
+        {
+            player = GameObject.FindWithTag("Player")?.transform;
+            if (player == null) return;
+        }
 
-}
+    }
 
-    
-    
+
+
     void Update()
     {
-    
+
 
         // ---- ZAMAN Ä°LERLETME ----
         if (dayNightCycle.IsDay)
@@ -1303,8 +1312,10 @@ if (player == null)
                 SaveSystem.SavePlayerAndInventory(
     player,
     Inventory.Instance,
-    FindObjectOfType<PlayerStats>()
+    FindObjectOfType<PlayerStats>(),
+    FindObjectOfType<PlayerWeapon>()
 );
+
 
 
                 Debug.Log("ğŸŸ¢ 08:00 â†’ Otomatik kayÄ±t alÄ±ndÄ±!");
@@ -1622,8 +1633,9 @@ public class CraftUIController : MonoBehaviour
         }
 
         WeaponSlotManager.Instance.slots[slotIndex] = weapon;
-        WeaponSlotManager.Instance.clip[slotIndex] = weapon.clipSize;
-        WeaponSlotManager.Instance.reserve[slotIndex] = weapon.maxAmmoCapacity;
+        WeaponSlotManager.Instance.slots[slotIndex] = weapon;
+        WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+
 
         WeaponSlotManager.Instance.SwitchSlot(slotIndex);
     }
@@ -2672,7 +2684,8 @@ public class Inventory : MonoBehaviour
     public void RaiseChanged() => OnChanged?.Invoke();
 
     // Yeni mermi depolama sistemi: ammoType(string) -> toplam mermi sayÄ±sÄ±
-    public Dictionary<string, int> ammoStorage = new Dictionary<string, int>();
+    private Dictionary<AmmoTypeData, int> ammoPool =
+        new Dictionary<AmmoTypeData, int>();
 
     void Awake()
     {
@@ -2689,72 +2702,108 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
     }
 
+public bool IsMagazineEquipped(MagazineInstance mag)
+{
+    if (mag == null) return false;
+
+    PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
+    if (pw == null) return false;
+
+    return pw.GetCurrentMagazine() == mag;
+}
+
+public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
+{
+    ammoPool = data;
+}
+
     // ---------------- ADD ----------------
     public bool TryAdd(ItemData data, int amount = 1)
+{
+    if (data == null || amount <= 0)
+        return false;
+
+    // ğŸ”¥ MAGAZINE ITEM
+    if (data is MagazineData magData)
     {
-        if (data == null || amount <= 0) return false;
-
-        // âœ… EÄŸer AmmoItemData ise: slot'a koyma, direkt ammoStorage'a mermi ekle
-        if (data is AmmoItemData ammoData)
+        for (int i = 0; i < slots.Length; i++)
         {
-            int totalAmmo = ammoData.ammoAmount * amount;
-            AddAmmo(ammoData.ammoType, totalAmmo);
-            Debug.Log($"[Inventory] {ammoData.ammoType} iÃ§in +{totalAmmo} mermi eklendi.");
-            // Slot kullanmadÄ±ÄŸÄ±mÄ±z iÃ§in RaiseChanged Ã§aÄŸÄ±rmaya gerek yok ama istersen ekleyebilirsin
-            return true;
-        }
-
-        // Normal stacklenebilir item mantÄ±ÄŸÄ±
-        if (data.stackable)
-        {
-            int remain = amount;
-
-            // Var olan stack'leri doldur
-            for (int i = 0; i < slots.Length && remain > 0; i++)
+            if (slots[i].data == null)
             {
-                var s = slots[i];
-                if (s.data == data && s.count < data.maxStack)
+                slots[i] = new InventoryItem
                 {
-                    int add = Mathf.Min(remain, data.maxStack - s.count);
-                    s.count += add;
-                    remain -= add;
-                }
-            }
+                    data = magData,
+                    count = 1,
+                    magazineInstance = new MagazineInstance(magData)
+                };
 
-            // BoÅŸ slotlara yeni stack aÃ§
-            for (int i = 0; i < slots.Length && remain > 0; i++)
-            {
-                if (slots[i].data == null)
-                {
-                    int add = Mathf.Min(remain, data.maxStack);
-                    slots[i] = new InventoryItem(data, add);
-                    remain -= add;
-                }
-            }
-
-            if (remain == 0)
-            {
                 RaiseChanged();
                 return true;
             }
-
-            return false;
         }
-        else
+
+        return false; // envanter dolu
+    }
+
+    // ğŸ”« AMMO ITEM
+    if (data is AmmoItemData ammoData)
+    {
+        int totalAmmo = ammoData.ammoAmount * amount;
+        AddAmmo(ammoData.ammoType, totalAmmo);
+
+        Debug.Log($"[Inventory] {ammoData.ammoType.ammoName} +{totalAmmo}");
+        return true;
+    }
+
+    // ğŸ“¦ STACKLENEBÄ°LEN ITEM
+    if (data.stackable)
+    {
+        int remain = amount;
+
+        for (int i = 0; i < slots.Length && remain > 0; i++)
         {
-            // Stacklenmeyen item
-            for (int i = 0; i < slots.Length; i++)
+            var s = slots[i];
+            if (s.data == data && s.count < data.maxStack)
             {
-                if (slots[i].data == null)
-                {
-                    slots[i] = new InventoryItem(data, 1);
-                    RaiseChanged();
-                    return true;
-                }
+                int add = Mathf.Min(remain, data.maxStack - s.count);
+                s.count += add;
+                remain -= add;
             }
-            return false;
+        }
+
+        for (int i = 0; i < slots.Length && remain > 0; i++)
+        {
+            if (slots[i].data == null)
+            {
+                int add = Mathf.Min(remain, data.maxStack);
+                slots[i] = new InventoryItem(data, add);
+                remain -= add;
+            }
+        }
+
+        if (remain == 0)
+        {
+            RaiseChanged();
+            return true;
+        }
+
+        return false;
+    }
+
+    // ğŸ“¦ STACKLENMEYEN NORMAL ITEM
+    for (int i = 0; i < slots.Length; i++)
+    {
+        if (slots[i].data == null)
+        {
+            slots[i] = new InventoryItem(data, 1);
+            RaiseChanged();
+            return true;
         }
     }
+
+    return false;
+}
+
 
     // --------- YARDIMCI SAYIM METOTLARI ---------
 
@@ -2767,6 +2816,84 @@ public class Inventory : MonoBehaviour
                 total += s.count;
         return total;
     }
+    public InventoryItem GetLastAddedSlot()
+{
+    for (int i = slots.Length - 1; i >= 0; i--)
+    {
+        if (slots[i] != null && slots[i].data != null)
+            return slots[i];
+    }
+    return null;
+}
+
+public bool UnloadOneFromMagazine(MagazineInstance mag)
+{
+    if (IsMagazineEquipped(mag))
+{
+    Debug.Log("TakÄ±lÄ± ÅŸarjÃ¶r boÅŸaltÄ±lamaz!");
+    return false;
+}
+
+    if (mag == null || mag.data == null)
+        return false;
+
+    if (mag.currentAmmo <= 0)
+        return false;
+
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
+
+    // ğŸ”« ÅarjÃ¶rden Ã§Ä±kar
+    mag.currentAmmo -= 1;
+
+    // ğŸ” AmmoPool'a geri koy
+    AddAmmo(ammoType, 1);
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] ÅarjÃ¶rden 1 mermi Ã§Ä±karÄ±ldÄ± â†’ " +
+        $"{mag.currentAmmo}/{mag.data.capacity}"
+    );
+
+    return true;
+}
+
+public bool UnloadAllFromMagazine(MagazineInstance mag)
+{
+    if (IsMagazineEquipped(mag))
+{
+    Debug.Log("TakÄ±lÄ± ÅŸarjÃ¶r boÅŸaltÄ±lamaz!");
+    return false;
+}
+
+    if (mag == null || mag.data == null)
+        return false;
+
+    int amount = mag.currentAmmo;
+    if (amount <= 0)
+        return false;
+
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
+
+    // ğŸ” AmmoPool'a geri koy
+    AddAmmo(ammoType, amount);
+
+    // ğŸ”« ÅarjÃ¶rÃ¼ boÅŸalt
+    mag.currentAmmo = 0;
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] ÅarjÃ¶r tamamen boÅŸaltÄ±ldÄ± â†’ +{amount} mermi"
+    );
+
+    return true;
+}
+
 
     // Envanterde yeterince var mÄ±?
     public bool HasEnough(ItemData data, int amount)
@@ -2781,6 +2908,18 @@ public class Inventory : MonoBehaviour
         if (!string.IsNullOrEmpty(id))
             unlockedBlueprints.Add(id);
     }
+    // Inventory.cs
+public Dictionary<AmmoTypeData, int> GetAmmoPool()
+{
+    return ammoPool;
+}
+
+public void ClearAmmoPool()
+{
+    ammoPool.Clear();
+}
+
+
 
     // Blueprint var mÄ±?
     public bool HasBlueprint(string id)
@@ -2817,6 +2956,30 @@ public class Inventory : MonoBehaviour
         RaiseChanged();
         return true;
     }
+    public bool TryAddMagazine(MagazineInstance mag)
+{
+    if (mag == null || mag.data == null)
+        return false;
+
+    for (int i = 0; i < slots.Length; i++)
+    {
+        if (slots[i].data == null)
+        {
+            slots[i] = new InventoryItem
+            {
+                data = mag.data,
+                count = 1,
+                magazineInstance = mag
+            };
+
+            RaiseChanged();
+            return true;
+        }
+    }
+
+    Debug.Log("Envanter dolu! ÅarjÃ¶r alÄ±namadÄ±.");
+    return false;
+}
 
     public bool TryMoveOrMerge(int from, int to)
     {
@@ -2887,85 +3050,108 @@ public class Inventory : MonoBehaviour
     // ---------------- AMMO SÄ°STEMÄ° ----------------
 
     // Ammo ekleme (pickup vs. burayÄ± kullanacak)
-    public void AddAmmo(string ammoId, int amount)
-{
-    if (!ammoStorage.ContainsKey(ammoId))
-        ammoStorage[ammoId] = 0;
+    public void AddAmmo(AmmoTypeData ammoType, int amount)
+    {
+        if (ammoType == null || amount <= 0) return;
 
-    ammoStorage[ammoId] += amount;
+        if (!ammoPool.ContainsKey(ammoType))
+            ammoPool[ammoType] = 0;
 
-    Debug.Log($"Ammo Added: {ammoId} -> {ammoStorage[ammoId]}");
-}
+        ammoPool[ammoType] += amount;
+
+        Debug.Log($"[Ammo] +{amount} {ammoType.ammoName} â†’ Total: {ammoPool[ammoType]}");
+    }
+
 
 
     // Belirli ammo tipinden kaÃ§ adet var?
-    public int GetAmmoAmount(string ammoType)
+    public int GetAmmoAmount(AmmoTypeData ammoType)
     {
-        if (string.IsNullOrEmpty(ammoType)) return 0;
-        return ammoStorage.TryGetValue(ammoType, out int value) ? value : 0;
+        if (ammoType == null) return 0;
+
+        return ammoPool.TryGetValue(ammoType, out int amount)
+            ? amount
+            : 0;
     }
 
+
     // Ammo tÃ¼ket (ÅŸarjÃ¶r doldurma vb.)
-    public bool TryUseAmmo(string ammoType, int amount)
+    public bool TryUseAmmo(AmmoTypeData ammoType, int amount)
     {
-        if (string.IsNullOrEmpty(ammoType) || amount <= 0) return false;
+        if (ammoType == null || amount <= 0) return false;
 
-        int current = GetAmmoAmount(ammoType);
-        if (current < amount) return false;
+        if (!ammoPool.ContainsKey(ammoType)) return false;
+        if (ammoPool[ammoType] < amount) return false;
 
-        ammoStorage[ammoType] = current - amount;
+        ammoPool[ammoType] -= amount;
+
         return true;
     }
 
+    public bool FullLoadMagazine(MagazineInstance mag)
+{
+    if (mag == null || mag.data == null)
+        return false;
+
+    int needed = mag.data.capacity - mag.currentAmmo;
+    if (needed <= 0)
+        return false;
+
+    int available = GetAmmoAmount(mag.data.ammoType);
+    if (available <= 0)
+        return false;
+
+    int load = Mathf.Min(needed, available);
+    return LoadAmmoIntoMagazine(mag, load);
+}
+
+
+
     // ÅarjÃ¶re ammo yÃ¼kleme - ammoStorage'dan Ã§eker
-    public void LoadAmmoIntoMag(MagazineItem mag, int amount)
-    {
-        if (mag == null)
-        {
-            Debug.LogWarning("LoadAmmoIntoMag: mag == null");
-            return;
-        }
+    public bool LoadAmmoIntoMagazine(
+    MagazineInstance mag,
+    int amount
+)
+{
+    if (mag == null || mag.data == null)
+        return false;
 
-        if (mag.IsFull)
-        {
-            Debug.Log("LoadAmmoIntoMag: ÅarjÃ¶r zaten dolu.");
-            return;
-        }
+    if (mag.IsFull)
+        return false;
 
-        string ammoType = mag.ammoType;
-        if (string.IsNullOrEmpty(ammoType))
-        {
-            Debug.LogWarning("LoadAmmoIntoMag: ÅarjÃ¶rÃ¼n ammoType'Ä± tanÄ±mlÄ± deÄŸil!");
-            return;
-        }
+    AmmoTypeData ammoType = mag.data.ammoType;
+    if (ammoType == null)
+        return false;
 
-        int available = GetAmmoAmount(ammoType);
-        if (available <= 0)
-        {
-            Debug.Log($"LoadAmmoIntoMag: Envanterde {ammoType} mermisi yok.");
-            return;
-        }
+    int available = GetAmmoAmount(ammoType);
+    if (available <= 0)
+        return false;
 
-        int space = mag.capacity - mag.currentAmmo;
-        int loadAmount = Mathf.Min(space, amount, available);
-        if (loadAmount <= 0)
-        {
-            Debug.Log("LoadAmmoIntoMag: YÃ¼klenecek mermi yok / yer yok.");
-            return;
-        }
+    int space = mag.data.capacity - mag.currentAmmo;
+    int load = Mathf.Min(space, Mathf.Min(amount, available));
 
-        // Envanterden mermi dÃ¼ÅŸ
-        if (!TryUseAmmo(ammoType, loadAmount))
-        {
-            Debug.LogWarning("LoadAmmoIntoMag: TryUseAmmo baÅŸarÄ±sÄ±z oldu, eÅŸzamanlÄ±lÄ±k sorunu olabilir.");
-            return;
-        }
+    if (load <= 0)
+        return false;
 
-        // ÅarjÃ¶rÃ¼ doldur
-        mag.currentAmmo += loadAmount;
+    // ğŸ”¥ AMMO HAVUZUNDAN Ã‡EK
+    TryUseAmmo(ammoType, load);
 
-        Debug.Log($"ÅarjÃ¶r {mag.magName} mermi yÃ¼klendi: +{loadAmount} ({ammoType}), Envanterde kalan: {GetAmmoAmount(ammoType)}");
-    }
+    // ğŸ”« ÅARJÃ–RE KOY
+    mag.currentAmmo += load;
+
+    RaiseChanged();
+
+    Debug.Log(
+        $"[Inventory] ÅarjÃ¶r dolduruldu â†’ +{load} " +
+        $"({mag.currentAmmo}/{mag.data.capacity})"
+    );
+
+    return true;
+}
+
+
+
+
 }
 using System;
 using UnityEngine;
@@ -2975,6 +3161,7 @@ public class InventoryItem
 {
     public ItemData data;
     public int count = 1;
+    public MagazineInstance magazineInstance;
 
     [Serializable]
     public class WeaponInstancePayload
@@ -2993,12 +3180,14 @@ public class InventoryItem
     {
         data = null;
         count = 0;
+        magazineInstance = null;
     }
 
     public InventoryItem(ItemData data, int count = 1)
     {
         this.data = data;
         this.count = count;
+        magazineInstance = null;
     }
 }
 using UnityEngine;
@@ -3019,6 +3208,11 @@ public class InventorySlotUI : MonoBehaviour,
     private InventoryItem cached;
     private RectTransform rt;
     private GameObject dragIcon;
+    [Header("Magazine Highlight")]
+    public Image highlightImage;
+    public Color equippedColor = Color.yellow;
+    public Color normalColor = Color.clear;
+
 
     private void Awake()
     {
@@ -3043,6 +3237,40 @@ public class InventorySlotUI : MonoBehaviour,
     {
         cached = item;
 
+        // ğŸ”« MAGAZINE SLOT
+        if (item.magazineInstance != null)
+        {
+            var mag = item.magazineInstance;
+
+            icon.enabled = true;
+            icon.sprite = mag.data.icon;
+            icon.preserveAspect = true;
+
+            countText.text =
+                $"{mag.currentAmmo}/{mag.data.capacity}";
+
+            return;
+        }
+        if (highlightImage != null)
+{
+    var pw = FindObjectOfType<PlayerWeapon>();
+
+    if (pw != null && pw.currentMagazine == item.magazineInstance)
+        highlightImage.color = equippedColor;
+    else
+        highlightImage.color = normalColor;
+}
+
+
+        // ğŸ”« ÅARJÃ–RSE â†’ MERMÄ° GÃ–STER
+        if (item.magazineInstance != null)
+        {
+            countText.text =
+                $"{item.magazineInstance.currentAmmo}/" +
+                $"{item.magazineInstance.data.capacity}";
+            return;
+        }
+
         if (item == null || item.data == null)
         {
             icon.enabled = false;
@@ -3054,27 +3282,54 @@ public class InventorySlotUI : MonoBehaviour,
         icon.sprite = item.data.icon;
         icon.preserveAspect = true;
 
-        // Ammo ise: item.count * ammoPerItem gÃ¶ster
+        // ğŸ”¥ 1ï¸âƒ£ MAGAZINE HER ZAMAN Ã–NCELÄ°KLÄ°
+        if (item.magazineInstance != null)
+        {
+            countText.text =
+                $"{item.magazineInstance.currentAmmo}/{item.magazineInstance.data.capacity}";
+            return;
+        }
+
+        // 2ï¸âƒ£ AMMO ITEM
         if (item.data is AmmoItemData ammoData)
         {
             int totalAmmo = item.count * ammoData.ammoAmount;
             countText.text = $"x{totalAmmo}";
+            return;
         }
-        else
-        {
-            countText.text = $"x{item.count}";
-        }
+
+        // 3ï¸âƒ£ NORMAL ITEM
+        countText.text = $"x{item.count}";
     }
+
+
 
     // SaÄŸ tÄ±k / sol tÄ±k davranÄ±ÅŸÄ±
     public void OnPointerClick(PointerEventData eventData)
-    {
-        if (cached == null || cached.data == null)
-            return;
+{
+    if (cached == null)
+        return;
 
-        // Åimdilik: saÄŸ tÄ±kla hiÃ§bir Ã¶zel iÅŸlem yapmÄ±yoruz.
-        // Ä°leride buraya "yemek ye / bandaj kullan / ammo yÃ¼kle" gibi davranÄ±ÅŸlar eklenebilir.
+    // ğŸ”« MAGAZINE LEFT CLICK â†’ TAK
+    if (cached.magazineInstance != null &&
+        eventData.button == PointerEventData.InputButton.Left)
+    {
+        var pw = FindObjectOfType<PlayerWeapon>();
+        if (pw == null) return;
+
+        pw.TryEquipMagazineFromInventory(
+            cached.magazineInstance
+        );
     }
+    if (cached.magazineInstance != null)
+{
+    owner.SelectMagazine(cached.magazineInstance);
+    return;
+}
+
+}
+
+
 
     // ---- DRAG & DROP ----
 
@@ -3151,11 +3406,15 @@ public class InventoryUI : MonoBehaviour
 
     [Header("Visual")]
     public int slotCount = 30;
+    public MagazineInstance selectedMagazine;
+    public MagazineLoadPanel magazineLoadPanel;
+
 
     private InventorySlotUI[] slots;
 
     void Awake()
     {
+        
         if (inventory == null)
             inventory = Inventory.Instance;
 
@@ -3180,7 +3439,18 @@ public class InventoryUI : MonoBehaviour
     
 }
 
-
+    public void SelectMagazine(MagazineInstance mag)
+{
+    selectedMagazine = mag;
+    UpdateMagazinePanel();
+}
+void UpdateMagazinePanel()
+{
+    if (selectedMagazine != null)
+        magazineLoadPanel.Show(selectedMagazine);
+    else
+        magazineLoadPanel.Hide();
+}
 
     void OnEnable()
     {
@@ -3333,21 +3603,23 @@ using TMPro;
 public class DamagePopup : MonoBehaviour
 {
     public TextMeshProUGUI textMesh;
-    private float floatSpeed = 25f;
+
+    private RectTransform rect;
+    private float floatSpeed = 40f;
     private float fadeDuration = 1.2f;
     private float elapsed = 0f;
+
     private Color startColor = Color.red;
+
+    private void Awake()
+    {
+        rect = GetComponent<RectTransform>();
+    }
 
     public void Setup(int damage)
     {
         if (textMesh == null)
             textMesh = GetComponent<TextMeshProUGUI>();
-
-        if (textMesh == null)
-        {
-            Debug.LogError("âŒ TextMeshProUGUI bileÅŸeni yok!");
-            return;
-        }
 
         textMesh.text = damage.ToString();
         textMesh.color = startColor;
@@ -3355,14 +3627,13 @@ public class DamagePopup : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(Vector3.up * floatSpeed * Time.deltaTime);
+        // ğŸ”¥ UI UZAYINDA YUKARI KAY
+        rect.anchoredPosition += Vector2.up * floatSpeed * Time.deltaTime;
+
         elapsed += Time.deltaTime;
 
-        if (textMesh != null)
-        {
-            float t = elapsed / fadeDuration;
-            textMesh.color = Color.Lerp(startColor, Color.clear, t);
-        }
+        float t = elapsed / fadeDuration;
+        textMesh.color = Color.Lerp(startColor, Color.clear, t);
 
         if (elapsed >= fadeDuration)
             Destroy(gameObject);
@@ -3370,45 +3641,41 @@ public class DamagePopup : MonoBehaviour
 }
 using UnityEngine;
 using TMPro;
-using UnityEngine.EventSystems;
 
 public class DamagePopupManager : MonoBehaviour
 {
     public static DamagePopupManager Instance;
 
     public GameObject popupPrefab;
-    public RectTransform popupParent; // MainCanvas
+    public RectTransform popupParent; // DamagePopups
     public Camera mainCam;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        if (mainCam == null) mainCam = Camera.main;
+        if (mainCam == null)
+            mainCam = Camera.main;
     }
 
-    public void SpawnPopup(Vector3 worldPosition, int damageAmount)
+    public void SpawnPopup(Vector3 worldPos, int damage)
     {
-        if (popupPrefab == null || popupParent == null)
-        {
-            Debug.LogError("âŒ DamagePopupManager: Prefab veya parent eksik!");
-            return;
-        }
+        if (!popupPrefab || !popupParent) return;
 
-        // World position â†’ screen position
-        Vector3 screenPos = mainCam.WorldToScreenPoint(worldPosition + Vector3.up * 1f);
+        Vector3 screenPos = mainCam.WorldToScreenPoint(worldPos + Vector3.up * 1f);
 
-        // Screen position â†’ local UI position
-        Vector2 localPos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(popupParent, screenPos, mainCam, out localPos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            popupParent,
+            screenPos,
+            mainCam,               // âš ï¸ Screen Space - Overlay MANTIÄI
+            out Vector2 localPos
+        );
 
         GameObject popup = Instantiate(popupPrefab, popupParent);
         popup.GetComponent<RectTransform>().anchoredPosition = localPos;
 
-        var damageScript = popup.GetComponent<DamagePopup>();
-        if (damageScript != null)
-            damageScript.Setup(damageAmount);
+        popup.GetComponent<DamagePopup>()?.Setup(damage);
     }
 }
 // DayNightCycle.cs
@@ -3775,50 +4042,43 @@ public class GameSceneBootstrap : MonoBehaviour
     public CursorLockMode lockMode = CursorLockMode.Confined;
 
     void Awake()
+{
+    Time.timeScale = 1f;
+
+    Cursor.visible   = !hideCursorInGame;
+    Cursor.lockState = lockMode;
+
+    // SADECE input map ayarÄ± (pause state'e dokunmaz)
+    foreach (var pi in FindObjectsOfType<PlayerInput>(includeInactive: true))
     {
-        // Oyun akÄ±ÅŸÄ± aÃ§Ä±k olsun
-        Time.timeScale = 1f;
-
-        // Cursor ayarÄ±
-        Cursor.visible   = !hideCursorInGame;
-        Cursor.lockState = lockMode;
-
-        // ğŸ”§ HATA VEREN SATIRI SÄ°L:
-        // PauseMenu.IsPaused = false;
-
-        // âœ… Yerine ÅŸunu kullan:
-        var pm = PauseMenu.Instance ?? FindObjectOfType<PauseMenu>();
-        if (pm != null) pm.ResumeGame();
-
-        
-
-        // PlayerInput action map'i Gameplay'e zorla (kullanÄ±yorsan)
-        foreach (var pi in FindObjectsOfType<PlayerInput>(includeInactive: true))
-        {
-            if (pi.actions != null && pi.actions.FindActionMap("Gameplay") != null)
-                pi.SwitchCurrentActionMap("Gameplay");
-        }
-
-        // EventSystem Ã§akÄ±ÅŸmasÄ±nÄ± Ã¶nle
-        var allEventSystems = FindObjectsOfType<EventSystem>();
-        for (int i = 1; i < allEventSystems.Length; i++)
-            Destroy(allEventSystems[i].gameObject);
+        if (pi.actions != null && pi.actions.FindActionMap("Gameplay") != null)
+            pi.SwitchCurrentActionMap("Gameplay");
     }
+
+    // EventSystem temizliÄŸi
+    var allEventSystems = FindObjectsOfType<EventSystem>();
+    for (int i = 1; i < allEventSystems.Length; i++)
+        Destroy(allEventSystems[i].gameObject);
 }
-// Assets/Scripts/Managers/GameStateManager.cs
+
+}
+using UnityEngine;
 public static class GameStateManager
 {
-    public static bool IsGamePaused =>
-        PauseMenu.IsPaused ||
-        (UIPanelSystem.Instance != null && UIPanelSystem.Instance.IsPanelOpen());
-    public static bool IsGameOver = false;
+    public static bool IsGamePaused { get; private set; }
+    public static bool IsGameOver { get; set; }
+
+    public static void SetPaused(bool paused)
+    {
+        IsGamePaused = paused;
+        Time.timeScale = paused ? 0f : 1f;
+    }
 
     public static void ResetGameState()
     {
         IsGameOver = false;
+        SetPaused(false);
     }
-
-
 }
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -4040,26 +4300,6 @@ public class WanderArea : MonoBehaviour
 #endif
 }
 using UnityEngine;
-using UnityEngine.UI;
-
-public static class CanvasScalerUpdater
-{
-    public static void UpdateAllCanvasScalers()
-    {
-        float x = PlayerPrefs.GetFloat("ResX", 1920);
-        float y = PlayerPrefs.GetFloat("ResY", 1080);
-
-        CanvasScaler[] scalers = Resources.FindObjectsOfTypeAll<CanvasScaler>();
-
-        foreach (CanvasScaler scaler in scalers)
-        {
-            // Sadece sahnedeki CanvasScalerâ€™lara uygula (Prefab deÄŸil)
-            if (scaler.gameObject.scene.isLoaded)
-                scaler.referenceResolution = new Vector2(x, y);
-        }
-    }
-}
-using UnityEngine;
 
 public class PanelController : MonoBehaviour
 {
@@ -4078,6 +4318,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
 {
+    public static PlayerInputRouter Instance;
+
     private PlayerControls controls;
 
     [Header("Panels")]
@@ -4089,9 +4331,38 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
    
     [Header("References")]
     public CaravanInteraction caravan; // Craft iÃ§in gerekecek
+    
+
+private bool IsPauseOpen()
+{
+    return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
+}
+
+private void Update()
+{
+    // Craft aÃ§Ä±ksa ama artÄ±k menzilde deÄŸilsek â†’ kapat
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        if (caravan == null || !caravan.playerInRange)
+        {
+            craftPanel.SetActive(false);
+            GameStateManager.SetPaused(false);
+        }
+    }
+}
+public void ForceCloseCraft()
+{
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        craftPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+    }
+}
+
 
     private void Awake()
     {
+        Instance = this;
         controls = new PlayerControls();
         controls.Gameplay.SetCallbacks(this);
     }
@@ -4106,6 +4377,7 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     public void OnInventory(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
+        if (IsPauseOpen()) return;
 
         TogglePanel(inventoryPanel);
     }
@@ -4115,19 +4387,28 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     // CRAFT (C)
     // ================================
     public void OnCraft(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (IsPauseOpen()) return;
+
+    // âŒ Caravan yoksa veya menzilde deÄŸilse â†’ aÃ§ma
+    if (caravan == null || !caravan.playerInRange)
     {
-        if (!ctx.performed) return;
-
-        // â— Craft sadece karavana yakÄ±nken aÃ§Ä±labilir
-        if (caravan != null && !caravan.playerInRange)
-        {
-            Debug.Log("Craft aÃ§Ä±lamadÄ± â†’ Karavana yakÄ±n olmalÄ±sÄ±n.");
-            return;
-        }
-
-        TogglePanel(craftPanel);
+        Debug.Log("Craft aÃ§Ä±lamadÄ± â†’ Caravan menzilinde deÄŸilsin.");
+        return;
     }
 
+    TogglePanel(craftPanel);
+}
+
+
+public void SetGameplayInput(bool enabled)
+{
+    if (enabled)
+        controls.Gameplay.Enable();
+    else
+        controls.Gameplay.Disable();
+}
 
     // ================================
     // TRADE (E)
@@ -4135,6 +4416,7 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     public void OnInteract(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
+        if (IsPauseOpen()) return;
 
         if (NPCInteraction.Instance == null) return;
         if (!NPCInteraction.Instance.PlayerIsNear()) return;
@@ -4146,45 +4428,55 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     // ================================
     // ESC (PAUSE + PANEL KAPAMA)
     // ================================
-    public void OnEscape(InputAction.CallbackContext ctx)
+ public void OnEscape(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (GameStateManager.IsGameOver) return;
+
+    // 1ï¸âƒ£ Pause AÃ‡IKSA â†’ sadece Pause kapansÄ±n
+    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
     {
-        if (!ctx.performed) return;
-
-        // 1) Trade aÃ§Ä±k â†’ kapat
-        if (tradePanel != null && tradePanel.activeSelf)
-        {
-            tradePanel.SetActive(false);
-            
-            return;
-        }
-
-        // 2) Inventory kapat
-        if (inventoryPanel != null && inventoryPanel.activeSelf)
-        {
-            inventoryPanel.SetActive(false);
-            
-            return;
-        }
-
-        // 3) Craft kapat
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            
-            return;
-        }
-
-        // 4) Pause aÃ§Ä±k â†’ kapat
-        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-        {
-            pauseMenuPanel.SetActive(false);
-            Time.timeScale = 0f;
-            return;
-        }
-
-        // 5) HiÃ§ panel yok â†’ pause aÃ§
-        TogglePanel(pauseMenuPanel);
+        PauseMenu.Instance.HidePause();
+        GameStateManager.SetPaused(false);
+        return;
     }
+
+    // 2ï¸âƒ£ Trade aÃ§Ä±ksa â†’ kapat
+    if (tradePanel != null && tradePanel.activeSelf)
+    {
+        tradePanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+        return;
+    }
+
+    // 3ï¸âƒ£ Craft aÃ§Ä±ksa â†’ kapat
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        craftPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+        return;
+    }
+
+    // 4ï¸âƒ£ Inventory aÃ§Ä±ksa â†’ kapat
+    if (inventoryPanel != null && inventoryPanel.activeSelf)
+    {
+        inventoryPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+        return;
+    }
+
+    // 5ï¸âƒ£ HiÃ§bir panel aÃ§Ä±k deÄŸil â†’ Pause aÃ§
+    CloseAllPanels();                 // ğŸ”’ GÃ¼venlik: baÅŸka panel kalmasÄ±n
+    PauseMenu.Instance.ShowPause();
+    GameStateManager.SetPaused(true);
+}
+
+
+
+
+
+
+
 
 
     // ================================
@@ -4244,7 +4536,8 @@ using TMPro;
 
 public class ResolutionChanger : MonoBehaviour
 {
-    public TMP_Dropdown resolutionDropdown;
+    private TMP_Dropdown resolutionDropdown;
+    private int lastIndex = -1;
 
     private readonly Vector2[] resolutions =
     {
@@ -4270,42 +4563,36 @@ public class ResolutionChanger : MonoBehaviour
         new Vector2(1600,900),
         new Vector2(1680,1050),
         new Vector2(1920,1080),
-        
     };
+
+    private void Awake()
+    {
+        resolutionDropdown = GetComponent<TMP_Dropdown>();
+    }
 
     private void Start()
     {
         int saved = PlayerPrefs.GetInt("ResolutionIndex", 0);
+
+        resolutionDropdown.onValueChanged.RemoveAllListeners();
         resolutionDropdown.value = saved;
+        lastIndex = saved;
+
         resolutionDropdown.onValueChanged.AddListener(SetResolution);
     }
 
     private void SetResolution(int index)
     {
-        Vector2 res = resolutions[index];
+        if (index == lastIndex) return;
+        lastIndex = index;
 
-        PlayerPrefs.SetFloat("ResX", res.x);
-        PlayerPrefs.SetFloat("ResY", res.y);
+        Vector2 res = resolutions[index];
+        Screen.SetResolution((int)res.x, (int)res.y, FullScreenMode.Windowed);
+
         PlayerPrefs.SetInt("ResolutionIndex", index);
         PlayerPrefs.Save();
 
-        CanvasScalerUpdater.UpdateAllCanvasScalers();
-    }
-}
-using UnityEngine;
-using System.Collections;
-
-public class ResolutionInitializer : MonoBehaviour
-{
-    private void Start()
-    {
-        StartCoroutine(ApplyDelayed());
-    }
-
-    IEnumerator ApplyDelayed()
-    {
-        yield return null; // 1 frame gecikme
-        CanvasScalerUpdater.UpdateAllCanvasScalers();
+        Debug.Log($"Resolution changed to {res.x}x{res.y}");
     }
 }
 using UnityEngine;
@@ -4627,7 +4914,6 @@ public class CreditsBuilder : MonoBehaviour
 }
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;
 
 public class MainMenu : MonoBehaviour
 {
@@ -4639,54 +4925,47 @@ public class MainMenu : MonoBehaviour
     public GameObject mainPanel;
     public GameObject settingsPanel;
     public GameObject creditsPanel;
-    public GameObject levelPanel;
 
-    private bool isInSettings = false;
-    private bool isInLevels = false;
-    private bool isInCredits = false;
-
-    private void Start()
+    void Start()
     {
-        // ğŸ”¥ Oyun sahnesinden gelen MusicManager varsa yok et
+        // MenÃ¼de oyun mÃ¼ziÄŸi kalmasÄ±n
         if (MusicManager.Instance != null)
             Destroy(MusicManager.Instance.gameObject);
 
-        // ğŸ”¥ TimeScale sÄ±fÄ±r kalmÄ±ÅŸ olabilir. MenÃ¼de kesinlikle 1 olsun.
         Time.timeScale = 1f;
 
-        StartCoroutine(PlayMusicWithDelay(0.25f));  
+        PlayMenuMusic();
 
-        // Devam Et butonunu aktif/pasif yap
-        var continueBtn = GameObject.Find("Continue Button")?.GetComponent<UnityEngine.UI.Button>();
-        if (continueBtn != null)
-            continueBtn.interactable = SaveSystem.HasSave();
+        InitContinueButton();
     }
 
-    private System.Collections.IEnumerator PlayMusicWithDelay(float delay)
+    // ---------------- MUSIC ----------------
+
+    void PlayMenuMusic()
     {
-        yield return new WaitForSecondsRealtime(delay);
-
-        if (musicSource != null && menuMusic != null)
+        if (musicSource == null || menuMusic == null)
         {
-            musicSource.clip = menuMusic;
-            musicSource.loop = true;
-            musicSource.volume = 1f;
-
-            // Mixer Ã§Ä±kÄ±ÅŸÄ±nÄ± bypass et â†’ test iÃ§in en temiz yÃ¶ntem
-            musicSource.outputAudioMixerGroup = null;
-
-            musicSource.Play();
-            Debug.Log("ğŸµ Ana MenÃ¼ mÃ¼ziÄŸi BAÅLADI!");
+            Debug.LogError("âŒ MenÃ¼ mÃ¼ziÄŸi atanmadÄ±!");
+            return;
         }
-        else
-        {
-            Debug.LogError("âŒ musicSource veya menuMusic atanmadÄ±!");
-        }
+
+        musicSource.clip = menuMusic;
+        musicSource.loop = true;
+        musicSource.volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        musicSource.outputAudioMixerGroup = null;
+        musicSource.Play();
     }
 
-    // -----------------------------------
-    //           OYUN BAÅLATMA
-    // -----------------------------------
+    // ---------------- BUTTONS ----------------
+
+    void InitContinueButton()
+    {
+        var btn = GameObject.Find("Continue Button")
+            ?.GetComponent<UnityEngine.UI.Button>();
+
+        if (btn != null)
+            btn.interactable = SaveSystem.HasSave();
+    }
 
     public void YeniOyunaBasla()
     {
@@ -4697,172 +4976,93 @@ public class MainMenu : MonoBehaviour
 
     public void DevamEt()
     {
-        if (!SaveSystem.HasSave())
-            return;
+        if (!SaveSystem.HasSave()) return;
 
         SaveBootstrap.ShouldLoadFromSave = true;
         SceneManager.LoadScene("Bolum1");
-    }
-
-    // -----------------------------------
-    //           PANEL KONTROLÃœ
-    // -----------------------------------
-    public void OpenSettings()
-    {
-        mainPanel.SetActive(false);
-        settingsPanel.SetActive(true);
-        isInSettings = true;
-    }
-
-    public void CloseSettings()
-    {
-        settingsPanel.SetActive(false);
-        mainPanel.SetActive(true);
-        isInSettings = false;
-    }
-
-    public void OpenLevels()
-    {
-        mainPanel.SetActive(false);
-        levelPanel.SetActive(true);
-        isInLevels = true;
-    }
-
-    public void CloseLevels()
-    {
-        levelPanel.SetActive(false);
-        mainPanel.SetActive(true);
-        isInLevels = false;
-    }
-
-    public void OpenCredits()
-    {
-        mainPanel.SetActive(false);
-        creditsPanel.SetActive(true);
-        isInCredits = true;
-    }
-
-    public void CloseCredits()
-    {
-        creditsPanel.SetActive(false);
-        mainPanel.SetActive(true);
-        isInCredits = false;
     }
 
     public void QuitGame()
     {
         Application.Quit();
     }
+
+    // ---------------- PANELS ----------------
+
+    public void OpenSettings()
+    {
+        OpenPanel(settingsPanel);
+    }
+
+
+
+    public void OpenCredits()
+    {
+        OpenPanel(creditsPanel);
+    }
+
+public void CloseCredits()
+    {
+        creditsPanel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
+    public void CloseSubPanel(GameObject panel)
+    {
+        panel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
+
+    void OpenPanel(GameObject panel)
+    {
+        mainPanel.SetActive(false);
+        panel.SetActive(true);
+    }
+    public void CloseSettings()
+{
+    settingsPanel.SetActive(false);
+    mainPanel.SetActive(true);
+}
+
 }
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;
-
 public class PauseMenu : MonoBehaviour
 {
     public static PauseMenu Instance { get; private set; }
 
-    public GameObject pausePanel;
-    public GameObject settingsPanel;
-    private bool justClosedSettings = false;
-
-
-    public static bool IsPaused { get; private set; }
-
-    private PlayerControls controls;
-
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
-
-        controls = new PlayerControls();
-        controls.Gameplay.Escape.performed += ctx => OnEscapePressed();
     }
 
-    private void OnEnable()
+    public GameObject pausePanel;
+    public GameObject settingsPanel;
+
+
+
+    public void ShowPause()
     {
-        controls.Gameplay.Enable();
-    }
-
-    private void OnDisable()
-    {
-        controls.Gameplay.Disable();
-    }
-
-   private void OnEscapePressed()
-{
-    // ğŸ”¥ Game Over durumunda ESC hiÃ§bir ÅŸey yapamaz
-    if (GameStateManager.IsGameOver)
-        return;
-
-    // ESC korumasÄ± (SettingsPanel yeni kapandÄ±ysa)
-    if (justClosedSettings)
-    {
-        justClosedSettings = false; // Bir kere blokla
-        return;
-    }
-
-    if (settingsPanel.activeSelf)
-    {
-        CloseSettings();
-        return;
-    }
-
-    if (IsPaused)
-        ResumeGame();
-    else
-        PauseGame();
-}
-
-
-    public void PauseGame()
-    {
-        IsPaused = true;
         pausePanel.SetActive(true);
         settingsPanel.SetActive(false);
-        Time.timeScale = 0f;
     }
 
-    public void ResumeGame()
+    public void HidePause()
     {
-        IsPaused = false;
         pausePanel.SetActive(false);
         settingsPanel.SetActive(false);
         Time.timeScale = 1f;
     }
 
-    public void OpenSettings()
+    public void CloseSettings()
     {
-        // Settings aÃ§Ä±ldÄ±ÄŸÄ±nda PauseMenu gizlenir ama oyun duraklamaya devam eder
-        IsPaused = true;
-        pausePanel.SetActive(false);
-        settingsPanel.SetActive(true);
+        settingsPanel.SetActive(false);
+        pausePanel.SetActive(true);
     }
-
-   public void CloseSettings()
-{
-    // Sadece SettingsPanel kapanÄ±r
-    settingsPanel.SetActive(false);
-
-    // PauseMenuPanel tekrar gÃ¶rÃ¼nÃ¼r olmalÄ±
-    pausePanel.SetActive(true);
-
-    // Oyun pause durumda kalmalÄ±
-    IsPaused = true;
-    Time.timeScale = 0f;
-
-    // ESCâ€™nin hemen PauseMenuâ€™yu kapatmamasÄ± iÃ§in 0.2 sn koruma
-    justClosedSettings = true;
-    Invoke(nameof(ResetSettingsCloseFlag), 0.2f);
-}
-
-
-private void ResetSettingsCloseFlag()
-{
-    justClosedSettings = false;
-}
-
-
 }
 using UnityEngine;
 using UnityEngine.UI;
@@ -4871,59 +5071,117 @@ using System.Collections.Generic;
 
 public class SettingsMenu : MonoBehaviour
 {
-    public GameObject panel;
+    [Header("Audio")]
     public Slider masterSlider;
-
     public Slider musicSlider;
     public Slider sfxSlider;
+
+    [Header("Panel")]
+public GameObject panel;
+
+
+    [Header("Video")]
     public TMP_Dropdown qualityDropdown;
     public Toggle fullscreenToggle;
     public TMP_Dropdown resolutionDropdown;
-    private Resolution[] resolutions;
 
-    private void Start()
+    Resolution[] resolutions;
+    bool initialized = false;
+
+    // -------------------------------------------------
+    // UNITY
+    // -------------------------------------------------
+
+    void Start()
     {
-        // AyarlarÄ± yÃ¼kle
-        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", 1f);
-        masterSlider.onValueChanged.AddListener(SetMasterVolume);
-
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1f);
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 1f);
-        qualityDropdown.value = PlayerPrefs.GetInt("QualityLevel", QualitySettings.GetQualityLevel());
-        fullscreenToggle.isOn = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-
+        LoadPrefs();
+        RegisterListeners();
         ApplySettings();
+    }
 
+    void OnEnable()
+    {
+        // Panel her aÃ§Ä±ldÄ±ÄŸÄ±nda resolution gÃ¼venli ÅŸekilde doldurulsun
+        InitResolutionDropdown();
+    }
+
+    // -------------------------------------------------
+    // INIT
+    // -------------------------------------------------
+
+    void LoadPrefs()
+    {
+        masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MasterVolume", 1f));
+        musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicVolume", 1f));
+        sfxSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("SFXVolume", 1f));
+
+        qualityDropdown.SetValueWithoutNotify(
+            PlayerPrefs.GetInt("QualityLevel", QualitySettings.GetQualityLevel())
+        );
+
+        fullscreenToggle.SetIsOnWithoutNotify(
+            PlayerPrefs.GetInt("Fullscreen", 1) == 1
+        );
+    }
+
+    void RegisterListeners()
+    {
+        if (initialized) return;
+        initialized = true;
+
+        if (AudioManager.Instance != null)
+        {
+            masterSlider.onValueChanged.AddListener(AudioManager.Instance.SetMasterVolume);
+            musicSlider.onValueChanged.AddListener(AudioManager.Instance.SetMusicVolume);
+            sfxSlider.onValueChanged.AddListener(AudioManager.Instance.SetSFXVolume);
+        }
+
+        qualityDropdown.onValueChanged.AddListener(SetQuality);
+        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+        resolutionDropdown.onValueChanged.AddListener(SetResolution);
+    }
+
+    // -------------------------------------------------
+    // APPLY
+    // -------------------------------------------------
+
+    void ApplySettings()
+    {
+        SetQuality(qualityDropdown.value);
+        SetFullscreen(fullscreenToggle.isOn);
+
+        int resIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
+        SetResolution(resIndex);
+    }
+
+    // -------------------------------------------------
+    // RESOLUTION
+    // -------------------------------------------------
+
+    void InitResolutionDropdown()
+    {
         resolutions = Screen.resolutions;
         resolutionDropdown.ClearOptions();
 
-        int currentResolutionIndex = 0;
         List<string> options = new List<string>();
+        int currentIndex = 0;
 
         for (int i = 0; i < resolutions.Length; i++)
         {
-            string option = $"{resolutions[i].width} x {resolutions[i].height} ({resolutions[i].refreshRate}Hz)";
-            options.Add(option);
+            Resolution r = resolutions[i];
+            options.Add($"{r.width} x {r.height} ({r.refreshRate}Hz)");
 
-            if (resolutions[i].width == Screen.currentResolution.width &&
-                resolutions[i].height == Screen.currentResolution.height)
-            {
-                currentResolutionIndex = i;
-            }
+            if (r.width == Screen.width && r.height == Screen.height)
+                currentIndex = i;
         }
 
         resolutionDropdown.AddOptions(options);
-        resolutionDropdown.value = PlayerPrefs.GetInt("ResolutionIndex", currentResolutionIndex);
+
+        int savedIndex = PlayerPrefs.GetInt("ResolutionIndex", currentIndex);
+        resolutionDropdown.SetValueWithoutNotify(savedIndex);
         resolutionDropdown.RefreshShownValue();
-
-        resolutionDropdown.onValueChanged.AddListener(SetResolution);
-        musicSlider.onValueChanged.AddListener(SetMusicVolume);
-        sfxSlider.onValueChanged.AddListener(SetSFXVolume);
-        qualityDropdown.onValueChanged.AddListener(SetQuality);
-        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
     }
-
-    public void OpenPanel()
+public void OpenPanel()
     {
         panel.SetActive(true);
     }
@@ -4933,56 +5191,51 @@ public class SettingsMenu : MonoBehaviour
         panel.SetActive(false);
 
         // EÄŸer ayarlar menÃ¼sÃ¼ pause menÃ¼sÃ¼nden aÃ§Ä±ldÄ±ysa, geri dÃ¶n
-        if (PauseMenu.Instance != null && PauseMenu.IsPaused)
+        if (PauseMenu.Instance != null && GameStateManager.IsGamePaused)
         {
             PauseMenu.Instance.CloseSettings();
         }
     }
 
-    
     void SetResolution(int index)
     {
-        Resolution res = resolutions[index];
-        Screen.SetResolution(res.width, res.height, Screen.fullScreenMode);
+        if (resolutions == null || index < 0 || index >= resolutions.Length)
+            return;
+
+        Resolution r = resolutions[index];
+
+        Screen.SetResolution(
+            r.width,
+            r.height,
+            fullscreenToggle.isOn
+                ? FullScreenMode.ExclusiveFullScreen
+                : FullScreenMode.Windowed
+        );
+
         PlayerPrefs.SetInt("ResolutionIndex", index);
-        Debug.Log($"ğŸ“º Ã‡Ã¶zÃ¼nÃ¼rlÃ¼k deÄŸiÅŸti: {res.width}x{res.height}");
+        PlayerPrefs.Save();
+
+        Debug.Log($"ğŸ“º Resolution applied: {r.width}x{r.height}");
     }
 
+    // -------------------------------------------------
+    // VIDEO
+    // -------------------------------------------------
 
-    void SetMasterVolume(float value)
+    void SetFullscreen(bool isFullscreen)
     {
-        AudioManager.Instance?.SetMasterVolume(value);
-    }
+        Screen.fullScreenMode = isFullscreen
+            ? FullScreenMode.ExclusiveFullScreen
+            : FullScreenMode.Windowed;
 
-
-    void SetMusicVolume(float value)
-    {
-        AudioManager.Instance?.SetMusicVolume(value);
-    }
-
-    void SetSFXVolume(float value)
-    {
-        AudioManager.Instance?.SetSFXVolume(value);
+        PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
+        PlayerPrefs.Save();
     }
 
     void SetQuality(int index)
     {
         QualitySettings.SetQualityLevel(index);
         PlayerPrefs.SetInt("QualityLevel", index);
-    }
-
-    void SetFullscreen(bool isFullscreen)
-    {
-        Screen.fullScreen = isFullscreen;
-        PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
-    }
-
-    void ApplySettings()
-    {
-        SetMusicVolume(musicSlider.value);
-        SetSFXVolume(sfxSlider.value);
-        SetQuality(qualityDropdown.value);
-        SetFullscreen(fullscreenToggle.isOn);
     }
 }
 public enum SettingsMenuOrigin
@@ -5381,11 +5634,26 @@ public class TradeOfferButton : MonoBehaviour
 
     void Awake()
     {
-        if (!iconImage && tradeButton)
-            iconImage = tradeButton.GetComponent<Image>();
+        
 
         EnsureOfferText();
     }
+
+    void OnEnable()
+{
+    EnsureOfferText();
+    ForceRebuild();
+}
+
+private void ForceRebuild()
+{
+    Canvas.ForceUpdateCanvases();
+
+    var rt = GetComponent<RectTransform>();
+    if (rt)
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+}
+
 
     private void EnsureOfferText()
     {
@@ -5469,32 +5737,24 @@ public class TradeOfferButton : MonoBehaviour
 
         var le = offerTextInstance.GetComponent<LayoutElement>();
         if (!le) le = offerTextInstance.gameObject.AddComponent<LayoutElement>();
-        le.ignoreLayout = true;
+        le.ignoreLayout = false;
     }
 
     private void ApplyIconForOffer(TradeOffer offer)
-    {
-        if (!iconImage) return;
+{
+    if (!iconImage) return;
 
-        Sprite s = null;
+    Sprite s = null;
 
-        if (offer.rewardKind == RewardKind.WeaponPart)
-        {
-            if (offer.partToGive != null)
-                s = offer.partToGive.icon;
-        }
-        else if (offer.rewardKind == RewardKind.Resource)
-        {
-            if (offer.rewardItemSO != null)
-                s = offer.rewardItemSO.icon;
-        }
+    if (offer.rewardKind == RewardKind.WeaponPart)
+        s = offer.partToGive?.icon;
+    else if (offer.rewardKind == RewardKind.Resource)
+        s = offer.rewardItemSO?.icon;
 
-        iconImage.sprite = s ? s : fallbackSprite;
-        iconImage.enabled = iconImage.sprite != null;
+    iconImage.sprite = s ? s : fallbackSprite;
+    iconImage.enabled = iconImage.sprite != null;
+}
 
-        if (iconImage.enabled)
-            iconImage.preserveAspect = true;
-    }
 
     private void OnTradeClicked()
     {
@@ -5757,6 +6017,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
 {
+    if (GameStateManager.IsGamePaused)
+    {
+        rb.linearVelocity = Vector2.zero;
+        return;
+    }
     float currentSpeed = moveSpeed;
     bool isMoving = moveInput.magnitude > 0.1f;
 
@@ -6229,6 +6494,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using System.Linq;
 
 [RequireComponent(typeof(AudioSource))]
 public class PlayerWeapon : MonoBehaviour
@@ -6253,6 +6519,27 @@ public class PlayerWeapon : MonoBehaviour
     public float muzzleFlashDuration = 0.05f;
     public float muzzleFlashIntensity = 3f;
     private Coroutine muzzleFlashCo;
+    [Header("Ammo Check")]
+    public float ammoCheckDuration = 0.35f;
+    public AudioClip ammoCheckSound;
+    public string ammoCheckAnimTrigger = "AmmoCheck"; // Animator’da Trigger
+    public AmmoCheckUI ammoCheckUI; // UI referansı (aşağıda yazacağım)
+    private bool isCheckingMag = false;
+
+    [Header("Reload Strategy")]
+    public ReloadStrategy reloadStrategy = ReloadStrategy.MostFull;
+
+    private MagazineInstance lastUsedMagazine;
+    private int lastMagIndex = -1;
+    public event System.Action<int, int> OnMagazineChanged;
+    // currentAmmo, capacity
+
+    public event System.Action<int> OnSpareMagazineCountChanged;
+    // yedek şarjör sayısı
+
+    public event System.Action<string> OnAmmoCheckFeedback;
+    // "Az mermi var", "Tam dolu" vs.
+
 
     [Header("Audio")]
     public AudioClip shootSound;
@@ -6268,13 +6555,19 @@ public class PlayerWeapon : MonoBehaviour
 
     private float lastAutoFireTime = 0f;
 
-    // NEW MAGAZINE SYSTEM
-    public MagazineItem currentMagazine;                 // Takılı şarjör
-    public List<MagazineItem> inventoryMags = new();     // Yedek şarjörler
 
-    // Reload Hold Detection
-    private float reloadPressTime;
+
+    // NEW MAGAZINE SYSTEM
+    public MagazineInstance currentMagazine;
+    public List<MagazineInstance> inventoryMags = new List<MagazineInstance>();
+
+
+    [Header("Reload Input")]
     public float reloadHoldThreshold = 0.4f;
+
+    private float reloadPressTime;
+    private bool reloadPressed;
+
 
     private void Awake()
     {
@@ -6295,6 +6588,99 @@ public class PlayerWeapon : MonoBehaviour
             LoadFromSlot(slotManager.activeSlotIndex);
         else
             Debug.LogError("[PlayerWeapon] Slot Manager null!");
+
+        CollectMagazinesFromInventory();
+    }
+
+    private void CollectMagazinesFromInventory()
+    {
+        inventoryMags.Clear();
+        currentMagazine = null;
+
+        var inv = Inventory.Instance;
+        if (inv == null) return;
+
+        for (int i = 0; i < inv.slots.Length; i++)
+        {
+            var slot = inv.slots[i];
+
+            if (slot == null || slot.magazineInstance == null)
+                continue;
+
+            var mag = slot.magazineInstance;
+
+            // 🔒 silaha uygun mu?
+            if (weaponData != null &&
+                mag.data != null &&
+                mag.data.ammoType == weaponData.ammoType)
+            {
+                inventoryMags.Add(mag);
+
+            }
+        }
+
+        // 🔥 otomatik en dolu şarjörü tak
+        if (inventoryMags.Count > 0)
+        {
+            currentMagazine = inventoryMags
+                .OrderByDescending(m => m.currentAmmo)
+                .First();
+
+            inventoryMags.Remove(currentMagazine);
+
+            Debug.Log(
+                $"[Weapon] Şarjör takıldı → {currentMagazine.currentAmmo}/{currentMagazine.data.capacity}"
+            );
+        }
+        else
+        {
+            Debug.Log("[Weapon] Uygun şarjör bulunamadı.");
+        }
+
+        inv.RaiseChanged();
+        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+    }
+
+    private MagazineInstance SelectNextMagazine()
+    {
+        if (inventoryMags == null || inventoryMags.Count == 0)
+            return null;
+
+        // 🔒 SADECE UYUMLU ŞARJÖRLER
+        var compatible = inventoryMags
+            .Where(m =>
+                m != null &&
+                m.data != null &&
+                IsMagazineCompatible(m)
+            )
+            .ToList();
+
+        if (compatible.Count == 0)
+            return null;
+
+        switch (reloadStrategy)
+        {
+            case ReloadStrategy.MostFull:
+                return compatible
+                    .OrderByDescending(m => m.currentAmmo)
+                    .First();
+
+            case ReloadStrategy.NextInList:
+                lastMagIndex = (lastMagIndex + 1) % compatible.Count;
+                return compatible[lastMagIndex];
+
+            case ReloadStrategy.LastUsed:
+                if (lastUsedMagazine != null &&
+                    compatible.Contains(lastUsedMagazine))
+                {
+                    return lastUsedMagazine;
+                }
+                return compatible
+                    .OrderByDescending(m => m.currentAmmo)
+                    .First();
+        }
+
+        return null;
     }
 
     // ============================
@@ -6344,37 +6730,87 @@ public class PlayerWeapon : MonoBehaviour
     // SHOOT (NEW INPUT SYSTEM)
     // ============================
 
-    private void HandleShootStart()
-    {
-
-        if (!weaponData.isAutomatic)
-            Shoot();
-    }
 
 
-    private void Update()
+private void Update()
 {
-    if (PauseMenu.IsPaused || weaponData == null || isReloading)
+    if (GameStateManager.IsGamePaused || weaponData == null)
         return;
 
-    // 🔫 Tekli atış (semi-auto)
+    // 🔫 Tekli atış
     if (!weaponData.isAutomatic)
     {
         if (Input.GetMouseButtonDown(0))
             Shoot();
     }
 
-    // 🔥 Otomatik atış (auto)
+    // 🔥 Otomatik atış
     if (weaponData.isAutomatic)
     {
         if (Input.GetMouseButton(0))
             AutoFire();
     }
+
+    // 🔁 R BASILDI
+    if (Input.GetKeyDown(KeyCode.R))
+    {
+        reloadPressTime = Time.time;
+        reloadPressed = true;
+    }
+
+    // 🔁 R BIRAKILDI
+    if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
+    {
+        reloadPressed = false;
+
+        float heldTime = Time.time - reloadPressTime;
+
+        // ⛔ Reload / Check çakışması burada engellenir
+        if (isReloading || isCheckingMag)
+            return;
+
+        if (heldTime >= reloadHoldThreshold)
+        {
+            StartCoroutine(MagCheck());
+        }
+        else
+        {
+            TryReload();
+        }
+    }
 }
+
+    public bool TryEquipMagazineFromInventory(MagazineInstance mag)
+    {
+        if (mag == null || mag.data == null)
+            return false;
+
+        if (!CanEquipMagazine(mag))
+        {
+            ammoCheckUI?.Show("Bu şarjör uyumsuz!");
+            return false;
+        }
+
+        if (isReloading || isCheckingMag)
+            return false;
+
+        currentMagazine = mag;
+
+        Debug.Log(
+            $"[Weapon] Şarjör takıldı → " +
+            $"{mag.currentAmmo}/{mag.data.capacity}"
+        );
+
+        Inventory.Instance.RaiseChanged();
+        return true;
+    }
 
 
     private void AutoFire()
     {
+        if (isReloading || isCheckingMag)
+    return;
+
         float fireDelay = 1f / weaponData.fireRate;
 
         if (Time.time - lastAutoFireTime >= fireDelay)
@@ -6384,25 +6820,131 @@ public class PlayerWeapon : MonoBehaviour
         }
     }
 
+    private void TryReload()
+    {
+        if (isCheckingMag)
+    return;
+
+        if (isReloading || isCheckingMag)
+            return;
+        if (inventoryMags.Count == 0)
+{
+    ammoCheckUI?.Show("Yedek şarjör yok.");
+    return;
+}
+
+        if (currentMagazine == null || currentMagazine.data == null)
+        {
+            ammoCheckUI?.Show("Şarjör takılı değil.");
+            return;
+        }
+        
+        if (!CanEquipMagazine(currentMagazine))
+        {
+            ammoCheckUI?.Show("Uyumsuz şarjör!");
+            return;
+        }
+
+        if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
+        {
+            ammoCheckUI?.Show("Şarjör zaten dolu.");
+            return;
+        }
+
+        StartCoroutine(ReloadRoutine());
+    }
+
+
+
     // ============================
     // ACTUAL SHOOT LOGIC
     // ============================
     public void Shoot()
     {
-        if (isReloading) return;
+        if (currentMagazine == null)
+{
+    PlayEmptyClipSound();
+    ammoCheckUI?.Show("Şarjör yok.");
+    return;
+}
 
-        if (currentMagazine == null || currentMagazine.currentAmmo <= 0)
+        if (isReloading || isCheckingMag)
+    return;
+
+        if (currentMagazine == null || currentMagazine.data == null)
         {
-            PlayEmptyClipSound();
-            Debug.Log("Boş! Ateş yok.");
+            Debug.Log("Şarjör takılı değil.");
             return;
         }
 
-        currentMagazine.currentAmmo--;
+        if (weaponData == null || weaponData.ammoType == null)
+        {
+            Debug.LogError("WeaponData veya ammoType NULL!");
+            return;
+        }
 
+        if (currentMagazine.data == null || currentMagazine.data.ammoType == null)
+        {
+            Debug.LogError("MagazineData veya ammoType NULL!");
+            return;
+        }
+
+        if (isReloading) return;
+
+        if (currentMagazine == null)
+        {
+            PlayEmptyClipSound();
+            Debug.Log("Şarjör takılı değil.");
+            return;
+        }
+
+        if (currentMagazine.data.ammoType != weaponData.ammoType)
+        {
+            Debug.LogError("UYUMSUZ ŞARJÖR TAKILI!");
+            return;
+        }
+
+        if (currentMagazine.currentAmmo <= 0)
+        {
+            PlayEmptyClipSound();
+            Debug.Log("Şarjör boş.");
+            return;
+        }
+        if (currentMagazine == null || currentMagazine.currentAmmo <= 0)
+        {
+            PlayEmptyClipSound();
+            Debug.Log("Boş şarjör!");
+            return;
+        }
+
+
+        currentMagazine.currentAmmo--;
         RangedAttack();
-        Debug.Log($"Ateş edildi! Şarjör: {currentMagazine.currentAmmo}/{currentMagazine.capacity}");
+        lastUsedMagazine = currentMagazine;
+        OnMagazineChanged?.Invoke(
+            currentMagazine.currentAmmo,
+            currentMagazine.data.capacity
+        );
+
+
+
     }
+    public MagazineInstance GetCurrentMagazine()
+    {
+        return currentMagazine;
+    }
+
+    public void SetCurrentMagazine(MagazineInstance mag)
+    {
+        currentMagazine = mag;
+    }
+
+    public bool CanEquipMagazine(MagazineInstance mag)
+    {
+        if (mag == null || mag.data == null) return false;
+        return mag.data.ammoType == weaponData.ammoType;
+    }
+
 
     private void RangedAttack()
     {
@@ -6475,27 +7017,39 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     // RELOAD (SHORT OR LONG HOLD)
     // ============================
+
+
     private IEnumerator ReloadRoutine()
     {
-        if (isReloading) yield break;
+        if (isReloading)
+            yield break;
 
-        if (inventoryMags.Count == 0)
+        // 🔒 SADECE UYUMLU ŞARJÖRLER
+        var compatibleMags = inventoryMags
+            .Where(m =>
+                m != null &&
+                m.data != null &&
+                m.data.ammoType == weaponData.ammoType
+            )
+            .ToList();
+
+        if (compatibleMags.Count == 0)
         {
-            Debug.Log("Yedek şarjör yok.");
+            Debug.Log("Bu silaha uygun şarjör yok!");
             yield break;
         }
 
         isReloading = true;
 
-        audioSource.PlayOneShot(reloadSound);
+        if (reloadSound != null)
+            audioSource.PlayOneShot(reloadSound);
+
         yield return new WaitForSeconds(weaponData.reloadTime);
 
-        // Eski şarjörü geri koy
-        if (currentMagazine != null)
-            inventoryMags.Add(currentMagazine);
+        currentMagazine = null;
 
-        // En dolu şarjörü bul
-        var nextMag = inventoryMags.OrderByDescending(m => m.currentAmmo).FirstOrDefault();
+        MagazineInstance nextMag = SelectNextMagazine();
+
         if (nextMag == null)
         {
             Debug.Log("Takılabilir şarjör yok!");
@@ -6505,33 +7059,102 @@ public class PlayerWeapon : MonoBehaviour
 
         inventoryMags.Remove(nextMag);
         currentMagazine = nextMag;
+        lastUsedMagazine = currentMagazine;
 
-        Debug.Log($"Yeni şarjör → {currentMagazine.currentAmmo}/{currentMagazine.capacity}");
+
+        Debug.Log(
+            $"Yeni şarjör takıldı → {currentMagazine.currentAmmo}/{currentMagazine.data.capacity}"
+        );
 
         isReloading = false;
+        OnMagazineChanged?.Invoke(
+    currentMagazine.currentAmmo,
+    currentMagazine.data.capacity
+);
+
+        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+
     }
+
+    private bool IsMagazineCompatible(MagazineInstance mag)
+    {
+        if (mag == null || mag.data == null || weaponData == null)
+            return false;
+
+        return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
+    }
+
 
     // ============================
     // MAGAZINE CHECK (HOLD R)
     // ============================
-    IEnumerator MagCheck()
+    private IEnumerator MagCheck()
     {
-        if (currentMagazine == null)
+        // Zaten kontrol ediliyorsa tekrar girme
+        if (isCheckingMag)
+            yield break;
+
+        // Reload sırasında check yapılamaz
+        if (isReloading)
+            yield break;
+
+        // Şarjör yok
+        if (currentMagazine == null || currentMagazine.data == null)
         {
-            Debug.Log("Şarjör takılı değil.");
+            ammoCheckUI?.Show("Şarjör takılı değil.");
+            OnAmmoCheckFeedback?.Invoke("Şarjör takılı değil.");
             yield break;
         }
 
-        yield return new WaitForSeconds(0.3f);
+        // Uyumsuz şarjör (sert kontrol)
+        if (!CanEquipMagazine(currentMagazine))
+        {
+            ammoCheckUI?.Show("Uyumsuz şarjör!");
+            OnAmmoCheckFeedback?.Invoke("Uyumsuz şarjör!");
+            yield break;
+        }
 
-        float ratio = (float)currentMagazine.currentAmmo / currentMagazine.capacity;
+        isCheckingMag = true;
 
-        if (ratio == 1f) Debug.Log("Tam dolu.");
-        else if (ratio >= 0.7f) Debug.Log("Neredeyse dolu.");
-        else if (ratio >= 0.4f) Debug.Log("Yarısı dolu.");
-        else if (ratio > 0) Debug.Log("Az mermi kaldı.");
-        else Debug.Log("Tamamen boş.");
+        // 🔊 Ses
+        if (ammoCheckSound != null)
+            audioSource.PlayOneShot(ammoCheckSound);
+
+        // 🎞 Animasyon
+        if (!string.IsNullOrEmpty(ammoCheckAnimTrigger))
+            animator?.SetTrigger(ammoCheckAnimTrigger);
+
+        // ⏱ Gerçekçi kontrol süresi
+        yield return new WaitForSeconds(ammoCheckDuration);
+
+        // 📊 Doluluk oranı
+        int ammo = currentMagazine.currentAmmo;
+        int cap = currentMagazine.data.capacity;
+
+        float ratio = cap > 0 ? (float)ammo / cap : 0f;
+
+        string msg;
+
+        if (ammo <= 0)
+            msg = "Boş gibi.";
+        else if (ratio < 0.25f)
+            msg = "Az mermi var.";
+        else if (ratio < 0.6f)
+            msg = "Yarısı dolu.";
+        else if (ratio < 1f)
+            msg = "Neredeyse dolu.";
+        else
+            msg = "Tam dolu.";
+
+        // 📢 UI + Event
+        ammoCheckUI?.Show(msg);
+        OnAmmoCheckFeedback?.Invoke(msg);
+
+        isCheckingMag = false;
     }
+
+
+
 
     // ============================
     // MUZZLE FLASH
@@ -6591,35 +7214,77 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     public void SetWeapon(WeaponData data)
-{
-    if (data == null)
-        return;
-
-    weaponData = data;
-
-    // Mevcut modeli sil
-    if (currentModel != null)
-        Destroy(currentModel);
-
-    // Yeni modeli oluştur
-    if (weaponData.prefab != null)
     {
-        currentModel = Instantiate(weaponData.prefab, transform);
-        currentModel.transform.localPosition = Vector3.zero;
-        currentModel.transform.localRotation = Quaternion.identity;
+        StopAllCoroutines();
+isReloading = false;
+isCheckingMag = false;
 
-        // FirePoint'i bul
-        Transform fp = currentModel.transform.Find("FirePoint");
-        if (fp != null)
-            firePoint = fp;
+        if (data == null)
+            return;
+
+        weaponData = data;
+
+        // Model
+        if (currentModel != null)
+            Destroy(currentModel);
+
+        if (weaponData.prefab != null)
+        {
+            currentModel = Instantiate(weaponData.prefab, transform);
+            currentModel.transform.localPosition = Vector3.zero;
+            currentModel.transform.localRotation = Quaternion.identity;
+
+            Transform fp = currentModel.transform.Find("FirePoint");
+            if (fp != null)
+                firePoint = fp;
+        }
+
+        // 🔥 ŞARJÖR BAĞLAMA
+        inventoryMags.Clear();
+        currentMagazine = null;
+
+        var inv = Inventory.Instance;
+
+        for (int i = 0; i < inv.slots.Length; i++)
+        {
+            var slot = inv.slots[i];
+
+            if (slot.magazineInstance == null)
+                continue;
+
+            MagazineInstance mag = slot.magazineInstance;
+
+            if (mag.data == null || mag.data.ammoType == null)
+                continue;
+
+            // 🔒 SADECE BU SİLAHA UYUMLU ŞARJÖR
+            if (mag.data.ammoType == weaponData.ammoType)
+            {
+                inventoryMags.Add(mag);
+            }
+        }
+
+        // 🔫 OTOMATİK TAK (opsiyonel ama önerilir)
+        if (inventoryMags.Count > 0)
+        {
+            currentMagazine = inventoryMags
+                .OrderByDescending(m => m.currentAmmo)
+                .First();
+
+            inventoryMags.Remove(currentMagazine);
+
+            Debug.Log(
+                $"[Weapon] Otomatik şarjör takıldı → " +
+                $"{currentMagazine.currentAmmo}/{currentMagazine.data.capacity}"
+            );
+        }
+        else
+        {
+            Debug.Log("[Weapon] Uyumlu şarjör bulunamadı.");
+        }
     }
 
-    // Şarjör sistemini sıfırla
-    currentMagazine = null;
-    inventoryMags.Clear();
 
-    Debug.Log($"[PlayerWeapon] Yeni silah takıldı → {weaponData.name}. Şarjörler sıfırlandı.");
-}
 
 }
 using UnityEngine;
@@ -6960,42 +7625,48 @@ public class GameInitializer : MonoBehaviour
     }
 
     private void Start()
-{
-    Debug.Log("GameInitializer: ShouldLoad = " + SaveBootstrap.ShouldLoadFromSave);
-    Debug.Log("GameInitializer: HasSave = " + SaveSystem.HasSave());
-
-    // 1) Save yÃ¼kleme...
-    if (SaveBootstrap.ShouldLoadFromSave && SaveSystem.HasSave())
     {
-        SaveSystem.LoadPlayerAndInventory(player, inventory, stats);
-        SaveBootstrap.ShouldLoadFromSave = false;
-        return;
+        Debug.Log("GameInitializer: ShouldLoad = " + SaveBootstrap.ShouldLoadFromSave);
+        Debug.Log("GameInitializer: HasSave = " + SaveSystem.HasSave());
+
+        // 1) Save yÃ¼kleme...
+        if (SaveBootstrap.ShouldLoadFromSave && SaveSystem.HasSave())
+        {
+            SaveSystem.LoadPlayerAndInventory(
+        player,
+        inventory,
+        stats,
+        FindObjectOfType<PlayerWeapon>()
+    );
+
+            SaveBootstrap.ShouldLoadFromSave = false;
+            return;
+        }
+
+        // 2) Yeni oyun â†’ default spawn
+        Vector3 spawnPos = player.position;
+
+        if (defaultSpawnPoint != null)
+            spawnPos = defaultSpawnPoint.position;
+        else if (fallbackSpawnPosition != Vector3.zero)
+            spawnPos = fallbackSpawnPosition;
+
+        player.position = spawnPos;
+
+
+        // 3) BAÅLANGIÃ‡ PÄ°STOL
+        ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
+        if (pistolItem != null)
+        {
+            WeaponSlotManager.Instance.EquipWeapon(pistolItem);
+            Debug.Log("â–¶ Yeni oyun â†’ BaÅŸlangÄ±Ã§ silahÄ± verildi: Pistol");
+        }
+
+
+
+        // Aktif slot pistol olsun
+        WeaponSlotManager.Instance.activeSlotIndex = 0;
     }
-
-    // 2) Yeni oyun â†’ default spawn
-    Vector3 spawnPos = player.position;
-
-    if (defaultSpawnPoint != null)
-        spawnPos = defaultSpawnPoint.position;
-    else if (fallbackSpawnPosition != Vector3.zero)
-        spawnPos = fallbackSpawnPosition;
-
-    player.position = spawnPos;
-
-
-    // 3) BAÅLANGIÃ‡ PÄ°STOL
-    ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
-    if (pistolItem != null)
-    {
-        WeaponSlotManager.Instance.EquipWeapon(pistolItem);
-        Debug.Log("â–¶ Yeni oyun â†’ BaÅŸlangÄ±Ã§ silahÄ± verildi: Pistol");
-    }
-
-
-   
-    // Aktif slot pistol olsun
-    WeaponSlotManager.Instance.activeSlotIndex = 0;
-}
 
 
 }
@@ -7008,28 +7679,34 @@ using System.Collections.Generic;
 [System.Serializable]
 public class SaveData
 {
+    // Position
     public float posX, posY, posZ;
 
-    public int currentHealth;
-    public int maxHealth;
-
-    public float currentStamina;
-    public float maxStamina;
-
-    public int currentHunger;
-    public int maxHunger;
-
+    // Stats
+    public int currentHealth, maxHealth;
+    public float currentStamina, maxStamina;
+    public int currentHunger, maxHunger;
     public int gold;
 
-    public List<InventoryItemData> inventory = new();
-    public List<string> unlockedWeaponIDs = new();
+    // Inventory items
+    public List<InventoryItemData> inventory = new List<InventoryItemData>();
 
+    // Ammo Pool (JsonUtility uyumlu)
+    public List<string> ammoTypeIDs = new List<string>();
+    public List<int> ammoAmounts = new List<int>();
+
+    // Weapons
     public string[] equippedWeaponIDs = new string[3];
-    public int[] slotClip = new int[3];
-    public int[] slotReserve = new int[3];
     public int activeSlotIndex;
 
-    // ğŸ”¥ Karavan silahlarÄ±
+    // Equipped magazine
+    public int equippedMagazineSlotIndex = -1;
+    public int equippedMagazineAmmo = 0;
+
+    // Craft
+    public List<string> unlockedWeaponIDs = new List<string>();
+
+    // Caravan
     public CaravanSaveData caravanSave;
 }
 
@@ -7038,14 +7715,32 @@ public class InventoryItemData
 {
     public string itemID;
     public int amount;
+    public bool hasMagazineInstance;
+    public int magazineCurrentAmmo;
+
 }
+
+[System.Serializable]
+public class AmmoSaveData
+{
+    public string ammoId;
+    public int amount;
+}
+
+[System.Serializable]
+public class MagazineSaveData
+{
+    public string magazineItemID; // MagazineData.itemID
+    public int currentAmmo;
+}
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using System.Collections.Generic;
 
 public static class SaveSystem
 {
-    private static string savePath = Path.Combine(Application.persistentDataPath, "save.json");
+    private static readonly string savePath =
+        Path.Combine(Application.persistentDataPath, "save.json");
 
     public static bool HasSave() => File.Exists(savePath);
 
@@ -7056,15 +7751,15 @@ public static class SaveSystem
     }
 
     // ============================================================
-    //                          SAVE
+    // SAVE
     // ============================================================
-
     public static void SavePlayerAndInventory(
         Transform player,
         Inventory inventory,
-        PlayerStats stats)
+        PlayerStats stats,
+        PlayerWeapon playerWeapon)
     {
-        if (player == null || inventory == null || stats == null)
+        if (!player || !inventory || !stats)
         {
             Debug.LogWarning("SavePlayerAndInventory: Eksik referans!");
             return;
@@ -7072,39 +7767,88 @@ public static class SaveSystem
 
         SaveData data = new SaveData();
 
-        // ---- Pozisyon ----
-        data.posX = player.position.x;
-        data.posY = player.position.y;
-        data.posZ = player.position.z;
+        // Position
+        Vector3 p = player.position;
+        data.posX = p.x;
+        data.posY = p.y;
+        data.posZ = p.z;
 
-        // ---- Statlar ----
+        // Stats
         data.currentHealth = stats.currentHealth;
         data.maxHealth = stats.maxHealth;
-
         data.currentStamina = stats.GetStamina();
         data.maxStamina = stats.GetMaxStamina();
-
         data.currentHunger = stats.currentHunger;
         data.maxHunger = stats.maxHunger;
-
         data.gold = stats.gold;
 
-        // ---- Envanter ----
+        // Inventory items
         data.inventory.Clear();
         foreach (var slot in inventory.slots)
         {
-            if (slot.data == null) continue;
+            if (slot == null || slot.data == null) continue;
 
-            var saved = new InventoryItemData
+            InventoryItemData itemData = new InventoryItemData
             {
                 itemID = slot.data.itemID,
                 amount = slot.count
             };
 
-            data.inventory.Add(saved);
+            if (slot.magazineInstance != null)
+            {
+                itemData.hasMagazineInstance = true;
+                itemData.magazineCurrentAmmo =
+                    slot.magazineInstance.currentAmmo;
+            }
+            else
+            {
+                itemData.hasMagazineInstance = false;
+            }
+
+            data.inventory.Add(itemData);
         }
 
-        // ---- Craft ile aÃ§Ä±lmÄ±ÅŸ silahlar ----
+
+        // Ammo Pool
+        data.ammoTypeIDs.Clear();
+        data.ammoAmounts.Clear();
+        foreach (var pair in inventory.GetAmmoPool())
+        {
+            data.ammoTypeIDs.Add(pair.Key.ammoId);
+            data.ammoAmounts.Add(pair.Value);
+        }
+
+        // Weapons
+        WeaponSlotManager wsm = WeaponSlotManager.Instance;
+        if (wsm != null)
+        {
+            for (int i = 0; i < 3; i++)
+                data.equippedWeaponIDs[i] =
+                    wsm.slots[i] != null ? wsm.slots[i].itemID : "";
+
+            data.activeSlotIndex = wsm.activeSlotIndex;
+        }
+
+        // Equipped magazine (slot index + ammo)
+        data.equippedMagazineSlotIndex = -1;
+        data.equippedMagazineAmmo = 0;
+
+        if (playerWeapon != null && playerWeapon.GetCurrentMagazine() != null)
+        {
+            MagazineInstance mag = playerWeapon.GetCurrentMagazine();
+
+            for (int i = 0; i < inventory.slots.Length; i++)
+            {
+                if (inventory.slots[i].magazineInstance == mag)
+                {
+                    data.equippedMagazineSlotIndex = i;
+                    data.equippedMagazineAmmo = mag.currentAmmo;
+                    break;
+                }
+            }
+        }
+
+        // Craft unlocks
         data.unlockedWeaponIDs.Clear();
         if (CraftingSystem.Instance != null)
         {
@@ -7112,48 +7856,24 @@ public static class SaveSystem
                 data.unlockedWeaponIDs.Add(id);
         }
 
-        // ---- Ekipman Silah SlotlarÄ± (WeaponSlotManager) ----
-        WeaponSlotManager wsm = WeaponSlotManager.Instance;
-        if (wsm != null)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                WeaponData wd = wsm.slots[i];
-
-                if (wd != null)
-                    data.equippedWeaponIDs[i] = wd.itemID;
-                else
-                    data.equippedWeaponIDs[i] = "";
-
-                var ammo = wsm.GetAmmo(i);
-                data.slotClip[i] = ammo.clip;
-                data.slotReserve[i] = ammo.reserve;
-            }
-
-            data.activeSlotIndex = wsm.activeSlotIndex;
-        }
-
-        // ---- Karavan Envanteri ----
+        // Caravan
         if (CaravanInventory.Instance != null)
             data.caravanSave = CaravanInventory.Instance.GetSaveData();
 
-        // ---- JSON Yaz ----
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(savePath, json);
-
-        Debug.Log("ğŸ’¾ SAVE â†’ TÃ¼m veriler kaydedildi.");
+        File.WriteAllText(savePath, JsonUtility.ToJson(data, true));
+        Debug.Log("ğŸ’¾ SAVE â†’ BaÅŸarÄ±lÄ±");
     }
 
     // ============================================================
-    //                          LOAD
+    // LOAD
     // ============================================================
-
     public static void LoadPlayerAndInventory(
         Transform player,
         Inventory inventory,
-        PlayerStats stats)
+        PlayerStats stats,
+        PlayerWeapon playerWeapon)
     {
-        if (player == null || inventory == null || stats == null)
+        if (!player || !inventory || !stats)
         {
             Debug.LogWarning("LoadPlayerAndInventory: Eksik referans!");
             return;
@@ -7161,19 +7881,19 @@ public static class SaveSystem
 
         if (!HasSave())
         {
-            Debug.LogWarning("LoadPlayerAndInventory: KayÄ±t bulunamadÄ±.");
+            Debug.LogWarning("LoadPlayerAndInventory: KayÄ±t yok.");
             return;
         }
 
-        string json = File.ReadAllText(savePath);
-        SaveData data = JsonUtility.FromJson<SaveData>(json);
+        SaveData data =
+            JsonUtility.FromJson<SaveData>(File.ReadAllText(savePath));
 
-        // ---- Pozisyon ----
-        Vector3 loadedPos = new Vector3(data.posX, data.posY, data.posZ);
-        if (loadedPos.y < 1f) loadedPos.y = 1f;  // yere gÃ¶mÃ¼lme Ã¶nlemi
-        player.position = loadedPos;
+        // Position
+        Vector3 pos = new Vector3(data.posX, data.posY, data.posZ);
+        if (pos.y < 1f) pos.y = 1f;
+        player.position = pos;
 
-        // ---- Statlar ----
+        // Stats
         stats.maxHealth = data.maxHealth;
         stats.currentHealth = data.currentHealth;
         stats.RefreshHealthUI();
@@ -7184,22 +7904,75 @@ public static class SaveSystem
 
         stats.maxHunger = data.maxHunger;
         stats.currentHunger = data.currentHunger;
-
         stats.gold = data.gold;
 
-        // ---- Envanter ----
+        // Inventory
         inventory.ClearInventory();
-        foreach (var item in data.inventory)
+        foreach (var it in data.inventory)
         {
-            if (string.IsNullOrEmpty(item.itemID) || item.amount <= 0) continue;
-
-            ItemData so = ItemDatabase.Get(item.itemID);
+            ItemData so = ItemDatabase.Get(it.itemID);
             if (so == null) continue;
 
-            inventory.TryAdd(so, item.amount);
+            inventory.TryAdd(so, it.amount);
+
+            // ğŸ”¥ ÅarjÃ¶rse, instanceâ€™Ä± dÃ¼zelt
+            if (it.hasMagazineInstance)
+            {
+                // En son eklenen slotu bul
+                InventoryItem slot = inventory.GetLastAddedSlot();
+
+                if (slot != null && slot.magazineInstance != null)
+                {
+                    slot.magazineInstance.currentAmmo =
+                        it.magazineCurrentAmmo;
+                }
+            }
         }
 
-        // ---- Craft ile aÃ§Ä±lmÄ±ÅŸ silahlar ----
+
+        // Ammo pool
+        inventory.ClearAmmoPool();
+        for (int i = 0; i < data.ammoTypeIDs.Count; i++)
+        {
+            AmmoTypeData ammoType =
+                AmmoTypeRegistry.Get(data.ammoTypeIDs[i]);
+            if (ammoType != null)
+                inventory.AddAmmo(ammoType, data.ammoAmounts[i]);
+        }
+
+        // Weapons
+        WeaponSlotManager wsm = WeaponSlotManager.Instance;
+        if (wsm != null)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                ItemData so = ItemDatabase.Get(data.equippedWeaponIDs[i]);
+                wsm.slots[i] =
+                    so is WeaponItemData wid ? wid.weaponData : null;
+            }
+
+            wsm.activeSlotIndex =
+                Mathf.Clamp(data.activeSlotIndex, 0, 2);
+            wsm.SwitchSlot(wsm.activeSlotIndex);
+        }
+
+        // Equipped magazine
+        if (playerWeapon != null &&
+            data.equippedMagazineSlotIndex >= 0 &&
+            data.equippedMagazineSlotIndex < inventory.slots.Length)
+        {
+            var mag =
+                inventory.slots[data.equippedMagazineSlotIndex]
+                    .magazineInstance;
+
+            if (mag != null)
+            {
+                mag.currentAmmo = data.equippedMagazineAmmo;
+                playerWeapon.SetCurrentMagazine(mag);
+            }
+        }
+
+        // Craft unlocks
         if (CraftingSystem.Instance != null)
         {
             CraftingSystem.Instance.unlockedWeapons.Clear();
@@ -7207,50 +7980,15 @@ public static class SaveSystem
                 CraftingSystem.Instance.unlockedWeapons.Add(id);
         }
 
-        // ---- WeaponSlotManager yÃ¼kleme ----
-        WeaponSlotManager wsm = WeaponSlotManager.Instance;
-        if (wsm != null)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                string id = data.equippedWeaponIDs[i];
-
-                if (!string.IsNullOrEmpty(id))
-                {
-                    ItemData so = ItemDatabase.Get(id);
-                    if (so is WeaponItemData wid)
-                    {
-                        wsm.slots[i] = wid.weaponData;
-                        wsm.clip[i] = data.slotClip[i];
-                        wsm.reserve[i] = data.slotReserve[i];
-                    }
-                    else
-                    {
-                        wsm.slots[i] = null;
-                        wsm.clip[i] = 0;
-                        wsm.reserve[i] = 0;
-                    }
-                }
-                else
-                {
-                    wsm.slots[i] = null;
-                    wsm.clip[i] = 0;
-                    wsm.reserve[i] = 0;
-                }
-            }
-
-            // Aktif slotu uygula
-            wsm.activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
-            wsm.SwitchSlot(wsm.activeSlotIndex);
-        }
-
-        // ---- Karavan YÃ¼kleme ----
-        if (data.caravanSave != null && CaravanInventory.Instance != null)
+        // Caravan
+        if (data.caravanSave != null &&
+            CaravanInventory.Instance != null)
         {
             CaravanInventory.Instance.LoadFromData(data.caravanSave);
         }
 
-        Debug.Log("ğŸ“¥ LOAD â†’ TÃ¼m veriler geri yÃ¼klendi.");
+
+        Debug.Log("ğŸ“¥ LOAD â†’ BaÅŸarÄ±lÄ±");
     }
 }
 using System;
@@ -8218,6 +8956,7 @@ public class ResourceCost
     public int amount = 1;
 }
 using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "New Weapon Data", menuName = "Weapons/Weapon Data")]
 public class WeaponData : ItemData
@@ -8232,8 +8971,6 @@ public class WeaponData : ItemData
     public float fireRate = 2f;
     public int damage;
 
-    public int clipSize;
-    public int maxAmmoCapacity;
     public float reloadTime = 1.5f;
 
     public float attackRange = 1.5f;
@@ -8247,7 +8984,10 @@ public class WeaponData : ItemData
     public float sniperCooldown = 3.0f;
     public int sniperPenetrationCount = 2;
 
-    public ResourceType ammoType;
+    [Header("Ammo & Magazine")]
+    public AmmoTypeData ammoType;
+    public List<MagazineType> acceptedMagazines;
+
 
     public bool isMolotov;
     public GameObject fireEffectPrefab;
@@ -8255,6 +8995,7 @@ public class WeaponData : ItemData
     public int burnDamage = 1;
     public float burnDuration = 5f;
     public float tickInterval = 1f;
+
 }
 using UnityEngine;
 
@@ -8414,10 +9155,6 @@ public class WeaponSlotManager : MonoBehaviour
     [Header("Equipped Weapons (WeaponData)")]
     public WeaponData[] slots = new WeaponData[3];
 
-    // Mermi durumu (clip + reserve)
-    [Header("Ammo State per Slot")]
-    public int[] clip = new int[3];
-    public int[] reserve = new int[3];
 
     [Header("Active Slot")]
     public int activeSlotIndex = 0;
@@ -8429,12 +9166,6 @@ public class WeaponSlotManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        // Mermileri 0 baÅŸlat
-        for (int i = 0; i < 3; i++)
-        {
-            clip[i] = 0;
-            reserve[i] = 0;
-        }
     }
 
 
@@ -8494,8 +9225,6 @@ public class WeaponSlotManager : MonoBehaviour
         int slot = (int)GetSlotForWeapon(weapon);
         slots[slot] = weapon;
 
-        clip[slot] = weapon.clipSize;
-        reserve[slot] = weapon.maxAmmoCapacity;
 
         ApplyToHandler(slot);
 
@@ -8565,15 +9294,10 @@ public class WeaponSlotManager : MonoBehaviour
     // -------------------------------
     // Ammo state
     // -------------------------------
-    public (int clip, int reserve) GetAmmo(int slot)
-    {
-        return (clip[slot], reserve[slot]);
-    }
+
 
     public void SetAmmo(int slot, int newClip, int newReserve)
     {
-        clip[slot] = newClip;
-        reserve[slot] = newReserve;
 
         // aktif slot ise PlayerWeaponâ€™Ä± gÃ¼ncelle
         if (slot == activeSlotIndex)
@@ -8607,10 +9331,6 @@ public class WeaponSlotManager : MonoBehaviour
     // 2) Yeni silah slota ekle
     slots[slot] = newWeapon;
 
-    // 3) Mermi bilgilerini sÄ±fÄ±rla
-    clip[slot] = newWeapon.clipSize;
-    reserve[slot] = newWeapon.maxAmmoCapacity;
-
     // 4) EÄŸer aktif slot buysa hemen gÃ¼ncelle
     if (activeSlotIndex == slot)
     {
@@ -8640,8 +9360,6 @@ public WeaponSlotSaveData GetSaveData()
         else
             data.equippedWeaponIDs[i] = "";
 
-        data.clip[i] = clip[i];
-        data.reserve[i] = reserve[i];
     }
 
     data.activeSlotIndex = activeSlotIndex;
@@ -8665,21 +9383,18 @@ public void LoadData(WeaponSlotSaveData data)
             if (item is WeaponItemData wid)
             {
                 slots[i] = wid.weaponData;
-                clip[i] = data.clip[i];
-                reserve[i] = data.reserve[i];
+
             }
             else
             {
                 slots[i] = null;
-                clip[i] = 0;
-                reserve[i] = 0;
+
             }
         }
         else
         {
             slots[i] = null;
-            clip[i] = 0;
-            reserve[i] = 0;
+
         }
     }
 
@@ -8704,51 +9419,111 @@ public enum WeaponType
     MeeleSword
 }
 
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Items/Ammo Data")]
+public class AmmoCheckUI : MonoBehaviour
+{
+    public CanvasGroup group;
+    public TMP_Text text;
+    public float showTime = 1.2f;
+
+    Coroutine co;
+
+    private void Awake()
+    {
+        HideInstant();
+    }
+
+    public void Show(string msg)
+    {
+        if (co != null) StopCoroutine(co);
+        co = StartCoroutine(ShowRoutine(msg));
+    }
+
+    IEnumerator ShowRoutine(string msg)
+    {
+        text.text = msg;
+        group.alpha = 1f;
+        group.blocksRaycasts = false;
+        group.interactable = false;
+
+        yield return new WaitForSeconds(showTime);
+
+        HideInstant();
+    }
+
+    void HideInstant()
+    {
+        if (group != null) group.alpha = 0f;
+        if (text != null) text.text = "";
+    }
+}
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "Items/Ammo Item")]
 public class AmmoItemData : ItemData
 {
     [Header("Ammo Settings")]
-    public string ammoType;          // 9mm, 5.56, 7.62
-    public int ammoAmount = 10;      // Bir kutudan gelen toplam mermi miktarÄ±
+    public AmmoTypeData ammoType;
+    public int ammoAmount;
 }
-
-
-
-
-[CreateAssetMenu(menuName = "Items/Ammo Type")]
-public class AmmoType : ScriptableObject
-{
-    public string ammoId;     // dictionary iÃ§in benzersiz ID
-    public string ammoName;
-    public Sprite icon;
-}
-
-
 using UnityEngine;
 
 public class AmmoPickup : MonoBehaviour
 {
-    public AmmoType ammoType;
+    public AmmoTypeData ammoType;
     public int amount = 15;
 
-    private Transform player;
-
-    void Start()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if (!other.CompareTag("Player"))
+            return;
+
+        Inventory.Instance.AddAmmo(ammoType, amount);
+        Destroy(gameObject);
+    }
+}
+using UnityEngine;
+[CreateAssetMenu(menuName = "Ammo/Ammo Type")]
+public class AmmoTypeData : ScriptableObject
+{
+    public string ammoId;     // "9mm", "556", vs (unique)
+    public string ammoName;   // UI iÃ§in
+    public Sprite icon;
+}
+using System.Collections.Generic;
+using UnityEngine;
+
+public class AmmoTypeRegistry : MonoBehaviour
+{
+    public static AmmoTypeRegistry Instance { get; private set; }
+
+    [Header("All AmmoTypeData assets")]
+    public AmmoTypeData[] ammoTypes;
+
+    private Dictionary<string, AmmoTypeData> map = new();
+
+    private void Awake()
+    {
+        if (Instance != null) { Destroy(gameObject); return; }
+        Instance = this;
+
+        map.Clear();
+        if (ammoTypes == null) return;
+
+        foreach (var a in ammoTypes)
+        {
+            if (a == null || string.IsNullOrEmpty(a.ammoId)) continue;
+            map[a.ammoId] = a;
+        }
     }
 
-    void Update()
+    public static AmmoTypeData Get(string ammoId)
     {
-        if (!player) return;
-
-        if (Vector3.Distance(player.position, transform.position) < 1.5f)
-        {
-            Inventory.Instance.AddAmmo(ammoType.ammoId, amount);
-            Destroy(gameObject);
-        }
+        if (Instance == null || string.IsNullOrEmpty(ammoId)) return null;
+        return Instance.map.TryGetValue(ammoId, out var v) ? v : null;
     }
 }
 public interface IAmmoProvider
@@ -8758,18 +9533,275 @@ public interface IAmmoProvider
 }
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Items/Magazine Item")]
-public class MagazineItem : ScriptableObject
+[CreateAssetMenu(menuName = "Items/Magazine Data")]
+public class MagazineData : ItemData
 {
-    public string magName;
-    public Sprite icon;
 
-    public string ammoType;   // â† Ã–NEMLÄ°: string olmalÄ±!
-    public int capacity = 12;
-    public int currentAmmo = 0;
+    public AmmoTypeData ammoType;
+    public MagazineType magazineType;
 
-    public bool IsFull => currentAmmo >= capacity;
-    public bool IsEmpty => currentAmmo <= 0;
+    public int capacity;
+    
+    private void OnValidate()
+    {
+        stackable = false;
+        maxStack = 1;
+    }
+
+}
+
+using UnityEngine;
+
+
+[System.Serializable]
+public class MagazineInstance
+{
+    public MagazineData data;
+    public int currentAmmo;
+
+    public bool IsFull
+    {
+        get
+        {
+            if (data == null)
+            {
+                Debug.LogError("MagazineInstance.data NULL!");
+                return data != null && currentAmmo >= data.capacity;
+
+            }
+
+            return currentAmmo >= data.capacity;
+        }
+    }
+
+    public bool IsEmpty
+    {
+        get
+        {
+            return currentAmmo <= 0;
+        }
+    }
+
+    public MagazineInstance(MagazineData data)
+    {
+        this.data = data;
+        currentAmmo = 0;
+    }
+}
+
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class MagazineLoadPanel : MonoBehaviour
+{
+    public TMP_Text titleText;
+    public TMP_Text ammoInfoText;
+    public Slider loadSlider;
+
+    public Button btnLoad;
+    public Button btnFullLoad;
+
+    private MagazineInstance currentMag;
+
+    private void Awake()
+    {
+        gameObject.SetActive(false);
+
+        loadSlider.onValueChanged.AddListener(_ =>
+        {
+            RefreshText();
+        });
+    }
+
+    public void Show(MagazineInstance mag)
+    {
+        if (mag == null || mag.data == null)
+            return;
+        if (loadSlider.maxValue <= 0)
+{
+    btnLoad.interactable = false;
+    btnFullLoad.interactable = false;
+}
+
+        currentMag = mag;
+        gameObject.SetActive(true);
+
+        titleText.text = mag.data.itemName;
+
+
+        int availableAmmo =
+            Inventory.Instance.GetAmmoAmount(mag.data.ammoType);
+
+        int space = mag.data.capacity - mag.currentAmmo;
+
+        loadSlider.minValue = 0;
+        loadSlider.maxValue = Mathf.Min(space, availableAmmo);
+        loadSlider.value = loadSlider.maxValue;
+        btnLoad.interactable = loadSlider.maxValue > 0;
+        btnFullLoad.interactable = loadSlider.maxValue > 0;
+
+
+        RefreshText();
+    }
+
+    public void Hide()
+    {
+        currentMag = null;
+        gameObject.SetActive(false);
+    }
+
+    public void RefreshText()
+    {
+        if (currentMag == null) return;
+
+        ammoInfoText.text =
+            $"{currentMag.currentAmmo}/{currentMag.data.capacity}  " +
+            $"â†’ +{(int)loadSlider.value}";
+    }
+
+    public void OnLoadPressed()
+    {
+        if (currentMag == null) return;
+
+        Inventory.Instance.LoadAmmoIntoMagazine(
+            currentMag,
+            (int)loadSlider.value
+        );
+
+        Show(currentMag); // refresh
+    }
+
+    public void OnFullLoadPressed()
+    {
+        if (currentMag == null) return;
+
+        Inventory.Instance.FullLoadMagazine(currentMag);
+        Show(currentMag);
+    }
+}
+using UnityEngine;
+
+public class MagazinePickup : MonoBehaviour
+{
+    public MagazineData magazineData;
+    public int startAmmo = 0; // loot dengesi iÃ§in
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        MagazineInstance mag = new MagazineInstance(magazineData);
+        mag.currentAmmo = Mathf.Clamp(startAmmo, 0, magazineData.capacity);
+
+        Inventory.Instance.TryAddMagazine(mag);
+        Destroy(gameObject);
+    }
+}
+
+public enum MagazineType
+{
+    None,
+    Pistol9mm,
+    SMG9mm,
+    STANAG_556,
+    Drum_556,
+    ShotgunTube
+}
+public enum ReloadStrategy
+{
+    MostFull,      // En dolu ÅŸarjÃ¶r
+    NextInList,    // Listede sÄ±radaki
+    LastUsed       // Son kullanÄ±lan
+}
+using UnityEngine;
+using TMPro;
+
+public class WeaponHUD : MonoBehaviour
+{
+    [Header("Texts")]
+    public TMP_Text magazineText;   // 12 / 30
+    public TMP_Text spareMagText;   // x3
+    public TMP_Text ammoPoolText;   // 90
+
+    private PlayerWeapon playerWeapon;
+
+    void Start()
+    {
+        playerWeapon = FindObjectOfType<PlayerWeapon>();
+    }
+
+    void Update()
+    {
+        if (playerWeapon == null)
+            return;
+
+        UpdateMagazine();
+        UpdateSpareMags();
+        UpdateAmmoPool();
+    }
+
+    void UpdateMagazine()
+    {
+        var mag = playerWeapon.currentMagazine;
+
+        if (mag == null || mag.data == null)
+        {
+            magazineText.text = "-- / --";
+            return;
+        }
+
+        magazineText.text =
+            $"{mag.currentAmmo} / {mag.data.capacity}";
+    }
+
+    void UpdateSpareMags()
+    {
+        if (playerWeapon.weaponData == null)
+        {
+            spareMagText.text = "x0";
+            return;
+        }
+
+        int count = playerWeapon.inventoryMags.FindAll(m =>
+            m != null &&
+            m.data != null &&
+            m.data.ammoType == playerWeapon.weaponData.ammoType
+        ).Count;
+
+        spareMagText.text = $"x{count}";
+    }
+
+    void UpdateAmmoPool()
+    {
+        if (playerWeapon.weaponData == null)
+        {
+            ammoPoolText.text = "0";
+            return;
+        }
+
+        int ammo = Inventory.Instance.GetAmmoAmount(
+            playerWeapon.weaponData.ammoType
+        );
+
+        ammoPoolText.text = ammo.ToString();
+    }
+}
+using UnityEngine;
+
+public class WeaponPickup : MonoBehaviour
+{
+    public WeaponData weaponData;
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        CaravanInventory.Instance.StoreWeapon(weaponData);
+        Destroy(gameObject);
+    }
 }
 using UnityEditor;
 using UnityEngine;

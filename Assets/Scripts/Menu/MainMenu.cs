@@ -11,7 +11,6 @@ public class MainMenu : MonoBehaviour
     public GameObject mainPanel;
     public GameObject settingsPanel;
     public GameObject creditsPanel;
-    public GameObject levelPanel;
 
     void Start()
     {
@@ -81,10 +80,7 @@ public class MainMenu : MonoBehaviour
         OpenPanel(settingsPanel);
     }
 
-    public void OpenLevels()
-    {
-        OpenPanel(levelPanel);
-    }
+
 
     public void OpenCredits()
     {

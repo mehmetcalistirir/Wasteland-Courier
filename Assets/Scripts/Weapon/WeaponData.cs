@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "New Weapon Data", menuName = "Weapons/Weapon Data")]
 public class WeaponData : ItemData
@@ -13,8 +14,6 @@ public class WeaponData : ItemData
     public float fireRate = 2f;
     public int damage;
 
-    public int clipSize;
-    public int maxAmmoCapacity;
     public float reloadTime = 1.5f;
 
     public float attackRange = 1.5f;
@@ -28,7 +27,12 @@ public class WeaponData : ItemData
     public float sniperCooldown = 3.0f;
     public int sniperPenetrationCount = 2;
 
-    public ResourceType ammoType;
+    [Header("Ammo & Magazine")]
+    public AmmoTypeData ammoType;
+public List<MagazineType> acceptedMagazines = new List<MagazineType>();
+
+
+
 
     public bool isMolotov;
     public GameObject fireEffectPrefab;
@@ -36,4 +40,5 @@ public class WeaponData : ItemData
     public int burnDamage = 1;
     public float burnDuration = 5f;
     public float tickInterval = 1f;
+
 }

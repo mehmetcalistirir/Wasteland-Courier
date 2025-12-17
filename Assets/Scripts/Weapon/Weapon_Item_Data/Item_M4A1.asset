@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a164e53ad684bcf489b85596401d39dc, type: 3}
-  m_Name: Item_Pistol
+  m_Name: Item_M4A1
   m_EditorClassIdentifier: Assembly-CSharp::WeaponItemData
-  itemName: Pistol
-  itemID: weapon_pistol
-  icon: {fileID: -4854829337826818713, guid: 1932acb0fbd75864b8c860ca2a361333, type: 3}
+  itemName: M4A1
+  itemID: weapon_M4A1
+  icon: {fileID: 564439294832975815, guid: 7a62928c4b4846140a4fd9b6aa1fdda1, type: 3}
   category: 2
   stackable: 0
   maxStack: 1
-  weaponType: 0
-  weaponData: {fileID: 11400000, guid: 02248f70225ea6644af71c0872a04ad6, type: 2}
+  weaponType: 1
+  weaponData: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}

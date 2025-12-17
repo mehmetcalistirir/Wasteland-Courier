@@ -19,14 +19,12 @@ MonoBehaviour:
   stackable: 1
   maxStack: 99
   prefab: {fileID: 944365562594708401, guid: c1cc0170a9db38a43bdb6a9e16d7679d, type: 3}
-  weaponType: 7
+  weaponType: 8
   knockbackForce: 6
   knockbackDuration: 0.18
   isAutomatic: 0
   fireRate: 0.5
   damage: 10
-  clipSize: 0
-  maxAmmoCapacity: 0
   reloadTime: 1.5
   attackRange: 1.5
   isShotgun: 0
@@ -36,7 +34,9 @@ MonoBehaviour:
   isSniper: 0
   sniperCooldown: 3
   sniperPenetrationCount: 2
-  ammoType: 0
+  projectilePrefab: {fileID: 0}
+  ammoType: {fileID: 0}
+  acceptedMagazines: 
   isMolotov: 0
   fireEffectPrefab: {fileID: 0}
   explosionRadius: 2.5

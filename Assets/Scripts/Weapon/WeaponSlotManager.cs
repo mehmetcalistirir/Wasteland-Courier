@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+
 
 public enum WeaponSlotType
 {
@@ -23,6 +26,8 @@ public class WeaponSlotManager : MonoBehaviour
 
     [Header("Active Slot")]
     public int activeSlotIndex = 0;
+    private PlayerControls controls;
+
 
 
 
@@ -31,7 +36,42 @@ public class WeaponSlotManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
+        controls = new PlayerControls(); // 🔥 MapToggle ile birebir
+
+
     }
+private void OnEnable()
+{
+    controls.Gameplay.Weapon1.performed += OnWeapon1;
+    controls.Gameplay.Weapon2.performed += OnWeapon2;
+    controls.Gameplay.Weapon3.performed += OnWeapon3;
+
+    controls.Gameplay.Enable();
+}
+
+private void OnDisable()
+{
+    controls.Gameplay.Weapon1.performed -= OnWeapon1;
+    controls.Gameplay.Weapon2.performed -= OnWeapon2;
+    controls.Gameplay.Weapon3.performed -= OnWeapon3;
+
+    controls.Gameplay.Disable();
+}
+
+private void OnWeapon1(InputAction.CallbackContext ctx)
+{
+    SwitchSlot(0);
+}
+
+private void OnWeapon2(InputAction.CallbackContext ctx)
+{
+    SwitchSlot(1);
+}
+
+private void OnWeapon3(InputAction.CallbackContext ctx)
+{
+    SwitchSlot(2);
+}
 
 
     // -------------------------------
@@ -57,6 +97,7 @@ public class WeaponSlotManager : MonoBehaviour
 
             // YAKIN DÖVÜŞ SLOTU (2)
             case WeaponType.ThrowingSpear:
+            case WeaponType.MeeleSpear:
             case WeaponType.MeeleSword:
                 return WeaponSlotType.Melee;
 
@@ -157,6 +198,7 @@ public class WeaponSlotManager : MonoBehaviour
         }
         return null;
     }
+
 
     // -------------------------------
     // Ammo state

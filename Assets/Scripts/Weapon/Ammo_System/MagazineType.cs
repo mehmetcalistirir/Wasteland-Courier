@@ -2,9 +2,9 @@
 public enum MagazineType
 {
     None,
-    Pistol9mm,
-    SMG9mm,
-    STANAG_556,
+    Glock18_9mm,
+    M4A1_556mm,
+    M24_762mm,
     Drum_556,
     ShotgunTube
 }

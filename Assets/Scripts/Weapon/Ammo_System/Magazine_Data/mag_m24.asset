@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7414632ebfae8d43a363f7cb055aa8a, type: 3}
-  m_Name: mag_glock_9mm_12
+  m_Name: mag_m24
   m_EditorClassIdentifier: Assembly-CSharp::MagazineData
-  itemName: GlockSarjor
-  itemID: mag_glock_9mm_12
+  itemName: M24 Sarjor
+  itemID: mag_m24
   icon: {fileID: 3910470184942907236, guid: 57209bfc03c33ee4799ad065bc715717, type: 3}
   category: 1
   stackable: 0
   maxStack: 1
-  ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
-  magazineType: 1
-  capacity: 12
+  ammoType: {fileID: 11400000, guid: c2d4e5cd1e3bc1444bdd1d374c7eadaf, type: 2}
+  magazineType: 3
+  capacity: 5

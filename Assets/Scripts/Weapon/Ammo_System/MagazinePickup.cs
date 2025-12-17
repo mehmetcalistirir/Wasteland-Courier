@@ -3,7 +3,10 @@ using UnityEngine;
 public class MagazinePickup : MonoBehaviour
 {
     public MagazineData magazineData;
-    public int startAmmo = 0;
+
+    [Header("Start Ammo Range")]
+    public int minStartAmmo = 0;
+    public int maxStartAmmo = 0;
 
     private PlayerWeapon pw;
 
@@ -20,11 +23,13 @@ public class MagazinePickup : MonoBehaviour
         if (magazineData == null) return;
 
         MagazineInstance mag = new MagazineInstance(magazineData);
-        mag.currentAmmo = Mathf.Clamp(startAmmo, 0, magazineData.capacity);
+
+        int randomAmmo = Random.Range(minStartAmmo, maxStartAmmo + 1);
+        mag.currentAmmo = Mathf.Clamp(randomAmmo, 0, magazineData.capacity);
 
         Inventory.Instance.TryAddMagazine(mag);
 
-        pw?.CollectMagazinesFromInventory(); // ✅ pickup sonrası liste güncellensin
+        pw?.CollectMagazinesFromInventory();
 
         Destroy(gameObject);
     }

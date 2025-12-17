@@ -126,8 +126,6 @@ GameObject:
   m_Component:
   - component: {fileID: 997705779475705567}
   - component: {fileID: 2082184951421079560}
-  - component: {fileID: 4255662185934373277}
-  - component: {fileID: 6610686388593566993}
   - component: {fileID: 2007917818231756497}
   m_Layer: 0
   m_Name: WeaponMelee
@@ -207,51 +205,9 @@ SpriteRenderer:
   m_Size: {x: 2.44, y: 7.33}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4255662185934373277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8360675168902930116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1d7d1a11a1465d4897fa4eafcb13dd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponPivot: {fileID: 997705779475705567}
-  flashlight: {fileID: 5974642317570145530}
-  firePoint: {fileID: 470014586234436219}
---- !u!114 &6610686388593566993
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8360675168902930116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: 23b941dccc66a014184f475471e68ece, type: 2}
-  firePoint: {fileID: 7490474164644769973}
-  bulletPrefab: {fileID: 3839466002162504836, guid: 6dbb90b9dacb96744b10f092742c1375, type: 3}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  muzzleFlash: {fileID: 0}
-  muzzleFlashDuration: 0.05
-  muzzleFlashIntensity: 3
-  shootSound: {fileID: 0}
-  reloadSound: {fileID: 0}
-  emptyClipSound: {fileID: 0}
-  gunshotHearingRadius: 12
-  gunshotFleeDuration: 3
-  gunshotFleeMultiplier: 1.8
 --- !u!82 &2007917818231756497
 AudioSource:
   m_ObjectHideFlags: 0

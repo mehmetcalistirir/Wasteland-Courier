@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ffe0e5cd070981f46804759725a8c710, type: 3}
-  m_Name: Data_Ammo_9mm
+  m_Name: Data_Ammo_762mm
   m_EditorClassIdentifier: Assembly-CSharp::AmmoItemData
-  itemName: 9mm Mermi
-  itemID: 9mm
+  itemName: 7.62mm Mermi
+  itemID: 762mm
   icon: {fileID: 5699242917808476451, guid: a4e8e966e4cb381468047b282d6dc6ab, type: 3}
   category: 1
   stackable: 1
   maxStack: 99
-  ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
+  ammoType: {fileID: 11400000, guid: c2d4e5cd1e3bc1444bdd1d374c7eadaf, type: 2}
   ammoAmount: 0

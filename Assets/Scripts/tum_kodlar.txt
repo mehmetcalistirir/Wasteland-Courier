@@ -6506,7 +6506,6 @@ public class PlayerWeapon : MonoBehaviour
 
     [Header("Components")]
     public Transform firePoint;
-    public GameObject bulletPrefab;
     public LayerMask enemyLayer;
 
     [Header("Muzzle Flash")]
@@ -6549,6 +6548,8 @@ public class PlayerWeapon : MonoBehaviour
     private bool isAiming = false;
 
     private float lastAutoFireTime = 0f;
+    private bool reloadHeldTriggered;
+    private int _lastSpareCount = -1;
 
 
 
@@ -6604,24 +6605,39 @@ public class PlayerWeapon : MonoBehaviour
 
     public void CollectMagazinesFromInventory()
     {
+        var inv = Inventory.Instance;
+        if (inv == null || weaponData == null)
+            return;
+
         inventoryMags.Clear();
 
-        var inv = Inventory.Instance;
-        if (inv == null) return;
-
+        // 🔍 Envanterdeki uyumlu şarjörleri topla
         for (int i = 0; i < inv.slots.Length; i++)
         {
             var slot = inv.slots[i];
-            if (slot == null || slot.magazineInstance == null)
-                continue;
+            if (slot == null) continue;
 
             var mag = slot.magazineInstance;
-            if (IsMagazineCompatible(mag))
-                inventoryMags.Add(mag);
+            if (mag == null || mag.data == null) continue;
+
+            if (!IsMagazineCompatible(mag)) continue;
+
+            inventoryMags.Add(mag);
         }
 
-        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+        // 🔒 Takılı şarjör listeden çıkar (double sayılmasın)
+        if (currentMagazine != null)
+            inventoryMags.Remove(currentMagazine);
+
+        // 📢 Event → SADECE sayı değiştiyse
+        int spareCount = inventoryMags.Count;
+        if (spareCount != _lastSpareCount)
+        {
+            _lastSpareCount = spareCount;
+            OnSpareMagazineCountChanged?.Invoke(spareCount);
+        }
     }
+
 
 
 
@@ -6697,39 +6713,65 @@ public class PlayerWeapon : MonoBehaviour
     {
         controls.Gameplay.Enable();
 
+        controls.Gameplay.Reload.started += OnReloadStarted;
         controls.Gameplay.Reload.performed += OnReloadPerformed;
         controls.Gameplay.Reload.canceled += OnReloadCanceled;
 
-        // Diğer inputlar (ADS, Weapon1 vs.) kalabilir
+        if (WeaponSlotManager.Instance != null)
+            WeaponSlotManager.Instance.SetActiveWeapon(this);
+        if (Inventory.Instance != null)
+            Inventory.Instance.OnChanged += OnInventoryChanged;
     }
+
 
 
     private void OnDisable()
     {
+        controls.Gameplay.Reload.started -= OnReloadStarted;
         controls.Gameplay.Reload.performed -= OnReloadPerformed;
         controls.Gameplay.Reload.canceled -= OnReloadCanceled;
 
+        if (Inventory.Instance != null)
+            Inventory.Instance.OnChanged -= OnInventoryChanged;
+
         controls.Gameplay.Disable();
     }
+
+    private void OnInventoryChanged()
+    {
+        CollectMagazinesFromInventory();
+    }
+
+
     private void OnReloadPerformed(InputAction.CallbackContext ctx)
     {
-        if (isReloading || isCheckingMag)
-            return;
+        if (isReloading || isCheckingMag) return;
+        if (weaponData == null) return;
 
-        // HOLD → MAG CHECK
+        // HOLD tamamlandıysa → MagCheck
         if (ctx.interaction is UnityEngine.InputSystem.Interactions.HoldInteraction)
         {
+            reloadHeldTriggered = true;
             StartCoroutine(MagCheck());
             return;
         }
 
-        // PRESS → RELOAD
-        TryReload();
+        // PRESS → Reload (ama hold’a gitmeyecekse)
+        if (!reloadHeldTriggered)
+            TryReload();
     }
+
     private void OnReloadCanceled(InputAction.CallbackContext ctx)
     {
         // Şimdilik boş
     }
+
+    private void OnReloadStarted(InputAction.CallbackContext ctx)
+    {
+        reloadHeldTriggered = false;
+    }
+
+
 
 
     private void SwitchToSlot(int slot)
@@ -6812,10 +6854,21 @@ public class PlayerWeapon : MonoBehaviour
 
     private void TryReload()
     {
-        if (isReloading || isCheckingMag)
+        if (isReloading || isCheckingMag) return;
+        if (weaponData == null)
+        {
+            ammoCheckUI?.Show("Silah yok.");
             return;
+        }
 
-        // 🔥 Silah boşsa → direkt şarjör tak
+        // bozuk state koruması
+        if (currentMagazine != null && currentMagazine.data == null)
+            currentMagazine = null;
+
+        // her reload girişinde listeyi tazele (pickup sonrası otomatik görsün)
+        CollectMagazinesFromInventory();
+
+        // Silah boşsa → direkt şarjör tak
         if (currentMagazine == null)
         {
             MagazineInstance next = SelectNextMagazine();
@@ -6836,7 +6889,8 @@ public class PlayerWeapon : MonoBehaviour
             return;
         }
 
-        // Doluysa normal reload
+
+        // currentMagazine.data artık garanti
         if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
         {
             ammoCheckUI?.Show("Şarjör zaten dolu.");
@@ -6846,8 +6900,18 @@ public class PlayerWeapon : MonoBehaviour
         StartCoroutine(ReloadRoutine());
     }
 
+    public void NotifyMagazineAmmoChanged()
+{
+    if (currentMagazine != null && currentMagazine.data != null)
+    {
+        OnMagazineChanged?.Invoke(
+            currentMagazine.currentAmmo,
+            currentMagazine.data.capacity
+        );
+    }
 
-
+    CollectMagazinesFromInventory();
+}
 
     // ============================
     // ACTUAL SHOOT LOGIC
@@ -6955,42 +7019,61 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     private void FireSingleBullet()
+{
+    if (weaponData.projectilePrefab == null)
     {
-        var bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Debug.LogError("WeaponData projectilePrefab NULL!");
+        return;
+    }
 
-        if (bullet.TryGetComponent(out WeaponBullet b))
+    var projectile = Instantiate(
+        weaponData.projectilePrefab,
+        firePoint.position,
+        firePoint.rotation
+    );
+
+    if (projectile.TryGetComponent(out WeaponBullet b))
+    {
+        b.damage = weaponData.damage;
+        b.owner = transform;
+        b.weaponType = weaponData.weaponType;
+        b.knockbackForce = weaponData.knockbackForce;
+        b.knockbackDuration = weaponData.knockbackDuration;
+    }
+}
+
+
+    private void FireShotgunPellets()
+{
+    if (weaponData.projectilePrefab == null)
+        return;
+
+    int pellets = Mathf.Max(weaponData.pelletsPerShot, 1);
+    float spread = weaponData.pelletSpreadAngle;
+
+    for (int i = 0; i < pellets; i++)
+    {
+        float t = pellets == 1 ? 0.5f : (float)i / (pellets - 1);
+        float angle = Mathf.Lerp(-spread, spread, t);
+
+        Quaternion rot =
+            firePoint.rotation * Quaternion.Euler(0, 0, angle);
+
+        var proj = Instantiate(
+            weaponData.projectilePrefab,
+            firePoint.position,
+            rot
+        );
+
+        if (proj.TryGetComponent(out WeaponBullet b))
         {
             b.damage = weaponData.damage;
             b.owner = transform;
             b.weaponType = weaponData.weaponType;
-            b.knockbackForce = weaponData.knockbackForce;
-            b.knockbackDuration = weaponData.knockbackDuration;
         }
     }
+}
 
-    private void FireShotgunPellets()
-    {
-        int pellets = Mathf.Max(weaponData.pelletsPerShot, 1);
-        float spread = weaponData.pelletSpreadAngle;
-
-        for (int i = 0; i < pellets; i++)
-        {
-            float t = pellets == 1 ? 0f : (float)i / (pellets - 1);
-            float angle = Mathf.Lerp(-spread, spread, t);
-            Quaternion rot = firePoint.rotation * Quaternion.Euler(0, 0, angle);
-
-            var bullet = Instantiate(bulletPrefab, firePoint.position, rot);
-
-            if (bullet.TryGetComponent(out WeaponBullet b))
-            {
-                b.damage = weaponData.damage;
-                b.owner = transform;
-                b.weaponType = weaponData.weaponType;
-                b.knockbackForce = weaponData.knockbackForce;
-                b.knockbackDuration = weaponData.knockbackDuration;
-            }
-        }
-    }
 
     // ============================
     // ADS
@@ -7218,6 +7301,7 @@ public class PlayerWeapon : MonoBehaviour
             if (fp != null)
                 firePoint = fp;
         }
+        CollectMagazinesFromInventory();
     }
 
     public void SetWeapon(WeaponData data)
@@ -9012,10 +9096,12 @@ public class WeaponData : ItemData
     public bool isSniper = false;
     public float sniperCooldown = 3.0f;
     public int sniperPenetrationCount = 2;
+    [Header("Projectile")]
+    public GameObject projectilePrefab;
 
     [Header("Ammo & Magazine")]
     public AmmoTypeData ammoType;
-public List<MagazineType> acceptedMagazines = new List<MagazineType>();
+    public List<MagazineType> acceptedMagazines = new List<MagazineType>();
 
 
 
@@ -9185,6 +9271,7 @@ public class WeaponSlotManager : MonoBehaviour
 
     [Header("Equipped Weapons (WeaponData)")]
     public WeaponData[] slots = new WeaponData[3];
+    public PlayerWeapon ActiveWeapon { get; private set; }
 
 
     [Header("Active Slot")]
@@ -9198,7 +9285,6 @@ public class WeaponSlotManager : MonoBehaviour
         Instance = this;
 
     }
-
 
 
     // -------------------------------
@@ -9278,38 +9364,41 @@ public class WeaponSlotManager : MonoBehaviour
     // PlayerWeapon'a silahÄ± aktar
     // -------------------------------
     private void ApplyToHandler(int slot)
-{
-    // TÃ¼m handlerâ€™larÄ± kapat
-    pistolHandler.gameObject.SetActive(false);
-    rifleHandler.gameObject.SetActive(false);
-    meleeHandler.gameObject.SetActive(false);
-
-    // Yeni handler
-    PlayerWeapon handler = GetHandler(slot);
-    if (handler == null)
     {
-        Debug.LogError("Handler bulunamadÄ±! Slot: " + slot);
-        return;
+        // TÃ¼m handlerâ€™larÄ± kapat
+        pistolHandler.gameObject.SetActive(false);
+        rifleHandler.gameObject.SetActive(false);
+        meleeHandler.gameObject.SetActive(false);
+
+        // Yeni handler
+        PlayerWeapon handler = GetHandler(slot);
+        if (handler == null)
+        {
+            Debug.LogError("Handler bulunamadÄ±! Slot: " + slot);
+            return;
+        }
+
+        // Handlerâ€™Ä± aktif et
+        handler.gameObject.SetActive(true);
+
+        // SilahÄ± yÃ¼kle
+        WeaponData weapon = slots[slot];
+        if (weapon != null)
+        {
+            handler.SetWeapon(weapon);
+
+            Debug.Log("Handler aÃ§Ä±ldÄ± ve silah verildi: " + weapon.name);
+        }
+        else
+        {
+            Debug.LogWarning("Slot boÅŸ ama handler aktif edildi: " + slot);
+        }
     }
 
-    // Handlerâ€™Ä± aktif et
-    handler.gameObject.SetActive(true);
-
-    // SilahÄ± yÃ¼kle
-    WeaponData weapon = slots[slot];
-    if (weapon != null)
+    public void SetActiveWeapon(PlayerWeapon weapon)
     {
-        handler.SetWeapon(weapon);
-
-        Debug.Log("Handler aÃ§Ä±ldÄ± ve silah verildi: " + weapon.name);
+        ActiveWeapon = weapon;
     }
-    else
-    {
-        Debug.LogWarning("Slot boÅŸ ama handler aktif edildi: " + slot);
-    }
-}
-
-
 
     private PlayerWeapon GetHandler(int slot)
     {
@@ -9346,75 +9435,81 @@ public class WeaponSlotManager : MonoBehaviour
     }
 
     public void EquipCraftedWeapon(WeaponData newWeapon)
-{
-    int slot = (int)GetSlotForWeapon(newWeapon);
-
-    Debug.Log($"[EquipCraftedWeapon] Yeni silah: {newWeapon.itemName}, Slot: {slot}");
-
-    // 1) Eski silahÄ± karavana gÃ¶nder
-    WeaponData oldWeapon = slots[slot];
-    if (oldWeapon != null)
     {
-        CaravanInventory.Instance.StoreWeapon(oldWeapon);
-        Debug.Log("Eski silah karavana gÃ¶nderildi: " + oldWeapon.itemName);
-    }
+        int slot = (int)GetSlotForWeapon(newWeapon);
 
-    // 2) Yeni silah slota ekle
-    slots[slot] = newWeapon;
+        Debug.Log($"[EquipCraftedWeapon] Yeni silah: {newWeapon.itemName}, Slot: {slot}");
 
-    // 4) EÄŸer aktif slot buysa hemen gÃ¼ncelle
-    if (activeSlotIndex == slot)
-    {
-        ApplyToHandler(slot);
-    }
-    else
-    {
-        // Craft edilen silaha otomatik geÃ§mek istiyorsan:
-        activeSlotIndex = slot;
-        ApplyToHandler(slot);
-    }
-
-    Debug.Log("Yeni silah oyuncuya takÄ±ldÄ±: " + newWeapon.itemName);
-}
-
-// ----------------------------------------------------
-//  SAVE
-// ----------------------------------------------------
-public WeaponSlotSaveData GetSaveData()
-{
-    WeaponSlotSaveData data = new WeaponSlotSaveData();
-
-    for (int i = 0; i < 3; i++)
-    {
-        if (slots[i] != null)
-            data.equippedWeaponIDs[i] = slots[i].itemID;
-        else
-            data.equippedWeaponIDs[i] = "";
-
-    }
-
-    data.activeSlotIndex = activeSlotIndex;
-
-    return data;
-}
-
-
-// ----------------------------------------------------
-//  LOAD
-// ----------------------------------------------------
-public void LoadData(WeaponSlotSaveData data)
-{
-    for (int i = 0; i < 3; i++)
-    {
-        string id = data.equippedWeaponIDs[i];
-
-        if (!string.IsNullOrEmpty(id))
+        // 1) Eski silahÄ± karavana gÃ¶nder
+        WeaponData oldWeapon = slots[slot];
+        if (oldWeapon != null)
         {
-            ItemData item = ItemDatabase.Get(id);
-            if (item is WeaponItemData wid)
-            {
-                slots[i] = wid.weaponData;
+            CaravanInventory.Instance.StoreWeapon(oldWeapon);
+            Debug.Log("Eski silah karavana gÃ¶nderildi: " + oldWeapon.itemName);
+        }
 
+        // 2) Yeni silah slota ekle
+        slots[slot] = newWeapon;
+
+        // 4) EÄŸer aktif slot buysa hemen gÃ¼ncelle
+        if (activeSlotIndex == slot)
+        {
+            ApplyToHandler(slot);
+        }
+        else
+        {
+            // Craft edilen silaha otomatik geÃ§mek istiyorsan:
+            activeSlotIndex = slot;
+            ApplyToHandler(slot);
+        }
+
+        Debug.Log("Yeni silah oyuncuya takÄ±ldÄ±: " + newWeapon.itemName);
+    }
+
+    // ----------------------------------------------------
+    //  SAVE
+    // ----------------------------------------------------
+    public WeaponSlotSaveData GetSaveData()
+    {
+        WeaponSlotSaveData data = new WeaponSlotSaveData();
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (slots[i] != null)
+                data.equippedWeaponIDs[i] = slots[i].itemID;
+            else
+                data.equippedWeaponIDs[i] = "";
+
+        }
+
+        data.activeSlotIndex = activeSlotIndex;
+
+        return data;
+    }
+
+
+    // ----------------------------------------------------
+    //  LOAD
+    // ----------------------------------------------------
+    public void LoadData(WeaponSlotSaveData data)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            string id = data.equippedWeaponIDs[i];
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                ItemData item = ItemDatabase.Get(id);
+                if (item is WeaponItemData wid)
+                {
+                    slots[i] = wid.weaponData;
+
+                }
+                else
+                {
+                    slots[i] = null;
+
+                }
             }
             else
             {
@@ -9422,18 +9517,12 @@ public void LoadData(WeaponSlotSaveData data)
 
             }
         }
-        else
-        {
-            slots[i] = null;
 
-        }
+        activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
+
+        // handler'Ä± gÃ¼ncelle
+        SwitchSlot(activeSlotIndex);
     }
-
-    activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
-
-    // handler'Ä± gÃ¼ncelle
-    SwitchSlot(activeSlotIndex);
-}
 
 
 
@@ -9634,6 +9723,10 @@ public class MagazineLoadPanel : MonoBehaviour
 
     public Button btnLoad;
     public Button btnFullLoad;
+    public Button btnClose; // ğŸ”¥ YENÄ°
+    private PlayerWeapon playerWeapon;
+
+
 
     private MagazineInstance currentMag;
 
@@ -9645,23 +9738,38 @@ public class MagazineLoadPanel : MonoBehaviour
         {
             RefreshText();
         });
+
+        if (btnClose != null)
+            btnClose.onClick.AddListener(Hide);
+    }
+
+    private void Update()
+    {
+        // ğŸ”¥ ESC ile kapatma
+        if (!gameObject.activeSelf)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Hide();
+        }
     }
 
     public void Show(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
             return;
-        if (loadSlider.maxValue <= 0)
-{
-    btnLoad.interactable = false;
-    btnFullLoad.interactable = false;
-}
 
         currentMag = mag;
+        currentMag = mag;
+
+        var sm = WeaponSlotManager.Instance;
+        if (sm != null)
+            playerWeapon = sm.ActiveWeapon;
+
         gameObject.SetActive(true);
 
         titleText.text = mag.data.itemName;
-
 
         int availableAmmo =
             Inventory.Instance.GetAmmoAmount(mag.data.ammoType);
@@ -9671,12 +9779,14 @@ public class MagazineLoadPanel : MonoBehaviour
         loadSlider.minValue = 0;
         loadSlider.maxValue = Mathf.Min(space, availableAmmo);
         loadSlider.value = loadSlider.maxValue;
-        btnLoad.interactable = loadSlider.maxValue > 0;
-        btnFullLoad.interactable = loadSlider.maxValue > 0;
 
+        bool canLoad = loadSlider.maxValue > 0;
+        btnLoad.interactable = canLoad;
+        btnFullLoad.interactable = canLoad;
 
         RefreshText();
     }
+
 
     public void Hide()
     {
@@ -9694,55 +9804,56 @@ public class MagazineLoadPanel : MonoBehaviour
     }
 
     public void OnLoadPressed()
-    {
-        if (currentMag == null) return;
+{
+    if (currentMag == null) return;
 
-        Inventory.Instance.LoadAmmoIntoMagazine(
-            currentMag,
-            (int)loadSlider.value
-        );
+    Inventory.Instance.LoadAmmoIntoMagazine(
+        currentMag,
+        (int)loadSlider.value
+    );
 
-        Show(currentMag); // refresh
-    }
+    playerWeapon?.NotifyMagazineAmmoChanged();
+    Show(currentMag);
+}
 
     public void OnFullLoadPressed()
-    {
-        if (currentMag == null) return;
+{
+    if (currentMag == null) return;
 
-        Inventory.Instance.FullLoadMagazine(currentMag);
-        Show(currentMag);
-    }
+    Inventory.Instance.FullLoadMagazine(currentMag);
+
+    playerWeapon?.NotifyMagazineAmmoChanged();
+    Show(currentMag);
+}
+
 }
 using UnityEngine;
 
 public class MagazinePickup : MonoBehaviour
 {
     public MagazineData magazineData;
-    public int startAmmo = 0; // loot dengesi
+    public int startAmmo = 0;
+
+    private PlayerWeapon pw;
+
+    private void Awake()
+    {
+        pw = FindObjectOfType<PlayerWeapon>();
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
             return;
 
-        Inventory inv = Inventory.Instance;
-        if (inv == null)
-            return;
+        if (magazineData == null) return;
 
-        // Yeni ÅŸarjÃ¶r oluÅŸtur
         MagazineInstance mag = new MagazineInstance(magazineData);
         mag.currentAmmo = Mathf.Clamp(startAmmo, 0, magazineData.capacity);
 
-        // Envantere ekle
-        if (!inv.TryAddMagazine(mag))
-            return;
+        Inventory.Instance.TryAddMagazine(mag);
 
-        // PlayerWeapon al (DOÄRU YER)
-        PlayerWeapon pw = other.GetComponent<PlayerWeapon>();
-        if (pw != null)
-        {
-            pw.CollectMagazinesFromInventory();
-        }
+        pw?.CollectMagazinesFromInventory(); // âœ… pickup sonrasÄ± liste gÃ¼ncellensin
 
         Destroy(gameObject);
     }
@@ -9763,78 +9874,136 @@ public enum ReloadStrategy
     NextInList,    // Listede sÄ±radaki
     LastUsed       // Son kullanÄ±lan
 }
-using UnityEngine;
+using System.Linq;
 using TMPro;
+using UnityEngine;
 
 public class WeaponHUD : MonoBehaviour
 {
     [Header("Texts")]
-    public TMP_Text magazineText;   // 12 / 30
-    public TMP_Text spareMagText;   // x3
-    public TMP_Text ammoPoolText;   // 90
+    public TMP_Text magazineText;   // "8 / 12" gibi
+    public TMP_Text spareMagText;   // Ä°stersen "x3" gÃ¶sterebiliriz (opsiyonel)
 
-    private PlayerWeapon playerWeapon;
+    private PlayerWeapon pw;
+    private Inventory inv;
 
-    void Start()
+    private void Awake()
     {
-        playerWeapon = FindObjectOfType<PlayerWeapon>();
+        inv = Inventory.Instance;
     }
 
+    private void OnEnable()
+    {
+            inv = Inventory.Instance;
+
+    var sm = WeaponSlotManager.Instance;
+    if (sm != null)
+        pw = sm.ActiveWeapon;
+
+    BindEvents();
+    RefreshAll();
+
+        // Weapon eventleri
+        if (pw != null)
+        {
+            pw.OnMagazineChanged += OnWeaponAmmoChanged;
+            pw.OnSpareMagazineCountChanged += OnSpareMagCountChanged;
+        }
+
+        // Inventory event
+        if (inv != null)
+            inv.OnChanged += RefreshAll;
+
+        RefreshAll();
+    }
+
+    private void OnDisable()
+    {
+        if (pw != null)
+        {
+            pw.OnMagazineChanged -= OnWeaponAmmoChanged;
+            pw.OnSpareMagazineCountChanged -= OnSpareMagCountChanged;
+        }
+
+        if (inv != null)
+            inv.OnChanged -= RefreshAll;
+    }
+
+    private void OnWeaponAmmoChanged(int current, int capacity)
+    {
+        // current deÄŸiÅŸince ikisini de yeniden hesaplamak daha gÃ¼venli
+        RefreshAll();
+    }
+    void BindEvents()
+{
+    if (pw == null) return;
+
+    pw.OnMagazineChanged += OnWeaponAmmoChanged;
+    pw.OnSpareMagazineCountChanged += OnSpareMagCountChanged;
+
+    if (inv != null)
+        inv.OnChanged += RefreshAll;
+}
+
+    private void OnSpareMagCountChanged(int count)
+    {
+        // Sadece count yazmak istersen:
+        if (spareMagText != null)
+            spareMagText.text = $"x{count}";
+
+        // Ama esas deÄŸerler yine gÃ¼ncellensin:
+        RefreshAll();
+    }
     void Update()
-    {
-        if (playerWeapon == null)
-            return;
+{
+    var sm = WeaponSlotManager.Instance;
+    if (sm == null) return;
 
-        UpdateMagazine();
-        UpdateSpareMags();
-        UpdateAmmoPool();
+    if (pw != sm.ActiveWeapon)
+    {
+        UnbindEvents();
+        pw = sm.ActiveWeapon;
+        BindEvents();
+        RefreshAll();
+    }
+}
+
+void UnbindEvents()
+{
+    if (pw == null) return;
+
+    pw.OnMagazineChanged -= OnWeaponAmmoChanged;
+    pw.OnSpareMagazineCountChanged -= OnSpareMagCountChanged;
+
+    if (inv != null)
+        inv.OnChanged -= RefreshAll;
+}
+
+    private void RefreshAll()
+{
+    if (pw == null || pw.weaponData == null)
+    {
+        magazineText.text = "-- / --";
+        spareMagText.text = "x0";
+        return;
     }
 
-    void UpdateMagazine()
+    int equippedAmmo = 0;
+    if (pw.currentMagazine != null && pw.currentMagazine.data != null)
+        equippedAmmo = pw.currentMagazine.currentAmmo;
+
+    int inventoryAmmo = 0;
+    for (int i = 0; i < pw.inventoryMags.Count; i++)
     {
-        var mag = playerWeapon.currentMagazine;
-
-        if (mag == null || mag.data == null)
-        {
-            magazineText.text = "-- / --";
-            return;
-        }
-
-        magazineText.text =
-            $"{mag.currentAmmo} / {mag.data.capacity}";
+        var m = pw.inventoryMags[i];
+        if (m == null || m.data == null) continue;
+        inventoryAmmo += m.currentAmmo;
     }
 
-    void UpdateSpareMags()
-    {
-        if (playerWeapon.weaponData == null)
-        {
-            spareMagText.text = "x0";
-            return;
-        }
+    magazineText.text = $"{equippedAmmo} / {inventoryAmmo}";
+    spareMagText.text = $"x{pw.inventoryMags.Count}";
+}
 
-        int count = playerWeapon.inventoryMags.FindAll(m =>
-            m != null &&
-            m.data != null &&
-            m.data.ammoType == playerWeapon.weaponData.ammoType
-        ).Count;
-
-        spareMagText.text = $"x{count}";
-    }
-
-    void UpdateAmmoPool()
-    {
-        if (playerWeapon.weaponData == null)
-        {
-            ammoPoolText.text = "0";
-            return;
-        }
-
-        int ammo = Inventory.Instance.GetAmmoAmount(
-            playerWeapon.weaponData.ammoType
-        );
-
-        ammoPoolText.text = ammo.ToString();
-    }
 }
 using UnityEngine;
 
@@ -9860,6 +10029,8 @@ public class WeaponDataEditor : Editor
     // Core
     SerializedProperty prefab;
     SerializedProperty weaponType;
+    // Projectile
+    SerializedProperty projectilePrefab;
 
     // Combat
     SerializedProperty knockbackForce;
@@ -9895,6 +10066,8 @@ public class WeaponDataEditor : Editor
     {
         prefab = serializedObject.FindProperty("prefab");
         weaponType = serializedObject.FindProperty("weaponType");
+        projectilePrefab = serializedObject.FindProperty("projectilePrefab");
+
 
         knockbackForce = serializedObject.FindProperty("knockbackForce");
         knockbackDuration = serializedObject.FindProperty("knockbackDuration");
@@ -9942,6 +10115,8 @@ public class WeaponDataEditor : Editor
         EditorGUILayout.PropertyField(damage);
         EditorGUILayout.PropertyField(reloadTime);
         EditorGUILayout.PropertyField(attackRange);
+        EditorGUILayout.PropertyField(projectilePrefab);
+
 
         // ---------------- AUTOMATIC ----------------
         if (wt != WeaponType.Shotgun &&

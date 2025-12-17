@@ -34,8 +34,9 @@ MonoBehaviour:
   isSniper: 0
   sniperCooldown: 3
   sniperPenetrationCount: 2
-  ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
-  acceptedMagazines: 01000000
+  projectilePrefab: {fileID: 3839466002162504836, guid: 6dbb90b9dacb96744b10f092742c1375, type: 3}
+  ammoType: {fileID: 11400000, guid: a373c20686e7d5b4387972a849591a3e, type: 2}
+  acceptedMagazines: 05000000
   isMolotov: 0
   fireEffectPrefab: {fileID: 0}
   explosionRadius: 2.5

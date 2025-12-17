@@ -94,8 +94,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3465567562603156701}
   - component: {fileID: 8045245472265004583}
-  - component: {fileID: 6385869869418457149}
-  - component: {fileID: 2329993721695046402}
   - component: {fileID: 5759696347228277711}
   m_Layer: 0
   m_Name: WeaponMeeleSpear
@@ -179,48 +177,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6385869869418457149
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944365562594708401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1d7d1a11a1465d4897fa4eafcb13dd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponPivot: {fileID: 3465567562603156701}
-  flashlight: {fileID: 8866623895005573136}
-  firePoint: {fileID: 4614354588770972592}
---- !u!114 &2329993721695046402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944365562594708401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: 23b941dccc66a014184f475471e68ece, type: 2}
-  firePoint: {fileID: 4614354588770972592}
-  bulletPrefab: {fileID: 0}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  muzzleFlash: {fileID: 0}
-  muzzleFlashDuration: 0.05
-  muzzleFlashIntensity: 3
-  shootSound: {fileID: 8300000, guid: 778de1b78c76e5f4f911c89da5893447, type: 3}
-  reloadSound: {fileID: 0}
-  emptyClipSound: {fileID: 0}
-  gunshotHearingRadius: 12
-  gunshotFleeDuration: 3
-  gunshotFleeMultiplier: 1.8
 --- !u!82 &5759696347228277711
 AudioSource:
   m_ObjectHideFlags: 0

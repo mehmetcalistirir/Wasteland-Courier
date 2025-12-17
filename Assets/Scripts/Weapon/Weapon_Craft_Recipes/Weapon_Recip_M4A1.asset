@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05499e8d33c33b6479eeb55924e510ea, type: 3}
-  m_Name: Weapon_Machinegun_Recipe
+  m_Name: Weapon_Recip_M4A1
   m_EditorClassIdentifier: Assembly-CSharp::WeaponCraftRecipe
   resultWeapon: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}
-  description: "Makinal\u0131 T\xFCfek"
+  description: M4A1
   costs:
   - item: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
     amount: 2

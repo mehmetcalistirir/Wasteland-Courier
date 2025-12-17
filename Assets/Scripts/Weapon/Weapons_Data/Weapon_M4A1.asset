@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83e9591c0c3c19a4d873b1c6fe87e5b8, type: 3}
-  m_Name: Weapon_MachineGun
+  m_Name: Weapon_M4A1
   m_EditorClassIdentifier: 
   itemName: Machine Gun
   itemID: weapon_machinegun
@@ -25,8 +25,6 @@ MonoBehaviour:
   isAutomatic: 1
   fireRate: 7
   damage: 15
-  clipSize: 30
-  maxAmmoCapacity: 90
   reloadTime: 1.5
   attackRange: 1.5
   isShotgun: 0
@@ -36,7 +34,9 @@ MonoBehaviour:
   isSniper: 0
   sniperCooldown: 3
   sniperPenetrationCount: 2
-  ammoType: 7
+  projectilePrefab: {fileID: 0}
+  ammoType: {fileID: 11400000, guid: 093a41e984dbe1e45a7a2c69efe8d879, type: 2}
+  acceptedMagazines: 02000000
   isMolotov: 0
   fireEffectPrefab: {fileID: 0}
   explosionRadius: 2.5

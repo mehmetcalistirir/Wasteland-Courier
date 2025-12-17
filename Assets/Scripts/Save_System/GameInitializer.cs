@@ -56,7 +56,7 @@ public class GameInitializer : MonoBehaviour
 
 
         // 3) BAŞLANGIÇ PİSTOL
-        ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
+        ItemData pistolItem = ItemDatabase.Get("weapon_glock18");
         if (pistolItem != null)
         {
             WeaponSlotManager.Instance.EquipWeapon(pistolItem);

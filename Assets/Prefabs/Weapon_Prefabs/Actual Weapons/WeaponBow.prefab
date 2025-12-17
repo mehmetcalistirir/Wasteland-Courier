@@ -125,8 +125,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5946931806285946009}
   - component: {fileID: 8723504082330926818}
-  - component: {fileID: 512914907621779594}
-  - component: {fileID: 7908447671027217973}
   - component: {fileID: 8814758082722394174}
   m_Layer: 0
   m_Name: WeaponBow
@@ -210,48 +208,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &512914907621779594
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7324183614779471187}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1d7d1a11a1465d4897fa4eafcb13dd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponPivot: {fileID: 5946931806285946009}
-  flashlight: {fileID: 3425561084344702985}
-  firePoint: {fileID: 5027593341952918076}
---- !u!114 &7908447671027217973
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7324183614779471187}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85636c5cfec1cd540a44e67f9a633887, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: a071eb56dcadec34eb7671a89e56f0b5, type: 2}
-  firePoint: {fileID: 5027593341952918076}
-  bulletPrefab: {fileID: 4594844033352697443, guid: 37df6a91251aa284eb0514fb85e537ec, type: 3}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  muzzleFlash: {fileID: 0}
-  muzzleFlashDuration: 0.05
-  muzzleFlashIntensity: 3
-  shootSound: {fileID: 8300000, guid: 3f414f52f1091244fb63e8025f9ac58a, type: 3}
-  reloadSound: {fileID: 0}
-  emptyClipSound: {fileID: 0}
-  gunshotHearingRadius: 12
-  gunshotFleeDuration: 3
-  gunshotFleeMultiplier: 1.8
 --- !u!82 &8814758082722394174
 AudioSource:
   m_ObjectHideFlags: 0

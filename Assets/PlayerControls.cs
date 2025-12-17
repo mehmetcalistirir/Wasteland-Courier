@@ -143,7 +143,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""id"": ""e12ea45d-86cc-4953-ba85-4ebaeae503c7"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold,Press"",
                     ""initialStateCheck"": false
                 },
                 {

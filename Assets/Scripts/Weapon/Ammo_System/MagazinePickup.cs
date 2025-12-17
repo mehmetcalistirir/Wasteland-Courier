@@ -3,31 +3,28 @@ using UnityEngine;
 public class MagazinePickup : MonoBehaviour
 {
     public MagazineData magazineData;
-    public int startAmmo = 0; // loot dengesi
+    public int startAmmo = 0;
+
+    private PlayerWeapon pw;
+
+    private void Awake()
+    {
+        pw = FindObjectOfType<PlayerWeapon>();
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
             return;
 
-        Inventory inv = Inventory.Instance;
-        if (inv == null)
-            return;
+        if (magazineData == null) return;
 
-        // Yeni şarjör oluştur
         MagazineInstance mag = new MagazineInstance(magazineData);
         mag.currentAmmo = Mathf.Clamp(startAmmo, 0, magazineData.capacity);
 
-        // Envantere ekle
-        if (!inv.TryAddMagazine(mag))
-            return;
+        Inventory.Instance.TryAddMagazine(mag);
 
-        // PlayerWeapon al (DOĞRU YER)
-        PlayerWeapon pw = other.GetComponent<PlayerWeapon>();
-        if (pw != null)
-        {
-            pw.CollectMagazinesFromInventory();
-        }
+        pw?.CollectMagazinesFromInventory(); // ✅ pickup sonrası liste güncellensin
 
         Destroy(gameObject);
     }

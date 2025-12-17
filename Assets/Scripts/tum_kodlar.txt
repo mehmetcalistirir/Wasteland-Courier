@@ -5960,10 +5960,10 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
-    public float sprintMultiplier = 1.7f; // KoÅŸarken hÄ±z artÄ±ÅŸÄ±
+    public float sprintMultiplier = 1.7f; // KoÃ…Å¸arken hÃ„Â±z artÃ„Â±Ã…Å¸Ã„Â±
     private bool isSprinting = false;
 
-    // --- BileÅŸen ReferanslarÄ± ---
+    // --- BileÃ…Å¸en ReferanslarÃ„Â± ---
     private Rigidbody2D rb;
     private PlayerStats stats;
     private Animator animator;
@@ -5973,7 +5973,7 @@ public class PlayerMovement : MonoBehaviour
     private PlayerControls controls;
     private Vector2 moveInput;
 
-    // --- Ek Ã–zellikler ---
+    // --- Ek Ãƒâ€“zellikler ---
     public static float FacingDirection { get; private set; } = 1f;
     public float soundRadius = 5f;
 
@@ -6017,15 +6017,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
 {
-    if (GameStateManager.IsGamePaused)
-    {
-        rb.linearVelocity = Vector2.zero;
-        return;
-    }
     float currentSpeed = moveSpeed;
     bool isMoving = moveInput.magnitude > 0.1f;
 
-    // PlayerStats'a koÅŸu/yÃ¼rÃ¼me bilgisini HER FRAME gÃ¶nder
+    // PlayerStats'a koÃ…Å¸u/yÃƒÂ¼rÃƒÂ¼me bilgisini HER FRAME gÃƒÂ¶nder
     stats.SetMovementState(isMoving, isSprinting);
 
     if (isSprinting && stats.HasStamina() && isMoving)
@@ -6048,25 +6043,25 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-    // --- 360Â° Fareye DÃ¶nÃ¼k Animasyon ve Rotasyon ---
+    // --- 360Ã‚Â° Fareye DÃƒÂ¶nÃƒÂ¼k Animasyon ve Rotasyon ---
     private void UpdateRotationAndAnimation()
     {
         if (animator == null || mainCamera == null) return;
 
-        // ğŸ§­ Fare konumunu al ve yÃ¶nÃ¼ hesapla
+        // ÄŸÅ¸Â§Â­ Fare konumunu al ve yÃƒÂ¶nÃƒÂ¼ hesapla
         Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
         Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(mouseScreenPos);
         Vector2 aimDirection = (mouseWorldPos - transform.position).normalized;
 
-        // ğŸŒ€ Karakteri fareye Ã§evir (360Â°)
+        // ÄŸÅ¸Å’â‚¬ Karakteri fareye ÃƒÂ§evir (360Ã‚Â°)
         float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarÄ± bakÄ±yorsa -90f uygundur
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarÃ„Â± bakÃ„Â±yorsa -90f uygundur
 
-        // ğŸ Animasyon durumu
+        // ÄŸÅ¸ÂÂ Animasyon durumu
         bool isMoving = moveInput.magnitude > 0.1f;
         animator.SetBool("IsMoving", isMoving);
 
-        // ğŸ” FacingDirection flip kontrolÃ¼ (silah veya atÄ±ÅŸ yÃ¶nÃ¼ iÃ§in)
+        // ÄŸÅ¸â€Â FacingDirection flip kontrolÃƒÂ¼ (silah veya atÃ„Â±Ã…Å¸ yÃƒÂ¶nÃƒÂ¼ iÃƒÂ§in)
         FacingDirection = aimDirection.x >= 0 ? 1f : -1f;
     }
 }
@@ -6565,9 +6560,7 @@ public class PlayerWeapon : MonoBehaviour
     [Header("Reload Input")]
     public float reloadHoldThreshold = 0.4f;
 
-    private float reloadPressTime;
-    private bool reloadPressed;
-    private Coroutine holdCheckCo;
+
     private bool magCheckTriggered;
 
 
@@ -6585,6 +6578,8 @@ public class PlayerWeapon : MonoBehaviour
 
     private void Start()
     {
+        CollectMagazinesFromInventory();
+
         slotManager = WeaponSlotManager.Instance;
 
         if (slotManager != null)
@@ -6593,47 +6588,41 @@ public class PlayerWeapon : MonoBehaviour
             Debug.LogError("[PlayerWeapon] Slot Manager null!");
 
         CollectMagazinesFromInventory();
-    }
 
-    private void CollectMagazinesFromInventory()
-{
-    inventoryMags.Clear();
-    currentMagazine = null;
-
-    var inv = Inventory.Instance;
-    if (inv == null) return;
-
-    for (int i = 0; i < inv.slots.Length; i++)
-    {
-        var slot = inv.slots[i];
-
-        if (slot == null || slot.magazineInstance == null)
-            continue;
-
-        var mag = slot.magazineInstance;
-
-        if (weaponData != null && mag.data != null && mag.data.ammoType == weaponData.ammoType)
+        if (currentMagazine == null && inventoryMags.Count > 0)
         {
-            inventoryMags.Add(mag);
+            currentMagazine = SelectNextMagazine();
+            inventoryMags.Remove(currentMagazine);
+
+            OnMagazineChanged?.Invoke(
+                currentMagazine.currentAmmo,
+                currentMagazine.data.capacity
+            );
         }
+
     }
 
-    if (inventoryMags.Count > 0)
+    public void CollectMagazinesFromInventory()
     {
-        currentMagazine = inventoryMags
-            .OrderByDescending(m => m.currentAmmo)
-            .First();
+        inventoryMags.Clear();
 
-        inventoryMags.Remove(currentMagazine);
-    }
-    else
-    {
-        Debug.Log("[Weapon] Uygun şarjör bulunamadı.");
+        var inv = Inventory.Instance;
+        if (inv == null) return;
+
+        for (int i = 0; i < inv.slots.Length; i++)
+        {
+            var slot = inv.slots[i];
+            if (slot == null || slot.magazineInstance == null)
+                continue;
+
+            var mag = slot.magazineInstance;
+            if (IsMagazineCompatible(mag))
+                inventoryMags.Add(mag);
+        }
+
+        OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
     }
 
-    inv.RaiseChanged();
-    OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
-}
 
 
     private MagazineInstance SelectNextMagazine()
@@ -6641,42 +6630,65 @@ public class PlayerWeapon : MonoBehaviour
         if (inventoryMags == null || inventoryMags.Count == 0)
             return null;
 
-        // 🔒 SADECE UYUMLU ŞARJÖRLER
-        var compatible = inventoryMags
-            .Where(m =>
-                m != null &&
-                m.data != null &&
-                IsMagazineCompatible(m)
-            )
-            .ToList();
+        // Uyumlu olanları topla (GC-free)
+        // (İstersen liste oluşturmadan direkt seçebilirsin)
+        MagazineInstance best = null;
 
-        if (compatible.Count == 0)
-            return null;
-
-        switch (reloadStrategy)
+        if (reloadStrategy == ReloadStrategy.MostFull || reloadStrategy == ReloadStrategy.LastUsed)
         {
-            case ReloadStrategy.MostFull:
-                return compatible
-                    .OrderByDescending(m => m.currentAmmo)
-                    .First();
+            int bestAmmo = -1;
 
-            case ReloadStrategy.NextInList:
-                lastMagIndex = (lastMagIndex + 1) % compatible.Count;
-                return compatible[lastMagIndex];
+            for (int i = 0; i < inventoryMags.Count; i++)
+            {
+                var m = inventoryMags[i];
+                if (m == null || m.data == null) continue;
+                if (!IsMagazineCompatible(m)) continue;
 
-            case ReloadStrategy.LastUsed:
-                if (lastUsedMagazine != null &&
-                    compatible.Contains(lastUsedMagazine))
+                if (reloadStrategy == ReloadStrategy.LastUsed && lastUsedMagazine != null && m == lastUsedMagazine)
+                    return m; // direkt dön
+
+                if (m.currentAmmo > bestAmmo)
                 {
-                    return lastUsedMagazine;
+                    bestAmmo = m.currentAmmo;
+                    best = m;
                 }
-                return compatible
-                    .OrderByDescending(m => m.currentAmmo)
-                    .First();
+            }
+
+            return best;
+        }
+
+        // NextInList (uyumlular arasında sırayla)
+        // Uyumlu sayısını bul, sonra index seç
+        int compatibleCount = 0;
+        for (int i = 0; i < inventoryMags.Count; i++)
+        {
+            var m = inventoryMags[i];
+            if (m == null || m.data == null) continue;
+            if (!IsMagazineCompatible(m)) continue;
+            compatibleCount++;
+        }
+
+        if (compatibleCount == 0) return null;
+
+        lastMagIndex = (lastMagIndex + 1) % compatibleCount;
+
+        // lastMagIndex’in işaret ettiği uyumlu elemanı bul
+        int k = 0;
+        for (int i = 0; i < inventoryMags.Count; i++)
+        {
+            var m = inventoryMags[i];
+            if (m == null || m.data == null) continue;
+            if (!IsMagazineCompatible(m)) continue;
+
+            if (k == lastMagIndex)
+                return m;
+
+            k++;
         }
 
         return null;
     }
+
 
     // ============================
     // INPUT SYSTEM ONENABLE / OFF
@@ -6685,36 +6697,40 @@ public class PlayerWeapon : MonoBehaviour
     {
         controls.Gameplay.Enable();
 
-        // Slot Switching
-        controls.Gameplay.Weapon1.performed += ctx => SwitchToSlot(0);
-        controls.Gameplay.Weapon2.performed += ctx => SwitchToSlot(1);
-        controls.Gameplay.Weapon3.performed += ctx => SwitchToSlot(2);
+        controls.Gameplay.Reload.performed += OnReloadPerformed;
+        controls.Gameplay.Reload.canceled += OnReloadCanceled;
 
-        // ADS
-        controls.Gameplay.ADS.started += ctx => StartADS();
-        controls.Gameplay.ADS.canceled += ctx => StopADS();
-
-        // Reload Hold Detection
-        controls.Gameplay.Reload.started += ctx =>
-        {
-            reloadPressTime = Time.time;
-        };
-
-        controls.Gameplay.Reload.canceled += ctx =>
-        {
-            float held = Time.time - reloadPressTime;
-
-            if (held >= reloadHoldThreshold)
-                StartCoroutine(MagCheck());
-            else
-                StartCoroutine(ReloadRoutine());
-        };
+        // Diğer inputlar (ADS, Weapon1 vs.) kalabilir
     }
+
 
     private void OnDisable()
     {
+        controls.Gameplay.Reload.performed -= OnReloadPerformed;
+        controls.Gameplay.Reload.canceled -= OnReloadCanceled;
+
         controls.Gameplay.Disable();
     }
+    private void OnReloadPerformed(InputAction.CallbackContext ctx)
+    {
+        if (isReloading || isCheckingMag)
+            return;
+
+        // HOLD → MAG CHECK
+        if (ctx.interaction is UnityEngine.InputSystem.Interactions.HoldInteraction)
+        {
+            StartCoroutine(MagCheck());
+            return;
+        }
+
+        // PRESS → RELOAD
+        TryReload();
+    }
+    private void OnReloadCanceled(InputAction.CallbackContext ctx)
+    {
+        // Şimdilik boş
+    }
+
 
     private void SwitchToSlot(int slot)
     {
@@ -6727,65 +6743,33 @@ public class PlayerWeapon : MonoBehaviour
 
 
 
-private void Update()
-{
-    if (GameStateManager.IsGamePaused || weaponData == null)
-        return;
-
-    // 🔫 Tekli atış
-    if (!weaponData.isAutomatic)
+    private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-            Shoot();
+        if (GameStateManager.IsGamePaused || weaponData == null)
+            return;
+
+        // 🔫 Tekli atış
+        if (!weaponData.isAutomatic)
+        {
+            if (Input.GetMouseButtonDown(0))
+                Shoot();
+        }
+
+        // 🔥 Otomatik atış
+        if (weaponData.isAutomatic)
+        {
+            if (Input.GetMouseButton(0))
+                AutoFire();
+        }
+
+
     }
 
-    // 🔥 Otomatik atış
-    if (weaponData.isAutomatic)
-    {
-        if (Input.GetMouseButton(0))
-            AutoFire();
-    }
+    // ============================
+    // MAGAZINE CHECK (HOLD R)
+    // ============================
 
-    // 🔁 R BASILDI
-if (Input.GetKeyDown(KeyCode.R) && !isCheckingMag && !isReloading)
-{
-    reloadPressed = true;
-    magCheckTriggered = false;
 
-    if (holdCheckCo != null)
-        StopCoroutine(holdCheckCo);
-
-    holdCheckCo = StartCoroutine(HoldMagCheckRoutine());
-}
-
-// 🔁 R BIRAKILDI
-if (Input.GetKeyUp(KeyCode.R) && reloadPressed)
-{
-    reloadPressed = false;
-
-    // Eğer hold ile mag check tetiklenmediyse → reload
-    if (!magCheckTriggered)
-    {
-        TryReload();
-    }
-}
-
-}
-
-// ============================
-// MAGAZINE CHECK (HOLD R)
-// ============================
-
-private IEnumerator HoldMagCheckRoutine()
-{
-    yield return new WaitForSeconds(reloadHoldThreshold);
-
-    if (reloadPressed && !magCheckTriggered)
-    {
-        magCheckTriggered = true;
-        StartCoroutine(MagCheck());
-    }
-}
     public bool TryEquipMagazineFromInventory(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)
@@ -6815,7 +6799,7 @@ private IEnumerator HoldMagCheckRoutine()
     private void AutoFire()
     {
         if (isReloading || isCheckingMag)
-    return;
+            return;
 
         float fireDelay = 1f / weaponData.fireRate;
 
@@ -6827,36 +6811,41 @@ private IEnumerator HoldMagCheckRoutine()
     }
 
     private void TryReload()
-{
-    if (isCheckingMag || isReloading)
-        return;
-
-    if (inventoryMags.Count == 0)
     {
-        ammoCheckUI?.Show("Yedek şarjör yok.");
-        return;
+        if (isReloading || isCheckingMag)
+            return;
+
+        // 🔥 Silah boşsa → direkt şarjör tak
+        if (currentMagazine == null)
+        {
+            MagazineInstance next = SelectNextMagazine();
+            if (next == null)
+            {
+                ammoCheckUI?.Show("Uyumlu şarjör yok.");
+                return;
+            }
+
+            inventoryMags.Remove(next);
+            currentMagazine = next;
+
+            OnMagazineChanged?.Invoke(
+                currentMagazine.currentAmmo,
+                currentMagazine.data.capacity
+            );
+            OnSpareMagazineCountChanged?.Invoke(inventoryMags.Count);
+            return;
+        }
+
+        // Doluysa normal reload
+        if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
+        {
+            ammoCheckUI?.Show("Şarjör zaten dolu.");
+            return;
+        }
+
+        StartCoroutine(ReloadRoutine());
     }
 
-    if (currentMagazine == null || currentMagazine.data == null)
-    {
-        ammoCheckUI?.Show("Şarjör takılı değil.");
-        return;
-    }
-    
-    if (!CanEquipMagazine(currentMagazine))
-    {
-        ammoCheckUI?.Show("Uyumsuz şarjör!");
-        return;
-    }
-
-    if (currentMagazine.currentAmmo >= currentMagazine.data.capacity)
-    {
-        ammoCheckUI?.Show("Şarjör zaten dolu.");
-        return;
-    }
-
-    StartCoroutine(ReloadRoutine());
-}
 
 
 
@@ -6866,14 +6855,14 @@ private IEnumerator HoldMagCheckRoutine()
     public void Shoot()
     {
         if (currentMagazine == null)
-{
-    PlayEmptyClipSound();
-    ammoCheckUI?.Show("Şarjör yok.");
-    return;
-}
+        {
+            PlayEmptyClipSound();
+            ammoCheckUI?.Show("Şarjör yok.");
+            return;
+        }
 
         if (isReloading || isCheckingMag)
-    return;
+            return;
 
         if (currentMagazine == null || currentMagazine.data == null)
         {
@@ -6945,9 +6934,9 @@ private IEnumerator HoldMagCheckRoutine()
 
     public bool CanEquipMagazine(MagazineInstance mag)
     {
-        if (mag == null || mag.data == null) return false;
-        return mag.data.ammoType == weaponData.ammoType;
+        return IsMagazineCompatible(mag);
     }
+
 
 
     private void RangedAttack()
@@ -7029,19 +7018,27 @@ private IEnumerator HoldMagCheckRoutine()
             yield break;
 
         // 🔒 SADECE UYUMLU ŞARJÖRLER
-        var compatibleMags = inventoryMags
-            .Where(m =>
-                m != null &&
-                m.data != null &&
-                m.data.ammoType == weaponData.ammoType
-            )
-            .ToList();
-
-        if (compatibleMags.Count == 0)
+        bool hasCompatible = false;
+        for (int i = 0; i < inventoryMags.Count; i++)
         {
-            Debug.Log("Bu silaha uygun şarjör yok!");
+            var m = inventoryMags[i];
+            if (m == null || m.data == null) continue;
+            if (m.data.ammoType != weaponData.ammoType) continue;
+            if (!IsMagazineCompatible(m)) continue;
+
+            hasCompatible = true;
+            break;
+        }
+
+        if (!hasCompatible)
+        {
+            // (Log istersen sadece editor)
+            // #if UNITY_EDITOR
+            // Debug.Log("Bu silaha uygun şarjör yok!");
+            // #endif
             yield break;
         }
+
 
         isReloading = true;
 
@@ -7081,16 +7078,16 @@ private IEnumerator HoldMagCheckRoutine()
     }
 
     private bool IsMagazineCompatible(MagazineInstance mag)
-{
-    if (mag == null || mag.data == null || weaponData == null)
-        return false;
+    {
+        if (mag == null || mag.data == null || weaponData == null)
+            return false;
 
-    // acceptedMagazines null veya boş kontrolü
-    if (weaponData.acceptedMagazines == null || weaponData.acceptedMagazines.Count == 0)
-        return false;
+        // acceptedMagazines null veya boş kontrolü
+        if (weaponData.acceptedMagazines == null || weaponData.acceptedMagazines.Count == 0)
+            return false;
 
-    return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
-}
+        return weaponData.acceptedMagazines.Contains(mag.data.magazineType);
+    }
 
 
 
@@ -7226,8 +7223,8 @@ private IEnumerator HoldMagCheckRoutine()
     public void SetWeapon(WeaponData data)
     {
         StopAllCoroutines();
-isReloading = false;
-isCheckingMag = false;
+        isReloading = false;
+        isCheckingMag = false;
 
         if (data == null)
             return;
@@ -7268,18 +7265,30 @@ isCheckingMag = false;
                 continue;
 
             // 🔒 SADECE BU SİLAHA UYUMLU ŞARJÖR
-            if (mag.data.ammoType == weaponData.ammoType)
+            if (IsMagazineCompatible(mag))
             {
                 inventoryMags.Add(mag);
             }
+
         }
 
         // 🔫 OTOMATİK TAK (opsiyonel ama önerilir)
         if (inventoryMags.Count > 0)
         {
-            currentMagazine = inventoryMags
-                .OrderByDescending(m => m.currentAmmo)
-                .First();
+            MagazineInstance best = null;
+            int maxAmmo = -1;
+
+            foreach (var m in inventoryMags)
+            {
+                if (m.currentAmmo > maxAmmo)
+                {
+                    maxAmmo = m.currentAmmo;
+                    best = m;
+                }
+            }
+
+            currentMagazine = best;
+
 
             inventoryMags.Remove(currentMagazine);
 
@@ -7292,6 +7301,16 @@ isCheckingMag = false;
         {
             Debug.Log("[Weapon] Uyumlu şarjör bulunamadı.");
         }
+        CollectMagazinesFromInventory();
+
+        currentMagazine = null;
+
+        if (inventoryMags.Count > 0)
+        {
+            currentMagazine = SelectNextMagazine();
+            inventoryMags.Remove(currentMagazine);
+        }
+
     }
 
 
@@ -8775,18 +8794,18 @@ using UnityEngine.Rendering.Universal;
 public class WeaponAim : MonoBehaviour
 {
     [Header("Components")]
-    [Tooltip("SilahÄ±n ve altÄ±ndaki her ÅŸeyin dÃ¶neceÄŸi ana pivot. Genellikle silahÄ±n kendisidir.")]
+    [Tooltip("SilahÃ„Â±n ve altÃ„Â±ndaki her Ã…Å¸eyin dÃƒÂ¶neceÃ„Å¸i ana pivot. Genellikle silahÃ„Â±n kendisidir.")]
     public Transform weaponPivot;
 
     [Tooltip("Bu silaha ait Light 2D objesi.")]
     public Light2D flashlight;
 
-    [Tooltip("Merminin Ã§Ä±kacaÄŸÄ± namlu ucu transformu.")]
+    [Tooltip("Merminin ÃƒÂ§Ã„Â±kacaÃ„Å¸Ã„Â± namlu ucu transformu.")]
     public Transform firePoint;
 
     private SpriteRenderer weaponSpriteRenderer;
 
-    // FirePoint'in baÅŸlangÄ±Ã§ lokal pozisyonu
+    // FirePoint'in baÃ…Å¸langÃ„Â±ÃƒÂ§ lokal pozisyonu
     private Vector3 firePointDefaultLocalPos;
 
     private void Awake()
@@ -8795,7 +8814,7 @@ public class WeaponAim : MonoBehaviour
             weaponSpriteRenderer = weaponPivot.GetComponentInChildren<SpriteRenderer>();
 
         if (firePoint != null)
-            firePointDefaultLocalPos = firePoint.localPosition; // Ã¶rn: (0.05, 0.01, 0)
+            firePointDefaultLocalPos = firePoint.localPosition; // ÃƒÂ¶rn: (0.05, 0.01, 0)
     }
 
     private void OnDisable()
@@ -8819,10 +8838,10 @@ public class WeaponAim : MonoBehaviour
         Vector3 aimDirection = (worldPosition - weaponPivot.position).normalized;
         float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
 
-        // SilahÄ± dÃ¶ndÃ¼r
+        // SilahÃ„Â± dÃƒÂ¶ndÃƒÂ¼r
         weaponPivot.rotation = Quaternion.Euler(0f, 0f, angle);
 
-        // Sprite flip (senin mantÄ±ÄŸÄ±n)
+        // Sprite flip (senin mantÃ„Â±Ã„Å¸Ã„Â±n)
         float facingDirection = PlayerMovement.FacingDirection;
         bool flip = (facingDirection < 0);
 
@@ -8833,14 +8852,14 @@ public class WeaponAim : MonoBehaviour
             weaponSpriteRenderer.flipY = flip;
         }
 
-        // Fener yÃ¶nÃ¼
+        // Fener yÃƒÂ¶nÃƒÂ¼
         if (flashlight != null)
             flashlight.transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
 
-        // FirePoint pozisyonu ve yÃ¶nÃ¼
+        // FirePoint pozisyonu ve yÃƒÂ¶nÃƒÂ¼
         if (firePoint != null)
         {
-            // Hem X hem Y iÅŸaretini facing'e gÃ¶re deÄŸiÅŸtir
+            // Hem X hem Y iÃ…Å¸aretini facing'e gÃƒÂ¶re deÃ„Å¸iÃ…Å¸tir
             float sx = flip ? -1f : 1f;
             float sy = flip ? -1f : 1f;
 
@@ -8850,7 +8869,7 @@ public class WeaponAim : MonoBehaviour
                 firePointDefaultLocalPos.z
             );
 
-            // Rotasyonu pivot'tan miras alsÄ±n
+            // Rotasyonu pivot'tan miras alsÃ„Â±n
             firePoint.localRotation = Quaternion.identity;
         }
     }
@@ -9699,17 +9718,32 @@ using UnityEngine;
 public class MagazinePickup : MonoBehaviour
 {
     public MagazineData magazineData;
-    public int startAmmo = 0; // loot dengesi iÃ§in
+    public int startAmmo = 0; // loot dengesi
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
             return;
 
+        Inventory inv = Inventory.Instance;
+        if (inv == null)
+            return;
+
+        // Yeni ÅŸarjÃ¶r oluÅŸtur
         MagazineInstance mag = new MagazineInstance(magazineData);
         mag.currentAmmo = Mathf.Clamp(startAmmo, 0, magazineData.capacity);
 
-        Inventory.Instance.TryAddMagazine(mag);
+        // Envantere ekle
+        if (!inv.TryAddMagazine(mag))
+            return;
+
+        // PlayerWeapon al (DOÄRU YER)
+        PlayerWeapon pw = other.GetComponent<PlayerWeapon>();
+        if (pw != null)
+        {
+            pw.CollectMagazinesFromInventory();
+        }
+
         Destroy(gameObject);
     }
 }

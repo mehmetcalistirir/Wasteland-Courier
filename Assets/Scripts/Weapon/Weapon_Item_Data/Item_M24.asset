@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item_M24
   m_EditorClassIdentifier: Assembly-CSharp::WeaponItemData
   itemName: M24
-  itemID: weapon_M24
+  itemID: weapon_m24
   icon: {fileID: -952550666369105273, guid: 0ca327810e77d8d43b339f400f3becb7, type: 3}
   category: 2
   stackable: 0

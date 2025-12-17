@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item_M4A1
   m_EditorClassIdentifier: Assembly-CSharp::WeaponItemData
   itemName: M4A1
-  itemID: weapon_M4A1
+  itemID: weapon_m4a1
   icon: {fileID: 564439294832975815, guid: 7a62928c4b4846140a4fd9b6aa1fdda1, type: 3}
   category: 2
   stackable: 0

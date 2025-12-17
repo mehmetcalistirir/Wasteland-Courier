@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item_Glock18
   m_EditorClassIdentifier: Assembly-CSharp::WeaponItemData
   itemName: Glock 18
-  itemID: weapon_Glock18
+  itemID: weapon_glock18
   icon: {fileID: -4854829337826818713, guid: 1932acb0fbd75864b8c860ca2a361333, type: 3}
   category: 2
   stackable: 0

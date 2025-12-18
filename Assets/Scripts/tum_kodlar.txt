@@ -7768,7 +7768,7 @@ public class GameInitializer : MonoBehaviour
 
 
         // 3) BAÅLANGIÃ‡ PÄ°STOL
-        ItemData pistolItem = ItemDatabase.Get("weapon_pistol");
+        ItemData pistolItem = ItemDatabase.Get("weapon_glock18");
         if (pistolItem != null)
         {
             WeaponSlotManager.Instance.EquipWeapon(pistolItem);
@@ -9252,6 +9252,9 @@ public enum WeaponPartType
     ScrapMetal
 }
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+
 
 public enum WeaponSlotType
 {
@@ -9276,6 +9279,8 @@ public class WeaponSlotManager : MonoBehaviour
 
     [Header("Active Slot")]
     public int activeSlotIndex = 0;
+    private PlayerControls controls;
+
 
 
 
@@ -9284,7 +9289,42 @@ public class WeaponSlotManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
+        controls = new PlayerControls(); // ğŸ”¥ MapToggle ile birebir
+
+
     }
+private void OnEnable()
+{
+    controls.Gameplay.Weapon1.performed += OnWeapon1;
+    controls.Gameplay.Weapon2.performed += OnWeapon2;
+    controls.Gameplay.Weapon3.performed += OnWeapon3;
+
+    controls.Gameplay.Enable();
+}
+
+private void OnDisable()
+{
+    controls.Gameplay.Weapon1.performed -= OnWeapon1;
+    controls.Gameplay.Weapon2.performed -= OnWeapon2;
+    controls.Gameplay.Weapon3.performed -= OnWeapon3;
+
+    controls.Gameplay.Disable();
+}
+
+private void OnWeapon1(InputAction.CallbackContext ctx)
+{
+    SwitchSlot(0);
+}
+
+private void OnWeapon2(InputAction.CallbackContext ctx)
+{
+    SwitchSlot(1);
+}
+
+private void OnWeapon3(InputAction.CallbackContext ctx)
+{
+    SwitchSlot(2);
+}
 
 
     // -------------------------------
@@ -9310,6 +9350,7 @@ public class WeaponSlotManager : MonoBehaviour
 
             // YAKIN DÃ–VÃœÅ SLOTU (2)
             case WeaponType.ThrowingSpear:
+            case WeaponType.MeeleSpear:
             case WeaponType.MeeleSword:
                 return WeaponSlotType.Melee;
 
@@ -9410,6 +9451,7 @@ public class WeaponSlotManager : MonoBehaviour
         }
         return null;
     }
+
 
     // -------------------------------
     // Ammo state
@@ -9536,6 +9578,7 @@ public enum WeaponType
     Molotov,
     ThrowingSpear,
     Bow,
+    MeeleSpear,
     MeeleSword
 }
 
@@ -9832,7 +9875,10 @@ using UnityEngine;
 public class MagazinePickup : MonoBehaviour
 {
     public MagazineData magazineData;
-    public int startAmmo = 0;
+
+    [Header("Start Ammo Range")]
+    public int minStartAmmo = 0;
+    public int maxStartAmmo = 0;
 
     private PlayerWeapon pw;
 
@@ -9849,11 +9895,13 @@ public class MagazinePickup : MonoBehaviour
         if (magazineData == null) return;
 
         MagazineInstance mag = new MagazineInstance(magazineData);
-        mag.currentAmmo = Mathf.Clamp(startAmmo, 0, magazineData.capacity);
+
+        int randomAmmo = Random.Range(minStartAmmo, maxStartAmmo + 1);
+        mag.currentAmmo = Mathf.Clamp(randomAmmo, 0, magazineData.capacity);
 
         Inventory.Instance.TryAddMagazine(mag);
 
-        pw?.CollectMagazinesFromInventory(); // âœ… pickup sonrasÄ± liste gÃ¼ncellensin
+        pw?.CollectMagazinesFromInventory();
 
         Destroy(gameObject);
     }
@@ -9862,9 +9910,9 @@ public class MagazinePickup : MonoBehaviour
 public enum MagazineType
 {
     None,
-    Pistol9mm,
-    SMG9mm,
-    STANAG_556,
+    Glock18_9mm,
+    M4A1_556mm,
+    M24_762mm,
     Drum_556,
     ShotgunTube
 }

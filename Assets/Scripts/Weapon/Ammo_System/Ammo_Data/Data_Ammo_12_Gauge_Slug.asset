@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AmmoItemData
   itemName: 12 Kalibre Kovan
   itemID: 12gaugeslug
-  icon: {fileID: 6311552833237785406, guid: 116600327cc9f9b448e202c754d77b88, type: 3}
+  icon: {fileID: -7693665795165526321, guid: ac0a3d44525726c4aaf2cc6ff55a239b, type: 3}
   category: 1
   stackable: 1
   maxStack: 99

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AmmoItemData
   itemName: 5.56mm Mermi
   itemID: 556mm
-  icon: {fileID: 5699242917808476451, guid: a4e8e966e4cb381468047b282d6dc6ab, type: 3}
+  icon: {fileID: 151575246617741874, guid: d8a916a83589c4b47a0ae747246c9f87, type: 3}
   category: 1
   stackable: 1
   maxStack: 99

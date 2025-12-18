@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AmmoTypeData
   ammoId: 9mm
   ammoName: 9mm
-  icon: {fileID: 5699242917808476451, guid: a4e8e966e4cb381468047b282d6dc6ab, type: 3}
+  icon: {fileID: 9122342043793165280, guid: c50284f1988bf704f948aaaca9764363, type: 3}

@@ -162,9 +162,9 @@ MonoBehaviour:
   caravan: {fileID: 0}
   armoredDamageInterval: 1
   armoredCaravanDamage: 1
-  explosionRadius: 2
-  explosionDamageToPlayer: 2
-  explosionDamageToCaravan: 2
+  explosionRadius: 10
+  explosionDamageToPlayer: 10
+  explosionDamageToCaravan: 5
   explosionHitMask:
     serializedVersion: 2
     m_Bits: 0

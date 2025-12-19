@@ -49,7 +49,7 @@ public class EnemyManager : MonoBehaviour
         currentDay++;
 
         if (spawnZoneManager != null)
-    spawnZoneManager.SpawnAllZones();
+            spawnZoneManager.SpawnAllZones();
 
     }
 

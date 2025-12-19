@@ -3,7 +3,7 @@ using TMPro;
 
 public class ResolutionChanger : MonoBehaviour
 {
-    private TMP_Dropdown resolutionDropdown;
+    public TMP_Dropdown resolutionDropdown;
     private int lastIndex = -1;
 
     private readonly Vector2[] resolutions =
@@ -38,15 +38,17 @@ public class ResolutionChanger : MonoBehaviour
     }
 
     private void Start()
-    {
-        int saved = PlayerPrefs.GetInt("ResolutionIndex", 0);
-
-        resolutionDropdown.onValueChanged.RemoveAllListeners();
-        resolutionDropdown.value = saved;
-        lastIndex = saved;
-
-        resolutionDropdown.onValueChanged.AddListener(SetResolution);
+{
+    // Güvenlik kontrolü ekleyin
+    if (resolutionDropdown == null) {
+        Debug.LogError("Resolution Dropdown atanmadı!");
+        return;
     }
+    
+    int saved = PlayerPrefs.GetInt("ResolutionIndex", 0);
+    resolutionDropdown.onValueChanged.RemoveAllListeners();
+    // ... geri kalan kodlar
+}
 
     private void SetResolution(int index)
     {

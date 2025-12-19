@@ -16,26 +16,40 @@ public class AudioManager : MonoBehaviour
     public string sfxParam = "SFXVolume";
     public string masterParam = "MasterVolume";
 
-    void Awake()
-    {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); return; }
-
-        float master = PlayerPrefs.GetFloat("MasterVolume", 1f);
-        float music = PlayerPrefs.GetFloat("MusicVolume", 1f);
-        float sfx = PlayerPrefs.GetFloat("SFXVolume", 1f);
-        SetMasterVolume(master);
-        SetMusicVolume(music);
-        SetSFXVolume(sfx);
+   void Awake()
+{
+    // 1. ADIM: Singleton ve Kalıcılık Kontrolü
+    if (Instance == null) 
+    { 
+        Instance = this; 
+        DontDestroyOnLoad(gameObject); // Bu obje sahneler değiştikçe silinmez
     }
+    else 
+    { 
+        Destroy(gameObject); // Eğer zaten bir AudioManager varsa, yeni geleni yok et
+        return; 
+    }
+
+    // 2. ADIM: Ayarları Yükle (Sadece ilk oluşan AudioManager için çalışır)
+    float master = PlayerPrefs.GetFloat("MasterVolume", 1f);
+    float music = PlayerPrefs.GetFloat("MusicVolume", 1f);
+    float sfx = PlayerPrefs.GetFloat("SFXVolume", 1f);
+    
+    SetMasterVolume(master);
+    SetMusicVolume(music);
+    SetSFXVolume(sfx);
+}
 
     float ToDecibels(float value) => (value <= 0.0001f) ? -80f : Mathf.Log10(value) * 20f;
 
     public void SetMasterVolume(float v)
-    {
-        mainMixer.SetFloat(masterParam, ToDecibels(v));
-        PlayerPrefs.SetFloat("MasterVolume", v);
-    }
+{
+    float db = ToDecibels(v);
+    Debug.Log($"Master Volume Slider: {v} -> dB: {db}"); // Konsolda bu yazıyı görüyor musunuz?
+    bool success = mainMixer.SetFloat(masterParam, db);
+    if(!success) Debug.LogError($"{masterParam} isimli parametre Mixer'da bulunamadı!");
+    PlayerPrefs.SetFloat("MasterVolume", v);
+}
     public void SetMusicVolume(float v)
     {
         mainMixer.SetFloat(musicParam, ToDecibels(v));

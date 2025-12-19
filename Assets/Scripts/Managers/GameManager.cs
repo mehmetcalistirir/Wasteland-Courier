@@ -112,12 +112,16 @@ private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 
 
     public void RestartGame()
-    {
-        GameStateManager.IsGameOver = false;
-        GameStateManager.ResetGameState();
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+{
+    GameStateManager.IsGameOver = false;
+    GameStateManager.ResetGameState();
+    
+    // Ayarların kaybolmaması için diske yazmayı zorla
+    PlayerPrefs.Save(); 
+    
+    Time.timeScale = 1f;
+    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+}
 
    public void ReturnToMainMenu()
 {

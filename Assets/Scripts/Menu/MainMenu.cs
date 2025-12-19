@@ -27,20 +27,29 @@ public class MainMenu : MonoBehaviour
 
     // ---------------- MUSIC ----------------
 
-    void PlayMenuMusic()
+   void PlayMenuMusic()
+{
+    if (musicSource == null || menuMusic == null)
     {
-        if (musicSource == null || menuMusic == null)
-        {
-            Debug.LogError("❌ Menü müziği atanmadı!");
-            return;
-        }
-
-        musicSource.clip = menuMusic;
-        musicSource.loop = true;
-        musicSource.volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
-        musicSource.outputAudioMixerGroup = null;
-        musicSource.Play();
+        Debug.LogError("❌ Menü müziği atanmadı!");
+        return;
     }
+
+    musicSource.clip = menuMusic;
+    musicSource.loop = true;
+
+    // 1. ADIM: Mixer grubunu AudioManager'dan alıp atayın
+    if (AudioManager.Instance != null)
+    {
+        musicSource.outputAudioMixerGroup = AudioManager.Instance.musicGroup;
+    }
+
+    // 2. ADIM: AudioSource volume değerini 1 yapın. 
+    // Ses seviyesini artık Mixer (desibel olarak) yönetecek.
+    musicSource.volume = 1f; 
+    
+    musicSource.Play();
+}
 
     // ---------------- BUTTONS ----------------
 

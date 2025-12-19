@@ -109,22 +109,27 @@ public void StopAll()
     }
 
     private IEnumerator CrossfadeToNextTrack()
+{
+    // Sesi yavaşça kıs (0'a kadar)
+    while (audioSource.volume > 0)
     {
-        float startVolume = audioSource.volume;
-
-        // Sesi yavaşça kıs
-        while (audioSource.volume > 0)
-        {
-            audioSource.volume -= startVolume * Time.deltaTime / crossfadeDuration;
-            yield return null;
-        }
-
-        audioSource.Stop();
-        audioSource.volume = startVolume; // Sesi eski haline getir
-
-        // Yeni duruma göre bir sonraki şarkıyı çal
-        PlayNextTrack();
+        audioSource.volume -= Time.deltaTime / crossfadeDuration;
+        yield return null;
     }
+
+    audioSource.Stop();
+    
+    // Yeni şarkıyı seç ve başlat
+    PlayNextTrack();
+
+    // Sesi yavaşça aç (1'e kadar)
+    // Mixer grubuna bağlı olduğu için 1 değeri aslında kullanıcının slider ayarıdır.
+    while (audioSource.volume < 1)
+    {
+        audioSource.volume += Time.deltaTime / crossfadeDuration;
+        yield return null;
+    }
+}
 
     // Uygulama duraklatıldığında/geri gelince çağrılır
     void OnApplicationPause(bool pause)

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections; // Coroutine için eklendi
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -11,64 +12,98 @@ public class SettingsMenu : MonoBehaviour
     public Slider sfxSlider;
 
     [Header("Panel")]
-public GameObject panel;
-
+    public GameObject panel;
 
     [Header("Video")]
     public TMP_Dropdown qualityDropdown;
     public Toggle fullscreenToggle;
     public TMP_Dropdown resolutionDropdown;
 
-    Resolution[] resolutions;
-    bool initialized = false;
+    private Resolution[] resolutions;
+    private bool initialized = false;
 
     // -------------------------------------------------
     // UNITY
     // -------------------------------------------------
 
-    void Start()
+    void Awake()
     {
-        LoadPrefs();
+        // Dinleyicileri (Listeners) sadece bir kez kaydetmek en güvenlisidir
         RegisterListeners();
-        ApplySettings();
     }
 
     void OnEnable()
     {
-        // Panel her açıldığında resolution güvenli şekilde doldurulsun
-        InitResolutionDropdown();
+        // Sahne yeniden yüklendiğinde (Restart) UI ve Manager'ların 
+        // tam uyanması için 1 kare bekleyerek yükleme yapıyoruz.
+        StartCoroutine(SetupMenuDeferred());
     }
 
-    // -------------------------------------------------
-    // INIT
-    // -------------------------------------------------
-
-    void LoadPrefs()
+    private IEnumerator SetupMenuDeferred()
     {
-        masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MasterVolume", 1f));
-        musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicVolume", 1f));
-        sfxSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat("SFXVolume", 1f));
+        yield return null; // 1 frame bekle (Execution Order sorunlarını çözer)
 
-        qualityDropdown.SetValueWithoutNotify(
-            PlayerPrefs.GetInt("QualityLevel", QualitySettings.GetQualityLevel())
-        );
-
-        fullscreenToggle.SetIsOnWithoutNotify(
-            PlayerPrefs.GetInt("Fullscreen", 1) == 1
-        );
+        LoadPrefs();
+        InitResolutionDropdown();
+        RefreshVisuals(); // Görsel kaybolma sorununu çözer
     }
+
+    // -------------------------------------------------
+    // INIT & LOAD
+    // -------------------------------------------------
+
+    public void LoadPrefs()
+    {
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning("⚠️ AudioManager bulunamadı, yükleme geciktiriliyor...");
+            return;
+        }
+
+        // Değerleri alırken varsayılan 1f (Tam ses) kullanıyoruz
+        float master = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        float music = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        float sfx = PlayerPrefs.GetFloat("SFXVolume", 1f);
+
+        // SetValueWithoutNotify: Slider değerini değiştirir ama AudioManager'ı 
+        // tetiklemez. Böylece açılışta PlayerPrefs üzerine 0 yazılmaz.
+        masterSlider.SetValueWithoutNotify(master);
+        musicSlider.SetValueWithoutNotify(music);
+        sfxSlider.SetValueWithoutNotify(sfx);
+
+        qualityDropdown.SetValueWithoutNotify(PlayerPrefs.GetInt("QualityLevel", QualitySettings.GetQualityLevel()));
+        fullscreenToggle.SetIsOnWithoutNotify(PlayerPrefs.GetInt("Fullscreen", 1) == 1);
+
+        Debug.Log($"✅ Ayarlar Başarıyla Yüklendi: Master {master}");
+    }
+
+    private void RefreshVisuals()
+{
+    if (panel != null)
+    {
+        // UI'yı anında yeniden çizmeye zorlar
+        panel.SetActive(false);
+        panel.SetActive(true); 
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
+    }
+}
 
     void RegisterListeners()
     {
         if (initialized) return;
         initialized = true;
 
-        if (AudioManager.Instance != null)
-        {
-            masterSlider.onValueChanged.AddListener(AudioManager.Instance.SetMasterVolume);
-            musicSlider.onValueChanged.AddListener(AudioManager.Instance.SetMusicVolume);
-            sfxSlider.onValueChanged.AddListener(AudioManager.Instance.SetSFXVolume);
-        }
+        // Dinleyiciler AudioManager üzerinden sesleri anlık günceller
+        masterSlider.onValueChanged.AddListener(val => {
+            if (AudioManager.Instance != null) AudioManager.Instance.SetMasterVolume(val);
+        });
+        musicSlider.onValueChanged.AddListener(val => {
+            if (AudioManager.Instance != null) AudioManager.Instance.SetMusicVolume(val);
+        });
+        sfxSlider.onValueChanged.AddListener(val => {
+            if (AudioManager.Instance != null) AudioManager.Instance.SetSFXVolume(val);
+        });
 
         qualityDropdown.onValueChanged.AddListener(SetQuality);
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
@@ -76,24 +111,13 @@ public GameObject panel;
     }
 
     // -------------------------------------------------
-    // APPLY
-    // -------------------------------------------------
-
-    void ApplySettings()
-    {
-        SetQuality(qualityDropdown.value);
-        SetFullscreen(fullscreenToggle.isOn);
-
-        int resIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
-        SetResolution(resIndex);
-    }
-
-    // -------------------------------------------------
-    // RESOLUTION
+    // RESOLUTION & VIDEO
     // -------------------------------------------------
 
     void InitResolutionDropdown()
     {
+        if (resolutionDropdown == null) return;
+
         resolutions = Screen.resolutions;
         resolutionDropdown.ClearOptions();
 
@@ -103,14 +127,13 @@ public GameObject panel;
         for (int i = 0; i < resolutions.Length; i++)
         {
             Resolution r = resolutions[i];
-            options.Add($"{r.width} x {r.height} ({r.refreshRate}Hz)");
+            options.Add($"{r.width} x {r.height} ({r.refreshRateRatio.value:F0}Hz)");
 
             if (r.width == Screen.width && r.height == Screen.height)
                 currentIndex = i;
         }
 
         resolutionDropdown.AddOptions(options);
-
         int savedIndex = PlayerPrefs.GetInt("ResolutionIndex", currentIndex);
         resolutionDropdown.SetValueWithoutNotify(savedIndex);
         resolutionDropdown.RefreshShownValue();

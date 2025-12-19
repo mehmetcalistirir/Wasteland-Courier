@@ -8,6 +8,8 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float sprintMultiplier = 1.7f; // KoÅŸarken hÄ±z artÄ±ÅŸÄ±
     private bool isSprinting = false;
+    private PlayerWeapon weapon;
+
 
     // --- BileÅŸen ReferanslarÄ± ---
     private Rigidbody2D rb;
@@ -25,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
+        weapon = GetComponent<PlayerWeapon>();
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         controls = new PlayerControls();
@@ -36,8 +39,18 @@ public class PlayerMovement : MonoBehaviour
     {
         controls.Gameplay.Move.performed += OnMovePerformed;
         controls.Gameplay.Move.canceled += OnMoveCanceled;
-        controls.Gameplay.Sprint.performed += ctx => isSprinting = true;
-        controls.Gameplay.Sprint.canceled += ctx => isSprinting = false;
+        controls.Gameplay.Sprint.performed += ctx =>
+{
+    if (weapon != null && weapon.IsBusy)
+        return;
+
+    isSprinting = true;
+};
+
+        controls.Gameplay.Sprint.canceled += ctx =>
+        {
+            isSprinting = false;
+        };
         controls.Gameplay.Enable();
     }
 
@@ -62,21 +75,26 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void FixedUpdate()
-{
-    float currentSpeed = moveSpeed;
-    bool isMoving = moveInput.magnitude > 0.1f;
+    {
+        if (weapon != null && weapon.IsBusy)
+        {
+            isSprinting = false;
+        }
 
-    // PlayerStats'a koÅŸu/yÃ¼rÃ¼me bilgisini HER FRAME gÃ¶nder
-    stats.SetMovementState(isMoving, isSprinting);
+        float currentSpeed = moveSpeed;
+        bool isMoving = moveInput.magnitude > 0.1f;
 
-    if (isSprinting && stats.HasStamina() && isMoving)
-        currentSpeed *= sprintMultiplier;
-    else
-        isSprinting = false;
+        // PlayerStats'a koÅŸu/yÃ¼rÃ¼me bilgisini HER FRAME gÃ¶nder
+        stats.SetMovementState(isMoving, isSprinting);
 
-    Vector2 moveDelta = moveInput * currentSpeed * Time.fixedDeltaTime;
-    rb.MovePosition(rb.position + moveDelta);
-}
+        if (isSprinting && stats.HasStamina() && isMoving)
+            currentSpeed *= sprintMultiplier;
+        else
+            isSprinting = false;
+
+        Vector2 moveDelta = moveInput * currentSpeed * Time.fixedDeltaTime;
+        rb.MovePosition(rb.position + moveDelta);
+    }
 
 
     void Update()

@@ -416,17 +416,17 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     public void NotifyMagazineAmmoChanged()
-{
-    if (currentMagazine != null && currentMagazine.data != null)
     {
-        OnMagazineChanged?.Invoke(
-            currentMagazine.currentAmmo,
-            currentMagazine.data.capacity
-        );
-    }
+        if (currentMagazine != null && currentMagazine.data != null)
+        {
+            OnMagazineChanged?.Invoke(
+                currentMagazine.currentAmmo,
+                currentMagazine.data.capacity
+            );
+        }
 
-    CollectMagazinesFromInventory();
-}
+        CollectMagazinesFromInventory();
+    }
 
     // ============================
     // ACTUAL SHOOT LOGIC
@@ -534,60 +534,60 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     private void FireSingleBullet()
-{
-    if (weaponData.projectilePrefab == null)
     {
-        Debug.LogError("WeaponData projectilePrefab NULL!");
-        return;
-    }
+        if (weaponData.projectilePrefab == null)
+        {
+            Debug.LogError("WeaponData projectilePrefab NULL!");
+            return;
+        }
 
-    var projectile = Instantiate(
-        weaponData.projectilePrefab,
-        firePoint.position,
-        firePoint.rotation
-    );
-
-    if (projectile.TryGetComponent(out WeaponBullet b))
-    {
-        b.damage = weaponData.damage;
-        b.owner = transform;
-        b.weaponType = weaponData.weaponType;
-        b.knockbackForce = weaponData.knockbackForce;
-        b.knockbackDuration = weaponData.knockbackDuration;
-    }
-}
-
-
-    private void FireShotgunPellets()
-{
-    if (weaponData.projectilePrefab == null)
-        return;
-
-    int pellets = Mathf.Max(weaponData.pelletsPerShot, 1);
-    float spread = weaponData.pelletSpreadAngle;
-
-    for (int i = 0; i < pellets; i++)
-    {
-        float t = pellets == 1 ? 0.5f : (float)i / (pellets - 1);
-        float angle = Mathf.Lerp(-spread, spread, t);
-
-        Quaternion rot =
-            firePoint.rotation * Quaternion.Euler(0, 0, angle);
-
-        var proj = Instantiate(
+        var projectile = Instantiate(
             weaponData.projectilePrefab,
             firePoint.position,
-            rot
+            firePoint.rotation
         );
 
-        if (proj.TryGetComponent(out WeaponBullet b))
+        if (projectile.TryGetComponent(out WeaponBullet b))
         {
             b.damage = weaponData.damage;
             b.owner = transform;
             b.weaponType = weaponData.weaponType;
+            b.knockbackForce = weaponData.knockbackForce;
+            b.knockbackDuration = weaponData.knockbackDuration;
         }
     }
-}
+
+
+    private void FireShotgunPellets()
+    {
+        if (weaponData.projectilePrefab == null)
+            return;
+
+        int pellets = Mathf.Max(weaponData.pelletsPerShot, 1);
+        float spread = weaponData.pelletSpreadAngle;
+
+        for (int i = 0; i < pellets; i++)
+        {
+            float t = pellets == 1 ? 0.5f : (float)i / (pellets - 1);
+            float angle = Mathf.Lerp(-spread, spread, t);
+
+            Quaternion rot =
+                firePoint.rotation * Quaternion.Euler(0, 0, angle);
+
+            var proj = Instantiate(
+                weaponData.projectilePrefab,
+                firePoint.position,
+                rot
+            );
+
+            if (proj.TryGetComponent(out WeaponBullet b))
+            {
+                b.damage = weaponData.damage;
+                b.owner = transform;
+                b.weaponType = weaponData.weaponType;
+            }
+        }
+    }
 
 
     // ============================

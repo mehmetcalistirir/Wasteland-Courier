@@ -15,7 +15,10 @@ GameObject:
   - component: {fileID: 7092030044526869399}
   - component: {fileID: 8447757053825607418}
   - component: {fileID: 8227206359375966284}
+  - component: {fileID: 6836950268197039773}
   - component: {fileID: -6574281528775494263}
+  - component: {fileID: 6195439350498371342}
+  - component: {fileID: -6107042818683863511}
   m_Layer: 6
   m_Name: Enemy_Exploder
   m_TagString: Enemy
@@ -136,46 +139,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41bec1f91b7cbe44f9eb54a1551e63bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  burnsInDay: 1
-  burnDamagePerTick: 10
-  burnTickInterval: 1
-  maxHealth: 65
-  damageText: {fileID: 3279026775688206692}
-  hpBarPrefab: {fileID: 703183713388882252, guid: 5c650d700cb2738419891bde02ea05ab, type: 3}
-  damagePopupPrefab: {fileID: 0}
-  goldPrefab: {fileID: 452538406127782152, guid: 96dd3e9be42af944bb7189cfcd228730, type: 3}
-  blueprintPrefabs:
-  - {fileID: 7092412709379881292, guid: 917825acf1010e44db1845a4722bfed1, type: 3}
   enemyType: 2
   moveSpeed: 2
-  damageToCaravan: 1
-  ammoMachineGunPrefab: {fileID: 6180062328340131064, guid: 95af945c817613d459a5f58d0578a1f6, type: 3}
-  ammoPistolPrefab: {fileID: 198045730562365017, guid: 5648beb4e00fe404e81fde3a055a6bb4, type: 3}
-  ammoShotgunPrefab: {fileID: 4663766304207827621, guid: 242db9f69c0ee144f9ae4e13a8da2e15, type: 3}
-  ammoSniperPrefab: {fileID: 7962743320762343757, guid: 166b18fd0d12e174daf1641832658742, type: 3}
+  externalMovement: 0
+  player: {fileID: 0}
+  caravan: {fileID: 0}
+  target: {fileID: 6370573785070047475, guid: 07166245952cd734daa010f4526e861c, type: 3}
+  damageToPlayer: 1
+  armoredCaravanDamage: 1
+  armoredDamageInterval: 1
+  damageRangeToPlayer: 5
+  damageRangeToCaravan: 5
+  explosionRadius: 10
+  explosionDamageToPlayer: 10
+  explosionDamageToCaravan: 5
+  canBeKnockedBack: 1
+  knockbackRecoveryTime: 0.25
   ambientSounds:
   - {fileID: 8300000, guid: 342cf5fb003dfc94ebbb5ad6c7fc47a3, type: 3}
   hurtSounds: []
   deathSound: {fileID: 0}
   ambientSoundInterval: {x: 5, y: 15}
-  player: {fileID: 0}
-  caravan: {fileID: 0}
-  armoredDamageInterval: 1
-  armoredCaravanDamage: 1
-  explosionRadius: 10
-  explosionDamageToPlayer: 10
-  explosionDamageToCaravan: 5
-  explosionHitMask:
-    serializedVersion: 2
-    m_Bits: 0
-  canBeKnockedBack: 1
-  knockbackRecoveryTime: 0.25
-  contactDamageInterval: 1
-  damageToPlayer: 1
-  externalMovement: 0
-  damageRangeToPlayer: 5
-  damageRangeToCaravan: 5
-  target: {fileID: 6370573785070047475, guid: 07166245952cd734daa010f4526e861c, type: 3}
   isAttacking: 0
 --- !u!95 &7092030044526869399
 Animator:
@@ -342,6 +326,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6836950268197039773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5687110353871480299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36554c6b679a1bf4eaea6c3bea6f7048, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 5
+  hpFillImage: {fileID: 0}
 --- !u!114 &-6574281528775494263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -354,6 +352,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b0d866d9bb6af34294470539163d42b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHitbox
+--- !u!114 &6195439350498371342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5687110353871480299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b66689f7729d05946a97cfccbb1a5578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyLootDropper
+  goldDropChance: 0.25
+  blueprintDropChance: 0.75
+  ammoDropChance: 0.4
+  goldPrefab: {fileID: 0}
+  blueprintPrefabs: []
+  ammoPrefabs: []
+--- !u!114 &-6107042818683863511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5687110353871480299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efa7130063cc83c4eaea4e450178940b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySunBurn
+  burnsInDay: 1
+  burnDamagePerTick: 10
+  burnTickInterval: 1
 --- !u!1 &8273024124155826637
 GameObject:
   m_ObjectHideFlags: 0

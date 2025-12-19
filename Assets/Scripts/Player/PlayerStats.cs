@@ -55,6 +55,9 @@ public class PlayerStats : MonoBehaviour
     public delegate void OnHealthChanged(int current, int max);
     public event OnHealthChanged onHealthChanged;
 
+    [Header("Blood Vignette")]
+    [SerializeField] private BloodVignetteUI bloodVignetteUI;
+
 
     // ------------------------------
     //     HAREKET / ENVANTER
@@ -136,12 +139,14 @@ public class PlayerStats : MonoBehaviour
 
         currentHealth = maxHealth;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
+        onHealthChanged += UpdateBloodVignette;
+        UpdateBloodVignette(currentHealth, maxHealth);
 
         if (staminaSlider != null)
-{
-    staminaSlider.maxValue = maxStamina;
-    staminaSlider.value = currentStamina;
-}
+        {
+            staminaSlider.maxValue = maxStamina;
+            staminaSlider.value = currentStamina;
+        }
 
     }
 
@@ -151,7 +156,7 @@ public class PlayerStats : MonoBehaviour
         UpdateStaminaByHunger();
         UpdateStaminaRegen();
         UpdateHealthByHunger();
-        
+
 
         if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
             TryConsumeFood();
@@ -162,21 +167,21 @@ public class PlayerStats : MonoBehaviour
     }
 
     private void UpdateStaminaUI()
-{
-    if (staminaSlider == null) return;
+    {
+        if (staminaSlider == null) return;
 
-    // Full ise gizle
-    if (currentStamina >= maxStamina)
-    {
-        staminaSlider.gameObject.SetActive(false);
+        // Full ise gizle
+        if (currentStamina >= maxStamina)
+        {
+            staminaSlider.gameObject.SetActive(false);
+        }
+        else
+        {
+            staminaSlider.gameObject.SetActive(true);
+            staminaSlider.maxValue = maxStamina;
+            staminaSlider.value = currentStamina;
+        }
     }
-    else
-    {
-        staminaSlider.gameObject.SetActive(true);
-        staminaSlider.maxValue = maxStamina;
-        staminaSlider.value = currentStamina;
-    }
-}
 
 
 
@@ -186,21 +191,21 @@ public class PlayerStats : MonoBehaviour
     // ============================================================
 
     void HandleHungerSystem()
-{
-    float interval = hungerDecreaseInterval;
-
-    // Koşuyorsa açlık daha hızlı azalır
-    if (isRunning)
-        interval /= runningHungerMultiplier;
-
-    hungerTimer -= Time.deltaTime;
-
-    if (hungerTimer <= 0f)
     {
-        currentHunger = Mathf.Max(0, currentHunger - hungerDecreaseAmount);
-        hungerTimer = interval;
+        float interval = hungerDecreaseInterval;
+
+        // Koşuyorsa açlık daha hızlı azalır
+        if (isRunning)
+            interval /= runningHungerMultiplier;
+
+        hungerTimer -= Time.deltaTime;
+
+        if (hungerTimer <= 0f)
+        {
+            currentHunger = Mathf.Max(0, currentHunger - hungerDecreaseAmount);
+            hungerTimer = interval;
+        }
     }
-}
 
 
 
@@ -225,40 +230,40 @@ public class PlayerStats : MonoBehaviour
     // ============================================================
 
     void UpdateStaminaRegen()
-{
-    float hungerPercent = (float)currentHunger / maxHunger;
-
-    // Açlık → regen katsayısı
-    float hungerMult;
-    if (hungerPercent >= 0.70f)
-        hungerMult = 1.5f;   // tok → hızlı regen
-    else if (hungerPercent >= 0.40f)
-        hungerMult = 1f;     // normal
-    else if (hungerPercent >= 0.20f)
-        hungerMult = 0.5f;   // yorgun
-    else
-        hungerMult = 0.2f;   // bitkin
-
-    // KOŞARKEN → sadece STAMINA AZALIR
-    if (isRunning && isMoving)
     {
-        ModifyStamina(-staminaDrainRate * Time.deltaTime);
-        return;
-    }
+        float hungerPercent = (float)currentHunger / maxHunger;
 
-    // YÜRÜRKEN → az regen
-    if (isMoving)
-    {
-        float regen = staminaRegenWalk * hungerMult;
-        ModifyStamina(regen * Time.deltaTime);
+        // Açlık → regen katsayısı
+        float hungerMult;
+        if (hungerPercent >= 0.70f)
+            hungerMult = 1.5f;   // tok → hızlı regen
+        else if (hungerPercent >= 0.40f)
+            hungerMult = 1f;     // normal
+        else if (hungerPercent >= 0.20f)
+            hungerMult = 0.5f;   // yorgun
+        else
+            hungerMult = 0.2f;   // bitkin
+
+        // KOŞARKEN → sadece STAMINA AZALIR
+        if (isRunning && isMoving)
+        {
+            ModifyStamina(-staminaDrainRate * Time.deltaTime);
+            return;
+        }
+
+        // YÜRÜRKEN → az regen
+        if (isMoving)
+        {
+            float regen = staminaRegenWalk * hungerMult;
+            ModifyStamina(regen * Time.deltaTime);
+        }
+        // HİÇ HAREKET ETMEZKEN → daha fazla regen
+        else
+        {
+            float regen = staminaRegenIdle * hungerMult;
+            ModifyStamina(regen * Time.deltaTime);
+        }
     }
-    // HİÇ HAREKET ETMEZKEN → daha fazla regen
-    else
-    {
-        float regen = staminaRegenIdle * hungerMult;
-        ModifyStamina(regen * Time.deltaTime);
-    }
-}
 
 
 
@@ -367,23 +372,27 @@ public class PlayerStats : MonoBehaviour
     public bool IsAlive() => currentHealth > 0;
 
     public void TakeDamage(int amount)
-    {
-        if (!IsAlive()) return;
-        if (Time.time - lastDamageTime < damageCooldown) return;
+{
+    if (!IsAlive()) return;
+    if (Time.time - lastDamageTime < damageCooldown) return;
 
-        lastDamageTime = Time.time;
-        currentHealth = Mathf.Max(0, currentHealth - amount);
+    lastDamageTime = Time.time;
+    currentHealth = Mathf.Max(0, currentHealth - amount);
 
-        onHealthChanged?.Invoke(currentHealth, maxHealth);
+    onHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        if (hurtClip != null)
-            audioSource?.PlayOneShot(hurtClip);
+    // 🔴 KAN FLASH
+    bloodVignetteUI?.OnDamageFlash();
 
-        if (currentHealth <= 0)
-            Die();
+    if (hurtClip != null)
+        audioSource?.PlayOneShot(hurtClip);
 
-        DamagePopupManager.Instance?.SpawnPopup(transform.position, amount);
-    }
+    if (currentHealth <= 0)
+        Die();
+
+    DamagePopupManager.Instance?.SpawnPopup(transform.position, amount);
+}
+
 
     public void Heal(int amount)
     {
@@ -398,6 +407,10 @@ public class PlayerStats : MonoBehaviour
         onDeath?.Invoke();
     }
 
+    void OnDestroy()
+{
+    onHealthChanged -= UpdateBloodVignette;
+}
 
     // ============================================================
     //      Dış Scriptlerden Hareket Bilgisi Alma
@@ -414,5 +427,12 @@ public class PlayerStats : MonoBehaviour
     {
         onHealthChanged?.Invoke(currentHealth, maxHealth);
     }
+
+    private void UpdateBloodVignette(int current, int max)
+{
+    if (bloodVignetteUI == null) return;
+
+    bloodVignetteUI.health01 = (float)current / max;
+}
 
 }

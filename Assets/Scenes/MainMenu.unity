@@ -12037,7 +12037,7 @@ GameObject:
   - component: {fileID: 1445802109}
   - component: {fileID: 1445802108}
   m_Layer: 5
-  m_Name: Main Menu Panel
+  m_Name: MainMenuPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12154,7 +12154,7 @@ GameObject:
   - component: {fileID: 1525750378}
   - component: {fileID: 1525750379}
   m_Layer: 0
-  m_Name: Main Menu Manager
+  m_Name: MainMenuManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13410,9 +13410,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 822955899}
     m_Modifications:
+    - target: {fileID: 17071984891282202, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1041225672439138058, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1331078084355683197, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1808880410119942058, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2546525922900694541, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
       propertyPath: m_Name
-      value: Settings Panel
+      value: SettingsPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 2546525922900694541, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3676321975827550701, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7425931680815039671, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
       propertyPath: m_Pivot.x
@@ -13498,6 +13522,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1525750379}
+    - target: {fileID: 7992214544129497204, guid: 07a908643281ab54ca3642d35a5b12f8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13756,7 +13784,7 @@ RectTransform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1001889037}
   - {fileID: 1318862209}
   - {fileID: 431434177}
   - {fileID: 787374148}
-  - {fileID: 1001889037}

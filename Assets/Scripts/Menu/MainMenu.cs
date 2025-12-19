@@ -111,6 +111,7 @@ public void CloseCredits()
     {
         mainPanel.SetActive(false);
         panel.SetActive(true);
+        Canvas.ForceUpdateCanvases();
     }
     public void CloseSettings()
 {

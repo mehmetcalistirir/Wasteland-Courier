@@ -53,13 +53,12 @@ public class AmmoItemData : ItemData
     public AmmoTypeData ammoType;
 
     [Tooltip("Bu item alÄ±ndÄ±ÄŸÄ±nda ammoPool'a eklenecek miktar")]
-    public int ammoAmount = 10;
 
     private void OnValidate()
     {
         category = ItemCategory.Ammo;
-        stackable = false;
-        maxStack = 1;
+        stackable = true;
+        maxStack = 99;
     }
 }
 using UnityEngine;
@@ -228,7 +227,8 @@ public class MagazineLoadPanel : MonoBehaviour
         titleText.text = mag.data.itemName;
 
         int availableAmmo =
-            Inventory.Instance.GetAmmoAmount(mag.data.ammoType);
+            Inventory.Instance.GetTotalAmmo(mag.data.ammoType);
+
 
         int space = mag.data.capacity - mag.currentAmmo;
 
@@ -260,27 +260,27 @@ public class MagazineLoadPanel : MonoBehaviour
     }
 
     public void OnLoadPressed()
-{
-    if (currentMag == null) return;
+    {
+        if (currentMag == null) return;
 
-    Inventory.Instance.LoadAmmoIntoMagazine(
-        currentMag,
-        (int)loadSlider.value
-    );
+        Inventory.Instance.LoadAmmoIntoMagazine(
+            currentMag,
+            (int)loadSlider.value
+        );
 
-    playerWeapon?.NotifyMagazineAmmoChanged();
-    Show(currentMag);
-}
+        playerWeapon?.NotifyMagazineAmmoChanged();
+        Show(currentMag);
+    }
 
     public void OnFullLoadPressed()
-{
-    if (currentMag == null) return;
+    {
+        if (currentMag == null) return;
 
-    Inventory.Instance.FullLoadMagazine(currentMag);
+        Inventory.Instance.FullLoadMagazine(currentMag);
 
-    playerWeapon?.NotifyMagazineAmmoChanged();
-    Show(currentMag);
-}
+        playerWeapon?.NotifyMagazineAmmoChanged();
+        Show(currentMag);
+    }
 
 }
 using UnityEngine;
@@ -458,7 +458,8 @@ void UnbindEvents()
     {
         var m = pw.inventoryMags[i];
         if (m == null || m.data == null) continue;
-        inventoryAmmo += m.currentAmmo;
+        Inventory.Instance.GetTotalAmmo(pw.weaponData.ammoType);
+
     }
 
     magazineText.text = $"{equippedAmmo} / {inventoryAmmo}";
@@ -1855,7 +1856,9 @@ public class Collectible : MonoBehaviour
     public int maxAmount = 1;
 
     [Header("Ammo (opsiyonel)")]
-    public AmmoTypeData ammoType;
+    public AmmoItemData ammoItemData;
+    [Tooltip("Bu collectible kaÃ§ mermi verir")]
+    public int ammoCount = 10;
 
     [Header("Visual")]
     public Sprite normalSprite;
@@ -1891,10 +1894,10 @@ public class Collectible : MonoBehaviour
             collected = true;
         }
 
-        // 2ï¸âƒ£ Ammo
-        if (ammoType != null)
+        // 2ï¸âƒ£ Ammo (rastgele mermi)
+        if (ammoItemData != null)
         {
-            Inventory.Instance.AddAmmo(ammoType, amount);
+            Inventory.Instance.TryAdd(ammoItemData, amount);
             collected = true;
         }
 
@@ -1908,90 +1911,7 @@ public class Collectible : MonoBehaviour
 
         Destroy(gameObject);
     }
-}
-using UnityEditor;
-using UnityEngine;
 
-[CustomEditor(typeof(Collectible))]
-public class CollectibleEditor : Editor
-{
-    SerializedProperty item;
-    SerializedProperty minAmount;
-    SerializedProperty maxAmount;
-
-    SerializedProperty ammoType;
-
-    SerializedProperty normalSprite;
-    SerializedProperty highlightedSprite;
-
-    void OnEnable()
-    {
-        item = serializedObject.FindProperty("item");
-        minAmount = serializedObject.FindProperty("minAmount");
-        maxAmount = serializedObject.FindProperty("maxAmount");
-
-        ammoType = serializedObject.FindProperty("ammoType");
-
-        normalSprite = serializedObject.FindProperty("normalSprite");
-        highlightedSprite = serializedObject.FindProperty("highlightedSprite");
-    }
-
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-
-        bool hasItem = item.objectReferenceValue != null;
-        bool hasAmmo = ammoType.objectReferenceValue != null;
-
-        // ---------------- MODE INFO ----------------
-        EditorGUILayout.LabelField("Collectible Data", EditorStyles.boldLabel);
-
-        EditorGUILayout.PropertyField(item);
-        EditorGUILayout.PropertyField(ammoType);
-
-        // ---------------- VALIDATION ----------------
-        if (hasItem && hasAmmo)
-        {
-            EditorGUILayout.HelpBox(
-                "Bu Collectible hem Item hem Ammo iÃ§eriyor! Sadece biri dolu olmalÄ±.",
-                MessageType.Error
-            );
-        }
-        else if (!hasItem && !hasAmmo)
-        {
-            EditorGUILayout.HelpBox(
-                "Bu Collectible hiÃ§bir ÅŸey vermiyor (Item veya Ammo seÃ§melisin).",
-                MessageType.Warning
-            );
-        }
-
-        // ---------------- AMOUNT ----------------
-        if (hasItem || hasAmmo)
-        {
-            EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("Amount Settings", EditorStyles.boldLabel);
-
-            EditorGUILayout.PropertyField(minAmount);
-            EditorGUILayout.PropertyField(maxAmount);
-
-            if (minAmount.intValue > maxAmount.intValue)
-            {
-                EditorGUILayout.HelpBox(
-                    "Min Amount, Max Amount'tan bÃ¼yÃ¼k olamaz!",
-                    MessageType.Warning
-                );
-            }
-        }
-
-        // ---------------- VISUAL ----------------
-        EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("Visual", EditorStyles.boldLabel);
-
-        EditorGUILayout.PropertyField(normalSprite);
-        EditorGUILayout.PropertyField(highlightedSprite);
-
-        serializedObject.ApplyModifiedProperties();
-    }
 }
 using UnityEngine;
 using UnityEngine.UI;
@@ -2301,6 +2221,263 @@ public class CraftUIController : MonoBehaviour
         // Yeni silahÄ± tak
         WeaponSlotManager.Instance.EquipWeaponInSlot(weaponItem, slotIndex);
         WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+    }
+}
+using UnityEditor;
+using UnityEngine;
+
+[CustomEditor(typeof(Collectible))]
+public class CollectibleEditor : Editor
+{
+    SerializedProperty item;
+    SerializedProperty ammoItemData;
+
+    SerializedProperty minAmount;
+    SerializedProperty maxAmount;
+
+    SerializedProperty normalSprite;
+    SerializedProperty highlightedSprite;
+
+    void OnEnable()
+    {
+        item = serializedObject.FindProperty("item");
+        ammoItemData = serializedObject.FindProperty("ammoItemData");
+
+        minAmount = serializedObject.FindProperty("minAmount");
+        maxAmount = serializedObject.FindProperty("maxAmount");
+
+        normalSprite = serializedObject.FindProperty("normalSprite");
+        highlightedSprite = serializedObject.FindProperty("highlightedSprite");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        bool hasItem = item.objectReferenceValue != null;
+        bool hasAmmo = ammoItemData.objectReferenceValue != null;
+
+        // ---------------- HEADER ----------------
+        EditorGUILayout.LabelField("Collectible Data", EditorStyles.boldLabel);
+
+        // ---------------- TYPE SELECTION ----------------
+        EditorGUILayout.PropertyField(item);
+
+        if (!hasItem)
+            EditorGUILayout.PropertyField(ammoItemData);
+
+        // ---------------- VALIDATION ----------------
+        if (hasItem && hasAmmo)
+        {
+            EditorGUILayout.HelpBox(
+                "Bu Collectible hem Item hem Ammo iÃ§eriyor! Sadece biri dolu olmalÄ±.",
+                MessageType.Error
+            );
+        }
+        else if (!hasItem && !hasAmmo)
+        {
+            EditorGUILayout.HelpBox(
+                "Bu Collectible hiÃ§bir ÅŸey vermiyor (Item veya Ammo seÃ§melisin).",
+                MessageType.Warning
+            );
+        }
+
+        // ---------------- AMOUNT ----------------
+        if (hasItem || hasAmmo)
+        {
+            EditorGUILayout.Space(6);
+
+            string amountLabel =
+                hasAmmo ? "Ammo Amount (Mermi SayÄ±sÄ±)"
+                        : "Item Amount";
+
+            EditorGUILayout.LabelField(amountLabel, EditorStyles.boldLabel);
+
+            EditorGUILayout.PropertyField(minAmount, new GUIContent("Min"));
+            EditorGUILayout.PropertyField(maxAmount, new GUIContent("Max"));
+
+            if (minAmount.intValue > maxAmount.intValue)
+            {
+                EditorGUILayout.HelpBox(
+                    "Min Amount, Max Amount'tan bÃ¼yÃ¼k olamaz!",
+                    MessageType.Warning
+                );
+            }
+        }
+
+        // ---------------- VISUAL ----------------
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("Visual", EditorStyles.boldLabel);
+
+        EditorGUILayout.PropertyField(normalSprite);
+        EditorGUILayout.PropertyField(highlightedSprite);
+
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+using UnityEditor;
+using UnityEngine;
+
+
+[CustomEditor(typeof(WeaponDefinition))]
+public class WeaponDataEditor : Editor
+{
+    // Core
+    SerializedProperty prefab;
+    SerializedProperty weaponType;
+    // Projectile
+    SerializedProperty projectilePrefab;
+
+    // Combat
+    SerializedProperty knockbackForce;
+    SerializedProperty knockbackDuration;
+    SerializedProperty isAutomatic;
+    SerializedProperty fireRate;
+    SerializedProperty damage;
+    SerializedProperty reloadTime;
+    SerializedProperty attackRange;
+
+    // Shotgun
+    SerializedProperty pelletsPerShot;
+    SerializedProperty pelletSpreadAngle;
+    SerializedProperty shotgunCooldown;
+
+    // Sniper
+    SerializedProperty sniperCooldown;
+    SerializedProperty sniperPenetrationCount;
+
+    // Ammo & Magazine
+    SerializedProperty ammoType;
+    SerializedProperty acceptedMagazines;
+
+    // Molotov
+    SerializedProperty isMolotov;
+    SerializedProperty fireEffectPrefab;
+    SerializedProperty explosionRadius;
+    SerializedProperty burnDamage;
+    SerializedProperty burnDuration;
+    SerializedProperty tickInterval;
+
+    void OnEnable()
+    {
+        prefab = serializedObject.FindProperty("prefab");
+        weaponType = serializedObject.FindProperty("weaponType");
+        projectilePrefab = serializedObject.FindProperty("projectilePrefab");
+
+
+        knockbackForce = serializedObject.FindProperty("knockbackForce");
+        knockbackDuration = serializedObject.FindProperty("knockbackDuration");
+
+        isAutomatic = serializedObject.FindProperty("isAutomatic");
+        fireRate = serializedObject.FindProperty("fireRate");
+        damage = serializedObject.FindProperty("damage");
+        reloadTime = serializedObject.FindProperty("reloadTime");
+        attackRange = serializedObject.FindProperty("attackRange");
+
+        pelletsPerShot = serializedObject.FindProperty("pelletsPerShot");
+        pelletSpreadAngle = serializedObject.FindProperty("pelletSpreadAngle");
+        shotgunCooldown = serializedObject.FindProperty("shotgunCooldown");
+
+        sniperCooldown = serializedObject.FindProperty("sniperCooldown");
+        sniperPenetrationCount = serializedObject.FindProperty("sniperPenetrationCount");
+
+        ammoType = serializedObject.FindProperty("ammoType");
+        acceptedMagazines = serializedObject.FindProperty("acceptedMagazines");
+
+        isMolotov = serializedObject.FindProperty("isMolotov");
+        fireEffectPrefab = serializedObject.FindProperty("fireEffectPrefab");
+        explosionRadius = serializedObject.FindProperty("explosionRadius");
+        burnDamage = serializedObject.FindProperty("burnDamage");
+        burnDuration = serializedObject.FindProperty("burnDuration");
+        tickInterval = serializedObject.FindProperty("tickInterval");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        // ---------------- BASIC ----------------
+        EditorGUILayout.PropertyField(prefab);
+        EditorGUILayout.PropertyField(weaponType);
+
+        WeaponType wt = (WeaponType)weaponType.enumValueIndex;
+
+        EditorGUILayout.Space(6);
+        EditorGUILayout.LabelField("Combat Stats", EditorStyles.boldLabel);
+
+        EditorGUILayout.PropertyField(knockbackForce);
+        EditorGUILayout.PropertyField(knockbackDuration);
+        EditorGUILayout.PropertyField(fireRate);
+        EditorGUILayout.PropertyField(damage);
+        EditorGUILayout.PropertyField(reloadTime);
+        EditorGUILayout.PropertyField(attackRange);
+        EditorGUILayout.PropertyField(projectilePrefab);
+
+
+        // ---------------- AUTOMATIC ----------------
+        if (wt != WeaponType.Shotgun &&
+            wt != WeaponType.Sniper &&
+            wt != WeaponType.Molotov)
+        {
+            EditorGUILayout.PropertyField(isAutomatic);
+        }
+
+        // ---------------- SHOTGUN ----------------
+        if (wt == WeaponType.Shotgun)
+        {
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Shotgun Settings", EditorStyles.boldLabel);
+
+            EditorGUILayout.PropertyField(pelletsPerShot);
+            EditorGUILayout.PropertyField(pelletSpreadAngle);
+            EditorGUILayout.PropertyField(shotgunCooldown);
+        }
+
+        // ---------------- SNIPER ----------------
+        if (wt == WeaponType.Sniper)
+        {
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Sniper Settings", EditorStyles.boldLabel);
+
+            EditorGUILayout.PropertyField(sniperCooldown);
+            EditorGUILayout.PropertyField(sniperPenetrationCount);
+        }
+
+        // ---------------- MOLOTOV ----------------
+        if (wt == WeaponType.Molotov)
+        {
+            isMolotov.boolValue = true;
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Molotov Settings", EditorStyles.boldLabel);
+
+            EditorGUILayout.PropertyField(fireEffectPrefab);
+            EditorGUILayout.PropertyField(explosionRadius);
+            EditorGUILayout.PropertyField(burnDamage);
+            EditorGUILayout.PropertyField(burnDuration);
+            EditorGUILayout.PropertyField(tickInterval);
+        }
+        else
+        {
+            isMolotov.boolValue = false;
+        }
+
+        // ---------------- AMMO & MAGAZINE ----------------
+        EditorGUILayout.Space(8);
+        EditorGUILayout.LabelField("Ammo & Magazine", EditorStyles.boldLabel);
+
+        EditorGUILayout.PropertyField(ammoType);
+
+        if (acceptedMagazines != null)
+        {
+            EditorGUILayout.PropertyField(
+                acceptedMagazines,
+                new GUIContent("Accepted Magazines"),
+                true
+            );
+        }
+
+        serializedObject.ApplyModifiedProperties();
     }
 }
 using UnityEngine;
@@ -2996,8 +3173,7 @@ public class Inventory : MonoBehaviour
     public void RaiseChanged() => OnChanged?.Invoke();
 
     // Yeni mermi depolama sistemi: ammoType(string) -> toplam mermi sayÄ±sÄ±
-    private Dictionary<AmmoTypeData, int> ammoPool =
-        new Dictionary<AmmoTypeData, int>();
+
 
     void Awake()
     {
@@ -3014,61 +3190,102 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
     }
 
-public bool IsMagazineEquipped(MagazineInstance mag)
-{
-    if (mag == null) return false;
+    public bool IsMagazineEquipped(MagazineInstance mag)
+    {
+        if (mag == null) return false;
 
-    PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
-    if (pw == null) return false;
+        PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
+        if (pw == null) return false;
 
-    return pw.GetCurrentMagazine() == mag;
-}
+        return pw.GetCurrentMagazine() == mag;
+    }
 
-public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
-{
-    ammoPool = data;
-}
 
     // ---------------- ADD ----------------
     public bool TryAdd(ItemData data, int amount = 1)
-{
-    if (data == null || amount <= 0)
-        return false;
-
-    // ğŸ”¥ MAGAZINE ITEM
-    if (data is MagazineData magData)
     {
+        if (data == null || amount <= 0)
+            return false;
+
+        // ğŸ”¥ MAGAZINE ITEM
+        if (data is MagazineData magData)
+        {
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i].data == null)
+                {
+                    slots[i] = new InventoryItem
+                    {
+                        data = magData,
+                        count = 1,
+                        magazineInstance = new MagazineInstance(magData)
+                    };
+
+                    RaiseChanged();
+                    return true;
+                }
+            }
+
+            return false; // envanter dolu
+        }
+
+        // ğŸ”« AMMO ITEM
+        if (data is AmmoItemData ammoData)
+        {
+            return AddStackableItem(ammoData, amount);
+        }
+
+
+        // ğŸ“¦ STACKLENEBÄ°LEN ITEM
+        if (data.stackable)
+        {
+            int remain = amount;
+
+            for (int i = 0; i < slots.Length && remain > 0; i++)
+            {
+                var s = slots[i];
+                if (s.data == data && s.count < data.maxStack)
+                {
+                    int add = Mathf.Min(remain, data.maxStack - s.count);
+                    s.count += add;
+                    remain -= add;
+                }
+            }
+
+            for (int i = 0; i < slots.Length && remain > 0; i++)
+            {
+                if (slots[i].data == null)
+                {
+                    int add = Mathf.Min(remain, data.maxStack);
+                    slots[i] = new InventoryItem(data, add);
+                    remain -= add;
+                }
+            }
+
+            if (remain == 0)
+            {
+                RaiseChanged();
+                return true;
+            }
+
+            return false;
+        }
+
+        // ğŸ“¦ STACKLENMEYEN NORMAL ITEM
         for (int i = 0; i < slots.Length; i++)
         {
             if (slots[i].data == null)
             {
-                slots[i] = new InventoryItem
-                {
-                    data = magData,
-                    count = 1,
-                    magazineInstance = new MagazineInstance(magData)
-                };
-
+                slots[i] = new InventoryItem(data, 1);
                 RaiseChanged();
                 return true;
             }
         }
 
-        return false; // envanter dolu
+        return false;
     }
 
-    // ğŸ”« AMMO ITEM
-    if (data is AmmoItemData ammoData)
-    {
-        int totalAmmo = ammoData.ammoAmount * amount;
-        AddAmmo(ammoData.ammoType, totalAmmo);
-
-        Debug.Log($"[Inventory] {ammoData.ammoType.ammoName} +{totalAmmo}");
-        return true;
-    }
-
-    // ğŸ“¦ STACKLENEBÄ°LEN ITEM
-    if (data.stackable)
+    bool AddStackableItem(ItemData data, int amount)
     {
         int remain = amount;
 
@@ -3102,21 +3319,6 @@ public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
         return false;
     }
 
-    // ğŸ“¦ STACKLENMEYEN NORMAL ITEM
-    for (int i = 0; i < slots.Length; i++)
-    {
-        if (slots[i].data == null)
-        {
-            slots[i] = new InventoryItem(data, 1);
-            RaiseChanged();
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
     // --------- YARDIMCI SAYIM METOTLARI ---------
 
     public int GetTotalCount(ItemData data)
@@ -3129,82 +3331,74 @@ public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
         return total;
     }
     public InventoryItem GetLastAddedSlot()
-{
-    for (int i = slots.Length - 1; i >= 0; i--)
     {
-        if (slots[i] != null && slots[i].data != null)
-            return slots[i];
+        for (int i = slots.Length - 1; i >= 0; i--)
+        {
+            if (slots[i] != null && slots[i].data != null)
+                return slots[i];
+        }
+        return null;
     }
-    return null;
-}
 
-public bool UnloadOneFromMagazine(MagazineInstance mag)
-{
-    if (IsMagazineEquipped(mag))
-{
-    Debug.Log("TakÄ±lÄ± ÅŸarjÃ¶r boÅŸaltÄ±lamaz!");
-    return false;
-}
+    public bool UnloadOneFromMagazine(MagazineInstance mag)
+    {
+        if (IsMagazineEquipped(mag))
+            return false;
 
-    if (mag == null || mag.data == null)
-        return false;
+        if (mag == null || mag.data == null)
+            return false;
 
-    if (mag.currentAmmo <= 0)
-        return false;
+        if (mag.currentAmmo <= 0)
+            return false;
 
-    AmmoTypeData ammoType = mag.data.ammoType;
-    if (ammoType == null)
-        return false;
+        AmmoItemData ammoItem = FindAmmoItem(mag.data.ammoType);
+        if (ammoItem == null)
+            return false;
 
-    // ğŸ”« ÅarjÃ¶rden Ã§Ä±kar
-    mag.currentAmmo -= 1;
+        mag.currentAmmo -= 1;
 
-    // ğŸ” AmmoPool'a geri koy
-    AddAmmo(ammoType, 1);
+        TryAdd(ammoItem, 1);
+        RaiseChanged();
+        return true;
+    }
 
-    RaiseChanged();
 
-    Debug.Log(
-        $"[Inventory] ÅarjÃ¶rden 1 mermi Ã§Ä±karÄ±ldÄ± â†’ " +
-        $"{mag.currentAmmo}/{mag.data.capacity}"
-    );
+    public bool UnloadAllFromMagazine(MagazineInstance mag)
+    {
+        if (IsMagazineEquipped(mag))
+            return false;
 
-    return true;
-}
+        if (mag == null || mag.data == null)
+            return false;
 
-public bool UnloadAllFromMagazine(MagazineInstance mag)
-{
-    if (IsMagazineEquipped(mag))
-{
-    Debug.Log("TakÄ±lÄ± ÅŸarjÃ¶r boÅŸaltÄ±lamaz!");
-    return false;
-}
+        int amount = mag.currentAmmo;
+        if (amount <= 0)
+            return false;
 
-    if (mag == null || mag.data == null)
-        return false;
+        AmmoItemData ammoItem = FindAmmoItem(mag.data.ammoType);
+        if (ammoItem == null)
+            return false;
 
-    int amount = mag.currentAmmo;
-    if (amount <= 0)
-        return false;
+        TryAdd(ammoItem, amount);
 
-    AmmoTypeData ammoType = mag.data.ammoType;
-    if (ammoType == null)
-        return false;
 
-    // ğŸ” AmmoPool'a geri koy
-    AddAmmo(ammoType, amount);
+        mag.currentAmmo = 0;
+        RaiseChanged();
+        return true;
+    }
 
-    // ğŸ”« ÅarjÃ¶rÃ¼ boÅŸalt
-    mag.currentAmmo = 0;
+    AmmoItemData FindAmmoItem(AmmoTypeData type)
+    {
+        foreach (var s in slots)
+        {
+            if (s.data is AmmoItemData ammo &&
+                ammo.ammoType == type)
+                return ammo;
+        }
 
-    RaiseChanged();
-
-    Debug.Log(
-        $"[Inventory] ÅarjÃ¶r tamamen boÅŸaltÄ±ldÄ± â†’ +{amount} mermi"
-    );
-
-    return true;
-}
+        Debug.LogError($"AmmoItemData bulunamadÄ±: {type.ammoName}");
+        return null;
+    }
 
 
     // Envanterde yeterince var mÄ±?
@@ -3221,15 +3415,8 @@ public bool UnloadAllFromMagazine(MagazineInstance mag)
             unlockedBlueprints.Add(id);
     }
     // Inventory.cs
-public Dictionary<AmmoTypeData, int> GetAmmoPool()
-{
-    return ammoPool;
-}
 
-public void ClearAmmoPool()
-{
-    ammoPool.Clear();
-}
+
 
 
 
@@ -3269,29 +3456,74 @@ public void ClearAmmoPool()
         return true;
     }
     public bool TryAddMagazine(MagazineInstance mag)
-{
-    if (mag == null || mag.data == null)
-        return false;
-
-    for (int i = 0; i < slots.Length; i++)
     {
-        if (slots[i].data == null)
-        {
-            slots[i] = new InventoryItem
-            {
-                data = mag.data,
-                count = 1,
-                magazineInstance = mag
-            };
+        if (mag == null || mag.data == null)
+            return false;
 
-            RaiseChanged();
-            return true;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i].data == null)
+            {
+                slots[i] = new InventoryItem
+                {
+                    data = mag.data,
+                    count = 1,
+                    magazineInstance = mag
+                };
+
+                RaiseChanged();
+                return true;
+            }
         }
+
+        Debug.Log("Envanter dolu! ÅarjÃ¶r alÄ±namadÄ±.");
+        return false;
     }
 
-    Debug.Log("Envanter dolu! ÅarjÃ¶r alÄ±namadÄ±.");
-    return false;
-}
+    public int GetTotalAmmo(AmmoTypeData type)
+    {
+        int total = 0;
+
+        foreach (var s in slots)
+        {
+            if (s.data is AmmoItemData ammo &&
+                ammo.ammoType == type)
+            {
+                total += s.count;
+
+            }
+        }
+
+        return total;
+    }
+    public int TakeAmmoFromInventory(
+    AmmoTypeData type,
+    int amount
+)
+    {
+        int remaining = amount;
+
+        for (int i = 0; i < slots.Length && remaining > 0; i++)
+        {
+            var s = slots[i];
+
+            if (s.data is AmmoItemData ammo &&
+                ammo.ammoType == type)
+            {
+                int take = Mathf.Min(s.count, remaining);
+
+                s.count -= take;
+                remaining -= take;
+
+                if (s.count <= 0)
+                    slots[i] = new InventoryItem();
+            }
+        }
+
+        RaiseChanged();
+        return amount - remaining;
+    }
+
 
     public bool TryMoveOrMerge(int from, int to)
     {
@@ -3359,109 +3591,54 @@ public void ClearAmmoPool()
         return total;
     }
 
-    // ---------------- AMMO SÄ°STEMÄ° ----------------
-
-    // Ammo ekleme (pickup vs. burayÄ± kullanacak)
-    public void AddAmmo(AmmoTypeData ammoType, int amount)
-    {
-        if (ammoType == null || amount <= 0) return;
-
-        if (!ammoPool.ContainsKey(ammoType))
-            ammoPool[ammoType] = 0;
-
-        ammoPool[ammoType] += amount;
-
-        Debug.Log($"[Ammo] +{amount} {ammoType.ammoName} â†’ Total: {ammoPool[ammoType]}");
-    }
 
 
 
-    // Belirli ammo tipinden kaÃ§ adet var?
-    public int GetAmmoAmount(AmmoTypeData ammoType)
-    {
-        if (ammoType == null) return 0;
 
-        return ammoPool.TryGetValue(ammoType, out int amount)
-            ? amount
-            : 0;
-    }
-
-
-    // Ammo tÃ¼ket (ÅŸarjÃ¶r doldurma vb.)
-    public bool TryUseAmmo(AmmoTypeData ammoType, int amount)
-    {
-        if (ammoType == null || amount <= 0) return false;
-
-        if (!ammoPool.ContainsKey(ammoType)) return false;
-        if (ammoPool[ammoType] < amount) return false;
-
-        ammoPool[ammoType] -= amount;
-
-        return true;
-    }
 
     public bool FullLoadMagazine(MagazineInstance mag)
-{
-    if (mag == null || mag.data == null)
-        return false;
+    {
+        if (mag == null || mag.data == null)
+            return false;
 
-    int needed = mag.data.capacity - mag.currentAmmo;
-    if (needed <= 0)
-        return false;
+        int needed = mag.data.capacity - mag.currentAmmo;
+        if (needed <= 0)
+            return false;
 
-    int available = GetAmmoAmount(mag.data.ammoType);
-    if (available <= 0)
-        return false;
+        int available = GetTotalAmmo(mag.data.ammoType);
+        if (available <= 0)
+            return false;
 
-    int load = Mathf.Min(needed, available);
-    return LoadAmmoIntoMagazine(mag, load);
-}
-
+        return LoadAmmoIntoMagazine(mag, needed);
+    }
 
 
-    // ÅarjÃ¶re ammo yÃ¼kleme - ammoStorage'dan Ã§eker
+
+
     public bool LoadAmmoIntoMagazine(
     MagazineInstance mag,
     int amount
 )
-{
-    if (mag == null || mag.data == null)
-        return false;
+    {
+        if (mag == null || mag.data == null)
+            return false;
 
-    if (mag.IsFull)
-        return false;
+        int space = mag.data.capacity - mag.currentAmmo;
+        if (space <= 0)
+            return false;
 
-    AmmoTypeData ammoType = mag.data.ammoType;
-    if (ammoType == null)
-        return false;
+        int taken = TakeAmmoFromInventory(
+            mag.data.ammoType,
+            Mathf.Min(space, amount)
+        );
 
-    int available = GetAmmoAmount(ammoType);
-    if (available <= 0)
-        return false;
+        if (taken <= 0)
+            return false;
 
-    int space = mag.data.capacity - mag.currentAmmo;
-    int load = Mathf.Min(space, Mathf.Min(amount, available));
-
-    if (load <= 0)
-        return false;
-
-    // ğŸ”¥ AMMO HAVUZUNDAN Ã‡EK
-    TryUseAmmo(ammoType, load);
-
-    // ğŸ”« ÅARJÃ–RE KOY
-    mag.currentAmmo += load;
-
-    RaiseChanged();
-
-    Debug.Log(
-        $"[Inventory] ÅarjÃ¶r dolduruldu â†’ +{load} " +
-        $"({mag.currentAmmo}/{mag.data.capacity})"
-    );
-
-    return true;
-}
-
-
+        mag.currentAmmo += taken;
+        RaiseChanged();
+        return true;
+    }
 
 
 }
@@ -3564,14 +3741,14 @@ public class InventorySlotUI : MonoBehaviour,
             return;
         }
         if (highlightImage != null)
-{
-    var pw = FindObjectOfType<PlayerWeapon>();
+        {
+            var pw = FindObjectOfType<PlayerWeapon>();
 
-    if (pw != null && pw.currentMagazine == item.magazineInstance)
-        highlightImage.color = equippedColor;
-    else
-        highlightImage.color = normalColor;
-}
+            if (pw != null && pw.currentMagazine == item.magazineInstance)
+                highlightImage.color = equippedColor;
+            else
+                highlightImage.color = normalColor;
+        }
 
 
         // ğŸ”« ÅARJÃ–RSE â†’ MERMÄ° GÃ–STER
@@ -3603,12 +3780,12 @@ public class InventorySlotUI : MonoBehaviour,
         }
 
         // 2ï¸âƒ£ AMMO ITEM
-        if (item.data is AmmoItemData ammoData)
+        if (item.data is AmmoItemData)
         {
-            int totalAmmo = item.count * ammoData.ammoAmount;
-            countText.text = $"x{totalAmmo}";
+            countText.text = $"x{item.count}";
             return;
         }
+
 
         // 3ï¸âƒ£ NORMAL ITEM
         countText.text = $"x{item.count}";
@@ -3618,28 +3795,28 @@ public class InventorySlotUI : MonoBehaviour,
 
     // SaÄŸ tÄ±k / sol tÄ±k davranÄ±ÅŸÄ±
     public void OnPointerClick(PointerEventData eventData)
-{
-    if (cached == null)
-        return;
-
-    // ğŸ”« MAGAZINE LEFT CLICK â†’ TAK
-    if (cached.magazineInstance != null &&
-        eventData.button == PointerEventData.InputButton.Left)
     {
-        var pw = FindObjectOfType<PlayerWeapon>();
-        if (pw == null) return;
+        if (cached == null)
+            return;
 
-        pw.TryEquipMagazineFromInventory(
-            cached.magazineInstance
-        );
+        // ğŸ”« MAGAZINE LEFT CLICK â†’ TAK
+        if (cached.magazineInstance != null &&
+            eventData.button == PointerEventData.InputButton.Left)
+        {
+            var pw = FindObjectOfType<PlayerWeapon>();
+            if (pw == null) return;
+
+            pw.TryEquipMagazineFromInventory(
+                cached.magazineInstance
+            );
+        }
+        if (cached.magazineInstance != null)
+        {
+            owner.SelectMagazine(cached.magazineInstance);
+            return;
+        }
+
     }
-    if (cached.magazineInstance != null)
-{
-    owner.SelectMagazine(cached.magazineInstance);
-    return;
-}
-
-}
 
 
 
@@ -3850,8 +4027,20 @@ public static class ItemDatabase
     {
         dict = new Dictionary<string, ItemData>();
 
+        if (items == null)
+        {
+            Debug.LogError("âŒ ItemDatabase: items array NULL!");
+            return;
+        }
+
         foreach (var item in items)
         {
+            if (item == null)
+            {
+                Debug.LogWarning("âš ï¸ ItemDatabase: NULL item atlandÄ±.");
+                continue;
+            }
+
             if (string.IsNullOrWhiteSpace(item.itemID))
             {
                 Debug.LogError($"âŒ Item '{item.name}' iÃ§in itemID atanmadÄ±!");
@@ -3869,6 +4058,7 @@ public static class ItemDatabase
 
         Debug.Log($"ItemDatabase â†’ {dict.Count} item yÃ¼klendi.");
     }
+
 
     public static ItemData Get(string id)
     {
@@ -4822,7 +5012,7 @@ public class WanderArea : MonoBehaviour
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
+public class PlayerInputRouter : MonoBehaviour
 {
     public static PlayerInputRouter Instance;
 
@@ -4834,47 +5024,61 @@ public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
     public GameObject tradePanel;
     public GameObject pauseMenuPanel;
 
-   
+
     [Header("References")]
     public CaravanInteraction caravan; // Craft iÃ§in gerekecek
-    
 
-private bool IsPauseOpen()
-{
-    return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
-}
 
-private void Update()
-{
-    // Craft aÃ§Ä±ksa ama artÄ±k menzilde deÄŸilsek â†’ kapat
-    if (craftPanel != null && craftPanel.activeSelf)
+    private bool IsPauseOpen()
     {
-        if (caravan == null || !caravan.playerInRange)
+        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
+    }
+
+    private void Update()
+    {
+        // Craft aÃ§Ä±ksa ama artÄ±k menzilde deÄŸilsek â†’ kapat
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            if (caravan == null || !caravan.playerInRange)
+            {
+                craftPanel.SetActive(false);
+                GameStateManager.SetPaused(false);
+            }
+        }
+    }
+    public void ForceCloseCraft()
+    {
+        if (craftPanel != null && craftPanel.activeSelf)
         {
             craftPanel.SetActive(false);
             GameStateManager.SetPaused(false);
         }
     }
-}
-public void ForceCloseCraft()
-{
-    if (craftPanel != null && craftPanel.activeSelf)
-    {
-        craftPanel.SetActive(false);
-        GameStateManager.SetPaused(false);
-    }
-}
 
 
     private void Awake()
     {
         Instance = this;
         controls = new PlayerControls();
-        controls.Gameplay.SetCallbacks(this);
     }
 
-    private void OnEnable()  => controls.Gameplay.Enable();
-    private void OnDisable() => controls.Gameplay.Disable();
+
+    private void OnEnable()
+    {
+        controls.Gameplay.Inventory.performed += OnInventory;
+        controls.Gameplay.Craft.performed += OnCraft;
+        controls.Gameplay.Escape.performed += OnEscape;
+
+        controls.Gameplay.Enable();
+    }
+    private void OnDisable()
+    {
+        controls.Gameplay.Inventory.performed -= OnInventory;
+        controls.Gameplay.Craft.performed -= OnCraft;
+        controls.Gameplay.Escape.performed -= OnEscape;
+
+        controls.Gameplay.Disable();
+    }
 
 
     // ================================
@@ -4893,89 +5097,80 @@ public void ForceCloseCraft()
     // CRAFT (C)
     // ================================
     public void OnCraft(InputAction.CallbackContext ctx)
-{
-    if (!ctx.performed) return;
-    if (IsPauseOpen()) return;
-
-    // âŒ Caravan yoksa veya menzilde deÄŸilse â†’ aÃ§ma
-    if (caravan == null || !caravan.playerInRange)
-    {
-        Debug.Log("Craft aÃ§Ä±lamadÄ± â†’ Caravan menzilinde deÄŸilsin.");
-        return;
-    }
-
-    TogglePanel(craftPanel);
-}
-
-
-public void SetGameplayInput(bool enabled)
-{
-    if (enabled)
-        controls.Gameplay.Enable();
-    else
-        controls.Gameplay.Disable();
-}
-
-    // ================================
-    // TRADE (E)
-    // ================================
-    public void OnInteract(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
         if (IsPauseOpen()) return;
 
-        if (NPCInteraction.Instance == null) return;
-        if (!NPCInteraction.Instance.PlayerIsNear()) return;
+        // âŒ Caravan yoksa veya menzilde deÄŸilse â†’ aÃ§ma
+        if (caravan == null || !caravan.playerInRange)
+        {
+            Debug.Log("Craft aÃ§Ä±lamadÄ± â†’ Caravan menzilinde deÄŸilsin.");
+            return;
+        }
 
-        NPCInteraction.Instance.ToggleTradePanel();
+        TogglePanel(craftPanel);
     }
+
+
+    public void SetGameplayInput(bool enabled)
+    {
+        if (enabled)
+            controls.Gameplay.Enable();
+        else
+            controls.Gameplay.Disable();
+    }
+
+    // ================================
+    // TRADE (E)
+    // ================================
+
 
 
     // ================================
     // ESC (PAUSE + PANEL KAPAMA)
     // ================================
- public void OnEscape(InputAction.CallbackContext ctx)
-{
-    if (!ctx.performed) return;
-    if (GameStateManager.IsGameOver) return;
-
-    // 1ï¸âƒ£ Pause AÃ‡IKSA â†’ sadece Pause kapansÄ±n
-    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+    public void OnEscape(InputAction.CallbackContext ctx)
     {
-        PauseMenu.Instance.HidePause();
-        GameStateManager.SetPaused(false);
-        return;
-    }
+        if (!ctx.performed) return;
+        if (GameStateManager.IsGameOver) return;
 
-    // 2ï¸âƒ£ Trade aÃ§Ä±ksa â†’ kapat
-    if (tradePanel != null && tradePanel.activeSelf)
-    {
-        tradePanel.SetActive(false);
-        GameStateManager.SetPaused(false);
-        return;
-    }
+        // 1ï¸âƒ£ Pause AÃ‡IKSA â†’ sadece Pause kapansÄ±n
+        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+        {
+            PauseMenu.Instance.HidePause();
+            GameStateManager.SetPaused(false);
+            return;
+        }
 
-    // 3ï¸âƒ£ Craft aÃ§Ä±ksa â†’ kapat
-    if (craftPanel != null && craftPanel.activeSelf)
-    {
-        craftPanel.SetActive(false);
-        GameStateManager.SetPaused(false);
-        return;
-    }
+        // 2ï¸âƒ£ Trade aÃ§Ä±ksa â†’ kapat
+        if (tradePanel != null && tradePanel.activeSelf)
+        {
+            tradePanel.SetActive(false);
+            GameStateManager.SetPaused(false);
+            return;
+        }
 
-    // 4ï¸âƒ£ Inventory aÃ§Ä±ksa â†’ kapat
-    if (inventoryPanel != null && inventoryPanel.activeSelf)
-    {
-        inventoryPanel.SetActive(false);
-        GameStateManager.SetPaused(false);
-        return;
-    }
+        // 3ï¸âƒ£ Craft aÃ§Ä±ksa â†’ kapat
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            craftPanel.SetActive(false);
+            GameStateManager.SetPaused(false);
+            return;
+        }
 
-    // 5ï¸âƒ£ HiÃ§bir panel aÃ§Ä±k deÄŸil â†’ Pause aÃ§
-    CloseAllPanels();                 // ğŸ”’ GÃ¼venlik: baÅŸka panel kalmasÄ±n
-    PauseMenu.Instance.ShowPause();
-    GameStateManager.SetPaused(true);
-}
+        // 4ï¸âƒ£ Inventory aÃ§Ä±ksa â†’ kapat
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            inventoryPanel.SetActive(false);
+            GameStateManager.SetPaused(false);
+            return;
+        }
+
+        // 5ï¸âƒ£ HiÃ§bir panel aÃ§Ä±k deÄŸil â†’ Pause aÃ§
+        CloseAllPanels();                 // ğŸ”’ GÃ¼venlik: baÅŸka panel kalmasÄ±n
+        PauseMenu.Instance.ShowPause();
+        GameStateManager.SetPaused(true);
+    }
 
 
 
@@ -5003,7 +5198,7 @@ public void SetGameplayInput(bool enabled)
             Time.timeScale = open ? 0f : 1f;
         }
 
-        
+
     }
 
     private void CloseAllPanels()
@@ -5013,7 +5208,7 @@ public void SetGameplayInput(bool enabled)
         if (tradePanel) tradePanel.SetActive(false);
 
         // HUD geri gelsin
-        
+
         // Pause kapandÄ±ysa oyun devam etsin
         if (pauseMenuPanel && pauseMenuPanel.activeSelf)
         {
@@ -5026,16 +5221,16 @@ public void SetGameplayInput(bool enabled)
     // ================================
     // UNUSED INPUTS
     // ================================
-    public void OnMove(InputAction.CallbackContext ctx) {}
-    public void OnSprint(InputAction.CallbackContext ctx) {}
-    public void OnMap(InputAction.CallbackContext ctx) {}
-    public void OnReload(InputAction.CallbackContext ctx) {}
-    public void OnWeapon1(InputAction.CallbackContext ctx) {}
-    public void OnWeapon2(InputAction.CallbackContext ctx) {}
-    public void OnWeapon3(InputAction.CallbackContext ctx) {}
-    public void OnMelee(InputAction.CallbackContext ctx) {}
-    public void OnADS(InputAction.CallbackContext ctx) {}
-    public void OnCaravanWeapons(InputAction.CallbackContext ctx) {}
+    public void OnMove(InputAction.CallbackContext ctx) { }
+    public void OnSprint(InputAction.CallbackContext ctx) { }
+    public void OnMap(InputAction.CallbackContext ctx) { }
+    public void OnReload(InputAction.CallbackContext ctx) { }
+    public void OnWeapon1(InputAction.CallbackContext ctx) { }
+    public void OnWeapon2(InputAction.CallbackContext ctx) { }
+    public void OnWeapon3(InputAction.CallbackContext ctx) { }
+    public void OnMelee(InputAction.CallbackContext ctx) { }
+    public void OnADS(InputAction.CallbackContext ctx) { }
+    public void OnCaravanWeapons(InputAction.CallbackContext ctx) { }
 }
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -5851,453 +6046,13 @@ public class MultiImageIntroController : MonoBehaviour
     }
 }
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.EventSystems;
-
-public class NPCInteraction : MonoBehaviour
-{
-    private readonly List<TradeOfferButton> spawned = new List<TradeOfferButton>();
-    private bool layoutDone = false;
-
-    [Header("Trade Data")]
-    public List<TradeOffer> tradeOffers;
-
-    [Header("Layout Settings (code-driven)")]
-    public float rowSpacing = 8f;
-    public float innerSpacing = 12f;
-
-    [Header("Layout (manual)")]
-    public float topPadding = 10f;
-    public float bottomPadding = 10f;
-
-    [Header("UI Refs")]
-    public GameObject tradeUIPanel;
-    public GameObject interactPromptUI;
-    public Transform tradeOffersContainer;
-    public GameObject tradeOfferButtonPrefab;
-    public ScrollRect tradeScrollRect;
-
-    private bool inertiaDefault = true;
-    private bool isPlayerNearby = false;
-    private PlayerStats playerStats;
-
-    public static NPCInteraction Instance { get; private set; }
-
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    private void Start()
-    {
-        playerStats = FindObjectOfType<PlayerStats>();
-
-        if (tradeUIPanel != null) tradeUIPanel.SetActive(false);
-        if (interactPromptUI != null) interactPromptUI.SetActive(false);
-
-        // (optional) load offers
-        var loaded = Resources.LoadAll<TradeOffer>("Animals");
-        if (loaded.Length > 0)
-        {
-            var set = new HashSet<TradeOffer>(tradeOffers);
-            foreach (var t in loaded) if (!set.Contains(t)) tradeOffers.Add(t);
-        }
-    }
-
-    // --------------------------------------------------------------------
-    // PANEL AÃ‡ILMADAN Ã–NCE TEKLÄ°FLERÄ° DOLDURAN HAZIRLIK METODU
-    // --------------------------------------------------------------------
-    public void PrepareTradeUI()
-    {
-        PopulateTradeOffers();
-        Canvas.ForceUpdateCanvases();
-
-        if (tradeScrollRect != null)
-        {
-            tradeScrollRect.verticalNormalizedPosition = 1f;
-            tradeScrollRect.StopMovement();
-            tradeScrollRect.velocity = Vector2.zero;
-        }
-
-        EventSystem.current?.SetSelectedGameObject(null);
-    }
-
-    // --------------------------------------------------------------------
-    // PLAYERINPUTROUTER TARAFINDAN Ã‡AÄRILAN PANEL AÃ‡/KAPA METODU
-    // --------------------------------------------------------------------
-    public void ToggleTradePanel()
-    {
-        bool next = !tradeUIPanel.activeSelf;
-
-        if (next)   // aÃ§Ä±lÄ±yorsa
-        {
-            PrepareTradeUI();
-        }
-
-        tradeUIPanel.SetActive(next);
-
-        if (interactPromptUI != null)
-            interactPromptUI.SetActive(!next);   // panel aÃ§Ä±ldÄ±ÄŸÄ±nda prompt gizlensin
-    }
-
-    // --------------------------------------------------------------------
-    // TRADE TEKLÄ°FLERÄ°NÄ° YERLEÅTÄ°REN ESKÄ° METOD (DEÄÄ°ÅMEDÄ°)
-    // --------------------------------------------------------------------
-    private void PopulateTradeOffers()
-    {
-        float prevScroll = tradeScrollRect ? tradeScrollRect.verticalNormalizedPosition : 1f;
-
-        if (!layoutDone)
-        {
-            for (int i = tradeOffersContainer.childCount - 1; i >= 0; i--)
-                Destroy(tradeOffersContainer.GetChild(i).gameObject);
-
-            float y = -topPadding;
-
-            foreach (var offer in tradeOffers)
-            {
-                var go = Instantiate(tradeOfferButtonPrefab, tradeOffersContainer);
-                var btn = go.GetComponent<TradeOfferButton>();
-
-                var rt = (RectTransform)go.transform;
-                rt.anchorMin = new Vector2(0f, 1f);
-                rt.anchorMax = new Vector2(0f, 1f);
-                rt.pivot = new Vector2(0f, 1f);
-
-                float h = Mathf.Max(rt.sizeDelta.y, LayoutUtility.GetPreferredHeight(rt));
-                rt.anchoredPosition = new Vector2(0f, y);
-                y -= (h + rowSpacing);
-
-                spawned.Add(btn);
-            }
-
-            var contentRT = (RectTransform)tradeOffersContainer;
-            float needed = -y - rowSpacing + bottomPadding;
-            if (needed < 0f) needed = 0f;
-            var sz = contentRT.sizeDelta;
-            contentRT.sizeDelta = new Vector2(sz.x, needed);
-
-            layoutDone = true;
-        }
-
-        for (int i = 0; i < spawned.Count && i < tradeOffers.Count; i++)
-            spawned[i].Setup(tradeOffers[i]);
-
-        Canvas.ForceUpdateCanvases();
-
-        if (tradeScrollRect)
-        {
-            tradeScrollRect.StopMovement();
-            tradeScrollRect.velocity = Vector2.zero;
-            tradeScrollRect.verticalNormalizedPosition = prevScroll;
-        }
-
-        EventSystem.current?.SetSelectedGameObject(null);
-    }
-
-    // --------------------------------------------------------------------
-    // TRADE EXECUTION â€” OLDUKÃ‡A DOÄRU, HÄ°Ã‡ DOKUNMADIM
-    // --------------------------------------------------------------------
-    private bool HasEnoughResources(TradeOffer offer)
-    {
-        if (playerStats == null || offer == null) return false;
-
-        if (offer.requiredStone > 0 && !Inventory.Instance.HasEnough(offer.stoneSO, offer.requiredStone)) return false;
-        if (offer.requiredWood > 0 && !Inventory.Instance.HasEnough(offer.woodSO, offer.requiredWood)) return false;
-        if (offer.requiredScrapMetal > 0 && !Inventory.Instance.HasEnough(offer.scrapSO, offer.requiredScrapMetal)) return false;
-        if (offer.requiredMeat > 0 && !Inventory.Instance.HasEnough(offer.meatSO, offer.requiredMeat)) return false;
-        if (offer.requiredDeerHide > 0 && !Inventory.Instance.HasEnough(offer.deerHideSO, offer.requiredDeerHide)) return false;
-        if (offer.requiredRabbitHide > 0 && !Inventory.Instance.HasEnough(offer.rabbitHideSO, offer.requiredRabbitHide)) return false;
-        if (offer.requiredHerb > 0 && !Inventory.Instance.HasEnough(offer.herbSO, offer.requiredHerb)) return false;
-        if (offer.requiredAmmo > 0 && !Inventory.Instance.HasEnough(offer.ammoSO, offer.requiredAmmo)) return false;
-
-        return true;
-    }
-
-    private void DeductResources(TradeOffer offer)
-    {
-        if (offer.requiredStone > 0) Inventory.Instance.TryConsume(offer.stoneSO, offer.requiredStone);
-        if (offer.requiredWood > 0) Inventory.Instance.TryConsume(offer.woodSO, offer.requiredWood);
-        if (offer.requiredScrapMetal > 0) Inventory.Instance.TryConsume(offer.scrapSO, offer.requiredScrapMetal);
-        if (offer.requiredMeat > 0) Inventory.Instance.TryConsume(offer.meatSO, offer.requiredMeat);
-        if (offer.requiredDeerHide > 0) Inventory.Instance.TryConsume(offer.deerHideSO, offer.requiredDeerHide);
-        if (offer.requiredRabbitHide > 0) Inventory.Instance.TryConsume(offer.rabbitHideSO, offer.requiredRabbitHide);
-        if (offer.requiredHerb > 0) Inventory.Instance.TryConsume(offer.herbSO, offer.requiredHerb);
-        if (offer.requiredAmmo > 0) Inventory.Instance.TryConsume(offer.ammoSO, offer.requiredAmmo);
-    }
-
-    public void ExecuteTrade(TradeOffer offer)
-    {
-        if (!HasEnoughResources(offer))
-        {
-            Debug.Log("Yetersiz materyal!");
-            return;
-        }
-
-        DeductResources(offer);
-
-        if (offer.rewardKind == RewardKind.Resource)
-        {
-            if (offer.rewardItemSO != null && offer.rewardAmount > 0)
-                Inventory.Instance.TryAdd(offer.rewardItemSO, offer.rewardAmount);
-        }
-        else if (offer.rewardKind == RewardKind.WeaponPart)
-        {
-            if (offer.partToGive != null && offer.amountToGive > 0)
-                Inventory.Instance.TryAdd(offer.partToGive, offer.amountToGive);
-        }
-
-        PopulateTradeOffers();
-    }
-
-    // --------------------------------------------------------------------
-    // PLAYER NEAR â€” ORÄ°JÄ°NAL
-    // --------------------------------------------------------------------
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player")) return;
-
-        isPlayerNearby = true;
-
-        if (interactPromptUI != null)
-            interactPromptUI.SetActive(true);
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player")) return;
-
-        isPlayerNearby = false;
-
-        if (interactPromptUI != null)
-            interactPromptUI.SetActive(false);
-
-        // Panel aÃ§Ä±ksa kapatmak istersen:
-        // tradeUIPanel.SetActive(false);
-    }
-
-    public bool PlayerIsNear() => isPlayerNearby;
-}
-using UnityEngine;
-
-public enum RewardKind
-{
-    WeaponPart,
-    Resource
-}
-
-[CreateAssetMenu(fileName = "New Trade Offer", menuName = "NPC/Trade Offer")]
-public class TradeOffer : ScriptableObject
-{
-    [Header("Player Gives (Costs)")]
-    public ItemData stoneSO;
-    public int requiredStone = 0;
-
-    public ItemData woodSO;
-    public int requiredWood = 0;
-
-    public ItemData scrapSO;
-    public int requiredScrapMetal = 0;
-
-    public ItemData ammoSO;
-    public int requiredAmmo = 0;
-
-    public ItemData meatSO;
-    public int requiredMeat = 0;
-
-    public ItemData deerHideSO;
-    public int requiredDeerHide = 0;
-
-    public ItemData rabbitHideSO;
-    public int requiredRabbitHide = 0;
-
-    public ItemData herbSO;
-    public int requiredHerb = 0;
-
-    [Header("Player Gets (Rewards)")]
-    public RewardKind rewardKind = RewardKind.Resource;
-
-    // âœ” WeaponPart Ã¶dÃ¼lÃ¼ iÃ§in (Yeni sistem)
-    public WeaponPartItemData partToGive;
-    public int amountToGive = 1;
-
-    // Resource Ã¶dÃ¼lÃ¼ iÃ§in
-    public ItemData rewardItemSO;
-    public int rewardAmount = 0;
-}
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.Collections.Generic;
-
-public class TradeOfferButton : MonoBehaviour
-{
-    [Header("UI Prefabs")]
-    [SerializeField] private GameObject offerTextPrefab;
-    [SerializeField] private Button tradeButton;
-    [SerializeField] private Image iconImage;
-
-    [Header("Layout")]
-    [SerializeField] private float gap = 10f;
-    [SerializeField] private float textPosX = 490f;
-    [SerializeField] private float textWidth = 1000f;
-    [SerializeField] private float textHeight = 100f;
-
-    [Header("Sprites (Optional)")]
-    public Sprite fallbackSprite;
-
-    private Dictionary<WeaponPartItemData, Sprite> partMap = new();
-    private TradeOffer currentOffer;
-    private NPCInteraction npc;
-
-    [SerializeField] private TextMeshProUGUI offerTextSlot;
-    private TextMeshProUGUI offerTextInstance;
-
-    void Awake()
-    {
-        
-
-        EnsureOfferText();
-    }
-
-    void OnEnable()
-{
-    EnsureOfferText();
-    ForceRebuild();
-}
-
-private void ForceRebuild()
-{
-    Canvas.ForceUpdateCanvases();
-
-    var rt = GetComponent<RectTransform>();
-    if (rt)
-        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
-}
-
-
-    private void EnsureOfferText()
-    {
-        if (offerTextInstance != null) return;
-
-        if (offerTextSlot != null)
-            offerTextInstance = offerTextSlot;
-        else if (offerTextPrefab != null)
-            offerTextInstance = Instantiate(offerTextPrefab, transform).GetComponent<TextMeshProUGUI>();
-        else
-            Debug.LogError("[TradeOfferButton] No text source assigned!");
-
-        PositionAndSizeText();
-    }
-
-    public void Setup(TradeOffer offer)
-    {
-        currentOffer = offer;
-        npc = NPCInteraction.Instance;
-
-        if (!tradeButton || currentOffer == null)
-            return;
-
-        EnsureOfferText();
-        ApplyIconForOffer(offer);
-
-        string cost = BuildCostText(offer);
-
-        string reward = offer.rewardKind == RewardKind.WeaponPart
-            ? $"Verilen: {offer.amountToGive} x {offer.partToGive?.itemName}"
-            : $"Verilen: {offer.rewardAmount} x {offer.rewardItemSO?.itemName}";
-
-        offerTextInstance.text = $"{cost}\n{reward}";
-
-        tradeButton.interactable = CanAfford(offer);
-        tradeButton.onClick.RemoveAllListeners();
-        tradeButton.onClick.AddListener(OnTradeClicked);
-    }
-
-    private bool CanAfford(TradeOffer o)
-    {
-        return
-            Inventory.Instance.GetTotalCount(o.stoneSO) >= o.requiredStone &&
-            Inventory.Instance.GetTotalCount(o.woodSO) >= o.requiredWood &&
-            Inventory.Instance.GetTotalCount(o.scrapSO) >= o.requiredScrapMetal &&
-            Inventory.Instance.GetTotalCount(o.meatSO) >= o.requiredMeat &&
-            Inventory.Instance.GetTotalCount(o.deerHideSO) >= o.requiredDeerHide &&
-            Inventory.Instance.GetTotalCount(o.rabbitHideSO) >= o.requiredRabbitHide &&
-            Inventory.Instance.GetTotalCount(o.herbSO) >= o.requiredHerb &&
-            Inventory.Instance.GetTotalCount(o.ammoSO) >= o.requiredAmmo;
-    }
-
-    private string BuildCostText(TradeOffer o)
-    {
-        List<string> parts = new();
-
-        if (o.requiredWood > 0) parts.Add($"{o.requiredWood} Odun");
-        if (o.requiredStone > 0) parts.Add($"{o.requiredStone} TaÅŸ");
-        if (o.requiredScrapMetal > 0) parts.Add($"{o.requiredScrapMetal} Metal");
-        if (o.requiredMeat > 0) parts.Add($"{o.requiredMeat} Et");
-        if (o.requiredDeerHide > 0) parts.Add($"{o.requiredDeerHide} Geyik Derisi");
-        if (o.requiredRabbitHide > 0) parts.Add($"{o.requiredRabbitHide} TavÅŸan Derisi");
-        if (o.requiredHerb > 0) parts.Add($"{o.requiredHerb} Ot");
-        if (o.requiredAmmo > 0) parts.Add($"{o.requiredAmmo} Mermi");
-
-        return "Ä°stenen: " + string.Join(", ", parts);
-    }
-
-    private void PositionAndSizeText()
-    {
-        var rt = offerTextInstance.rectTransform;
-
-        rt.anchorMin = new Vector2(0f, 0.5f);
-        rt.anchorMax = new Vector2(0f, 0.5f);
-        rt.pivot = new Vector2(0f, 0.5f);
-
-        rt.anchoredPosition = new Vector2(textPosX, 0f);
-
-        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, textWidth);
-        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, textHeight);
-
-        var le = offerTextInstance.GetComponent<LayoutElement>();
-        if (!le) le = offerTextInstance.gameObject.AddComponent<LayoutElement>();
-        le.ignoreLayout = false;
-    }
-
-    private void ApplyIconForOffer(TradeOffer offer)
-{
-    if (!iconImage) return;
-
-    Sprite s = null;
-
-    if (offer.rewardKind == RewardKind.WeaponPart)
-        s = offer.partToGive?.icon;
-    else if (offer.rewardKind == RewardKind.Resource)
-        s = offer.rewardItemSO?.icon;
-
-    iconImage.sprite = s ? s : fallbackSprite;
-    iconImage.enabled = iconImage.sprite != null;
-}
-
-
-    private void OnTradeClicked()
-    {
-        if (npc == null || currentOffer == null) return;
-
-        npc.ExecuteTrade(currentOffer);
-    }
-}
-using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AudioSource))]
 public class PlayerFootsteps : MonoBehaviour
 {
-    [Header("Footstep Clip (Loop)")]
+    [Header("Footstep Loop Clip")]
     public AudioClip footstepLoop;
-
-    [Header("Movement")]
-    public float minMovementSpeed = 0.005f;
 
     [Header("Sound")]
     public float volume = 0.9f;
@@ -6305,58 +6060,56 @@ public class PlayerFootsteps : MonoBehaviour
     public float maxPitch = 1.05f;
 
     private AudioSource src;
-    private Vector3 lastPosition;
-    private bool isMoving = false;
+    private Animator animator;
+    private bool wasMovingLastFrame = false;
 
     void Awake()
     {
         src = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
 
         src.playOnAwake = false;
-        src.loop = true;          // ğŸ”´ EN Ã–NEMLÄ°
-        src.spatialBlend = 0f;    // 2D
+        src.loop = true;
+        src.spatialBlend = 0f; // 2D
         src.volume = volume;
-
-        lastPosition = transform.position;
     }
 
     void Update()
     {
-        Vector3 currentPos = transform.position;
-        float distance = (currentPos - lastPosition).magnitude;
-        float speed = distance / Mathf.Max(Time.deltaTime, 0.0001f);
-        lastPosition = currentPos;
+        if (animator == null) return;
 
-        bool movingNow = speed >= minMovementSpeed;
+        // ğŸ”‘ GERÃ‡EK HAREKET KAYNAÄI
+        bool isMoving = animator.GetBool("IsMoving");
 
         // Hareket BAÅLADI
-        if (movingNow && !isMoving)
+        if (isMoving && !wasMovingLastFrame)
         {
             StartFootsteps();
         }
         // Hareket BÄ°TTÄ°
-        else if (!movingNow && isMoving)
+        else if (!isMoving && wasMovingLastFrame)
         {
             StopFootsteps();
         }
 
-        isMoving = movingNow;
+        wasMovingLastFrame = isMoving;
     }
 
     void StartFootsteps()
     {
         if (footstepLoop == null) return;
+        if (src.isPlaying) return;
 
         src.clip = footstepLoop;
         src.pitch = Random.Range(minPitch, maxPitch);
         src.volume = volume;
-
         src.Play();
     }
 
     void StopFootsteps()
     {
-        src.Stop();
+        if (src.isPlaying)
+            src.Stop();
     }
 }
 using UnityEngine;
@@ -6365,17 +6118,45 @@ using System.Collections.Generic;
 
 public class PlayerCollector : MonoBehaviour
 {
+    [Header("Collect Settings")]
     public float collectRange = 1.5f;
-    private List<Collectible> highlighted = new List<Collectible>();
 
-    void Update()
+    private List<Collectible> highlighted = new List<Collectible>();
+    private PlayerControls controls;
+
+    private void Awake()
     {
-        // eski vurgularÄ± kapat
+        // Input Actions instance
+        controls = new PlayerControls();
+    }
+
+    private void OnEnable()
+    {
+        controls.Gameplay.Collect.performed += OnCollect;
+        controls.Gameplay.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.Gameplay.Collect.performed -= OnCollect;
+        controls.Gameplay.Disable();
+    }
+
+    private void Update()
+    {
+        UpdateHighlight();
+    }
+
+    // ---------------- HIGHLIGHT ----------------
+    private void UpdateHighlight()
+    {
+        // Eski vurgularÄ± kapat
         foreach (var c in highlighted)
             if (c) c.Highlight(false);
+
         highlighted.Clear();
 
-        // yenileri bul
+        // Yenileri bul
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, collectRange);
         foreach (var hit in hits)
         {
@@ -6386,20 +6167,21 @@ public class PlayerCollector : MonoBehaviour
                 highlighted.Add(c);
             }
         }
+    }
 
-        // E ile toplama
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+    // ---------------- COLLECT ----------------
+    private void OnCollect(InputAction.CallbackContext context)
+    {
+        foreach (var c in highlighted)
         {
-            foreach (var c in highlighted)
+            if (c != null)
             {
-                if (c != null)
-                {
-                    c.Collect();
-                    break;
-                }
+                c.Collect();
+                break; // sadece en yakÄ±n / ilk item
             }
         }
     }
+
 }
 using UnityEngine;
 using UnityEngine.UI;
@@ -6432,64 +6214,67 @@ public class PlayerHealthUI : MonoBehaviour
 }
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
-    public float sprintMultiplier = 1.7f; // KoÃ…Å¸arken hÃ„Â±z artÃ„Â±Ã…Å¸Ã„Â±
+    public float sprintMultiplier = 1.7f;
+
     private bool isSprinting = false;
-    private PlayerWeapon weapon;
+    private bool isMoving = false;
 
-
-    // --- BileÃ…Å¸en ReferanslarÃ„Â± ---
+    // --- References ---
     private Rigidbody2D rb;
     private PlayerStats stats;
     private Animator animator;
     private Camera mainCamera;
+    private PlayerWeapon weapon;
 
-    // --- Input System ---
+    // --- Input ---
     private PlayerControls controls;
     private Vector2 moveInput;
 
-    // --- Ek Ãƒâ€“zellikler ---
+    // --- Extra ---
     public static float FacingDirection { get; private set; } = 1f;
     public float soundRadius = 5f;
 
-    private void Awake()
+    void Awake()
     {
         weapon = GetComponent<PlayerWeapon>();
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        controls = new PlayerControls();
         stats = GetComponent<PlayerStats>();
         mainCamera = Camera.main;
+
+        controls = new PlayerControls();
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         controls.Gameplay.Move.performed += OnMovePerformed;
         controls.Gameplay.Move.canceled += OnMoveCanceled;
-        controls.Gameplay.Sprint.performed += ctx =>
-{
-    if (weapon != null && weapon.IsBusy)
-        return;
 
-    isSprinting = true;
-};
+        controls.Gameplay.Sprint.performed += ctx =>
+        {
+            if (weapon != null && weapon.IsBusy) return;
+            isSprinting = true;
+        };
 
         controls.Gameplay.Sprint.canceled += ctx =>
         {
             isSprinting = false;
         };
+
         controls.Gameplay.Enable();
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
         controls.Gameplay.Disable();
     }
+
+    // ---------------- INPUT ----------------
 
     private void OnMovePerformed(InputAction.CallbackContext context)
     {
@@ -6501,64 +6286,72 @@ public class PlayerMovement : MonoBehaviour
         moveInput = Vector2.zero;
     }
 
-    public void EmitFootstep()
-    {
-        SoundEmitter.EmitSound(transform.position, soundRadius);
-    }
-
-    private void FixedUpdate()
-    {
-        if (weapon != null && weapon.IsBusy)
-        {
-            isSprinting = false;
-        }
-
-        float currentSpeed = moveSpeed;
-        bool isMoving = moveInput.magnitude > 0.1f;
-
-        // PlayerStats'a koÃ…Å¸u/yÃƒÂ¼rÃƒÂ¼me bilgisini HER FRAME gÃƒÂ¶nder
-        stats.SetMovementState(isMoving, isSprinting);
-
-        if (isSprinting && stats.HasStamina() && isMoving)
-            currentSpeed *= sprintMultiplier;
-        else
-            isSprinting = false;
-
-        Vector2 moveDelta = moveInput * currentSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + moveDelta);
-    }
-
+    // ---------------- UPDATE (LOGIC + ANIMATION) ----------------
 
     void Update()
     {
         if (GameStateManager.IsGamePaused) return;
 
-        UpdateRotationAndAnimation();
-
+        UpdateMovementState();
+        UpdateRotation();
+        UpdateAnimation();
     }
 
-
-
-    // --- 360Ã‚Â° Fareye DÃƒÂ¶nÃƒÂ¼k Animasyon ve Rotasyon ---
-    private void UpdateRotationAndAnimation()
+    private void UpdateMovementState()
     {
-        if (animator == null || mainCamera == null) return;
+        isMoving = moveInput.magnitude > 0.1f;
 
-        // ÄŸÅ¸Â§Â­ Fare konumunu al ve yÃƒÂ¶nÃƒÂ¼ hesapla
+        // Weapon busy ise sprint iptal
+        if (weapon != null && weapon.IsBusy)
+            isSprinting = false;
+
+        // Stats her frame gÃ¼ncellensin
+        stats.SetMovementState(isMoving, isSprinting);
+    }
+
+    private void UpdateAnimation()
+    {
+        if (animator == null) return;
+        animator.SetBool("IsMoving", isMoving);
+    }
+
+    private void UpdateRotation()
+    {
+        if (mainCamera == null) return;
+
         Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
         Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(mouseScreenPos);
         Vector2 aimDirection = (mouseWorldPos - transform.position).normalized;
 
-        // ÄŸÅ¸Å’â‚¬ Karakteri fareye ÃƒÂ§evir (360Ã‚Â°)
         float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // Sprite yukarÃ„Â± bakÃ„Â±yorsa -90f uygundur
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
 
-        // ÄŸÅ¸ÂÂ Animasyon durumu
-        bool isMoving = moveInput.magnitude > 0.1f;
-        animator.SetBool("IsMoving", isMoving);
-
-        // ÄŸÅ¸â€Â FacingDirection flip kontrolÃƒÂ¼ (silah veya atÃ„Â±Ã…Å¸ yÃƒÂ¶nÃƒÂ¼ iÃƒÂ§in)
         FacingDirection = aimDirection.x >= 0 ? 1f : -1f;
+    }
+
+    // ---------------- FIXED UPDATE (PHYSICS) ----------------
+
+    void FixedUpdate()
+    {
+        if (!isMoving)
+            return;
+
+        float currentSpeed = moveSpeed;
+
+        if (isSprinting && stats.HasStamina())
+            currentSpeed *= sprintMultiplier;
+        else
+            isSprinting = false;
+
+        Vector2 moveDelta = moveInput.normalized * currentSpeed * Time.fixedDeltaTime;
+        rb.MovePosition(rb.position + moveDelta);
+    }
+
+    // ---------------- SOUND HOOK (OPTIONAL) ----------------
+
+    public void EmitFootstep()
+    {
+        SoundEmitter.EmitSound(transform.position, soundRadius);
     }
 }
 using System.Collections.Generic;
@@ -8034,14 +7827,9 @@ public class SaveData
     public int currentHealth, maxHealth;
     public float currentStamina, maxStamina;
     public int currentHunger, maxHunger;
-    public int gold;
 
     // Inventory items
     public List<InventoryItemData> inventory = new List<InventoryItemData>();
-
-    // Ammo Pool (JsonUtility uyumlu)
-    public List<string> ammoTypeIDs = new List<string>();
-    public List<int> ammoAmounts = new List<int>();
 
     // Weapons
     public string[] equippedWeaponIDs = new string[3];
@@ -8156,15 +7944,6 @@ public static class SaveSystem
         }
 
 
-        // Ammo Pool
-        data.ammoTypeIDs.Clear();
-        data.ammoAmounts.Clear();
-        foreach (var pair in inventory.GetAmmoPool())
-        {
-            data.ammoTypeIDs.Add(pair.Key.ammoId);
-            data.ammoAmounts.Add(pair.Value);
-        }
-
         // Weapons
         WeaponSlotManager wsm = WeaponSlotManager.Instance;
         if (wsm != null)
@@ -8276,15 +8055,6 @@ public static class SaveSystem
         }
 
 
-        // Ammo pool
-        inventory.ClearAmmoPool();
-        for (int i = 0; i < data.ammoTypeIDs.Count; i++)
-        {
-            AmmoTypeData ammoType =
-                AmmoTypeRegistry.Get(data.ammoTypeIDs[i]);
-            if (ammoType != null)
-                inventory.AddAmmo(ammoType, data.ammoAmounts[i]);
-        }
 
         // Weapons
         WeaponSlotManager wsm = WeaponSlotManager.Instance;
@@ -9488,171 +9258,6 @@ public class ItemCost
 {
     public ItemData item;
     public int amount = 1;
-}
-using UnityEditor;
-using UnityEngine;
-
-
-[CustomEditor(typeof(WeaponDefinition))]
-public class WeaponDataEditor : Editor
-{
-    // Core
-    SerializedProperty prefab;
-    SerializedProperty weaponType;
-    // Projectile
-    SerializedProperty projectilePrefab;
-
-    // Combat
-    SerializedProperty knockbackForce;
-    SerializedProperty knockbackDuration;
-    SerializedProperty isAutomatic;
-    SerializedProperty fireRate;
-    SerializedProperty damage;
-    SerializedProperty reloadTime;
-    SerializedProperty attackRange;
-
-    // Shotgun
-    SerializedProperty pelletsPerShot;
-    SerializedProperty pelletSpreadAngle;
-    SerializedProperty shotgunCooldown;
-
-    // Sniper
-    SerializedProperty sniperCooldown;
-    SerializedProperty sniperPenetrationCount;
-
-    // Ammo & Magazine
-    SerializedProperty ammoType;
-    SerializedProperty acceptedMagazines;
-
-    // Molotov
-    SerializedProperty isMolotov;
-    SerializedProperty fireEffectPrefab;
-    SerializedProperty explosionRadius;
-    SerializedProperty burnDamage;
-    SerializedProperty burnDuration;
-    SerializedProperty tickInterval;
-
-    void OnEnable()
-    {
-        prefab = serializedObject.FindProperty("prefab");
-        weaponType = serializedObject.FindProperty("weaponType");
-        projectilePrefab = serializedObject.FindProperty("projectilePrefab");
-
-
-        knockbackForce = serializedObject.FindProperty("knockbackForce");
-        knockbackDuration = serializedObject.FindProperty("knockbackDuration");
-
-        isAutomatic = serializedObject.FindProperty("isAutomatic");
-        fireRate = serializedObject.FindProperty("fireRate");
-        damage = serializedObject.FindProperty("damage");
-        reloadTime = serializedObject.FindProperty("reloadTime");
-        attackRange = serializedObject.FindProperty("attackRange");
-
-        pelletsPerShot = serializedObject.FindProperty("pelletsPerShot");
-        pelletSpreadAngle = serializedObject.FindProperty("pelletSpreadAngle");
-        shotgunCooldown = serializedObject.FindProperty("shotgunCooldown");
-
-        sniperCooldown = serializedObject.FindProperty("sniperCooldown");
-        sniperPenetrationCount = serializedObject.FindProperty("sniperPenetrationCount");
-
-        ammoType = serializedObject.FindProperty("ammoType");
-        acceptedMagazines = serializedObject.FindProperty("acceptedMagazines");
-
-        isMolotov = serializedObject.FindProperty("isMolotov");
-        fireEffectPrefab = serializedObject.FindProperty("fireEffectPrefab");
-        explosionRadius = serializedObject.FindProperty("explosionRadius");
-        burnDamage = serializedObject.FindProperty("burnDamage");
-        burnDuration = serializedObject.FindProperty("burnDuration");
-        tickInterval = serializedObject.FindProperty("tickInterval");
-    }
-
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-
-        // ---------------- BASIC ----------------
-        EditorGUILayout.PropertyField(prefab);
-        EditorGUILayout.PropertyField(weaponType);
-
-        WeaponType wt = (WeaponType)weaponType.enumValueIndex;
-
-        EditorGUILayout.Space(6);
-        EditorGUILayout.LabelField("Combat Stats", EditorStyles.boldLabel);
-
-        EditorGUILayout.PropertyField(knockbackForce);
-        EditorGUILayout.PropertyField(knockbackDuration);
-        EditorGUILayout.PropertyField(fireRate);
-        EditorGUILayout.PropertyField(damage);
-        EditorGUILayout.PropertyField(reloadTime);
-        EditorGUILayout.PropertyField(attackRange);
-        EditorGUILayout.PropertyField(projectilePrefab);
-
-
-        // ---------------- AUTOMATIC ----------------
-        if (wt != WeaponType.Shotgun &&
-            wt != WeaponType.Sniper &&
-            wt != WeaponType.Molotov)
-        {
-            EditorGUILayout.PropertyField(isAutomatic);
-        }
-
-        // ---------------- SHOTGUN ----------------
-        if (wt == WeaponType.Shotgun)
-        {
-            EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("Shotgun Settings", EditorStyles.boldLabel);
-
-            EditorGUILayout.PropertyField(pelletsPerShot);
-            EditorGUILayout.PropertyField(pelletSpreadAngle);
-            EditorGUILayout.PropertyField(shotgunCooldown);
-        }
-
-        // ---------------- SNIPER ----------------
-        if (wt == WeaponType.Sniper)
-        {
-            EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("Sniper Settings", EditorStyles.boldLabel);
-
-            EditorGUILayout.PropertyField(sniperCooldown);
-            EditorGUILayout.PropertyField(sniperPenetrationCount);
-        }
-
-        // ---------------- MOLOTOV ----------------
-        if (wt == WeaponType.Molotov)
-        {
-            isMolotov.boolValue = true;
-
-            EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("Molotov Settings", EditorStyles.boldLabel);
-
-            EditorGUILayout.PropertyField(fireEffectPrefab);
-            EditorGUILayout.PropertyField(explosionRadius);
-            EditorGUILayout.PropertyField(burnDamage);
-            EditorGUILayout.PropertyField(burnDuration);
-            EditorGUILayout.PropertyField(tickInterval);
-        }
-        else
-        {
-            isMolotov.boolValue = false;
-        }
-
-        // ---------------- AMMO & MAGAZINE ----------------
-        EditorGUILayout.Space(8);
-        EditorGUILayout.LabelField("Ammo & Magazine", EditorStyles.boldLabel);
-
-        EditorGUILayout.PropertyField(ammoType);
-
-        if (acceptedMagazines != null)
-        {
-            EditorGUILayout.PropertyField(
-                acceptedMagazines,
-                new GUIContent("Accepted Magazines"),
-                true
-            );
-        }
-
-        serializedObject.ApplyModifiedProperties();
-    }
 }
 using UnityEngine;
 

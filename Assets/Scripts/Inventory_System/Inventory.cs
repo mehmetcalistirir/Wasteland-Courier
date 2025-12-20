@@ -486,5 +486,45 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
+    public bool CanAdd(ItemData data, int amount)
+    {
+        if (data == null || amount <= 0)
+            return false;
+
+        // Magazine özel durumu
+        if (data is MagazineData)
+        {
+            // En az 1 boş slot var mı?
+            foreach (var s in slots)
+                if (s.data == null)
+                    return true;
+
+            return false;
+        }
+
+        int remain = amount;
+
+        // Stack doldurma
+        for (int i = 0; i < slots.Length && remain > 0; i++)
+        {
+            var s = slots[i];
+            if (s.data == data && s.count < data.maxStack)
+            {
+                int space = data.maxStack - s.count;
+                remain -= space;
+            }
+        }
+
+        // Boş slotlar
+        for (int i = 0; i < slots.Length && remain > 0; i++)
+        {
+            if (slots[i].data == null)
+            {
+                remain -= data.maxStack;
+            }
+        }
+
+        return remain <= 0;
+    }
 
 }

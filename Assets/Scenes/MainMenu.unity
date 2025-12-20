@@ -7002,7 +7002,7 @@ GameObject:
   - component: {fileID: 1222744345}
   - component: {fileID: 1222744344}
   m_Layer: 0
-  m_Name: MainMenuMusicSource
+  m_Name: AudioSource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14148,7 +14148,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8084029116624019767, guid: da114292be147b64390bdff767c1868e, type: 3}
       propertyPath: m_Name
-      value: Audio Manager
+      value: AudioManager
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

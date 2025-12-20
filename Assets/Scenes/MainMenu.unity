@@ -1202,7 +1202,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Eme\u011Fi Ge\xE7enler"
+  m_text: "Emegi Ge\xE7enler"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4ccb5bac4903b244198464149acd7e5d, type: 2}
   m_sharedMaterial: {fileID: -4998111448768146785, guid: 4ccb5bac4903b244198464149acd7e5d, type: 2}
@@ -7177,7 +7177,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xC7\u0131k\u0131\u015F"
+  m_text: "\xC7\u0131k\u0131s"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4ccb5bac4903b244198464149acd7e5d, type: 2}
   m_sharedMaterial: {fileID: -4998111448768146785, guid: 4ccb5bac4903b244198464149acd7e5d, type: 2}
@@ -7802,7 +7802,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Ba\u015Flat"
+  m_text: Baslat
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4ccb5bac4903b244198464149acd7e5d, type: 2}
   m_sharedMaterial: {fileID: -4998111448768146785, guid: 4ccb5bac4903b244198464149acd7e5d, type: 2}

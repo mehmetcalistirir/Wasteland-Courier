@@ -59,7 +59,8 @@ public class MagazineLoadPanel : MonoBehaviour
         titleText.text = mag.data.itemName;
 
         int availableAmmo =
-            Inventory.Instance.GetAmmoAmount(mag.data.ammoType);
+            Inventory.Instance.GetTotalAmmo(mag.data.ammoType);
+
 
         int space = mag.data.capacity - mag.currentAmmo;
 
@@ -91,26 +92,26 @@ public class MagazineLoadPanel : MonoBehaviour
     }
 
     public void OnLoadPressed()
-{
-    if (currentMag == null) return;
+    {
+        if (currentMag == null) return;
 
-    Inventory.Instance.LoadAmmoIntoMagazine(
-        currentMag,
-        (int)loadSlider.value
-    );
+        Inventory.Instance.LoadAmmoIntoMagazine(
+            currentMag,
+            (int)loadSlider.value
+        );
 
-    playerWeapon?.NotifyMagazineAmmoChanged();
-    Show(currentMag);
-}
+        playerWeapon?.NotifyMagazineAmmoChanged();
+        Show(currentMag);
+    }
 
     public void OnFullLoadPressed()
-{
-    if (currentMag == null) return;
+    {
+        if (currentMag == null) return;
 
-    Inventory.Instance.FullLoadMagazine(currentMag);
+        Inventory.Instance.FullLoadMagazine(currentMag);
 
-    playerWeapon?.NotifyMagazineAmmoChanged();
-    Show(currentMag);
-}
+        playerWeapon?.NotifyMagazineAmmoChanged();
+        Show(currentMag);
+    }
 
 }

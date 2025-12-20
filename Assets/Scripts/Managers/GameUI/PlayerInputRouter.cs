@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputRouter : MonoBehaviour, PlayerControls.IGameplayActions
+public class PlayerInputRouter : MonoBehaviour
 {
     public static PlayerInputRouter Instance;
 
@@ -46,14 +46,30 @@ public void ForceCloseCraft()
 
 
     private void Awake()
-    {
-        Instance = this;
-        controls = new PlayerControls();
-        controls.Gameplay.SetCallbacks(this);
-    }
+{
+    Instance = this;
+    controls = new PlayerControls();
+}
 
-    private void OnEnable()  => controls.Gameplay.Enable();
-    private void OnDisable() => controls.Gameplay.Disable();
+
+    private void OnEnable()
+{
+    controls.Gameplay.Inventory.performed += OnInventory;
+    controls.Gameplay.Craft.performed += OnCraft;
+    controls.Gameplay.Interact.performed += OnInteract;
+    controls.Gameplay.Escape.performed += OnEscape;
+
+    controls.Gameplay.Enable();
+}
+    private void OnDisable()
+{
+    controls.Gameplay.Inventory.performed -= OnInventory;
+    controls.Gameplay.Craft.performed -= OnCraft;
+    controls.Gameplay.Interact.performed -= OnInteract;
+    controls.Gameplay.Escape.performed -= OnEscape;
+
+    controls.Gameplay.Disable();
+}
 
 
     // ================================

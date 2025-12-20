@@ -60,14 +60,14 @@ public class InventorySlotUI : MonoBehaviour,
             return;
         }
         if (highlightImage != null)
-{
-    var pw = FindObjectOfType<PlayerWeapon>();
+        {
+            var pw = FindObjectOfType<PlayerWeapon>();
 
-    if (pw != null && pw.currentMagazine == item.magazineInstance)
-        highlightImage.color = equippedColor;
-    else
-        highlightImage.color = normalColor;
-}
+            if (pw != null && pw.currentMagazine == item.magazineInstance)
+                highlightImage.color = equippedColor;
+            else
+                highlightImage.color = normalColor;
+        }
 
 
         // 🔫 ŞARJÖRSE → MERMİ GÖSTER
@@ -99,12 +99,12 @@ public class InventorySlotUI : MonoBehaviour,
         }
 
         // 2️⃣ AMMO ITEM
-        if (item.data is AmmoItemData ammoData)
+        if (item.data is AmmoItemData)
         {
-            int totalAmmo = item.count * ammoData.ammoAmount;
-            countText.text = $"x{totalAmmo}";
+            countText.text = $"x{item.count}";
             return;
         }
+
 
         // 3️⃣ NORMAL ITEM
         countText.text = $"x{item.count}";
@@ -114,28 +114,28 @@ public class InventorySlotUI : MonoBehaviour,
 
     // Sağ tık / sol tık davranışı
     public void OnPointerClick(PointerEventData eventData)
-{
-    if (cached == null)
-        return;
-
-    // 🔫 MAGAZINE LEFT CLICK → TAK
-    if (cached.magazineInstance != null &&
-        eventData.button == PointerEventData.InputButton.Left)
     {
-        var pw = FindObjectOfType<PlayerWeapon>();
-        if (pw == null) return;
+        if (cached == null)
+            return;
 
-        pw.TryEquipMagazineFromInventory(
-            cached.magazineInstance
-        );
+        // 🔫 MAGAZINE LEFT CLICK → TAK
+        if (cached.magazineInstance != null &&
+            eventData.button == PointerEventData.InputButton.Left)
+        {
+            var pw = FindObjectOfType<PlayerWeapon>();
+            if (pw == null) return;
+
+            pw.TryEquipMagazineFromInventory(
+                cached.magazineInstance
+            );
+        }
+        if (cached.magazineInstance != null)
+        {
+            owner.SelectMagazine(cached.magazineInstance);
+            return;
+        }
+
     }
-    if (cached.magazineInstance != null)
-{
-    owner.SelectMagazine(cached.magazineInstance);
-    return;
-}
-
-}
 
 
 

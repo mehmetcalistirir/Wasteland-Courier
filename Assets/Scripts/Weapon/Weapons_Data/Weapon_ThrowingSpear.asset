@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e9591c0c3c19a4d873b1c6fe87e5b8, type: 3}
+  m_Name: Weapon_ThrowingSpear
+  m_EditorClassIdentifier: 
+  itemName: 
+  itemID: 
+  icon: {fileID: 0}
+  category: 0
+  stackable: 1
+  maxStack: 99
+  prefab: {fileID: 8329565982022195850, guid: 1ab2b8b913564da4f8d0c712f7a171ed, type: 3}
+  weaponType: 5
+  knockbackForce: 6
+  knockbackDuration: 0.18
+  isAutomatic: 0
+  fireRate: 2
+  damage: 8
+  clipSize: 5
+  maxAmmoCapacity: 0
+  reloadTime: 1.5
+  attackRange: 1.5
+  isShotgun: 0
+  pelletsPerShot: 3
+  pelletSpreadAngle: 8
+  shotgunCooldown: 2.5
+  isSniper: 0
+  sniperCooldown: 3
+  sniperPenetrationCount: 2
+  ammoType: 0
+  isMolotov: 0
+  fireEffectPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  burnDamage: 1
+  burnDuration: 5
+  tickInterval: 1

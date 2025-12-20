@@ -10,12 +10,11 @@ public class AmmoItemData : ItemData
     public AmmoTypeData ammoType;
 
     [Tooltip("Bu item alındığında ammoPool'a eklenecek miktar")]
-    public int ammoAmount = 10;
 
     private void OnValidate()
     {
         category = ItemCategory.Ammo;
-        stackable = false;
-        maxStack = 1;
+        stackable = true;
+        maxStack = 99;
     }
 }

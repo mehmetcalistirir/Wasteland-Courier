@@ -73,15 +73,6 @@ public static class SaveSystem
         }
 
 
-        // Ammo Pool
-        data.ammoTypeIDs.Clear();
-        data.ammoAmounts.Clear();
-        foreach (var pair in inventory.GetAmmoPool())
-        {
-            data.ammoTypeIDs.Add(pair.Key.ammoId);
-            data.ammoAmounts.Add(pair.Value);
-        }
-
         // Weapons
         WeaponSlotManager wsm = WeaponSlotManager.Instance;
         if (wsm != null)
@@ -193,15 +184,6 @@ public static class SaveSystem
         }
 
 
-        // Ammo pool
-        inventory.ClearAmmoPool();
-        for (int i = 0; i < data.ammoTypeIDs.Count; i++)
-        {
-            AmmoTypeData ammoType =
-                AmmoTypeRegistry.Get(data.ammoTypeIDs[i]);
-            if (ammoType != null)
-                inventory.AddAmmo(ammoType, data.ammoAmounts[i]);
-        }
 
         // Weapons
         WeaponSlotManager wsm = WeaponSlotManager.Instance;

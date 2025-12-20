@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3890cd13ff77ee34299ab59cb7d77650, type: 3}
+  m_Name: Item_Consumable_Bandage
+  m_EditorClassIdentifier: Assembly-CSharp::GenericItemData
+  itemName: Bandage
+  itemID: bandage
+  icon: {fileID: 1462799768519014029, guid: caf0d9597dff68941b8e007d21eb15f8, type: 3}
+  category: 1
+  stackable: 1
+  maxStack: 99
+  healAmount: 25
+  useDuration: 2

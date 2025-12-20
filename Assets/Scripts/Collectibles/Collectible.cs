@@ -8,7 +8,9 @@ public class Collectible : MonoBehaviour
     public int maxAmount = 1;
 
     [Header("Ammo (opsiyonel)")]
-    public AmmoTypeData ammoType;
+    public AmmoItemData ammoItemData;
+    [Tooltip("Bu collectible kaç mermi verir")]
+    public int ammoCount = 10;
 
     [Header("Visual")]
     public Sprite normalSprite;
@@ -44,10 +46,10 @@ public class Collectible : MonoBehaviour
             collected = true;
         }
 
-        // 2️⃣ Ammo
-        if (ammoType != null)
+        // 2️⃣ Ammo (rastgele mermi)
+        if (ammoItemData != null)
         {
-            Inventory.Instance.AddAmmo(ammoType, amount);
+            Inventory.Instance.TryAdd(ammoItemData, amount);
             collected = true;
         }
 
@@ -61,4 +63,5 @@ public class Collectible : MonoBehaviour
 
         Destroy(gameObject);
     }
+
 }

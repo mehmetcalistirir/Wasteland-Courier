@@ -153,6 +153,6 @@ MonoBehaviour:
   item: {fileID: 0}
   minAmount: 1
   maxAmount: 1
-  ammoType: {fileID: 11400000, guid: 093a41e984dbe1e45a7a2c69efe8d879, type: 2}
+  ammoItemData: {fileID: 11400000, guid: 6c9619befb2a45b4aaf561ff9b58f2ec, type: 2}
   normalSprite: {fileID: 0}
   highlightedSprite: {fileID: 0}

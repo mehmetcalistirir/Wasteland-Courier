@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Items/Magazine Data")]
+[CreateAssetMenu(menuName = "Items/Weapon/Magazine")]
 public class MagazineData : ItemData
 {
 
@@ -11,6 +11,7 @@ public class MagazineData : ItemData
     
     private void OnValidate()
     {
+        category = ItemCategory.Weapon;
         stackable = false;
         maxStack = 1;
     }

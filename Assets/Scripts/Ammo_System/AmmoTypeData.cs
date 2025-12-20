@@ -1,5 +1,5 @@
 using UnityEngine;
-[CreateAssetMenu(menuName = "Ammo/Ammo Type")]
+[CreateAssetMenu(menuName = "Items/Weapon/Ammo Type")]
 public class AmmoTypeData : ScriptableObject
 {
     public string ammoId;     // "9mm", "556", vs (unique)

@@ -11,8 +11,7 @@ GameObject:
   - component: {fileID: 961905443199052394}
   - component: {fileID: 4788089409609341756}
   - component: {fileID: 6625596795648692096}
-  - component: {fileID: 5913701219613738088}
-  - component: {fileID: 1993296058382366606}
+  - component: {fileID: 8033089787415615932}
   m_Layer: 7
   m_Name: Gold
   m_TagString: Gold
@@ -29,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 452538406127782152}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.90802, y: -0.77487, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -55,6 +54,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -76,6 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
@@ -126,34 +128,7 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 1.58
---- !u!50 &5913701219613738088
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 452538406127782152}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
---- !u!114 &1993296058382366606
+--- !u!114 &8033089787415615932
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -162,7 +137,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 452538406127782152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9b1365b8278aa644be22cc916cbb5fa, type: 3}
+  m_Script: {fileID: 11500000, guid: a77c174afd640df4db2e0814d1b80dc1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  amount: 1
+  m_EditorClassIdentifier: Assembly-CSharp::Collectible
+  type: 0
+  item: {fileID: 0}
+  minAmount: 1
+  maxAmount: 1
+  ammoType: {fileID: 0}
+  normalSprite: {fileID: 0}
+  highlightedSprite: {fileID: 0}

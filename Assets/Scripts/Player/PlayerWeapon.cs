@@ -17,7 +17,7 @@ public class PlayerWeapon : MonoBehaviour
     private WeaponSlotManager slotManager;
 
     [Header("Weapon Configuration")]
-    public WeaponData weaponData;
+    public WeaponDefinition weaponData;
 
     [Header("Components")]
     public Transform firePoint;
@@ -238,11 +238,10 @@ public class PlayerWeapon : MonoBehaviour
         controls.Gameplay.Reload.performed += OnReloadPerformed;
         controls.Gameplay.Reload.canceled += OnReloadCanceled;
 
-        if (WeaponSlotManager.Instance != null)
-            WeaponSlotManager.Instance.SetActiveWeapon(this);
         if (Inventory.Instance != null)
             Inventory.Instance.OnChanged += OnInventoryChanged;
     }
+
 
 
 
@@ -771,28 +770,28 @@ public class PlayerWeapon : MonoBehaviour
     // MUZZLE FLASH
     // ============================
     private void TryMuzzleFlash()
-{
-    if (muzzleFlash == null) return;
+    {
+        if (muzzleFlash == null) return;
 
-    muzzleFlash.transform.position = firePoint.position;
+        muzzleFlash.transform.position = firePoint.position;
 
-    if (muzzleFlashCo != null)
-        StopCoroutine(muzzleFlashCo);
+        if (muzzleFlashCo != null)
+            StopCoroutine(muzzleFlashCo);
 
-    muzzleFlashCo = StartCoroutine(MuzzleFlashRoutine());
-}
+        muzzleFlashCo = StartCoroutine(MuzzleFlashRoutine());
+    }
 
-    
-private IEnumerator MuzzleFlashRoutine()
-{
-    muzzleFlash.enabled = true;
-    muzzleFlash.intensity = muzzleFlashIntensity;
 
-    yield return new WaitForSeconds(muzzleFlashDuration);
+    private IEnumerator MuzzleFlashRoutine()
+    {
+        muzzleFlash.enabled = true;
+        muzzleFlash.intensity = muzzleFlashIntensity;
 
-    muzzleFlash.intensity = 0f;
-    muzzleFlash.enabled = false;
-}
+        yield return new WaitForSeconds(muzzleFlashDuration);
+
+        muzzleFlash.intensity = 0f;
+        muzzleFlash.enabled = false;
+    }
 
 
     public void PlayEmptyClipSound()
@@ -806,10 +805,13 @@ private IEnumerator MuzzleFlashRoutine()
     // ============================
     public void LoadFromSlot(int slot)
     {
-        var data = slotManager.GetEquippedWeapon(slot);
-        if (data == null) return;
+        WeaponItemData item =
+            WeaponSlotManager.Instance.GetWeaponItemInSlot(slot);
 
-        weaponData = data;
+        if (item == null || item.weaponDefinition == null)
+            return;
+
+        weaponData = item.weaponDefinition;
         lastAutoFireTime = 0f;
         isReloading = false;
 
@@ -823,10 +825,12 @@ private IEnumerator MuzzleFlashRoutine()
             if (fp != null)
                 firePoint = fp;
         }
+
         CollectMagazinesFromInventory();
     }
 
-    public void SetWeapon(WeaponData data)
+
+    public void SetWeapon(WeaponDefinition data)
     {
         StopAllCoroutines();
         isReloading = false;

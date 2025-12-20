@@ -25,13 +25,13 @@ public class CaravanWeaponUI : MonoBehaviour
         // Pistols
         CreateButtons(WeaponType.Pistol, pistolRoot);
 
-        // Rifles (MachineGun, Shotgun, Sniper, Bow hepsi Rifle slotunda)
+        // Rifles
         CreateButtons(WeaponType.MachineGun, rifleRoot);
         CreateButtons(WeaponType.Shotgun, rifleRoot);
         CreateButtons(WeaponType.Sniper, rifleRoot);
         CreateButtons(WeaponType.Bow, rifleRoot);
 
-        // Melee weapons
+        // Melee
         CreateButtons(WeaponType.MeeleSword, meleeRoot);
         CreateButtons(WeaponType.ThrowingSpear, meleeRoot);
     }
@@ -44,18 +44,18 @@ public class CaravanWeaponUI : MonoBehaviour
 
     private void CreateButtons(WeaponType type, Transform root)
     {
-        List<WeaponData> list = CaravanInventory.Instance.GetWeapons(type);
+        List<WeaponItemData> list = CaravanInventory.Instance.GetWeapons(type);
 
         for (int i = 0; i < list.Count; i++)
         {
-            WeaponData weapon = list[i];
+            WeaponItemData weaponItem = list[i];
 
             GameObject btnGO = Instantiate(weaponButtonPrefab, root);
 
-            // UI text update
+            // UI text
             TMP_Text txt = btnGO.GetComponentInChildren<TMP_Text>();
             if (txt != null)
-                txt.text = weapon.itemName;
+                txt.text = weaponItem.itemName;
 
             Button btn = btnGO.GetComponent<Button>();
 
@@ -69,43 +69,38 @@ public class CaravanWeaponUI : MonoBehaviour
 
     private void OnWeaponSelected(WeaponType type, int index)
     {
-        // 1) Karavandan silahı çek
-        WeaponData selected = CaravanInventory.Instance.TakeWeapon(type, index);
+        // 1) Karavandan silah ITEM'ini çek
+        WeaponItemData selectedItem =
+            CaravanInventory.Instance.TakeWeapon(type, index);
 
-        if (selected == null)
+        if (selectedItem == null)
         {
             Debug.LogError("Karavandan silah alınamadı!");
             return;
         }
 
         // 2) Bu silah hangi slotta kullanılacak?
-        WeaponSlotType slotType = WeaponSlotManager.Instance.GetSlotForWeapon(selected);
+        WeaponSlotType slotType =
+            WeaponSlotManager.Instance.GetSlotForWeapon(selectedItem.weaponType);
+
         int slotIndex = (int)slotType;
 
-        // 3) Oyuncunun üzerindeki aynı slot silahını karavana gönder
-        WeaponData oldWeapon = WeaponSlotManager.Instance.slots[slotIndex];
+        // 3) Oyuncunun üzerindeki silahı karavana gönder
+        WeaponItemData oldItem =
+            WeaponSlotManager.Instance.GetWeaponItemInSlot(slotIndex);
 
-        if (oldWeapon != null)
+        if (oldItem != null)
         {
-            CaravanInventory.Instance.StoreWeapon(oldWeapon);
+            CaravanInventory.Instance.StoreWeapon(oldItem);
         }
 
         // 4) Yeni silahı oyuncuya tak
-        WeaponSlotManager.Instance.slots[slotIndex] = selected;
-
-        WeaponSlotManager.Instance.slots[slotIndex] = selected;
+        WeaponSlotManager.Instance.EquipWeaponInSlot(selectedItem, slotIndex);
         WeaponSlotManager.Instance.SwitchSlot(slotIndex);
 
+        Debug.Log($"🔄 Swap başarılı! {selectedItem.itemName} oyuncuya takıldı.");
 
-        // 5) Eğer aktif slot ise handler’ı güncelle
-        if (WeaponSlotManager.Instance.activeSlotIndex == slotIndex)
-        {
-            WeaponSlotManager.Instance.SwitchSlot(slotIndex);
-        }
-
-        Debug.Log($"🔄 Swap başarılı! {selected.itemName} oyuncuya takıldı.");
-
-        // 6) UI yenile
+        // 5) UI yenile
         RefreshUI();
     }
 }

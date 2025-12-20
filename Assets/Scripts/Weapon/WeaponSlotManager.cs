@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
-
 public enum WeaponSlotType
 {
     Pistol = 0,
@@ -19,173 +17,120 @@ public class WeaponSlotManager : MonoBehaviour
     public PlayerWeapon rifleHandler;
     public PlayerWeapon meleeHandler;
 
-    [Header("Equipped Weapons (WeaponData)")]
-    public WeaponData[] slots = new WeaponData[3];
-    public PlayerWeapon ActiveWeapon { get; private set; }
+    [Header("Equipped Weapons (ITEM)")]
+    public WeaponItemData[] slots = new WeaponItemData[3];
 
+    public PlayerWeapon ActiveWeapon { get; private set; }
 
     [Header("Active Slot")]
     public int activeSlotIndex = 0;
+
     private PlayerControls controls;
 
-
-
-
+    // ----------------------------------------------------
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        controls = new PlayerControls(); // 🔥 MapToggle ile birebir
-
-
+        controls = new PlayerControls();
     }
-private void OnEnable()
-{
-    controls.Gameplay.Weapon1.performed += OnWeapon1;
-    controls.Gameplay.Weapon2.performed += OnWeapon2;
-    controls.Gameplay.Weapon3.performed += OnWeapon3;
 
-    controls.Gameplay.Enable();
-}
-
-private void OnDisable()
-{
-    controls.Gameplay.Weapon1.performed -= OnWeapon1;
-    controls.Gameplay.Weapon2.performed -= OnWeapon2;
-    controls.Gameplay.Weapon3.performed -= OnWeapon3;
-
-    controls.Gameplay.Disable();
-}
-
-private void OnWeapon1(InputAction.CallbackContext ctx)
-{
-    SwitchSlot(0);
-}
-
-private void OnWeapon2(InputAction.CallbackContext ctx)
-{
-    SwitchSlot(1);
-}
-
-private void OnWeapon3(InputAction.CallbackContext ctx)
-{
-    SwitchSlot(2);
-}
-
-
-    // -------------------------------
-    // Silah tipine göre slot belirle
-    // -------------------------------
-    public WeaponSlotType GetSlotForWeapon(WeaponData weapon)
+    private void OnEnable()
     {
-        if (weapon == null)
-            return WeaponSlotType.Rifle; // default
+        controls.Gameplay.Weapon1.performed += _ => SwitchSlot(0);
+        controls.Gameplay.Weapon2.performed += _ => SwitchSlot(1);
+        controls.Gameplay.Weapon3.performed += _ => SwitchSlot(2);
+        controls.Gameplay.Enable();
+    }
 
-        switch (weapon.weaponType)
+    private void OnDisable()
+    {
+        controls.Gameplay.Disable();
+    }
+
+    // ----------------------------------------------------
+    // SLOT BELİRLEME
+    // ----------------------------------------------------
+    public WeaponSlotType GetSlotForWeapon(WeaponType weaponType)
+    {
+        switch (weaponType)
         {
-            // TABANCA SLOTU (0)
             case WeaponType.Pistol:
                 return WeaponSlotType.Pistol;
 
-            // TÜFEK / UZUN MENZİL SLOTU (1)
             case WeaponType.MachineGun:
             case WeaponType.Shotgun:
             case WeaponType.Sniper:
             case WeaponType.Bow:
                 return WeaponSlotType.Rifle;
 
-            // YAKIN DÖVÜŞ SLOTU (2)
             case WeaponType.ThrowingSpear:
-            case WeaponType.MeeleSpear:
             case WeaponType.MeeleSword:
+            case WeaponType.MeeleSpear:
                 return WeaponSlotType.Melee;
 
-            // Tanınmayanlar varsayılan: tüfek slotu
             default:
                 return WeaponSlotType.Rifle;
         }
     }
 
-
-    // -------------------------------
-    // Silah kuşan
-    // -------------------------------
-    public void EquipWeapon(ItemData item)
+    // ----------------------------------------------------
+    // DIŞ API (UI / Craft / Caravan)
+    // ----------------------------------------------------
+    public WeaponItemData GetWeaponItemInSlot(int slot)
     {
-        WeaponItemData wid = item as WeaponItemData;
-        if (wid == null)
-        {
-            Debug.LogError("EquipWeapon → Bu item bir WeaponItemData değil!");
-            return;
-        }
-
-        WeaponData weapon = wid.weaponData;
-        if (weapon == null)
-        {
-            Debug.LogError("EquipWeapon → WeaponItemData.weaponData boş!");
-            return;
-        }
-
-        int slot = (int)GetSlotForWeapon(weapon);
-        slots[slot] = weapon;
-
-
-        ApplyToHandler(slot);
-
-        Debug.Log($"[WeaponSlotManager] {item.itemName} (WeaponData: {weapon.name}) slot {slot} içine takıldı.");
+        return slots[slot];
     }
 
+    public void EquipWeaponInSlot(WeaponItemData item, int slot)
+    {
+        slots[slot] = item;
 
-    // -------------------------------
-    // Aktif slota geçiş
-    // -------------------------------
+        if (activeSlotIndex == slot)
+            ApplyToHandler(slot);
+    }
+
+    public void EquipWeapon(WeaponItemData item)
+    {
+        int slot = (int)GetSlotForWeapon(item.weaponType);
+        EquipWeaponInSlot(item, slot);
+        SwitchSlot(slot);
+    }
+
+    // ----------------------------------------------------
+    // SLOT DEĞİŞTİR
+    // ----------------------------------------------------
     public void SwitchSlot(int newSlot)
     {
-        if (newSlot < 0 || newSlot > 2) return;
+        if (newSlot < 0 || newSlot > 2)
+            return;
 
         activeSlotIndex = newSlot;
         ApplyToHandler(newSlot);
     }
 
-    // -------------------------------
-    // PlayerWeapon'a silahı aktar
-    // -------------------------------
+    // ----------------------------------------------------
+    // HANDLER AKTARIMI
+    // ----------------------------------------------------
     private void ApplyToHandler(int slot)
     {
-        // Tüm handler’ları kapat
         pistolHandler.gameObject.SetActive(false);
         rifleHandler.gameObject.SetActive(false);
         meleeHandler.gameObject.SetActive(false);
 
-        // Yeni handler
         PlayerWeapon handler = GetHandler(slot);
         if (handler == null)
-        {
-            Debug.LogError("Handler bulunamadı! Slot: " + slot);
             return;
-        }
 
-        // Handler’ı aktif et
         handler.gameObject.SetActive(true);
+        ActiveWeapon = handler;
 
-        // Silahı yükle
-        WeaponData weapon = slots[slot];
-        if (weapon != null)
+        WeaponItemData item = slots[slot];
+        if (item != null && item.weaponDefinition != null)
         {
-            handler.SetWeapon(weapon);
-
-            Debug.Log("Handler açıldı ve silah verildi: " + weapon.name);
+            handler.SetWeapon(item.weaponDefinition);
         }
-        else
-        {
-            Debug.LogWarning("Slot boş ama handler aktif edildi: " + slot);
-        }
-    }
-
-    public void SetActiveWeapon(PlayerWeapon weapon)
-    {
-        ActiveWeapon = weapon;
     }
 
     private PlayerWeapon GetHandler(int slot)
@@ -199,86 +144,22 @@ private void OnWeapon3(InputAction.CallbackContext ctx)
         return null;
     }
 
-
-    // -------------------------------
-    // Ammo state
-    // -------------------------------
-
-
-    public void SetAmmo(int slot, int newClip, int newReserve)
-    {
-
-        // aktif slot ise PlayerWeapon’ı güncelle
-        if (slot == activeSlotIndex)
-        {
-            ApplyToHandler(slot);
-        }
-    }
-
-    // -------------------------------
-    // Save/Load için Getter
-    // -------------------------------
-    public WeaponData GetEquippedWeapon(int slot)
-    {
-        return slots[slot];
-    }
-
-    public void EquipCraftedWeapon(WeaponData newWeapon)
-    {
-        int slot = (int)GetSlotForWeapon(newWeapon);
-
-        Debug.Log($"[EquipCraftedWeapon] Yeni silah: {newWeapon.itemName}, Slot: {slot}");
-
-        // 1) Eski silahı karavana gönder
-        WeaponData oldWeapon = slots[slot];
-        if (oldWeapon != null)
-        {
-            CaravanInventory.Instance.StoreWeapon(oldWeapon);
-            Debug.Log("Eski silah karavana gönderildi: " + oldWeapon.itemName);
-        }
-
-        // 2) Yeni silah slota ekle
-        slots[slot] = newWeapon;
-
-        // 4) Eğer aktif slot buysa hemen güncelle
-        if (activeSlotIndex == slot)
-        {
-            ApplyToHandler(slot);
-        }
-        else
-        {
-            // Craft edilen silaha otomatik geçmek istiyorsan:
-            activeSlotIndex = slot;
-            ApplyToHandler(slot);
-        }
-
-        Debug.Log("Yeni silah oyuncuya takıldı: " + newWeapon.itemName);
-    }
-
     // ----------------------------------------------------
-    //  SAVE
+    // SAVE
     // ----------------------------------------------------
     public WeaponSlotSaveData GetSaveData()
     {
         WeaponSlotSaveData data = new WeaponSlotSaveData();
 
         for (int i = 0; i < 3; i++)
-        {
-            if (slots[i] != null)
-                data.equippedWeaponIDs[i] = slots[i].itemID;
-            else
-                data.equippedWeaponIDs[i] = "";
-
-        }
+            data.equippedWeaponIDs[i] = slots[i] != null ? slots[i].itemID : "";
 
         data.activeSlotIndex = activeSlotIndex;
-
         return data;
     }
 
-
     // ----------------------------------------------------
-    //  LOAD
+    // LOAD
     // ----------------------------------------------------
     public void LoadData(WeaponSlotSaveData data)
     {
@@ -287,32 +168,12 @@ private void OnWeapon3(InputAction.CallbackContext ctx)
             string id = data.equippedWeaponIDs[i];
 
             if (!string.IsNullOrEmpty(id))
-            {
-                ItemData item = ItemDatabase.Get(id);
-                if (item is WeaponItemData wid)
-                {
-                    slots[i] = wid.weaponData;
-
-                }
-                else
-                {
-                    slots[i] = null;
-
-                }
-            }
+                slots[i] = ItemDatabase.Get(id) as WeaponItemData;
             else
-            {
                 slots[i] = null;
-
-            }
         }
 
         activeSlotIndex = Mathf.Clamp(data.activeSlotIndex, 0, 2);
-
-        // handler'ı güncelle
         SwitchSlot(activeSlotIndex);
     }
-
-
-
 }

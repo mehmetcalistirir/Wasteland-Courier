@@ -5,39 +5,35 @@ using System.Collections.Generic;
 public class PlayerCollector : MonoBehaviour
 {
     public float collectRange = 1.5f;
-    private List<Resource> highlightedResources = new List<Resource>();
+    private List<Collectible> highlighted = new List<Collectible>();
 
     void Update()
     {
-        // Önceki vurguları kaldır
-        foreach (var res in highlightedResources)
-        {
-            if (res != null)
-                res.Highlight(false);
-        }
-        highlightedResources.Clear();
+        // eski vurguları kapat
+        foreach (var c in highlighted)
+            if (c) c.Highlight(false);
+        highlighted.Clear();
 
-        // Yeni yakındaki kaynakları bul
+        // yenileri bul
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, collectRange);
         foreach (var hit in hits)
         {
-            Resource res = hit.GetComponent<Resource>();
-            if (res != null)
+            var c = hit.GetComponent<Collectible>();
+            if (c != null)
             {
-                res.Highlight(true);
-                highlightedResources.Add(res);
+                c.Highlight(true);
+                highlighted.Add(c);
             }
         }
 
-        // E tuşu ile toplama
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        // E ile toplama
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            Debug.Log("E tuşuna basıldı!");
-            foreach (var res in highlightedResources)
+            foreach (var c in highlighted)
             {
-                if (res != null)
+                if (c != null)
                 {
-                    res.Collect();
+                    c.Collect();
                     break;
                 }
             }

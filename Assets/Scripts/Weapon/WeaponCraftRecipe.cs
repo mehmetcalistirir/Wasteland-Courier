@@ -1,23 +1,26 @@
+using UnityEngine;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Weapon Craft Recipe", menuName = "Crafting/Weapon Craft Recipe")]
+[CreateAssetMenu(
+    menuName = "Crafting/Recipe/Weapon",
+    fileName = "recipe_wpn_"
+)]
 public class WeaponCraftRecipe : ScriptableObject
 {
-    [Header("Üretilecek Silah")]
-    public WeaponData resultWeapon;
+    [Header("Result")]
+    public WeaponItemData resultWeapon;
 
-    [Header("Craft Açıklaması (Opsiyonel)")]
+    [Header("Description")]
     [TextArea]
     public string description;
 
-    [Header("Gerekli Kaynaklar")]
-    public List<ResourceCost> costs = new List<ResourceCost>();
+    [Header("Costs")]
+    public List<ItemCost> costs = new();
 }
 
 [Serializable]
-public class ResourceCost
+public class ItemCost
 {
     public ItemData item;
     public int amount = 1;

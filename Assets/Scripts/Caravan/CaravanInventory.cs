@@ -5,9 +5,9 @@ public class CaravanInventory : MonoBehaviour
 {
     public static CaravanInventory Instance;
 
-    // WeaponType → List<WeaponData>
-    public Dictionary<WeaponType, List<WeaponData>> storedWeapons =
-        new Dictionary<WeaponType, List<WeaponData>>();
+    // WeaponType → List<WeaponItemData>
+    public Dictionary<WeaponType, List<WeaponItemData>> storedWeapons =
+        new Dictionary<WeaponType, List<WeaponItemData>>();
 
     private void Awake()
     {
@@ -15,13 +15,12 @@ public class CaravanInventory : MonoBehaviour
 
         foreach (WeaponType type in System.Enum.GetValues(typeof(WeaponType)))
         {
-            storedWeapons[type] = new List<WeaponData>();
+            storedWeapons[type] = new List<WeaponItemData>();
         }
     }
 
-
     // ============================================
-    // 1) WeaponSlotManager tarafından çağrılan sistem
+    // 1) ItemID üzerinden silah ekleme (Save / SlotManager)
     // ============================================
     public void AddItem(string itemID, int amount = 1)
     {
@@ -32,35 +31,35 @@ public class CaravanInventory : MonoBehaviour
             return;
         }
 
-        WeaponItemData wid = data as WeaponItemData;
-        if (wid == null)
+        if (data is not WeaponItemData weaponItem)
         {
             Debug.LogError("CaravanInventory.AddItem → Bu item bir silah değil: " + itemID);
             return;
         }
 
-        StoreWeapon(wid.weaponData);
+        StoreWeapon(weaponItem);
     }
 
-
     // ============================================
-    // 2) Silah depolama (WeaponData)
+    // 2) Silah depolama (ITEM)
     // ============================================
-    public void StoreWeapon(WeaponData data)
+    public void StoreWeapon(WeaponItemData weaponItem)
     {
-        if (!storedWeapons.ContainsKey(data.weaponType))
-            storedWeapons[data.weaponType] = new List<WeaponData>();
+        if (weaponItem == null)
+            return;
 
-        storedWeapons[data.weaponType].Add(data);
+        if (!storedWeapons.ContainsKey(weaponItem.weaponType))
+            storedWeapons[weaponItem.weaponType] = new List<WeaponItemData>();
 
-        Debug.Log($"{data.weaponType} türünde silah karavana eklendi: {data.itemName}");
+        storedWeapons[weaponItem.weaponType].Add(weaponItem);
+
+        Debug.Log($"{weaponItem.weaponType} türünde silah karavana eklendi: {weaponItem.itemName}");
     }
 
-
     // ============================================
-    // 3) UI veya Swap için Silah Çekme
+    // 3) Silah çekme (UI / Swap)
     // ============================================
-    public WeaponData TakeWeapon(WeaponType type, int index)
+    public WeaponItemData TakeWeapon(WeaponType type, int index)
     {
         if (!storedWeapons.ContainsKey(type) || storedWeapons[type].Count == 0)
             return null;
@@ -68,25 +67,22 @@ public class CaravanInventory : MonoBehaviour
         if (index < 0 || index >= storedWeapons[type].Count)
             return null;
 
-        WeaponData w = storedWeapons[type][index];
+        WeaponItemData item = storedWeapons[type][index];
         storedWeapons[type].RemoveAt(index);
 
-        return w;
+        return item;
     }
-
 
     // ============================================
     // 4) Silah listesini döndür (UI için)
     // ============================================
-    public List<WeaponData> GetWeapons(WeaponType type)
+    public List<WeaponItemData> GetWeapons(WeaponType type)
     {
         if (!storedWeapons.ContainsKey(type))
-            storedWeapons[type] = new List<WeaponData>();
+            storedWeapons[type] = new List<WeaponItemData>();
 
         return storedWeapons[type];
     }
-
-
 
     // ============================================
     // 5) SAVE SYSTEM
@@ -97,13 +93,15 @@ public class CaravanInventory : MonoBehaviour
 
         foreach (var kvp in storedWeapons)
         {
-            WeaponSaveEntry entry = new WeaponSaveEntry();
-            entry.type = kvp.Key;
-            entry.weaponIDs = new List<string>();
-
-            foreach (var weapon in kvp.Value)
+            WeaponSaveEntry entry = new WeaponSaveEntry
             {
-                entry.weaponIDs.Add(weapon.itemID);
+                type = kvp.Key,
+                weaponIDs = new List<string>()
+            };
+
+            foreach (var weaponItem in kvp.Value)
+            {
+                entry.weaponIDs.Add(weaponItem.itemID);
             }
 
             save.weaponEntries.Add(entry);
@@ -111,44 +109,54 @@ public class CaravanInventory : MonoBehaviour
 
         return save;
     }
-    public bool HasWeapon(WeaponData weapon)
-{
-    if (!storedWeapons.ContainsKey(weapon.weaponType))
-        return false;
 
-    foreach (var w in storedWeapons[weapon.weaponType])
+    public bool HasWeapon(WeaponItemData weaponItem)
     {
-        if (w.itemID == weapon.itemID)
-            return true;
-    }
+        if (weaponItem == null)
+            return false;
 
-    return false;
-}
+        if (!storedWeapons.ContainsKey(weaponItem.weaponType))
+            return false;
 
-public void LoadFromData(CaravanSaveData save)
-{
-    // Tüm silahları temizle
-    foreach (var key in storedWeapons.Keys)
-        storedWeapons[key].Clear();
-
-    // Save verisini geri yükle
-    foreach (var entry in save.weaponEntries)
-    {
-        if (!storedWeapons.ContainsKey(entry.type))
-            storedWeapons[entry.type] = new List<WeaponData>();
-
-        foreach (string id in entry.weaponIDs)
+        foreach (var w in storedWeapons[weaponItem.weaponType])
         {
-            ItemData data = ItemDatabase.Get(id);
-
-            if (data is WeaponItemData wid)
-                storedWeapons[entry.type].Add(wid.weaponData);
+            if (w.itemID == weaponItem.itemID)
+                return true;
         }
+
+        return false;
     }
 
-    Debug.Log("CaravanInventory yüklendi.");
-}
+    public void LoadFromData(CaravanSaveData save)
+    {
+        // Tüm silahları temizle
+        foreach (var key in storedWeapons.Keys)
+            storedWeapons[key].Clear();
 
+        if (save == null)
+            return;
 
+        // Save verisini geri yükle
+        foreach (var entry in save.weaponEntries)
+        {
+            if (!storedWeapons.ContainsKey(entry.type))
+                storedWeapons[entry.type] = new List<WeaponItemData>();
 
+            foreach (string id in entry.weaponIDs)
+            {
+                ItemData data = ItemDatabase.Get(id);
+
+                if (data is WeaponItemData weaponItem)
+                {
+                    storedWeapons[entry.type].Add(weaponItem);
+                }
+                else
+                {
+                    Debug.LogWarning("Save'de silah item bulunamadı: " + id);
+                }
+            }
+        }
+
+        Debug.Log("CaravanInventory yüklendi.");
+    }
 }

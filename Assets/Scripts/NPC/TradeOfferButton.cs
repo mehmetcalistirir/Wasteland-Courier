@@ -19,7 +19,7 @@ public class TradeOfferButton : MonoBehaviour
     [Header("Sprites (Optional)")]
     public Sprite fallbackSprite;
 
-    private Dictionary<PartItemData, Sprite> partMap = new();
+    private Dictionary<WeaponPartItemData, Sprite> partMap = new();
     private TradeOffer currentOffer;
     private NPCInteraction npc;
 

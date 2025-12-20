@@ -5,12 +5,12 @@ public class CraftingSystem : MonoBehaviour
 {
     public static CraftingSystem Instance { get; private set; }
 
-    [Header("Tarifler (ScriptableObject WeaponCraftRecipe)")]
+    [Header("Weapon Craft Recipes")]
     public List<WeaponCraftRecipe> recipes = new();
 
     public CaravanInventory caravanInventory;
 
-    // Craft edilip kalıcı açılan silahlar
+    // Craft edilip kalıcı açılan silahlar (itemID)
     public HashSet<string> unlockedWeapons = new();
 
     private void Awake()
@@ -22,27 +22,22 @@ public class CraftingSystem : MonoBehaviour
     }
 
     // ------------------------------------------------------------
-    // Tarife bağlı WeaponData'yı al
+    // Recipe → WeaponItemData
     // ------------------------------------------------------------
-    private WeaponData GetWeapon(WeaponCraftRecipe recipe)
+    private WeaponItemData GetWeaponItem(WeaponCraftRecipe recipe)
     {
-        return recipe?.resultWeapon;
+        return recipe != null ? recipe.resultWeapon : null;
     }
 
-    private string GetKey(WeaponData weapon)
+    private string GetKey(WeaponItemData weaponItem)
     {
-        if (weapon == null) return "";
-
-        if (!string.IsNullOrWhiteSpace(weapon.itemName))
-            return weapon.itemName;
-
-        return weapon.itemID;
+        return weaponItem != null ? weaponItem.itemID : string.Empty;
     }
 
     public bool IsUnlocked(WeaponCraftRecipe recipe)
     {
-        WeaponData w = GetWeapon(recipe);
-        return unlockedWeapons.Contains(GetKey(w));
+        WeaponItemData item = GetWeaponItem(recipe);
+        return unlockedWeapons.Contains(GetKey(item));
     }
 
     // ------------------------------------------------------------
@@ -52,8 +47,8 @@ public class CraftingSystem : MonoBehaviour
     {
         if (recipe == null) return false;
 
-        WeaponData weapon = GetWeapon(recipe);
-        if (weapon == null) return false;
+        WeaponItemData weaponItem = GetWeaponItem(recipe);
+        if (weaponItem == null) return false;
 
         if (IsUnlocked(recipe)) return false;
 
@@ -67,31 +62,31 @@ public class CraftingSystem : MonoBehaviour
     }
 
     // ------------------------------------------------------------
-    // Craft → KARAVANA EKLE
+    // Craft → Oyuncuya silahı VER
     // ------------------------------------------------------------
     public bool TryCraft(WeaponCraftRecipe recipe)
-{
-    if (!CanCraft(recipe))
     {
-        Debug.Log("Craft başarısız: Gereken koşullar sağlanmıyor.");
-        return false;
+        if (!CanCraft(recipe))
+        {
+            Debug.Log("Craft başarısız: Gereken koşullar sağlanmıyor.");
+            return false;
+        }
+
+        WeaponItemData weaponItem = GetWeaponItem(recipe);
+
+        // 1) Kaynakları tüket
+        foreach (var cost in recipe.costs)
+            Inventory.Instance.TryConsume(cost.item, cost.amount);
+
+        // 2) Unlock et (ITEM ID)
+        unlockedWeapons.Add(GetKey(weaponItem));
+
+        // 3) Silahı oyuncuya ver / tak
+        WeaponSlotManager.Instance.EquipWeapon(weaponItem);
+
+
+        Debug.Log($"✔ CRAFT BAŞARILI → {weaponItem.itemName} oyuncuya takıldı!");
+
+        return true;
     }
-
-    WeaponData weapon = GetWeapon(recipe);
-
-    // 1) Kaynakları tüket
-    foreach (var cost in recipe.costs)
-        Inventory.Instance.TryConsume(cost.item, cost.amount);
-
-    // 2) Silahı unlock et
-    unlockedWeapons.Add(GetKey(weapon));
-
-    // 3) Craft edilen silahı OYUNCUYA TAK
-    WeaponSlotManager.Instance.EquipCraftedWeapon(weapon);
-
-    Debug.Log($"✔ CRAFT BAŞARILI → {weapon.itemName} oyuncuya takıldı!");
-
-    return true;
-}
-
 }

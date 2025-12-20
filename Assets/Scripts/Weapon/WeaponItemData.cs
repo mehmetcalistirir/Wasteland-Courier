@@ -1,11 +1,14 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Inventory/Weapon Item")]
+[CreateAssetMenu(
+    menuName = "Items/Weapon",
+    fileName = "itm_wpn_"
+)]
 public class WeaponItemData : ItemData
 {
     [Header("Weapon Link")]
-    public WeaponType weaponType;   // Pistol / Rifle / Melee
-    public WeaponData weaponData;   // Ateş etme davranışları
+    public WeaponType weaponType;
+    public WeaponDefinition weaponDefinition;
 
     private void OnValidate()
     {

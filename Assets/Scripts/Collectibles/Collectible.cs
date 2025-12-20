@@ -2,32 +2,61 @@ using UnityEngine;
 
 public class Collectible : MonoBehaviour
 {
-    public CollectibleType type;
-
-    [Header("Inventory Item")]
+    [Header("Inventory Item (opsiyonel)")]
     public ItemData item;
     public int minAmount = 1;
     public int maxAmount = 1;
 
-    [Header("Ammo")]
+    [Header("Ammo (opsiyonel)")]
     public AmmoTypeData ammoType;
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player"))
-            return;
+    [Header("Visual")]
+    public Sprite normalSprite;
+    public Sprite highlightedSprite;
 
+    private SpriteRenderer sr;
+
+    void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
+        if (sr && normalSprite)
+            sr.sprite = normalSprite;
+    }
+
+    public void Highlight(bool state)
+    {
+        if (!sr) return;
+
+        if (highlightedSprite != null)
+            sr.sprite = state ? highlightedSprite : normalSprite;
+    }
+
+    public void Collect()
+    {
         int amount = Random.Range(minAmount, maxAmount + 1);
 
-        switch (type)
-        {
-            case CollectibleType.InventoryItem:
-                Inventory.Instance.TryAdd(item, amount);
-                break;
+        bool collected = false;
 
-            case CollectibleType.Ammo:
-                Inventory.Instance.AddAmmo(ammoType, amount);
-                break;
+        // 1️⃣ Inventory Item
+        if (item != null)
+        {
+            Inventory.Instance.TryAdd(item, amount);
+            collected = true;
+        }
+
+        // 2️⃣ Ammo
+        if (ammoType != null)
+        {
+            Inventory.Instance.AddAmmo(ammoType, amount);
+            collected = true;
+        }
+
+        if (!collected)
+        {
+            Debug.LogWarning(
+                $"[Collectible] {gameObject.name} üzerinde item veya ammo tanımlı değil!"
+            );
+            return;
         }
 
         Destroy(gameObject);

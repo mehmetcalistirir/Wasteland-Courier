@@ -206,18 +206,23 @@ public static class SaveSystem
         // Weapons
         WeaponSlotManager wsm = WeaponSlotManager.Instance;
         if (wsm != null)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                ItemData so = ItemDatabase.Get(data.equippedWeaponIDs[i]);
-                wsm.slots[i] =
-                    so is WeaponItemData wid ? wid.weaponData : null;
-            }
+{
+    for (int i = 0; i < 3; i++)
+    {
+        string id = data.equippedWeaponIDs[i];
 
-            wsm.activeSlotIndex =
-                Mathf.Clamp(data.activeSlotIndex, 0, 2);
-            wsm.SwitchSlot(wsm.activeSlotIndex);
-        }
+        if (!string.IsNullOrEmpty(id))
+            wsm.slots[i] = ItemDatabase.Get(id) as WeaponItemData;
+        else
+            wsm.slots[i] = null;
+    }
+
+    wsm.activeSlotIndex =
+        Mathf.Clamp(data.activeSlotIndex, 0, 2);
+
+    wsm.SwitchSlot(wsm.activeSlotIndex);
+}
+
 
         // Equipped magazine
         if (playerWeapon != null &&

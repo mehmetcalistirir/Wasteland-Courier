@@ -2,14 +2,25 @@ using UnityEngine;
 
 public class WeaponPickup : MonoBehaviour
 {
-    public WeaponData weaponData;
+    [Header("Weapon Item (Inventory)")]
+    public WeaponItemData weaponItem;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
             return;
 
-        CaravanInventory.Instance.StoreWeapon(weaponData);
+        if (weaponItem == null)
+        {
+            Debug.LogError("[WeaponPickup] weaponItem atanmadı!");
+            return;
+        }
+
+        // Silahı karavana / envantere ekle
+        CaravanInventory.Instance.StoreWeapon(weaponItem);
+
+        Debug.Log($"🟢 Weapon pickup alındı: {weaponItem.itemName}");
+
         Destroy(gameObject);
     }
 }

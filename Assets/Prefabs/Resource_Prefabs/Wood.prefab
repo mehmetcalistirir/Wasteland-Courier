@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6499807351581863115}
   - component: {fileID: 5146117353057106884}
-  - component: {fileID: 6921577911449915916}
-  - component: {fileID: 2228147992480742636}
+  - component: {fileID: 7115043323064371346}
+  - component: {fileID: -1697722872248010275}
   m_Layer: 7
   m_Name: Wood
   m_TagString: Resource
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 6150571164243365950}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5, y: 4, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -92,32 +92,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6921577911449915916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6150571164243365950}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 623acb3bd47a35b418d937a9a13c593b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemData: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
-  type: 1
-  amount: 1
-  hitsRequired: 3
-  hitCooldown: 1
-  ammoToActiveSlot: 0
-  ammoTargetSlotIndex: 0
-  ammoAmountAsPercentOfMax: 1
-  ammoPercentOfMax: 0.25
-  ammoFixedAmount: 12
-  clampToMaxCapacity: 1
-  normalSprite: {fileID: -2961232818638073087, guid: 45c8df68d02a9e84ea094dfee81dfcd0, type: 3}
-  highlightedSprite: {fileID: -1622388726588670532, guid: d67e7bd36f2c1ee4b917bae14ab0d223, type: 3}
---- !u!61 &2228147992480742636
+--- !u!61 &7115043323064371346
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -155,11 +130,30 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.93, y: 1.03}
+    oldSize: {x: 9.3, y: 10.3}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 6.26, y: 4.32}
+  m_Size: {x: 9.3, y: 10.3}
   m_EdgeRadius: 0
+--- !u!114 &-1697722872248010275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6150571164243365950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a77c174afd640df4db2e0814d1b80dc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Collectible
+  type: 0
+  item: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
+  minAmount: 1
+  maxAmount: 1
+  ammoType: {fileID: 0}
+  normalSprite: {fileID: 0}
+  highlightedSprite: {fileID: 0}

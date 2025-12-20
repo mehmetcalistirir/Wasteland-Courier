@@ -10,14 +10,9 @@ public class SaveData
     public int currentHealth, maxHealth;
     public float currentStamina, maxStamina;
     public int currentHunger, maxHunger;
-    public int gold;
 
     // Inventory items
     public List<InventoryItemData> inventory = new List<InventoryItemData>();
-
-    // Ammo Pool (JsonUtility uyumlu)
-    public List<string> ammoTypeIDs = new List<string>();
-    public List<int> ammoAmounts = new List<int>();
 
     // Weapons
     public string[] equippedWeaponIDs = new string[3];

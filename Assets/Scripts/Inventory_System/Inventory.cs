@@ -19,8 +19,7 @@ public class Inventory : MonoBehaviour
     public void RaiseChanged() => OnChanged?.Invoke();
 
     // Yeni mermi depolama sistemi: ammoType(string) -> toplam mermi sayısı
-    private Dictionary<AmmoTypeData, int> ammoPool =
-        new Dictionary<AmmoTypeData, int>();
+
 
     void Awake()
     {
@@ -37,61 +36,102 @@ public class Inventory : MonoBehaviour
             slots[i] = new InventoryItem();
     }
 
-public bool IsMagazineEquipped(MagazineInstance mag)
-{
-    if (mag == null) return false;
+    public bool IsMagazineEquipped(MagazineInstance mag)
+    {
+        if (mag == null) return false;
 
-    PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
-    if (pw == null) return false;
+        PlayerWeapon pw = FindObjectOfType<PlayerWeapon>();
+        if (pw == null) return false;
 
-    return pw.GetCurrentMagazine() == mag;
-}
+        return pw.GetCurrentMagazine() == mag;
+    }
 
-public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
-{
-    ammoPool = data;
-}
 
     // ---------------- ADD ----------------
     public bool TryAdd(ItemData data, int amount = 1)
-{
-    if (data == null || amount <= 0)
-        return false;
-
-    // 🔥 MAGAZINE ITEM
-    if (data is MagazineData magData)
     {
+        if (data == null || amount <= 0)
+            return false;
+
+        // 🔥 MAGAZINE ITEM
+        if (data is MagazineData magData)
+        {
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i].data == null)
+                {
+                    slots[i] = new InventoryItem
+                    {
+                        data = magData,
+                        count = 1,
+                        magazineInstance = new MagazineInstance(magData)
+                    };
+
+                    RaiseChanged();
+                    return true;
+                }
+            }
+
+            return false; // envanter dolu
+        }
+
+        // 🔫 AMMO ITEM
+        if (data is AmmoItemData ammoData)
+        {
+            return AddStackableItem(ammoData, amount);
+        }
+
+
+        // 📦 STACKLENEBİLEN ITEM
+        if (data.stackable)
+        {
+            int remain = amount;
+
+            for (int i = 0; i < slots.Length && remain > 0; i++)
+            {
+                var s = slots[i];
+                if (s.data == data && s.count < data.maxStack)
+                {
+                    int add = Mathf.Min(remain, data.maxStack - s.count);
+                    s.count += add;
+                    remain -= add;
+                }
+            }
+
+            for (int i = 0; i < slots.Length && remain > 0; i++)
+            {
+                if (slots[i].data == null)
+                {
+                    int add = Mathf.Min(remain, data.maxStack);
+                    slots[i] = new InventoryItem(data, add);
+                    remain -= add;
+                }
+            }
+
+            if (remain == 0)
+            {
+                RaiseChanged();
+                return true;
+            }
+
+            return false;
+        }
+
+        // 📦 STACKLENMEYEN NORMAL ITEM
         for (int i = 0; i < slots.Length; i++)
         {
             if (slots[i].data == null)
             {
-                slots[i] = new InventoryItem
-                {
-                    data = magData,
-                    count = 1,
-                    magazineInstance = new MagazineInstance(magData)
-                };
-
+                slots[i] = new InventoryItem(data, 1);
                 RaiseChanged();
                 return true;
             }
         }
 
-        return false; // envanter dolu
+        return false;
     }
 
-    // 🔫 AMMO ITEM
-    if (data is AmmoItemData ammoData)
-    {
-        int totalAmmo = ammoData.ammoAmount * amount;
-        AddAmmo(ammoData.ammoType, totalAmmo);
-
-        Debug.Log($"[Inventory] {ammoData.ammoType.ammoName} +{totalAmmo}");
-        return true;
-    }
-
-    // 📦 STACKLENEBİLEN ITEM
-    if (data.stackable)
+    bool AddStackableItem(ItemData data, int amount)
     {
         int remain = amount;
 
@@ -125,21 +165,6 @@ public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
         return false;
     }
 
-    // 📦 STACKLENMEYEN NORMAL ITEM
-    for (int i = 0; i < slots.Length; i++)
-    {
-        if (slots[i].data == null)
-        {
-            slots[i] = new InventoryItem(data, 1);
-            RaiseChanged();
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
     // --------- YARDIMCI SAYIM METOTLARI ---------
 
     public int GetTotalCount(ItemData data)
@@ -152,82 +177,74 @@ public void SetAmmoPool(Dictionary<AmmoTypeData, int> data)
         return total;
     }
     public InventoryItem GetLastAddedSlot()
-{
-    for (int i = slots.Length - 1; i >= 0; i--)
     {
-        if (slots[i] != null && slots[i].data != null)
-            return slots[i];
+        for (int i = slots.Length - 1; i >= 0; i--)
+        {
+            if (slots[i] != null && slots[i].data != null)
+                return slots[i];
+        }
+        return null;
     }
-    return null;
-}
 
-public bool UnloadOneFromMagazine(MagazineInstance mag)
-{
-    if (IsMagazineEquipped(mag))
-{
-    Debug.Log("Takılı şarjör boşaltılamaz!");
-    return false;
-}
+    public bool UnloadOneFromMagazine(MagazineInstance mag)
+    {
+        if (IsMagazineEquipped(mag))
+            return false;
 
-    if (mag == null || mag.data == null)
-        return false;
+        if (mag == null || mag.data == null)
+            return false;
 
-    if (mag.currentAmmo <= 0)
-        return false;
+        if (mag.currentAmmo <= 0)
+            return false;
 
-    AmmoTypeData ammoType = mag.data.ammoType;
-    if (ammoType == null)
-        return false;
+        AmmoItemData ammoItem = FindAmmoItem(mag.data.ammoType);
+        if (ammoItem == null)
+            return false;
 
-    // 🔫 Şarjörden çıkar
-    mag.currentAmmo -= 1;
+        mag.currentAmmo -= 1;
 
-    // 🔁 AmmoPool'a geri koy
-    AddAmmo(ammoType, 1);
+        TryAdd(ammoItem, 1);
+        RaiseChanged();
+        return true;
+    }
 
-    RaiseChanged();
 
-    Debug.Log(
-        $"[Inventory] Şarjörden 1 mermi çıkarıldı → " +
-        $"{mag.currentAmmo}/{mag.data.capacity}"
-    );
+    public bool UnloadAllFromMagazine(MagazineInstance mag)
+    {
+        if (IsMagazineEquipped(mag))
+            return false;
 
-    return true;
-}
+        if (mag == null || mag.data == null)
+            return false;
 
-public bool UnloadAllFromMagazine(MagazineInstance mag)
-{
-    if (IsMagazineEquipped(mag))
-{
-    Debug.Log("Takılı şarjör boşaltılamaz!");
-    return false;
-}
+        int amount = mag.currentAmmo;
+        if (amount <= 0)
+            return false;
 
-    if (mag == null || mag.data == null)
-        return false;
+        AmmoItemData ammoItem = FindAmmoItem(mag.data.ammoType);
+        if (ammoItem == null)
+            return false;
 
-    int amount = mag.currentAmmo;
-    if (amount <= 0)
-        return false;
+        TryAdd(ammoItem, amount);
 
-    AmmoTypeData ammoType = mag.data.ammoType;
-    if (ammoType == null)
-        return false;
 
-    // 🔁 AmmoPool'a geri koy
-    AddAmmo(ammoType, amount);
+        mag.currentAmmo = 0;
+        RaiseChanged();
+        return true;
+    }
 
-    // 🔫 Şarjörü boşalt
-    mag.currentAmmo = 0;
+    AmmoItemData FindAmmoItem(AmmoTypeData type)
+    {
+        foreach (var s in slots)
+        {
+            if (s.data is AmmoItemData ammo &&
+                ammo.ammoType == type)
+                return ammo;
+        }
 
-    RaiseChanged();
-
-    Debug.Log(
-        $"[Inventory] Şarjör tamamen boşaltıldı → +{amount} mermi"
-    );
-
-    return true;
-}
+        Debug.LogError($"AmmoItemData bulunamadı: {type.ammoName}");
+        return null;
+    }
 
 
     // Envanterde yeterince var mı?
@@ -244,15 +261,8 @@ public bool UnloadAllFromMagazine(MagazineInstance mag)
             unlockedBlueprints.Add(id);
     }
     // Inventory.cs
-public Dictionary<AmmoTypeData, int> GetAmmoPool()
-{
-    return ammoPool;
-}
 
-public void ClearAmmoPool()
-{
-    ammoPool.Clear();
-}
+
 
 
 
@@ -292,29 +302,74 @@ public void ClearAmmoPool()
         return true;
     }
     public bool TryAddMagazine(MagazineInstance mag)
-{
-    if (mag == null || mag.data == null)
-        return false;
-
-    for (int i = 0; i < slots.Length; i++)
     {
-        if (slots[i].data == null)
-        {
-            slots[i] = new InventoryItem
-            {
-                data = mag.data,
-                count = 1,
-                magazineInstance = mag
-            };
+        if (mag == null || mag.data == null)
+            return false;
 
-            RaiseChanged();
-            return true;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i].data == null)
+            {
+                slots[i] = new InventoryItem
+                {
+                    data = mag.data,
+                    count = 1,
+                    magazineInstance = mag
+                };
+
+                RaiseChanged();
+                return true;
+            }
         }
+
+        Debug.Log("Envanter dolu! Şarjör alınamadı.");
+        return false;
     }
 
-    Debug.Log("Envanter dolu! Şarjör alınamadı.");
-    return false;
-}
+    public int GetTotalAmmo(AmmoTypeData type)
+    {
+        int total = 0;
+
+        foreach (var s in slots)
+        {
+            if (s.data is AmmoItemData ammo &&
+                ammo.ammoType == type)
+            {
+                total += s.count;
+
+            }
+        }
+
+        return total;
+    }
+    public int TakeAmmoFromInventory(
+    AmmoTypeData type,
+    int amount
+)
+    {
+        int remaining = amount;
+
+        for (int i = 0; i < slots.Length && remaining > 0; i++)
+        {
+            var s = slots[i];
+
+            if (s.data is AmmoItemData ammo &&
+                ammo.ammoType == type)
+            {
+                int take = Mathf.Min(s.count, remaining);
+
+                s.count -= take;
+                remaining -= take;
+
+                if (s.count <= 0)
+                    slots[i] = new InventoryItem();
+            }
+        }
+
+        RaiseChanged();
+        return amount - remaining;
+    }
+
 
     public bool TryMoveOrMerge(int from, int to)
     {
@@ -382,109 +437,54 @@ public void ClearAmmoPool()
         return total;
     }
 
-    // ---------------- AMMO SİSTEMİ ----------------
-
-    // Ammo ekleme (pickup vs. burayı kullanacak)
-    public void AddAmmo(AmmoTypeData ammoType, int amount)
-    {
-        if (ammoType == null || amount <= 0) return;
-
-        if (!ammoPool.ContainsKey(ammoType))
-            ammoPool[ammoType] = 0;
-
-        ammoPool[ammoType] += amount;
-
-        Debug.Log($"[Ammo] +{amount} {ammoType.ammoName} → Total: {ammoPool[ammoType]}");
-    }
 
 
 
-    // Belirli ammo tipinden kaç adet var?
-    public int GetAmmoAmount(AmmoTypeData ammoType)
-    {
-        if (ammoType == null) return 0;
 
-        return ammoPool.TryGetValue(ammoType, out int amount)
-            ? amount
-            : 0;
-    }
-
-
-    // Ammo tüket (şarjör doldurma vb.)
-    public bool TryUseAmmo(AmmoTypeData ammoType, int amount)
-    {
-        if (ammoType == null || amount <= 0) return false;
-
-        if (!ammoPool.ContainsKey(ammoType)) return false;
-        if (ammoPool[ammoType] < amount) return false;
-
-        ammoPool[ammoType] -= amount;
-
-        return true;
-    }
 
     public bool FullLoadMagazine(MagazineInstance mag)
-{
-    if (mag == null || mag.data == null)
-        return false;
+    {
+        if (mag == null || mag.data == null)
+            return false;
 
-    int needed = mag.data.capacity - mag.currentAmmo;
-    if (needed <= 0)
-        return false;
+        int needed = mag.data.capacity - mag.currentAmmo;
+        if (needed <= 0)
+            return false;
 
-    int available = GetAmmoAmount(mag.data.ammoType);
-    if (available <= 0)
-        return false;
+        int available = GetTotalAmmo(mag.data.ammoType);
+        if (available <= 0)
+            return false;
 
-    int load = Mathf.Min(needed, available);
-    return LoadAmmoIntoMagazine(mag, load);
-}
-
+        return LoadAmmoIntoMagazine(mag, needed);
+    }
 
 
-    // Şarjöre ammo yükleme - ammoStorage'dan çeker
+
+
     public bool LoadAmmoIntoMagazine(
     MagazineInstance mag,
     int amount
 )
-{
-    if (mag == null || mag.data == null)
-        return false;
+    {
+        if (mag == null || mag.data == null)
+            return false;
 
-    if (mag.IsFull)
-        return false;
+        int space = mag.data.capacity - mag.currentAmmo;
+        if (space <= 0)
+            return false;
 
-    AmmoTypeData ammoType = mag.data.ammoType;
-    if (ammoType == null)
-        return false;
+        int taken = TakeAmmoFromInventory(
+            mag.data.ammoType,
+            Mathf.Min(space, amount)
+        );
 
-    int available = GetAmmoAmount(ammoType);
-    if (available <= 0)
-        return false;
+        if (taken <= 0)
+            return false;
 
-    int space = mag.data.capacity - mag.currentAmmo;
-    int load = Mathf.Min(space, Mathf.Min(amount, available));
-
-    if (load <= 0)
-        return false;
-
-    // 🔥 AMMO HAVUZUNDAN ÇEK
-    TryUseAmmo(ammoType, load);
-
-    // 🔫 ŞARJÖRE KOY
-    mag.currentAmmo += load;
-
-    RaiseChanged();
-
-    Debug.Log(
-        $"[Inventory] Şarjör dolduruldu → +{load} " +
-        $"({mag.currentAmmo}/{mag.data.capacity})"
-    );
-
-    return true;
-}
-
-
+        mag.currentAmmo += taken;
+        RaiseChanged();
+        return true;
+    }
 
 
 }

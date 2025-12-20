@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7414632ebfae8d43a363f7cb055aa8a, type: 3}
-  m_Name: mag_m24
+  m_Name: Item_mag_m24
   m_EditorClassIdentifier: Assembly-CSharp::MagazineData
   itemName: M24 Sarjor
   itemID: mag_m24

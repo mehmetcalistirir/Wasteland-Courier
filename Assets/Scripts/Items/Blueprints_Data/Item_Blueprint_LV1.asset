@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70dacc4652a71f84ab91252e7af701af, type: 3}
-  m_Name: Blueprint_LV1
+  m_Name: Item_Blueprint_LV1
   m_EditorClassIdentifier: Assembly-CSharp::BlueprintItemData
   itemName: Blueprint LV1
   itemID: blueprintlv1

@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7414632ebfae8d43a363f7cb055aa8a, type: 3}
-  m_Name: mag_shotgun
+  m_Name: Item_mag_m4a1
   m_EditorClassIdentifier: Assembly-CSharp::MagazineData
-  itemName: Shotgun Sarjor
-  itemID: mag_shotgun
-  icon: {fileID: 6311552833237785406, guid: 116600327cc9f9b448e202c754d77b88, type: 3}
+  itemName: M4A1 Sarjor
+  itemID: mag_m4a1
+  icon: {fileID: 3910470184942907236, guid: 57209bfc03c33ee4799ad065bc715717, type: 3}
   category: 1
   stackable: 0
   maxStack: 1
-  ammoType: {fileID: 11400000, guid: a373c20686e7d5b4387972a849591a3e, type: 2}
-  magazineType: 5
-  capacity: 5
+  ammoType: {fileID: 11400000, guid: 093a41e984dbe1e45a7a2c69efe8d879, type: 2}
+  magazineType: 2
+  capacity: 45

@@ -10,12 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6124e6f1ee44bc4eae72ec3b299fc77, type: 3}
-  m_Name: ScrapMetal_Data
+  m_Name: Item_Fuel_Data
   m_EditorClassIdentifier: Assembly-CSharp::CraftResourceData
-  itemName: Scrap Metal
-  itemID: scrapmetal
-  icon: {fileID: 4735667228514538081, guid: 26c14e88b0a28aa4db17247de8895816, type: 3}
+  itemName: Fuel
+  itemID: fuel
+  icon: {fileID: 1291326603927916234, guid: a947f20e7864ddb41ab3b17b04e50896, type: 3}
   category: 0
   stackable: 1
   maxStack: 99
-  amountPerPickup: 1

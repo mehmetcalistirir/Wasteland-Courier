@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6124e6f1ee44bc4eae72ec3b299fc77, type: 3}
-  m_Name: Gold_Data
+  m_Name: Item_RabbitHide_Data
   m_EditorClassIdentifier: Assembly-CSharp::CraftResourceData
-  itemName: Gold
-  itemID: gold
-  icon: {fileID: 8020760914197115748, guid: d50e1256a0d9b7f4cb0065f3b2455e36, type: 3}
+  itemName: Rabbit Hide
+  itemID: rabbithide
+  icon: {fileID: -4147940799158932591, guid: e2d36e5f2d6e6c747b3bf5dc3a4d4a27, type: 3}
   category: 0
   stackable: 1
   maxStack: 99

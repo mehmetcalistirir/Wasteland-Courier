@@ -121,7 +121,8 @@ void UnbindEvents()
     {
         var m = pw.inventoryMags[i];
         if (m == null || m.data == null) continue;
-        inventoryAmmo += m.currentAmmo;
+        Inventory.Instance.GetTotalAmmo(pw.weaponData.ammoType);
+
     }
 
     magazineText.text = $"{equippedAmmo} / {inventoryAmmo}";

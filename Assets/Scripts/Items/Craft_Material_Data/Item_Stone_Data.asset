@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6124e6f1ee44bc4eae72ec3b299fc77, type: 3}
-  m_Name: DeerHide_Data
+  m_Name: Item_Stone_Data
   m_EditorClassIdentifier: Assembly-CSharp::CraftResourceData
-  itemName: Deer Hide
-  itemID: deerhide
-  icon: {fileID: -1912432549724291594, guid: 9991e6f1567e1b04eb155523419bbdd2, type: 3}
+  itemName: Stone
+  itemID: stone
+  icon: {fileID: -803223824015377030, guid: ac4e2c43319b1484ca1c64336e6544fe, type: 3}
   category: 0
   stackable: 1
   maxStack: 99
+  amountPerPickup: 1

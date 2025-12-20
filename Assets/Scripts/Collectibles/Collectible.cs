@@ -8,7 +8,9 @@ public class Collectible : MonoBehaviour
     public int maxAmount = 1;
 
     [Header("Ammo (opsiyonel)")]
-    public AmmoTypeData ammoType;
+    public AmmoItemData ammoItemData;
+    [Tooltip("Bu collectible kaç mermi verir")]
+    public int ammoCount = 10;
 
     [Header("Visual")]
     public Sprite normalSprite;
@@ -45,11 +47,13 @@ public class Collectible : MonoBehaviour
         }
 
         // 2️⃣ Ammo
-        if (ammoType != null)
+        if (ammoItemData != null)
         {
-            Inventory.Instance.AddAmmo(ammoType, amount);
+            Inventory.Instance.TryAdd(ammoItemData, ammoCount);
             collected = true;
         }
+
+
 
         if (!collected)
         {

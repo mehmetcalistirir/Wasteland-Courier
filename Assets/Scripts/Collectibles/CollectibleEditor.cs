@@ -8,7 +8,8 @@ public class CollectibleEditor : Editor
     SerializedProperty minAmount;
     SerializedProperty maxAmount;
 
-    SerializedProperty ammoType;
+    SerializedProperty ammoItemData;
+
 
     SerializedProperty normalSprite;
     SerializedProperty highlightedSprite;
@@ -19,7 +20,8 @@ public class CollectibleEditor : Editor
         minAmount = serializedObject.FindProperty("minAmount");
         maxAmount = serializedObject.FindProperty("maxAmount");
 
-        ammoType = serializedObject.FindProperty("ammoType");
+        ammoItemData = serializedObject.FindProperty("ammoItemData");
+
 
         normalSprite = serializedObject.FindProperty("normalSprite");
         highlightedSprite = serializedObject.FindProperty("highlightedSprite");
@@ -30,13 +32,13 @@ public class CollectibleEditor : Editor
         serializedObject.Update();
 
         bool hasItem = item.objectReferenceValue != null;
-        bool hasAmmo = ammoType.objectReferenceValue != null;
+        bool hasAmmo = ammoItemData.objectReferenceValue != null;
 
         // ---------------- MODE INFO ----------------
         EditorGUILayout.LabelField("Collectible Data", EditorStyles.boldLabel);
 
         EditorGUILayout.PropertyField(item);
-        EditorGUILayout.PropertyField(ammoType);
+        EditorGUILayout.PropertyField(ammoItemData);
 
         // ---------------- VALIDATION ----------------
         if (hasItem && hasAmmo)

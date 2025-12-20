@@ -9,14 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffe0e5cd070981f46804759725a8c710, type: 3}
-  m_Name: Data_Ammo_12_Gauge_Slug
-  m_EditorClassIdentifier: Assembly-CSharp::AmmoItemData
-  itemName: 12 Kalibre Kovan
-  itemID: 12gaugeslug
-  icon: {fileID: -7693665795165526321, guid: ac0a3d44525726c4aaf2cc6ff55a239b, type: 3}
+  m_Script: {fileID: 11500000, guid: e7414632ebfae8d43a363f7cb055aa8a, type: 3}
+  m_Name: Item_mag_shotgun
+  m_EditorClassIdentifier: Assembly-CSharp::MagazineData
+  itemName: Shotgun Sarjor
+  itemID: mag_shotgun
+  icon: {fileID: 6311552833237785406, guid: 116600327cc9f9b448e202c754d77b88, type: 3}
   category: 1
-  stackable: 1
-  maxStack: 99
+  stackable: 0
+  maxStack: 1
   ammoType: {fileID: 11400000, guid: a373c20686e7d5b4387972a849591a3e, type: 2}
-  ammoAmount: 0
+  magazineType: 5
+  capacity: 5

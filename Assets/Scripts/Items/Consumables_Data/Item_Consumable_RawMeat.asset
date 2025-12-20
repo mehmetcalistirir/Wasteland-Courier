@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3890cd13ff77ee34299ab59cb7d77650, type: 3}
-  m_Name: Consumable_RawMeat
+  m_Name: Item_Consumable_RawMeat
   m_EditorClassIdentifier: Assembly-CSharp::GenericItemData
   itemName: Raw Meat
   itemID: rawmeat

@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3890cd13ff77ee34299ab59cb7d77650, type: 3}
-  m_Name: Consumable_CookedMeat
+  m_Name: Item_Consumable_Bandage
   m_EditorClassIdentifier: Assembly-CSharp::GenericItemData
-  itemName: Cooked Meat
-  itemID: cookedmeat
-  icon: {fileID: 5820582672157233216, guid: 575f5890dc3bfdc4fb5627722921a532, type: 3}
+  itemName: Bandage
+  itemID: bandage
+  icon: {fileID: 1462799768519014029, guid: caf0d9597dff68941b8e007d21eb15f8, type: 3}
   category: 1
   stackable: 1
   maxStack: 99

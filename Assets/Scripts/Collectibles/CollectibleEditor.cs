@@ -5,11 +5,10 @@ using UnityEngine;
 public class CollectibleEditor : Editor
 {
     SerializedProperty item;
-    SerializedProperty minAmount;
-    SerializedProperty maxAmount;
-
     SerializedProperty ammoItemData;
 
+    SerializedProperty minAmount;
+    SerializedProperty maxAmount;
 
     SerializedProperty normalSprite;
     SerializedProperty highlightedSprite;
@@ -17,11 +16,10 @@ public class CollectibleEditor : Editor
     void OnEnable()
     {
         item = serializedObject.FindProperty("item");
-        minAmount = serializedObject.FindProperty("minAmount");
-        maxAmount = serializedObject.FindProperty("maxAmount");
-
         ammoItemData = serializedObject.FindProperty("ammoItemData");
 
+        minAmount = serializedObject.FindProperty("minAmount");
+        maxAmount = serializedObject.FindProperty("maxAmount");
 
         normalSprite = serializedObject.FindProperty("normalSprite");
         highlightedSprite = serializedObject.FindProperty("highlightedSprite");
@@ -34,11 +32,14 @@ public class CollectibleEditor : Editor
         bool hasItem = item.objectReferenceValue != null;
         bool hasAmmo = ammoItemData.objectReferenceValue != null;
 
-        // ---------------- MODE INFO ----------------
+        // ---------------- HEADER ----------------
         EditorGUILayout.LabelField("Collectible Data", EditorStyles.boldLabel);
 
+        // ---------------- TYPE SELECTION ----------------
         EditorGUILayout.PropertyField(item);
-        EditorGUILayout.PropertyField(ammoItemData);
+
+        if (!hasItem)
+            EditorGUILayout.PropertyField(ammoItemData);
 
         // ---------------- VALIDATION ----------------
         if (hasItem && hasAmmo)
@@ -60,10 +61,15 @@ public class CollectibleEditor : Editor
         if (hasItem || hasAmmo)
         {
             EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("Amount Settings", EditorStyles.boldLabel);
 
-            EditorGUILayout.PropertyField(minAmount);
-            EditorGUILayout.PropertyField(maxAmount);
+            string amountLabel =
+                hasAmmo ? "Ammo Amount (Mermi Sayısı)"
+                        : "Item Amount";
+
+            EditorGUILayout.LabelField(amountLabel, EditorStyles.boldLabel);
+
+            EditorGUILayout.PropertyField(minAmount, new GUIContent("Min"));
+            EditorGUILayout.PropertyField(maxAmount, new GUIContent("Max"));
 
             if (minAmount.intValue > maxAmount.intValue)
             {

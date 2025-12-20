@@ -46,14 +46,12 @@ public class Collectible : MonoBehaviour
             collected = true;
         }
 
-        // 2️⃣ Ammo
+        // 2️⃣ Ammo (rastgele mermi)
         if (ammoItemData != null)
         {
-            Inventory.Instance.TryAdd(ammoItemData, ammoCount);
+            Inventory.Instance.TryAdd(ammoItemData, amount);
             collected = true;
         }
-
-
 
         if (!collected)
         {
@@ -65,4 +63,5 @@ public class Collectible : MonoBehaviour
 
         Destroy(gameObject);
     }
+
 }

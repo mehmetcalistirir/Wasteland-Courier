@@ -1,114 +1,72 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AudioSource))]
 public class PlayerFootsteps : MonoBehaviour
 {
-    public enum Mode { DistanceBased, AnimationEvents }
-    [Header("Mode")]
-    public Mode mode = Mode.DistanceBased;
+    [Header("Footstep Clip (Loop)")]
+    public AudioClip footstepLoop;
 
-    [Header("Footstep Clips")]
-    public AudioClip[] footstepClips;
+    [Header("Movement")]
+    public float minMovementSpeed = 0.005f;
 
-    [Header("Step Settings")]
-    public float walkStepDistance = 0.85f;  // yürürken adım mesafesi
-    public float runStepDistance  = 0.55f;  // koşarken daha kısa mesafe
-    public float runThreshold     = 3.0f;   // koşma hızı eşiği
-    public float minMovementSpeed = 0.05f;  // durma eşiği
-
-    [Header("Sound Settings")]
+    [Header("Sound")]
     public float volume = 0.9f;
     public float minPitch = 0.95f;
     public float maxPitch = 1.05f;
-    public float minStepGap = 0.12f; // iki adım arası min süre
-    private float nextStepAvailableTime = 0f;
 
     private AudioSource src;
     private Vector3 lastPosition;
-    private float accumulatedDistance = 0f;
-    private float lastStepTime = 0f;
-    private int lastClipIndex = -1;
+    private bool isMoving = false;
 
     void Awake()
     {
         src = GetComponent<AudioSource>();
+
         src.playOnAwake = false;
-        src.spatialBlend = 0f; // 2D sound
+        src.loop = true;          // 🔴 EN ÖNEMLİ
+        src.spatialBlend = 0f;    // 2D
+        src.volume = volume;
 
         lastPosition = transform.position;
     }
 
     void Update()
     {
-        if (mode == Mode.AnimationEvents)
-        {
-            lastPosition = transform.position;
-            return;
-        }
-
-        if (footstepClips == null || footstepClips.Length == 0) return;
-        if (Time.timeScale == 0f) return; // oyun durduysa ses yok
-
         Vector3 currentPos = transform.position;
-        float frameDistance = Vector3.Distance(currentPos, lastPosition);
+        float distance = (currentPos - lastPosition).magnitude;
+        float speed = distance / Mathf.Max(Time.deltaTime, 0.0001f);
         lastPosition = currentPos;
 
-        float speed = frameDistance / Mathf.Max(Time.deltaTime, 0.0001f);
+        bool movingNow = speed >= minMovementSpeed;
 
-        if (speed < minMovementSpeed)
+        // Hareket BAŞLADI
+        if (movingNow && !isMoving)
         {
-            accumulatedDistance = 0f;
-            return;
+            StartFootsteps();
+        }
+        // Hareket BİTTİ
+        else if (!movingNow && isMoving)
+        {
+            StopFootsteps();
         }
 
-        accumulatedDistance += frameDistance;
-
-        float targetStepDist = speed >= runThreshold ? runStepDistance : walkStepDistance;
-
-        if (accumulatedDistance >= targetStepDist)
-        {
-            PlayStep();
-            accumulatedDistance -= targetStepDist; // stable rhythm
-        }
+        isMoving = movingNow;
     }
 
-    // Animation event için
-    public void AnimationFootstep()
+    void StartFootsteps()
     {
-        if (mode == Mode.AnimationEvents)
-            PlayStep();
+        if (footstepLoop == null) return;
+
+        src.clip = footstepLoop;
+        src.pitch = Random.Range(minPitch, maxPitch);
+        src.volume = volume;
+
+        src.Play();
     }
 
-    private void PlayStep()
-{
-    // Ses uzunluğu bitene kadar bekle
-    if (Time.time < nextStepAvailableTime) return;
-
-    // Debounce
-    if (Time.time - lastStepTime < minStepGap) return;
-    lastStepTime = Time.time;
-
-    int idx = PickClipIndex();
-    float len = footstepClips[idx].length;
-
-    src.pitch = Random.Range(minPitch, maxPitch);
-    src.PlayOneShot(footstepClips[idx], volume);
-
-    // Ses süresi boyunca yeni adım engelli
-    nextStepAvailableTime = Time.time + len;
-}
-
-    private int PickClipIndex()
+    void StopFootsteps()
     {
-        if (footstepClips.Length == 1) return 0;
-
-        int i;
-        do { i = Random.Range(0, footstepClips.Length); }
-        while (i == lastClipIndex);
-        lastClipIndex = i;
-
-        return i;
+        src.Stop();
     }
 }

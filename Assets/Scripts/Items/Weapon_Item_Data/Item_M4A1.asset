@@ -15,8 +15,8 @@ MonoBehaviour:
   itemName: M4A1
   itemID: weapon_m4a1
   icon: {fileID: 564439294832975815, guid: 7a62928c4b4846140a4fd9b6aa1fdda1, type: 3}
-  category: 2
+  category: 5
   stackable: 0
   maxStack: 1
   weaponType: 1
-  weaponData: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}
+  weaponDefinition: {fileID: 11400000, guid: 9cca43d20f5d79f4e92e95b76fb7c1f0, type: 2}

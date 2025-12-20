@@ -15,8 +15,8 @@ MonoBehaviour:
   itemName: Glock 18
   itemID: weapon_glock18
   icon: {fileID: -4854829337826818713, guid: 1932acb0fbd75864b8c860ca2a361333, type: 3}
-  category: 2
+  category: 5
   stackable: 0
   maxStack: 1
   weaponType: 0
-  weaponData: {fileID: 11400000, guid: 02248f70225ea6644af71c0872a04ad6, type: 2}
+  weaponDefinition: {fileID: 11400000, guid: 02248f70225ea6644af71c0872a04ad6, type: 2}

@@ -15,8 +15,8 @@ MonoBehaviour:
   itemName: Shotgun
   itemID: weapon_shotgun
   icon: {fileID: 4099191518589774541, guid: 8d28fad03878d464fb4e8f1f05844664, type: 3}
-  category: 2
+  category: 5
   stackable: 0
   maxStack: 1
   weaponType: 2
-  weaponData: {fileID: 11400000, guid: 18378fe0a73d11443b1e040e6125cbf7, type: 2}
+  weaponDefinition: {fileID: 11400000, guid: 18378fe0a73d11443b1e040e6125cbf7, type: 2}

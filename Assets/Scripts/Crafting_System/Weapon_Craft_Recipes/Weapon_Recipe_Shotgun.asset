@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05499e8d33c33b6479eeb55924e510ea, type: 3}
   m_Name: Weapon_Recipe_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponCraftRecipe
-  resultWeapon: {fileID: 11400000, guid: 18378fe0a73d11443b1e040e6125cbf7, type: 2}
+  resultWeapon: {fileID: 11400000, guid: b6b6ccca89f0cf74f879593362c99b74, type: 2}
   description: "Pompal\u0131 T\xFCfek"
   costs:
   - item: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}

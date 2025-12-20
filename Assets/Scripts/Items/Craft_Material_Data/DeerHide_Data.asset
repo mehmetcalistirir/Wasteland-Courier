@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CraftResourceData
   itemName: Deer Hide
   itemID: deerhide
-  icon: {fileID: 0}
+  icon: {fileID: -1912432549724291594, guid: 9991e6f1567e1b04eb155523419bbdd2, type: 3}
   category: 0
   stackable: 1
   maxStack: 99
-  amountPerPickup: 1

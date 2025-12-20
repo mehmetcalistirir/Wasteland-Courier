@@ -9,13 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dacc4652a71f84ab91252e7af701af, type: 3}
-  m_Name: New Blueprint Item Data
-  m_EditorClassIdentifier: Assembly-CSharp::BlueprintItemData
-  itemName: 
-  itemID: 
-  icon: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: e6124e6f1ee44bc4eae72ec3b299fc77, type: 3}
+  m_Name: Fuel_Data
+  m_EditorClassIdentifier: Assembly-CSharp::CraftResourceData
+  itemName: Fuel
+  itemID: fuel
+  icon: {fileID: 1291326603927916234, guid: a947f20e7864ddb41ab3b17b04e50896, type: 3}
   category: 0
   stackable: 1
   maxStack: 99
-  blueprintID: 

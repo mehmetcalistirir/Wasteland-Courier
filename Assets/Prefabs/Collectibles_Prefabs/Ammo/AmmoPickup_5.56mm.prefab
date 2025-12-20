@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2591984982563560070}
   - component: {fileID: 7059881971247314874}
   - component: {fileID: 2007031901802159158}
-  - component: {fileID: 8146145102518812207}
+  - component: {fileID: 4220389557526646758}
   m_Layer: 0
-  m_Name: AmmoPickup_9mm
+  m_Name: AmmoPickup_5.56mm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 9122342043793165280, guid: c50284f1988bf704f948aaaca9764363, type: 3}
+  m_Sprite: {fileID: 151575246617741874, guid: d8a916a83589c4b47a0ae747246c9f87, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -138,7 +138,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3.24, y: 4.16}
   m_EdgeRadius: 0
---- !u!114 &8146145102518812207
+--- !u!114 &4220389557526646758
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -147,9 +147,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4238441997697719145}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e47013a3b6486e4aa6c5d4e17fbf5b6, type: 3}
+  m_Script: {fileID: 11500000, guid: a77c174afd640df4db2e0814d1b80dc1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AmmoPickup
-  ammoType: {fileID: 11400000, guid: bef6fd61d6e8fce49a72033d33213885, type: 2}
+  m_EditorClassIdentifier: Assembly-CSharp::Collectible
+  item: {fileID: 0}
   minAmount: 1
-  maxAmount: 7
+  maxAmount: 1
+  ammoType: {fileID: 11400000, guid: 093a41e984dbe1e45a7a2c69efe8d879, type: 2}
+  normalSprite: {fileID: 0}
+  highlightedSprite: {fileID: 0}

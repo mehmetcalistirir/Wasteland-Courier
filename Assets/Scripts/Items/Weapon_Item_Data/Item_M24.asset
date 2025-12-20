@@ -15,8 +15,8 @@ MonoBehaviour:
   itemName: M24
   itemID: weapon_m24
   icon: {fileID: -952550666369105273, guid: 0ca327810e77d8d43b339f400f3becb7, type: 3}
-  category: 2
+  category: 5
   stackable: 0
   maxStack: 1
   weaponType: 3
-  weaponData: {fileID: 11400000, guid: 85c7b221ff1168c45b4f926ea4f212cc, type: 2}
+  weaponDefinition: {fileID: 11400000, guid: 85c7b221ff1168c45b4f926ea4f212cc, type: 2}

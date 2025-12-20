@@ -4,11 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class PlayerFootsteps : MonoBehaviour
 {
-    [Header("Footstep Clip (Loop)")]
+    [Header("Footstep Loop Clip")]
     public AudioClip footstepLoop;
-
-    [Header("Movement")]
-    public float minMovementSpeed = 0.005f;
 
     [Header("Sound")]
     public float volume = 0.9f;
@@ -16,57 +13,55 @@ public class PlayerFootsteps : MonoBehaviour
     public float maxPitch = 1.05f;
 
     private AudioSource src;
-    private Vector3 lastPosition;
-    private bool isMoving = false;
+    private Animator animator;
+    private bool wasMovingLastFrame = false;
 
     void Awake()
     {
         src = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
 
         src.playOnAwake = false;
-        src.loop = true;          // 🔴 EN ÖNEMLİ
-        src.spatialBlend = 0f;    // 2D
+        src.loop = true;
+        src.spatialBlend = 0f; // 2D
         src.volume = volume;
-
-        lastPosition = transform.position;
     }
 
     void Update()
     {
-        Vector3 currentPos = transform.position;
-        float distance = (currentPos - lastPosition).magnitude;
-        float speed = distance / Mathf.Max(Time.deltaTime, 0.0001f);
-        lastPosition = currentPos;
+        if (animator == null) return;
 
-        bool movingNow = speed >= minMovementSpeed;
+        // 🔑 GERÇEK HAREKET KAYNAĞI
+        bool isMoving = animator.GetBool("IsMoving");
 
         // Hareket BAŞLADI
-        if (movingNow && !isMoving)
+        if (isMoving && !wasMovingLastFrame)
         {
             StartFootsteps();
         }
         // Hareket BİTTİ
-        else if (!movingNow && isMoving)
+        else if (!isMoving && wasMovingLastFrame)
         {
             StopFootsteps();
         }
 
-        isMoving = movingNow;
+        wasMovingLastFrame = isMoving;
     }
 
     void StartFootsteps()
     {
         if (footstepLoop == null) return;
+        if (src.isPlaying) return;
 
         src.clip = footstepLoop;
         src.pitch = Random.Range(minPitch, maxPitch);
         src.volume = volume;
-
         src.Play();
     }
 
     void StopFootsteps()
     {
-        src.Stop();
+        if (src.isPlaying)
+            src.Stop();
     }
 }

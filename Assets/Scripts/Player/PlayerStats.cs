@@ -64,7 +64,6 @@ public class PlayerStats : MonoBehaviour
     // ------------------------------
     [Header("Hareket/Envanter")]
     public float moveSpeed = 5f;
-    public int gold = 10;
 
 
     // ------------------------------
@@ -434,5 +433,7 @@ public class PlayerStats : MonoBehaviour
 
     bloodVignetteUI.health01 = (float)current / max;
 }
+
+
 
 }

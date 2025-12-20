@@ -16,6 +16,6 @@ public enum ResourceType
     Ammo,
     Blueprint,
     Molotov,
-    Bandage// ✅ yeni eklenen
+    Bandage
 
 }

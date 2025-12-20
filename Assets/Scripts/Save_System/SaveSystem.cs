@@ -45,7 +45,6 @@ public static class SaveSystem
         data.maxStamina = stats.GetMaxStamina();
         data.currentHunger = stats.currentHunger;
         data.maxHunger = stats.maxHunger;
-        data.gold = stats.gold;
 
         // Inventory items
         data.inventory.Clear();
@@ -169,7 +168,6 @@ public static class SaveSystem
 
         stats.maxHunger = data.maxHunger;
         stats.currentHunger = data.currentHunger;
-        stats.gold = data.gold;
 
         // Inventory
         inventory.ClearInventory();

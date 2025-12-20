@@ -2,7 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class ButtonStateController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+[RequireComponent(typeof(Image), typeof(Button))]
+public class ButtonStateController : MonoBehaviour,
+    IPointerEnterHandler,
+    IPointerExitHandler,
+    IPointerDownHandler,
+    IPointerUpHandler
 {
     [Header("Sprites")]
     public Sprite normalSprite;
@@ -10,42 +15,60 @@ public class ButtonStateController : MonoBehaviour, IPointerEnterHandler, IPoint
     public Sprite clickedSprite;
 
     private Image image;
+    private Button button;
 
     void Awake()
     {
         image = GetComponent<Image>();
+        button = GetComponent<Button>();
+
         image.sprite = normalSprite;
     }
 
-    // Mouse üstüne gelince
+    // 🔒 Button pasifse hiçbir şey yapma
+    bool IsInteractable()
+    {
+        return button != null && button.interactable;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (!IsInteractable()) return;
         image.sprite = hoverSprite;
     }
 
-    // Mouse ayrılınca
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (!IsInteractable()) return;
         image.sprite = normalSprite;
     }
 
-    // Mouse tıklayınca
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!IsInteractable()) return;
         image.sprite = clickedSprite;
     }
 
-    // Mouse bırakınca
     public void OnPointerUp(PointerEventData eventData)
     {
-        // Eğer hala üzerindeyse hover'a, değilse normale dön
+        if (!IsInteractable()) return;
+
         if (RectTransformUtility.RectangleContainsScreenPoint(
-            GetComponent<RectTransform>(),
+            transform as RectTransform,
             Input.mousePosition))
         {
             image.sprite = hoverSprite;
         }
         else
+        {
+            image.sprite = normalSprite;
+        }
+    }
+
+    // 🔁 Button runtime'da disable edilirse sprite resetlensin
+    void Update()
+    {
+        if (!IsInteractable() && image.sprite != normalSprite)
         {
             image.sprite = normalSprite;
         }

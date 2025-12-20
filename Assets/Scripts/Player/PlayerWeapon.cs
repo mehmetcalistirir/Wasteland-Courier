@@ -23,10 +23,11 @@ public class PlayerWeapon : MonoBehaviour
     public Transform firePoint;
     public LayerMask enemyLayer;
 
-    [Header("Muzzle Flash")]
-    public Light2D muzzleFlash;
+    [Header("Lights")]
+    public Light2D spotLight;        // sürekli açık
+    public Light2D muzzleFlash;      // ateşte yanar
     public float muzzleFlashDuration = 0.05f;
-    public float muzzleFlashIntensity = 3f;
+    public float muzzleFlashIntensity = 1f;
     private Coroutine muzzleFlashCo;
     [Header("Ammo Check")]
     public float ammoCheckDuration = 0.35f;
@@ -37,6 +38,8 @@ public class PlayerWeapon : MonoBehaviour
 
     [Header("Reload Strategy")]
     public ReloadStrategy reloadStrategy = ReloadStrategy.MostFull;
+    public bool IsBusy =>
+    isReloading || isCheckingMag;
 
     private MagazineInstance lastUsedMagazine;
     private int lastMagIndex = -1;
@@ -85,12 +88,15 @@ public class PlayerWeapon : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         animator = GetComponentInChildren<Animator>();
-
         controls = new PlayerControls();
 
         if (muzzleFlash != null)
+        {
             muzzleFlash.enabled = false;
+            muzzleFlash.intensity = 0f;
+        }
     }
+
 
     private void Start()
     {
@@ -765,28 +771,29 @@ public class PlayerWeapon : MonoBehaviour
     // MUZZLE FLASH
     // ============================
     private void TryMuzzleFlash()
-    {
-        if (muzzleFlash == null) return;
+{
+    if (muzzleFlash == null) return;
 
-        muzzleFlash.transform.position = firePoint.position;
+    muzzleFlash.transform.position = firePoint.position;
 
-        if (muzzleFlashCo != null)
-            StopCoroutine(muzzleFlashCo);
+    if (muzzleFlashCo != null)
+        StopCoroutine(muzzleFlashCo);
 
-        muzzleFlashCo = StartCoroutine(MuzzleFlashRoutine());
-    }
+    muzzleFlashCo = StartCoroutine(MuzzleFlashRoutine());
+}
 
-    private IEnumerator MuzzleFlashRoutine()
-    {
-        float original = muzzleFlash.intensity;
-        muzzleFlash.enabled = true;
-        muzzleFlash.intensity = muzzleFlashIntensity;
+    
+private IEnumerator MuzzleFlashRoutine()
+{
+    muzzleFlash.enabled = true;
+    muzzleFlash.intensity = muzzleFlashIntensity;
 
-        yield return new WaitForSeconds(muzzleFlashDuration);
+    yield return new WaitForSeconds(muzzleFlashDuration);
 
-        muzzleFlash.intensity = original;
-        muzzleFlash.enabled = false;
-    }
+    muzzleFlash.intensity = 0f;
+    muzzleFlash.enabled = false;
+}
+
 
     public void PlayEmptyClipSound()
     {

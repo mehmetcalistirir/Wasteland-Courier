@@ -27,29 +27,29 @@ public class MainMenu : MonoBehaviour
 
     // ---------------- MUSIC ----------------
 
-   void PlayMenuMusic()
-{
-    if (musicSource == null || menuMusic == null)
+    void PlayMenuMusic()
     {
-        Debug.LogError("❌ Menü müziği atanmadı!");
-        return;
+        if (musicSource == null || menuMusic == null)
+        {
+            Debug.LogError("❌ Menü müziği atanmadı!");
+            return;
+        }
+
+        musicSource.clip = menuMusic;
+        musicSource.loop = true;
+
+        // 1. ADIM: Mixer grubunu AudioManager'dan alıp atayın
+        if (AudioManager.Instance != null)
+        {
+            musicSource.outputAudioMixerGroup = AudioManager.Instance.musicGroup;
+        }
+
+        // 2. ADIM: AudioSource volume değerini 1 yapın. 
+        // Ses seviyesini artık Mixer (desibel olarak) yönetecek.
+        musicSource.volume = 1f;
+
+        musicSource.Play();
     }
-
-    musicSource.clip = menuMusic;
-    musicSource.loop = true;
-
-    // 1. ADIM: Mixer grubunu AudioManager'dan alıp atayın
-    if (AudioManager.Instance != null)
-    {
-        musicSource.outputAudioMixerGroup = AudioManager.Instance.musicGroup;
-    }
-
-    // 2. ADIM: AudioSource volume değerini 1 yapın. 
-    // Ses seviyesini artık Mixer (desibel olarak) yönetecek.
-    musicSource.volume = 1f; 
-    
-    musicSource.Play();
-}
 
     // ---------------- BUTTONS ----------------
 
@@ -66,7 +66,8 @@ public class MainMenu : MonoBehaviour
     {
         SaveSystem.DeleteSave();
         SaveBootstrap.ShouldLoadFromSave = false;
-        SceneManager.LoadScene("Bolum1");
+        PlayerPrefs.SetString("SceneToLoad", "Bolum1");
+        SceneManager.LoadScene("LoadingScene");
     }
 
     public void DevamEt()
@@ -74,7 +75,9 @@ public class MainMenu : MonoBehaviour
         if (!SaveSystem.HasSave()) return;
 
         SaveBootstrap.ShouldLoadFromSave = true;
-        SceneManager.LoadScene("Bolum1");
+
+        PlayerPrefs.SetString("SceneToLoad", "Bolum1");
+        SceneManager.LoadScene("LoadingScene");
     }
 
     public void QuitGame()
@@ -96,7 +99,7 @@ public class MainMenu : MonoBehaviour
         OpenPanel(creditsPanel);
     }
 
-public void CloseCredits()
+    public void CloseCredits()
     {
         creditsPanel.SetActive(false);
         mainPanel.SetActive(true);
@@ -111,11 +114,12 @@ public void CloseCredits()
     {
         mainPanel.SetActive(false);
         panel.SetActive(true);
+        Canvas.ForceUpdateCanvases();
     }
     public void CloseSettings()
-{
-    settingsPanel.SetActive(false);
-    mainPanel.SetActive(true);
-}
+    {
+        settingsPanel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
 
 }

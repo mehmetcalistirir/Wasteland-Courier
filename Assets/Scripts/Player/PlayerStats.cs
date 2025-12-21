@@ -6,6 +6,17 @@ using UnityEngine.UI;
 
 public class PlayerStats : MonoBehaviour
 {
+    [Header("Breathing Sound")]
+public AudioClip heavyBreathingLoop;
+
+[Tooltip("Stamina bu değerin ALTINA düşerse nefes sesi başlar")]
+public float breathingStaminaThreshold = 25f;
+
+public float breathingVolume = 0.8f;
+public float breathingFadeSpeed = 2f;
+
+private AudioSource breathingSource;
+private bool isBreathingActive = false;
     // ------------------------------
     //   STAMINA (Açlığa Bağlı)
     // ------------------------------
@@ -126,6 +137,15 @@ public class PlayerStats : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
 
         AudioManager.Instance?.RouteToSFX(audioSource);
+        breathingSource = gameObject.AddComponent<AudioSource>();
+breathingSource.clip = heavyBreathingLoop;
+breathingSource.loop = true;
+breathingSource.playOnAwake = false;
+breathingSource.spatialBlend = 0f; // 2D
+breathingSource.volume = 0f;
+
+AudioManager.Instance?.RouteToSFX(breathingSource);
+
     }
 
     void Start()
@@ -162,6 +182,47 @@ public class PlayerStats : MonoBehaviour
 
         UpdateHungerUI();
         UpdateStaminaUI();
+        if (heavyBreathingLoop == null || breathingSource == null)
+        return;
+
+    // 🔴 STAMINA DÜŞÜK → NEFES BAŞLASIN
+    if (currentStamina <= breathingStaminaThreshold)
+    {
+        if (!isBreathingActive)
+        {
+            isBreathingActive = true;
+            breathingSource.volume = 0f;
+
+            if (!breathingSource.isPlaying)
+                breathingSource.Play();
+        }
+    }
+    // 🟢 STAMINA YETERLİ → NEFES KESİLSİN
+    else
+    {
+        isBreathingActive = false;
+    }
+
+    // 🎚️ FADE
+    if (isBreathingActive)
+    {
+        breathingSource.volume = Mathf.MoveTowards(
+            breathingSource.volume,
+            breathingVolume,
+            breathingFadeSpeed * Time.deltaTime
+        );
+    }
+    else
+    {
+        breathingSource.volume = Mathf.MoveTowards(
+            breathingSource.volume,
+            0f,
+            breathingFadeSpeed * Time.deltaTime
+        );
+
+        if (breathingSource.volume <= 0.01f && breathingSource.isPlaying)
+            breathingSource.Stop();
+    }
 
     }
 

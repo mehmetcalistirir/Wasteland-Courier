@@ -159,6 +159,8 @@ MonoBehaviour:
   hurtSounds: []
   deathSound: {fileID: 0}
   ambientSoundInterval: {x: 5, y: 15}
+  caravanClawAttackSounds:
+  - {fileID: 8300000, guid: dad71b2ba05dc9c47960718bebffeed0, type: 3}
   isAttacking: 0
 --- !u!95 &7676543833574890051
 Animator:

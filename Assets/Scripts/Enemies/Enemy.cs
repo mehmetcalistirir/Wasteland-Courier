@@ -36,6 +36,10 @@ public class Enemy : MonoBehaviour
     public AudioClip deathSound;
     public Vector2 ambientSoundInterval = new Vector2(5f, 15f);
 
+    [Header("Caravan Attack Audio")]
+public List<AudioClip> caravanClawAttackSounds;
+
+
     private Animator animator;
     private AudioSource audioSource;
 
@@ -68,6 +72,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+         animator.SetBool("IsAttacking", isAttacking);
         if (target == null)
         {
             ResolveTargets();
@@ -97,6 +102,42 @@ public class Enemy : MonoBehaviour
             StartCoroutine(AttackPlayerRoutine());
         }
     }
+    // ========================
+// ANIMATION EVENT (CARAVAN ATTACK)
+// ========================
+public void DealCaravanDamageWithSound()
+{
+    // Sadece Armored enemy karavana vurur
+    if (enemyType != EnemyType.Armored)
+        return;
+
+    if (target == null || !target.CompareTag("Caravan"))
+        return;
+
+    // 💥 HASAR
+    CaravanHealth ch = target.GetComponent<CaravanHealth>();
+    if (ch != null)
+        ch.TakeDamage(armoredCaravanDamage);
+
+    // 🔊 SES
+    if (caravanClawAttackSounds != null && caravanClawAttackSounds.Count > 0)
+    {
+        int index = Random.Range(0, caravanClawAttackSounds.Count);
+        audioSource.PlayOneShot(caravanClawAttackSounds[index]);
+    }
+    PlayCaravanClawAttackSound();
+}
+public void PlayCaravanClawAttackSound()
+{
+    if (caravanClawAttackSounds == null || caravanClawAttackSounds.Count == 0)
+        return;
+
+    int index = Random.Range(0, caravanClawAttackSounds.Count);
+    audioSource.PlayOneShot(caravanClawAttackSounds[index]);
+}
+
+
+
 
     // ========================
     // TARGET RESOLUTION

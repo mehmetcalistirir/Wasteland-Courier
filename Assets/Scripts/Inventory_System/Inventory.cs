@@ -50,6 +50,7 @@ public class Inventory : MonoBehaviour
     // ---------------- ADD ----------------
     public bool TryAdd(ItemData data, int amount = 1)
     {
+
         if (data == null || amount <= 0)
             return false;
 
@@ -58,6 +59,9 @@ public class Inventory : MonoBehaviour
         {
             for (int i = 0; i < slots.Length; i++)
             {
+                var s = slots[i];
+                if (s?.data != null)
+                    Debug.Log($"[INV SLOT] {s.data.itemName} id='{s.data.itemID}' count={s.count}");
                 if (slots[i].data == null)
                 {
                     slots[i] = new InventoryItem
@@ -525,6 +529,57 @@ public class Inventory : MonoBehaviour
         }
 
         return remain <= 0;
+    }
+    public int GetItemCountByID(string itemID)
+    {
+        if (string.IsNullOrEmpty(itemID)) return 0;
+
+        int total = 0;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var s = slots[i];
+            if (s == null || s.data == null) continue;
+
+            if (s.data.itemID == itemID)
+                total += s.count;
+        }
+        return total;
+    }
+
+
+    public bool HasEnoughByID(string itemID, int amount)
+    {
+        int total = 0;
+
+        foreach (var s in slots)
+        {
+            if (s.data != null && s.data.itemID == itemID)
+                total += s.count;
+        }
+
+        return total >= amount;
+    }
+
+    public bool TryConsumeByID(string itemID, int amount)
+    {
+        int remaining = amount;
+
+        for (int i = 0; i < slots.Length && remaining > 0; i++)
+        {
+            var s = slots[i];
+            if (s.data != null && s.data.itemID == itemID)
+            {
+                int take = Mathf.Min(remaining, s.count);
+                s.count -= take;
+                remaining -= take;
+
+                if (s.count <= 0)
+                    slots[i] = new InventoryItem();
+            }
+        }
+
+        RaiseChanged();
+        return remaining == 0;
     }
 
 }

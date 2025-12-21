@@ -17,7 +17,6 @@ public class CaravanInteraction : MonoBehaviour
     if (other.GetComponentInParent<PlayerMovement>() != null)
     {
         playerInRange = true;
-        Debug.Log("Caravan → Player MENZİLE GİRDİ");
     }
 }
 
@@ -26,7 +25,6 @@ private void OnTriggerExit2D(Collider2D other)
     if (other.GetComponentInParent<PlayerMovement>() != null)
     {
         playerInRange = false;
-        Debug.Log("Caravan → Player MENZİLDEN ÇIKTI");
         PlayerInputRouter.Instance?.ForceCloseCraft();
     }
 }

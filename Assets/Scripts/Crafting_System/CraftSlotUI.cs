@@ -4,43 +4,38 @@ using TMPro;
 
 public class CraftSlotUI : MonoBehaviour
 {
-    public Image icon;
-    public TMP_Text nameText;
-    public Transform costRoot;
-    public GameObject costEntryPrefab;
+    public WeaponCraftRecipe recipe;
+    public Button craftButton;
 
-    private WeaponCraftRecipe recipe;
+    [Header("UI")]
+    public TextMeshProUGUI resultText;
+    public TextMeshProUGUI costText;
 
-    public void Setup(WeaponCraftRecipe recipe, Sprite weaponIcon, string name)
+    private CraftUIController ui;
+
+    public void Setup(
+        WeaponCraftRecipe r,
+        CraftUIController controller
+    )
     {
-        this.recipe = recipe;
+        recipe = r;
+        ui = controller;
 
-        icon.sprite = weaponIcon;
-        nameText.text = name;
+        // 🎯 Sonuç
+        resultText.text = r.resultWeapon.itemName;
 
-        RefreshCosts();
-    }
-
-    private void RefreshCosts()
-    {
-        // Eski maliyet entry'lerini temizle
-        foreach (Transform t in costRoot)
-            Destroy(t.gameObject);
-
-        foreach (var cost in recipe.costs)
+        // 📦 Cost listesi (ÖNEMLİ KISIM)
+        costText.text = "";
+        foreach (var cost in r.costs)
         {
-            GameObject costGO = Instantiate(costEntryPrefab, costRoot);
-            CraftCostUI ui = costGO.GetComponent<CraftCostUI>();
-
-            int playerAmount = Inventory.Instance.GetItemCount(cost.item);
-
-            ui.Setup(cost.item, cost.amount, playerAmount);
+            int have = Inventory.Instance.GetItemCountByID(cost.item.itemID);
+            costText.text +=
+                $"{cost.item.itemName} {have}/{cost.amount}\n";
         }
-    }
 
-    // UI butonu için
-    public void OnSelectPressed()
-    {
-        CraftUIController.Instance.SelectRecipe(recipe);
+        craftButton.onClick.RemoveAllListeners();
+        craftButton.onClick.AddListener(() =>
+            ui.OnCraftButtonClicked(recipe)
+        );
     }
 }

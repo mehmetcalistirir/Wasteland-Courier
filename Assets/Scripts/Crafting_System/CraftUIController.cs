@@ -1,151 +1,62 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 public class CraftUIController : MonoBehaviour
 {
-    [Header("UI")]
-    public GameObject craftPanel;
-    public Transform gridParent;
+    [Header("UI Refs")]
+    public Transform craftContainer;
     public GameObject craftSlotPrefab;
-    public Button craftButton;
-    public TMP_Text craftButtonText;
 
-    [Header("Logic")]
-    public WeaponCraftRecipe selectedRecipe;
-
-    public static CraftUIController Instance;
-
-    private void Awake()
+    private void OnEnable()
     {
-        Instance = this;
+        RefreshUI();
+        Inventory.Instance.OnChanged += RefreshUI;
     }
 
-    private void Start()
+    private void OnDisable()
     {
-        PopulateRecipes();
-        craftPanel.SetActive(false);
+        Inventory.Instance.OnChanged -= RefreshUI;
     }
 
-    // --------------------------------------------------
-    // Tarif Slotlarını oluştur
-    // --------------------------------------------------
-    public void PopulateRecipes()
+    // ------------------------------------------------
+    // 🔄 UI Yenile
+    // ------------------------------------------------
+    public void RefreshUI()
     {
-        foreach (Transform t in gridParent)
-            Destroy(t.gameObject);
-
-        if (CraftingSystem.Instance == null)
+        // 1️⃣ Temizle
+        for (int i = craftContainer.childCount - 1; i >= 0; i--)
         {
-            Debug.LogError("CraftingSystem.Instance bulunamadı!");
-            return;
+            Destroy(craftContainer.GetChild(i).gameObject);
         }
 
+        // 2️⃣ Tarifleri bas
         foreach (var recipe in CraftingSystem.Instance.recipes)
         {
-            GameObject slotGO = Instantiate(craftSlotPrefab, gridParent);
+            GameObject go = Instantiate(
+                craftSlotPrefab,
+                craftContainer
+            );
 
-            CraftSlotUI slotUI = slotGO.GetComponent<CraftSlotUI>();
-            if (slotUI == null)
-            {
-                Debug.LogError("CraftSlot prefabında CraftSlotUI yok!");
-                continue;
-            }
+            CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
+            slotUI.Setup(recipe, this);
 
-            WeaponItemData weaponItem = recipe.resultWeapon;
-            if (weaponItem == null)
-            {
-                Debug.LogError("Tarifte resultWeapon (WeaponItemData) eksik!");
-                continue;
-            }
+            bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
 
-            slotUI.Setup(recipe, weaponItem.icon, weaponItem.itemName);
+            slotUI.craftButton.interactable = canCraft;
+
+            CanvasGroup cg = go.GetComponent<CanvasGroup>();
+            if (cg != null)
+                cg.alpha = canCraft ? 1f : 0.4f;
         }
     }
 
-    // --------------------------------------------------
-    // Tarif seçme
-    // --------------------------------------------------
-    public void SelectRecipe(WeaponCraftRecipe recipe)
+    // ------------------------------------------------
+    // 🔴 Button burayı çağırır
+    // ------------------------------------------------
+    public void OnCraftButtonClicked(WeaponCraftRecipe recipe)
     {
-        selectedRecipe = recipe;
-
-        WeaponItemData weaponItem = recipe.resultWeapon;
-        bool existsInCaravan = CaravanInventory.Instance.HasWeapon(weaponItem);
-
-        craftButtonText.text = existsInCaravan ? "Swap" : "Craft";
-    }
-
-    // --------------------------------------------------
-    // Craft / Swap butonu
-    // --------------------------------------------------
-    public void OnCraftButtonPressed()
-    {
-        if (selectedRecipe == null)
-        {
-            Debug.Log("Tarif seçilmedi.");
-            return;
-        }
-
-        WeaponItemData weaponItem = selectedRecipe.resultWeapon;
-        bool existsInCaravan = CaravanInventory.Instance.HasWeapon(weaponItem);
-
-        if (existsInCaravan)
-        {
-            SwapWithCaravan(weaponItem);
-            Debug.Log($"Swap: {weaponItem.itemName}");
-            selectedRecipe = null;
-            return;
-        }
-
-        bool success = CraftingSystem.Instance.TryCraft(selectedRecipe);
+        bool success = CraftingSystem.Instance.TryCraft(recipe);
 
         if (success)
-        {
-            Debug.Log($"Craft başarılı: {weaponItem.itemName}");
-            PopulateRecipes();
-            selectedRecipe = null;
-        }
-        else
-        {
-            Debug.Log($"Craft başarısız: {weaponItem.itemName}");
-        }
-    }
-
-    // --------------------------------------------------
-    // Swap işlemi
-    // --------------------------------------------------
-    private void SwapWithCaravan(WeaponItemData weaponItem)
-    {
-        if (weaponItem == null)
-            return;
-
-        // Hangi slotta bu silah takılmalı?
-        WeaponSlotType slotType =
-            WeaponSlotManager.Instance.GetSlotForWeapon(weaponItem.weaponType);
-
-        int slotIndex = (int)slotType;
-
-        // Mevcut silahı karavana koy
-        WeaponItemData currentItem =
-            WeaponSlotManager.Instance.GetWeaponItemInSlot(slotIndex);
-
-        if (currentItem != null)
-            CaravanInventory.Instance.StoreWeapon(currentItem);
-
-        // Karavandan seçilen silahı çıkar
-        var list = CaravanInventory.Instance.GetWeapons(weaponItem.weaponType);
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (list[i].itemID == weaponItem.itemID)
-            {
-                list.RemoveAt(i);
-                break;
-            }
-        }
-
-        // Yeni silahı tak
-        WeaponSlotManager.Instance.EquipWeaponInSlot(weaponItem, slotIndex);
-        WeaponSlotManager.Instance.SwitchSlot(slotIndex);
+            RefreshUI();
     }
 }

@@ -54,8 +54,9 @@ public class CraftingSystem : MonoBehaviour
 
         foreach (var cost in recipe.costs)
         {
-            if (!Inventory.Instance.HasEnough(cost.item, cost.amount))
-                return false;
+            if (!Inventory.Instance.HasEnoughByID(cost.item.itemID, cost.amount))
+    return false;
+
         }
 
         return true;
@@ -76,7 +77,8 @@ public class CraftingSystem : MonoBehaviour
 
         // 1) Kaynakları tüket
         foreach (var cost in recipe.costs)
-            Inventory.Instance.TryConsume(cost.item, cost.amount);
+    Inventory.Instance.TryConsumeByID(cost.item.itemID, cost.amount);
+
 
         // 2) Unlock et (ITEM ID)
         unlockedWeapons.Add(GetKey(weaponItem));

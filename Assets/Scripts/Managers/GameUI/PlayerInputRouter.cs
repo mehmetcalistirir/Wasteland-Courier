@@ -86,19 +86,13 @@ public class PlayerInputRouter : MonoBehaviour
     // CRAFT (C)
     // ================================
     public void OnCraft(InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
-        if (IsPauseOpen()) return;
+{
+    if (!ctx.performed) return;
+    if (IsPauseOpen()) return;
 
-        // ❌ Caravan yoksa veya menzilde değilse → açma
-        if (caravan == null || !caravan.playerInRange)
-        {
-            Debug.Log("Craft açılamadı → Caravan menzilinde değilsin.");
-            return;
-        }
+    ToggleCraft();
+}
 
-        TogglePanel(craftPanel);
-    }
 
 
     public void SetGameplayInput(bool enabled)
@@ -181,11 +175,6 @@ public class PlayerInputRouter : MonoBehaviour
         CloseAllPanels();
         panel.SetActive(open);
 
-        // Pause logic
-        if (panel == pauseMenuPanel)
-        {
-            Time.timeScale = open ? 0f : 1f;
-        }
 
 
     }
@@ -202,9 +191,18 @@ public class PlayerInputRouter : MonoBehaviour
         if (pauseMenuPanel && pauseMenuPanel.activeSelf)
         {
             pauseMenuPanel.SetActive(false);
-            Time.timeScale = 1f;
         }
     }
+    public void ToggleCraft()
+{
+    if (caravan == null || !caravan.playerInRange)
+        return;
+
+    TogglePanel(craftPanel);
+    GameStateManager.SetPaused(craftPanel.activeSelf);
+}
+
+
 
 
     // ================================

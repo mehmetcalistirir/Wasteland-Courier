@@ -96,10 +96,18 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void UpdateAnimation()
-    {
-        if (animator == null) return;
-        animator.SetBool("IsMoving", isMoving);
-    }
+{
+    if (animator == null) return;
+
+    animator.SetBool("IsMoving", isMoving);
+
+    // 🔑 EN KRİTİK SATIR
+    animator.SetBool(
+        "IsRunning",
+        isSprinting && stats.HasStamina()
+    );
+}
+
 
     private void UpdateRotation()
     {

@@ -4,17 +4,22 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class PlayerFootsteps : MonoBehaviour
 {
-    [Header("Footstep Loop Clip")]
-    public AudioClip footstepLoop;
+    [Header("Footstep Loop Clips")]
+    public AudioClip walkLoop;
+    public AudioClip runLoop;
 
     [Header("Sound")]
-    public float volume = 0.9f;
+    public float walkVolume = 0.7f;
+    public float runVolume = 0.95f;
+
     public float minPitch = 0.95f;
     public float maxPitch = 1.05f;
 
     private AudioSource src;
     private Animator animator;
+
     private bool wasMovingLastFrame = false;
+    private bool wasRunningLastFrame = false;
 
     void Awake()
     {
@@ -24,39 +29,52 @@ public class PlayerFootsteps : MonoBehaviour
         src.playOnAwake = false;
         src.loop = true;
         src.spatialBlend = 0f; // 2D
-        src.volume = volume;
     }
 
     void Update()
     {
         if (animator == null) return;
 
-        // 🔑 GERÇEK HAREKET KAYNAĞI
         bool isMoving = animator.GetBool("IsMoving");
+        bool isRunning = animator.GetBool("IsRunning");
 
-        // Hareket BAŞLADI
-        if (isMoving && !wasMovingLastFrame)
+        // ⛔ HAREKET YOK → SES YOK
+        if (!isMoving)
         {
-            StartFootsteps();
-        }
-        // Hareket BİTTİ
-        else if (!isMoving && wasMovingLastFrame)
-        {
-            StopFootsteps();
+            if (wasMovingLastFrame)
+                StopFootsteps();
+
+            wasMovingLastFrame = false;
+            wasRunningLastFrame = false;
+            return;
         }
 
-        wasMovingLastFrame = isMoving;
+        // ▶️ HAREKET BAŞLADI
+        if (!wasMovingLastFrame)
+        {
+            PlayFootsteps(isRunning);
+        }
+        // 🔁 WALK ↔ RUN GEÇİŞİ
+        else if (wasRunningLastFrame != isRunning)
+        {
+            PlayFootsteps(isRunning);
+        }
+
+        wasMovingLastFrame = true;
+        wasRunningLastFrame = isRunning;
     }
 
-    void StartFootsteps()
+    void PlayFootsteps(bool running)
     {
-        if (footstepLoop == null) return;
-        if (src.isPlaying) return;
+        AudioClip targetClip = running ? runLoop : walkLoop;
+        if (targetClip == null) return;
 
-        src.clip = footstepLoop;
+        src.clip = targetClip;
         src.pitch = Random.Range(minPitch, maxPitch);
-        src.volume = volume;
-        src.Play();
+        src.volume = running ? runVolume : walkVolume;
+
+        if (!src.isPlaying)
+            src.Play();
     }
 
     void StopFootsteps()

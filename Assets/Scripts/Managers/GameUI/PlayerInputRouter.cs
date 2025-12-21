@@ -8,49 +8,18 @@ public class PlayerInputRouter : MonoBehaviour
     private PlayerControls controls;
 
     [Header("Panels")]
-    public GameObject inventoryPanel;
     public GameObject craftPanel;
     public GameObject tradePanel;
     public GameObject pauseMenuPanel;
 
-
     [Header("References")]
-    public CaravanInteraction caravan; // Craft için gerekecek
-
-
-    private bool IsPauseOpen()
-    {
-        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
-    }
-
-    private void Update()
-    {
-        // Craft açıksa ama artık menzilde değilsek → kapat
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            if (caravan == null || !caravan.playerInRange)
-            {
-                craftPanel.SetActive(false);
-                GameStateManager.SetPaused(false);
-            }
-        }
-    }
-    public void ForceCloseCraft()
-    {
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            GameStateManager.SetPaused(false);
-        }
-    }
-
+    public CaravanInteraction caravan;
 
     private void Awake()
     {
         Instance = this;
         controls = new PlayerControls();
     }
-
 
     private void OnEnable()
     {
@@ -60,6 +29,7 @@ public class PlayerInputRouter : MonoBehaviour
 
         controls.Gameplay.Enable();
     }
+
     private void OnDisable()
     {
         controls.Gameplay.Inventory.performed -= OnInventory;
@@ -69,55 +39,48 @@ public class PlayerInputRouter : MonoBehaviour
         controls.Gameplay.Disable();
     }
 
-
-    // ================================
-    // INVENTORY (I)
-    // ================================
-    public void OnInventory(InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
-        if (IsPauseOpen()) return;
-
-        TogglePanel(inventoryPanel);
-    }
-
-
-    // ================================
-    // CRAFT (C)
-    // ================================
-    public void OnCraft(InputAction.CallbackContext ctx)
+    // ==============================
+    // INVENTORY (I) → PIPBOY
+    // ==============================
+    private void OnInventory(InputAction.CallbackContext ctx)
 {
     if (!ctx.performed) return;
     if (IsPauseOpen()) return;
 
-    ToggleCraft();
+    if (PipBoyController.Instance == null)
+        return;
+
+    // PipBoy zaten açıksa tekrar açma
+    if (PipBoyController.Instance.IsOpen)
+        return;
+
+    PipBoyController.Instance.Open(0);
 }
 
 
-
-    public void SetGameplayInput(bool enabled)
+    // ==============================
+    // CRAFT (C)
+    // ==============================
+    private void OnCraft(InputAction.CallbackContext ctx)
     {
-        if (enabled)
-            controls.Gameplay.Enable();
-        else
-            controls.Gameplay.Disable();
+        if (!ctx.performed) return;
+        if (IsPauseOpen()) return;
+
+        if (caravan == null || !caravan.playerInRange)
+            return;
+
+        ToggleCraft();
     }
 
-    // ================================
-    // TRADE (E)
-    // ================================
-
-
-
-    // ================================
-    // ESC (PAUSE + PANEL KAPAMA)
-    // ================================
-    public void OnEscape(InputAction.CallbackContext ctx)
+    // ==============================
+    // ESC
+    // ==============================
+    private void OnEscape(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
         if (GameStateManager.IsGameOver) return;
 
-        // 1️⃣ Pause AÇIKSA → sadece Pause kapansın
+        // 1️⃣ Pause açıksa → kapat
         if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
         {
             PauseMenu.Instance.HidePause();
@@ -141,73 +104,50 @@ public class PlayerInputRouter : MonoBehaviour
             return;
         }
 
-        // 4️⃣ Inventory açıksa → kapat
-        if (inventoryPanel != null && inventoryPanel.activeSelf)
-        {
-            inventoryPanel.SetActive(false);
-            GameStateManager.SetPaused(false);
-            return;
-        }
-
-        // 5️⃣ Hiçbir panel açık değil → Pause aç
-        CloseAllPanels();                 // 🔒 Güvenlik: başka panel kalmasın
+        // 4️⃣ Hiçbiri açık değil → Pause aç
         PauseMenu.Instance.ShowPause();
         GameStateManager.SetPaused(true);
     }
 
-
-
-
-
-
-
-
-
-    // ================================
-    // PANEL HELPERS
-    // ================================
-    private void TogglePanel(GameObject panel)
-    {
-        if (panel == null) return;
-
-        bool open = !panel.activeSelf;
-
-        CloseAllPanels();
-        panel.SetActive(open);
-
-
-
-    }
-
-    private void CloseAllPanels()
-    {
-        if (inventoryPanel) inventoryPanel.SetActive(false);
-        if (craftPanel) craftPanel.SetActive(false);
-        if (tradePanel) tradePanel.SetActive(false);
-
-        // HUD geri gelsin
-
-        // Pause kapandıysa oyun devam etsin
-        if (pauseMenuPanel && pauseMenuPanel.activeSelf)
-        {
-            pauseMenuPanel.SetActive(false);
-        }
-    }
-    public void ToggleCraft()
+    public void ForceCloseCraft()
 {
-    if (caravan == null || !caravan.playerInRange)
-        return;
-
-    TogglePanel(craftPanel);
-    GameStateManager.SetPaused(craftPanel.activeSelf);
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        craftPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+    }
 }
 
 
+    // ==============================
+    // HELPERS
+    // ==============================
+    private bool IsPauseOpen()
+    {
+        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
+    }
 
+    private void ToggleCraft()
+    {
+        bool open = !craftPanel.activeSelf;
+        craftPanel.SetActive(open);
+        GameStateManager.SetPaused(open);
+    }
 
-    // ================================
+    // ==============================
+    // INPUT CONTROL (PipBoy çağırır)
+    // ==============================
+    public void SetGameplayInput(bool enabled)
+    {
+        if (enabled)
+            controls.Gameplay.Enable();
+        else
+            controls.Gameplay.Disable();
+    }
+
+    // ==============================
     // UNUSED INPUTS
-    // ================================
+    // ==============================
     public void OnMove(InputAction.CallbackContext ctx) { }
     public void OnSprint(InputAction.CallbackContext ctx) { }
     public void OnMap(InputAction.CallbackContext ctx) { }

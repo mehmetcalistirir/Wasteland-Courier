@@ -7,6 +7,9 @@ public class CraftingSystem : MonoBehaviour
 
     [Header("Weapon Craft Recipes")]
     public List<WeaponCraftRecipe> recipes = new();
+    
+    [Header("Item Craft Recipes")]
+    public List<ItemCraftRecipe> itemRecipes = new();
 
     public CaravanInventory caravanInventory;
 
@@ -91,4 +94,50 @@ public class CraftingSystem : MonoBehaviour
 
         return true;
     }
+    public bool CanCraftItem(ItemCraftRecipe recipe)
+{
+    if (recipe == null) return false;
+
+    if (recipe.unlockOnce && unlockedWeapons.Contains(recipe.unlockID))
+        return false;
+
+    foreach (var cost in recipe.costs)
+    {
+        if (!Inventory.Instance.HasEnoughByID(
+            cost.item.itemID,
+            cost.amount))
+            return false;
+    }
+
+    return Inventory.Instance.CanAdd(
+        recipe.resultItem,
+        recipe.resultAmount);
+}
+
+public bool TryCraftItem(ItemCraftRecipe recipe)
+{
+    if (!CanCraftItem(recipe))
+        return false;
+
+    // 1️⃣ Tüket
+    foreach (var cost in recipe.costs)
+    {
+        Inventory.Instance.TryConsumeByID(
+            cost.item.itemID,
+            cost.amount);
+    }
+
+    // 2️⃣ Ver
+    Inventory.Instance.TryAdd(
+        recipe.resultItem,
+        recipe.resultAmount);
+
+    // 3️⃣ Unlock (opsiyonel)
+    if (recipe.unlockOnce)
+        unlockedWeapons.Add(recipe.unlockID);
+
+    Debug.Log($"✔ ITEM CRAFT → {recipe.resultItem.itemName}");
+    return true;
+}
+
 }

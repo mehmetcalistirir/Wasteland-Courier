@@ -60,3 +60,4 @@ public class CraftUIController : MonoBehaviour
             RefreshUI();
     }
 }
+

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_Recip_M4A1
   m_EditorClassIdentifier: Assembly-CSharp::WeaponCraftRecipe
   resultWeapon: {fileID: 11400000, guid: 36cef50bceae80842aba611729f93107, type: 2}
-  description: M4A1
+  description: "Taramal\u0131 t\xFCfek"
   costs:
   - item: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
     amount: 2

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_Recip_M24
   m_EditorClassIdentifier: Assembly-CSharp::WeaponCraftRecipe
   resultWeapon: {fileID: 11400000, guid: 4a4ef5c848983a447a66f4f8c5b04abf, type: 2}
-  description: M24
+  description: "Keskin ni\u015Fanc\u0131 t\xFCfe\u011Fi"
   costs:
   - item: {fileID: 11400000, guid: 471c0233f217e4a42bba36553607646f, type: 2}
     amount: 2

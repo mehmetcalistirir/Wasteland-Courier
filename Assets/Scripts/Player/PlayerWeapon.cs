@@ -52,6 +52,8 @@ public class PlayerWeapon : MonoBehaviour
     public event System.Action<string> OnAmmoCheckFeedback;
     // "Az mermi var", "Tam dolu" vs.
 
+    private float lastShotTime;
+
 
     [Header("Audio")]
     public AudioClip shootSound;
@@ -314,8 +316,15 @@ public class PlayerWeapon : MonoBehaviour
         if (!weaponData.isAutomatic)
         {
             if (Input.GetMouseButtonDown(0))
-                Shoot();
+            {
+                if (Time.time - lastAutoFireTime >= (1f / weaponData.fireRate))
+                {
+                    lastAutoFireTime = Time.time;
+                    Shoot();
+                }
+            }
         }
+
 
         // 🔥 Otomatik atış
         if (weaponData.isAutomatic)
@@ -438,6 +447,16 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     public void Shoot()
     {
+        float cooldown =
+    weaponData.isShotgun
+    ? weaponData.shotgunCooldown
+    : (1f / weaponData.fireRate);
+
+        if (Time.time - lastShotTime < cooldown)
+            return;
+
+        lastShotTime = Time.time;
+
         if (currentMagazine == null)
         {
             PlayEmptyClipSound();
@@ -913,13 +932,12 @@ public class PlayerWeapon : MonoBehaviour
         }
         CollectMagazinesFromInventory();
 
-        currentMagazine = null;
-
-        if (inventoryMags.Count > 0)
+        if (currentMagazine == null && inventoryMags.Count > 0)
         {
             currentMagazine = SelectNextMagazine();
             inventoryMags.Remove(currentMagazine);
         }
+
 
     }
 

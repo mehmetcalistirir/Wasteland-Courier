@@ -18,8 +18,24 @@ public class Inventory : MonoBehaviour
     public event Action OnChanged;
     public void RaiseChanged() => OnChanged?.Invoke();
 
-    // Yeni mermi depolama sistemi: ammoType(string) -> toplam mermi sayısı
 
+    //envantere inspectordan ekleneleri siler
+    /*
+        void Awake()
+        {
+            if (Instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+
+            slots = new InventoryItem[capacity];
+            for (int i = 0; i < capacity; i++)
+                slots[i] = new InventoryItem();
+        }
+        */
 
     void Awake()
     {
@@ -31,9 +47,13 @@ public class Inventory : MonoBehaviour
 
         Instance = this;
 
-        slots = new InventoryItem[capacity];
-        for (int i = 0; i < capacity; i++)
-            slots[i] = new InventoryItem();
+        // ❗ SADECE boşsa oluştur
+        if (slots == null || slots.Length == 0)
+        {
+            slots = new InventoryItem[capacity];
+            for (int i = 0; i < capacity; i++)
+                slots[i] = new InventoryItem();
+        }
     }
 
     public bool IsMagazineEquipped(MagazineInstance mag)

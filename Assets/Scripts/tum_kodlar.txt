@@ -1462,7 +1462,6 @@ public class CaravanInteraction : MonoBehaviour
     if (other.GetComponentInParent<PlayerMovement>() != null)
     {
         playerInRange = true;
-        Debug.Log("Caravan â†’ Player MENZÄ°LE GÄ°RDÄ°");
     }
 }
 
@@ -1471,7 +1470,6 @@ private void OnTriggerExit2D(Collider2D other)
     if (other.GetComponentInParent<PlayerMovement>() != null)
     {
         playerInRange = false;
-        Debug.Log("Caravan â†’ Player MENZÄ°LDEN Ã‡IKTI");
         PlayerInputRouter.Instance?.ForceCloseCraft();
     }
 }
@@ -1913,25 +1911,22 @@ public class Collectible : MonoBehaviour
     }
 
 }
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-public class CraftCostUI : MonoBehaviour
+public class CostRowUI : MonoBehaviour
 {
     public Image icon;
-    public TMP_Text amountText;
+    public TMP_Text text;
 
-    public void Setup(ItemData item, int requiredAmount, int playerAmount)
+    public void Setup(Sprite sprite, string itemName, int owned, int required)
     {
-        if (icon != null && item != null)
-            icon.sprite = item.icon;
+        Debug.Log($"[COST ROW] sprite={(sprite ? sprite.name : "NULL")}");
+        icon.sprite = sprite;
 
-        if (amountText != null)
-        {
-            amountText.text = $"{playerAmount}/{requiredAmount}";
-            amountText.color = playerAmount >= requiredAmount ? Color.white : Color.red;
-        }
+        text.text = $"{itemName}  {owned}/{required}";
+        text.color = owned >= required ? Color.white : Color.red;
     }
 }
 using System.Collections.Generic;
@@ -1943,6 +1938,9 @@ public class CraftingSystem : MonoBehaviour
 
     [Header("Weapon Craft Recipes")]
     public List<WeaponCraftRecipe> recipes = new();
+    
+    [Header("Item Craft Recipes")]
+    public List<ItemCraftRecipe> itemRecipes = new();
 
     public CaravanInventory caravanInventory;
 
@@ -1990,8 +1988,9 @@ public class CraftingSystem : MonoBehaviour
 
         foreach (var cost in recipe.costs)
         {
-            if (!Inventory.Instance.HasEnough(cost.item, cost.amount))
-                return false;
+            if (!Inventory.Instance.HasEnoughByID(cost.item.itemID, cost.amount))
+    return false;
+
         }
 
         return true;
@@ -2012,7 +2011,8 @@ public class CraftingSystem : MonoBehaviour
 
         // 1) KaynaklarÄ± tÃ¼ket
         foreach (var cost in recipe.costs)
-            Inventory.Instance.TryConsume(cost.item, cost.amount);
+    Inventory.Instance.TryConsumeByID(cost.item.itemID, cost.amount);
+
 
         // 2) Unlock et (ITEM ID)
         unlockedWeapons.Add(GetKey(weaponItem));
@@ -2025,203 +2025,308 @@ public class CraftingSystem : MonoBehaviour
 
         return true;
     }
+    public bool CanCraftItem(ItemCraftRecipe recipe)
+{
+    if (recipe == null) return false;
+
+    if (recipe.unlockOnce && unlockedWeapons.Contains(recipe.unlockID))
+        return false;
+
+    foreach (var cost in recipe.costs)
+    {
+        if (!Inventory.Instance.HasEnoughByID(
+            cost.item.itemID,
+            cost.amount))
+            return false;
+    }
+
+    return Inventory.Instance.CanAdd(
+        recipe.resultItem,
+        recipe.resultAmount);
 }
+
+public bool TryCraftItem(ItemCraftRecipe recipe)
+{
+    if (!CanCraftItem(recipe))
+        return false;
+
+    // 1ï¸âƒ£ TÃ¼ket
+    foreach (var cost in recipe.costs)
+    {
+        Inventory.Instance.TryConsumeByID(
+            cost.item.itemID,
+            cost.amount);
+    }
+
+    // 2ï¸âƒ£ Ver
+    Inventory.Instance.TryAdd(
+        recipe.resultItem,
+        recipe.resultAmount);
+
+    // 3ï¸âƒ£ Unlock (opsiyonel)
+    if (recipe.unlockOnce)
+        unlockedWeapons.Add(recipe.unlockID);
+
+    Debug.Log($"âœ” ITEM CRAFT â†’ {recipe.resultItem.itemName}");
+    return true;
+}
+
+}
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+
+
+public enum CraftRecipeType
+{
+    Weapon,
+    Item
+}
+
 
 public class CraftSlotUI : MonoBehaviour
 {
-    public Image icon;
+    [Header("UI")]
+    public Image iconImage;
     public TMP_Text nameText;
-    public Transform costRoot;
-    public GameObject costEntryPrefab;
+    public TMP_Text descriptionText;
+    public Transform costContainer;
+    public GameObject costRowPrefab;
+    public Button craftButton;
 
-    private WeaponCraftRecipe recipe;
+    [HideInInspector] public CraftRecipeType recipeType;
 
-    public void Setup(WeaponCraftRecipe recipe, Sprite weaponIcon, string name)
+    private WeaponCraftRecipe weaponRecipe;
+    private ItemCraftRecipe itemRecipe;
+    private CraftUIController controller;
+
+    // ------------------------------------------------
+    // ğŸ”« WEAPON SETUP
+    // ------------------------------------------------
+    public void Setup(WeaponCraftRecipe recipe, CraftUIController controller)
     {
-        this.recipe = recipe;
+        recipeType = CraftRecipeType.Weapon;
+        weaponRecipe = recipe;
+        itemRecipe = null;
+        this.controller = controller;
 
-        icon.sprite = weaponIcon;
-        nameText.text = name;
+        WeaponItemData weapon = recipe.resultWeapon;
 
-        RefreshCosts();
+        // ğŸ–¼ ICON
+        iconImage.sprite = weapon.icon;
+
+        // ğŸ“ TEXT
+        nameText.text = weapon.itemName;
+        descriptionText.text = recipe.description;
+
+        SetupCosts(recipe.costs);
+
+        SetupButton();
     }
 
-    private void RefreshCosts()
+    // ------------------------------------------------
+    // ğŸ“¦ ITEM SETUP
+    // ------------------------------------------------
+    public void Setup(ItemCraftRecipe recipe, CraftUIController controller)
     {
-        // Eski maliyet entry'lerini temizle
-        foreach (Transform t in costRoot)
-            Destroy(t.gameObject);
+        recipeType = CraftRecipeType.Item;
+        itemRecipe = recipe;
+        weaponRecipe = null;
+        this.controller = controller;
 
-        foreach (var cost in recipe.costs)
+        // ğŸ–¼ ICON
+        iconImage.sprite = recipe.resultItem.icon;
+
+        // ğŸ“ TEXT
+        nameText.text = recipe.resultItem.itemName;
+        descriptionText.text = recipe.description;
+
+        SetupCosts(recipe.costs);
+
+        SetupButton();
+    }
+
+    // ------------------------------------------------
+    // ğŸ§± COST UI
+    // ------------------------------------------------
+    private void SetupCosts(System.Collections.Generic.List<ItemCost> costs)
+    {
+        foreach (Transform child in costContainer)
+            Destroy(child.gameObject);
+
+        foreach (var cost in costs)
         {
-            GameObject costGO = Instantiate(costEntryPrefab, costRoot);
-            CraftCostUI ui = costGO.GetComponent<CraftCostUI>();
+            GameObject row = Instantiate(costRowPrefab, costContainer);
+            CostRowUI rowUI = row.GetComponent<CostRowUI>();
 
-            int playerAmount = Inventory.Instance.GetItemCount(cost.item);
+            int owned = Inventory.Instance.GetItemCountByID(
+                cost.item.itemID);
 
-            ui.Setup(cost.item, cost.amount, playerAmount);
+            rowUI.Setup(
+                cost.item.icon,
+                cost.item.itemName,
+                owned,
+                cost.amount
+            );
         }
     }
 
-    // UI butonu iÃ§in
-    public void OnSelectPressed()
+    // ------------------------------------------------
+    // ğŸ”˜ BUTTON
+    // ------------------------------------------------
+    private void SetupButton()
     {
-        CraftUIController.Instance.SelectRecipe(recipe);
+        craftButton.onClick.RemoveAllListeners();
+        craftButton.onClick.AddListener(OnCraftPressed);
+    }
+
+    private void OnCraftPressed()
+    {
+        bool success = false;
+
+        switch (recipeType)
+        {
+            case CraftRecipeType.Weapon:
+                success = CraftingSystem.Instance.TryCraft(weaponRecipe);
+                break;
+
+            case CraftRecipeType.Item:
+                success = CraftingSystem.Instance.TryCraftItem(itemRecipe);
+                break;
+        }
+
+        if (success)
+            controller.RefreshUI();
     }
 }
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 public class CraftUIController : MonoBehaviour
 {
-    [Header("UI")]
-    public GameObject craftPanel;
-    public Transform gridParent;
+    [Header("UI Refs")]
+    public Transform craftContainer;
     public GameObject craftSlotPrefab;
-    public Button craftButton;
-    public TMP_Text craftButtonText;
 
-    [Header("Logic")]
-    public WeaponCraftRecipe selectedRecipe;
-
-    public static CraftUIController Instance;
-
-    private void Awake()
+    private void OnEnable()
     {
-        Instance = this;
+        RefreshUI();
+        Inventory.Instance.OnChanged += RefreshUI;
     }
 
-    private void Start()
+    private void OnDisable()
     {
-        PopulateRecipes();
-        craftPanel.SetActive(false);
+        Inventory.Instance.OnChanged -= RefreshUI;
     }
 
-    // --------------------------------------------------
-    // Tarif SlotlarÄ±nÄ± oluÅŸtur
-    // --------------------------------------------------
-    public void PopulateRecipes()
+    // ------------------------------------------------
+    // ğŸ”„ UI Yenile
+    // ------------------------------------------------
+    public void RefreshUI()
+{
+    // 1ï¸âƒ£ Temizle
+    for (int i = craftContainer.childCount - 1; i >= 0; i--)
+        Destroy(craftContainer.GetChild(i).gameObject);
+
+    // ===============================
+    // ğŸ”« WEAPON RECIPES
+    // ===============================
+    foreach (var recipe in CraftingSystem.Instance.recipes)
     {
-        foreach (Transform t in gridParent)
-            Destroy(t.gameObject);
+        GameObject go = Instantiate(craftSlotPrefab, craftContainer);
+        CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
 
-        if (CraftingSystem.Instance == null)
-        {
-            Debug.LogError("CraftingSystem.Instance bulunamadÄ±!");
-            return;
-        }
+        slotUI.Setup(recipe, this);
 
-        foreach (var recipe in CraftingSystem.Instance.recipes)
-        {
-            GameObject slotGO = Instantiate(craftSlotPrefab, gridParent);
+        bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
+        slotUI.craftButton.interactable = canCraft;
 
-            CraftSlotUI slotUI = slotGO.GetComponent<CraftSlotUI>();
-            if (slotUI == null)
-            {
-                Debug.LogError("CraftSlot prefabÄ±nda CraftSlotUI yok!");
-                continue;
-            }
-
-            WeaponItemData weaponItem = recipe.resultWeapon;
-            if (weaponItem == null)
-            {
-                Debug.LogError("Tarifte resultWeapon (WeaponItemData) eksik!");
-                continue;
-            }
-
-            slotUI.Setup(recipe, weaponItem.icon, weaponItem.itemName);
-        }
+        CanvasGroup cg = go.GetComponent<CanvasGroup>();
+        if (cg != null)
+            cg.alpha = canCraft ? 1f : 0.4f;
     }
 
-    // --------------------------------------------------
-    // Tarif seÃ§me
-    // --------------------------------------------------
-    public void SelectRecipe(WeaponCraftRecipe recipe)
+    // ===============================
+    // ğŸ“¦ ITEM RECIPES
+    // ===============================
+    foreach (var recipe in CraftingSystem.Instance.itemRecipes)
     {
-        selectedRecipe = recipe;
+        GameObject go = Instantiate(craftSlotPrefab, craftContainer);
+        CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
 
-        WeaponItemData weaponItem = recipe.resultWeapon;
-        bool existsInCaravan = CaravanInventory.Instance.HasWeapon(weaponItem);
+        slotUI.Setup(recipe, this);
 
-        craftButtonText.text = existsInCaravan ? "Swap" : "Craft";
+        bool canCraft = CraftingSystem.Instance.CanCraftItem(recipe);
+        slotUI.craftButton.interactable = canCraft;
+
+        CanvasGroup cg = go.GetComponent<CanvasGroup>();
+        if (cg != null)
+            cg.alpha = canCraft ? 1f : 0.4f;
     }
+}
 
-    // --------------------------------------------------
-    // Craft / Swap butonu
-    // --------------------------------------------------
-    public void OnCraftButtonPressed()
+
+    // ------------------------------------------------
+    // ğŸ”´ Button burayÄ± Ã§aÄŸÄ±rÄ±r
+    // ------------------------------------------------
+    public void OnCraftButtonClicked(WeaponCraftRecipe recipe)
     {
-        if (selectedRecipe == null)
-        {
-            Debug.Log("Tarif seÃ§ilmedi.");
-            return;
-        }
-
-        WeaponItemData weaponItem = selectedRecipe.resultWeapon;
-        bool existsInCaravan = CaravanInventory.Instance.HasWeapon(weaponItem);
-
-        if (existsInCaravan)
-        {
-            SwapWithCaravan(weaponItem);
-            Debug.Log($"Swap: {weaponItem.itemName}");
-            selectedRecipe = null;
-            return;
-        }
-
-        bool success = CraftingSystem.Instance.TryCraft(selectedRecipe);
+        bool success = CraftingSystem.Instance.TryCraft(recipe);
 
         if (success)
-        {
-            Debug.Log($"Craft baÅŸarÄ±lÄ±: {weaponItem.itemName}");
-            PopulateRecipes();
-            selectedRecipe = null;
-        }
-        else
-        {
-            Debug.Log($"Craft baÅŸarÄ±sÄ±z: {weaponItem.itemName}");
-        }
+            RefreshUI();
     }
+}
 
-    // --------------------------------------------------
-    // Swap iÅŸlemi
-    // --------------------------------------------------
-    private void SwapWithCaravan(WeaponItemData weaponItem)
-    {
-        if (weaponItem == null)
-            return;
+using UnityEngine;
+using System.Collections.Generic;
 
-        // Hangi slotta bu silah takÄ±lmalÄ±?
-        WeaponSlotType slotType =
-            WeaponSlotManager.Instance.GetSlotForWeapon(weaponItem.weaponType);
+[CreateAssetMenu(
+    menuName = "Crafting/Recipe/Item",
+    fileName = "recipe_item_"
+)]
+public class ItemCraftRecipe : ScriptableObject
+{
+    [Header("Result")]
+    public ItemData resultItem;
+    public int resultAmount = 1;
 
-        int slotIndex = (int)slotType;
+    [Header("Costs")]
+    public List<ItemCost> costs = new();
 
-        // Mevcut silahÄ± karavana koy
-        WeaponItemData currentItem =
-            WeaponSlotManager.Instance.GetWeaponItemInSlot(slotIndex);
+    [Header("Description")]
+    [TextArea]
+    public string description;
 
-        if (currentItem != null)
-            CaravanInventory.Instance.StoreWeapon(currentItem);
+    // ğŸ”“ Opsiyonel unlock
+    public bool unlockOnce = false;
+    public string unlockID;
+}
+using UnityEngine;
+using System;
+using System.Collections.Generic;
 
-        // Karavandan seÃ§ilen silahÄ± Ã§Ä±kar
-        var list = CaravanInventory.Instance.GetWeapons(weaponItem.weaponType);
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (list[i].itemID == weaponItem.itemID)
-            {
-                list.RemoveAt(i);
-                break;
-            }
-        }
+[CreateAssetMenu(
+    menuName = "Crafting/Recipe/Weapon",
+    fileName = "recipe_wpn_"
+)]
+public class WeaponCraftRecipe : ScriptableObject
+{
+    [Header("Result")]
+    public WeaponItemData resultWeapon;
 
-        // Yeni silahÄ± tak
-        WeaponSlotManager.Instance.EquipWeaponInSlot(weaponItem, slotIndex);
-        WeaponSlotManager.Instance.SwitchSlot(slotIndex);
-    }
+    [Header("Description")]
+    [TextArea]
+    public string description;
+
+    [Header("Costs")]
+    public List<ItemCost> costs = new();
+}
+
+[Serializable]
+public class ItemCost
+{
+    public ItemData item;
+    public int amount = 1;
 }
 using UnityEditor;
 using UnityEngine;
@@ -2518,6 +2623,10 @@ public class Enemy : MonoBehaviour
     public AudioClip deathSound;
     public Vector2 ambientSoundInterval = new Vector2(5f, 15f);
 
+    [Header("Caravan Attack Audio")]
+public List<AudioClip> caravanClawAttackSounds;
+
+
     private Animator animator;
     private AudioSource audioSource;
 
@@ -2550,6 +2659,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+         animator.SetBool("IsAttacking", isAttacking);
         if (target == null)
         {
             ResolveTargets();
@@ -2579,6 +2689,42 @@ public class Enemy : MonoBehaviour
             StartCoroutine(AttackPlayerRoutine());
         }
     }
+    // ========================
+// ANIMATION EVENT (CARAVAN ATTACK)
+// ========================
+public void DealCaravanDamageWithSound()
+{
+    // Sadece Armored enemy karavana vurur
+    if (enemyType != EnemyType.Armored)
+        return;
+
+    if (target == null || !target.CompareTag("Caravan"))
+        return;
+
+    // ğŸ’¥ HASAR
+    CaravanHealth ch = target.GetComponent<CaravanHealth>();
+    if (ch != null)
+        ch.TakeDamage(armoredCaravanDamage);
+
+    // ğŸ”Š SES
+    if (caravanClawAttackSounds != null && caravanClawAttackSounds.Count > 0)
+    {
+        int index = Random.Range(0, caravanClawAttackSounds.Count);
+        audioSource.PlayOneShot(caravanClawAttackSounds[index]);
+    }
+    PlayCaravanClawAttackSound();
+}
+public void PlayCaravanClawAttackSound()
+{
+    if (caravanClawAttackSounds == null || caravanClawAttackSounds.Count == 0)
+        return;
+
+    int index = Random.Range(0, caravanClawAttackSounds.Count);
+    audioSource.PlayOneShot(caravanClawAttackSounds[index]);
+}
+
+
+
 
     // ========================
     // TARGET RESOLUTION
@@ -3204,6 +3350,7 @@ public class Inventory : MonoBehaviour
     // ---------------- ADD ----------------
     public bool TryAdd(ItemData data, int amount = 1)
     {
+
         if (data == null || amount <= 0)
             return false;
 
@@ -3212,6 +3359,9 @@ public class Inventory : MonoBehaviour
         {
             for (int i = 0; i < slots.Length; i++)
             {
+                var s = slots[i];
+                if (s?.data != null)
+                    Debug.Log($"[INV SLOT] {s.data.itemName} id='{s.data.itemID}' count={s.count}");
                 if (slots[i].data == null)
                 {
                     slots[i] = new InventoryItem
@@ -3640,6 +3790,97 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
+    public bool CanAdd(ItemData data, int amount)
+    {
+        if (data == null || amount <= 0)
+            return false;
+
+        // Magazine Ã¶zel durumu
+        if (data is MagazineData)
+        {
+            // En az 1 boÅŸ slot var mÄ±?
+            foreach (var s in slots)
+                if (s.data == null)
+                    return true;
+
+            return false;
+        }
+
+        int remain = amount;
+
+        // Stack doldurma
+        for (int i = 0; i < slots.Length && remain > 0; i++)
+        {
+            var s = slots[i];
+            if (s.data == data && s.count < data.maxStack)
+            {
+                int space = data.maxStack - s.count;
+                remain -= space;
+            }
+        }
+
+        // BoÅŸ slotlar
+        for (int i = 0; i < slots.Length && remain > 0; i++)
+        {
+            if (slots[i].data == null)
+            {
+                remain -= data.maxStack;
+            }
+        }
+
+        return remain <= 0;
+    }
+    public int GetItemCountByID(string itemID)
+    {
+        if (string.IsNullOrEmpty(itemID)) return 0;
+
+        int total = 0;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var s = slots[i];
+            if (s == null || s.data == null) continue;
+
+            if (s.data.itemID == itemID)
+                total += s.count;
+        }
+        return total;
+    }
+
+
+    public bool HasEnoughByID(string itemID, int amount)
+    {
+        int total = 0;
+
+        foreach (var s in slots)
+        {
+            if (s.data != null && s.data.itemID == itemID)
+                total += s.count;
+        }
+
+        return total >= amount;
+    }
+
+    public bool TryConsumeByID(string itemID, int amount)
+    {
+        int remaining = amount;
+
+        for (int i = 0; i < slots.Length && remaining > 0; i++)
+        {
+            var s = slots[i];
+            if (s.data != null && s.data.itemID == itemID)
+            {
+                int take = Mathf.Min(remaining, s.count);
+                s.count -= take;
+                remaining -= take;
+
+                if (s.count <= 0)
+                    slots[i] = new InventoryItem();
+            }
+        }
+
+        RaiseChanged();
+        return remaining == 0;
+    }
 
 }
 using System;
@@ -5019,49 +5260,18 @@ public class PlayerInputRouter : MonoBehaviour
     private PlayerControls controls;
 
     [Header("Panels")]
-    public GameObject inventoryPanel;
     public GameObject craftPanel;
     public GameObject tradePanel;
     public GameObject pauseMenuPanel;
 
-
     [Header("References")]
-    public CaravanInteraction caravan; // Craft iÃ§in gerekecek
-
-
-    private bool IsPauseOpen()
-    {
-        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
-    }
-
-    private void Update()
-    {
-        // Craft aÃ§Ä±ksa ama artÄ±k menzilde deÄŸilsek â†’ kapat
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            if (caravan == null || !caravan.playerInRange)
-            {
-                craftPanel.SetActive(false);
-                GameStateManager.SetPaused(false);
-            }
-        }
-    }
-    public void ForceCloseCraft()
-    {
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            GameStateManager.SetPaused(false);
-        }
-    }
-
+    public CaravanInteraction caravan;
 
     private void Awake()
     {
         Instance = this;
         controls = new PlayerControls();
     }
-
 
     private void OnEnable()
     {
@@ -5071,6 +5281,7 @@ public class PlayerInputRouter : MonoBehaviour
 
         controls.Gameplay.Enable();
     }
+
     private void OnDisable()
     {
         controls.Gameplay.Inventory.performed -= OnInventory;
@@ -5080,61 +5291,48 @@ public class PlayerInputRouter : MonoBehaviour
         controls.Gameplay.Disable();
     }
 
+    // ==============================
+    // INVENTORY (I) â†’ PIPBOY
+    // ==============================
+    private void OnInventory(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (IsPauseOpen()) return;
 
-    // ================================
-    // INVENTORY (I)
-    // ================================
-    public void OnInventory(InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
-        if (IsPauseOpen()) return;
+    if (PipBoyController.Instance == null)
+        return;
 
-        TogglePanel(inventoryPanel);
-    }
+    // PipBoy zaten aÃ§Ä±ksa tekrar aÃ§ma
+    if (PipBoyController.Instance.IsOpen)
+        return;
+
+    PipBoyController.Instance.Open(0);
+}
 
 
-    // ================================
+    // ==============================
     // CRAFT (C)
-    // ================================
-    public void OnCraft(InputAction.CallbackContext ctx)
+    // ==============================
+    private void OnCraft(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
         if (IsPauseOpen()) return;
 
-        // âŒ Caravan yoksa veya menzilde deÄŸilse â†’ aÃ§ma
         if (caravan == null || !caravan.playerInRange)
-        {
-            Debug.Log("Craft aÃ§Ä±lamadÄ± â†’ Caravan menzilinde deÄŸilsin.");
             return;
-        }
 
-        TogglePanel(craftPanel);
+        ToggleCraft();
     }
 
-
-    public void SetGameplayInput(bool enabled)
-    {
-        if (enabled)
-            controls.Gameplay.Enable();
-        else
-            controls.Gameplay.Disable();
-    }
-
-    // ================================
-    // TRADE (E)
-    // ================================
-
-
-
-    // ================================
-    // ESC (PAUSE + PANEL KAPAMA)
-    // ================================
-    public void OnEscape(InputAction.CallbackContext ctx)
+    // ==============================
+    // ESC
+    // ==============================
+    private void OnEscape(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
         if (GameStateManager.IsGameOver) return;
 
-        // 1ï¸âƒ£ Pause AÃ‡IKSA â†’ sadece Pause kapansÄ±n
+        // 1ï¸âƒ£ Pause aÃ§Ä±ksa â†’ kapat
         if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
         {
             PauseMenu.Instance.HidePause();
@@ -5158,69 +5356,50 @@ public class PlayerInputRouter : MonoBehaviour
             return;
         }
 
-        // 4ï¸âƒ£ Inventory aÃ§Ä±ksa â†’ kapat
-        if (inventoryPanel != null && inventoryPanel.activeSelf)
-        {
-            inventoryPanel.SetActive(false);
-            GameStateManager.SetPaused(false);
-            return;
-        }
-
-        // 5ï¸âƒ£ HiÃ§bir panel aÃ§Ä±k deÄŸil â†’ Pause aÃ§
-        CloseAllPanels();                 // ğŸ”’ GÃ¼venlik: baÅŸka panel kalmasÄ±n
+        // 4ï¸âƒ£ HiÃ§biri aÃ§Ä±k deÄŸil â†’ Pause aÃ§
         PauseMenu.Instance.ShowPause();
         GameStateManager.SetPaused(true);
     }
 
-
-
-
-
-
-
-
-
-    // ================================
-    // PANEL HELPERS
-    // ================================
-    private void TogglePanel(GameObject panel)
+    public void ForceCloseCraft()
+{
+    if (craftPanel != null && craftPanel.activeSelf)
     {
-        if (panel == null) return;
-
-        bool open = !panel.activeSelf;
-
-        CloseAllPanels();
-        panel.SetActive(open);
-
-        // Pause logic
-        if (panel == pauseMenuPanel)
-        {
-            Time.timeScale = open ? 0f : 1f;
-        }
+        craftPanel.SetActive(false);
+        GameStateManager.SetPaused(false);
+    }
+}
 
 
+    // ==============================
+    // HELPERS
+    // ==============================
+    private bool IsPauseOpen()
+    {
+        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
     }
 
-    private void CloseAllPanels()
+    private void ToggleCraft()
     {
-        if (inventoryPanel) inventoryPanel.SetActive(false);
-        if (craftPanel) craftPanel.SetActive(false);
-        if (tradePanel) tradePanel.SetActive(false);
-
-        // HUD geri gelsin
-
-        // Pause kapandÄ±ysa oyun devam etsin
-        if (pauseMenuPanel && pauseMenuPanel.activeSelf)
-        {
-            pauseMenuPanel.SetActive(false);
-            Time.timeScale = 1f;
-        }
+        bool open = !craftPanel.activeSelf;
+        craftPanel.SetActive(open);
+        GameStateManager.SetPaused(open);
     }
 
+    // ==============================
+    // INPUT CONTROL (PipBoy Ã§aÄŸÄ±rÄ±r)
+    // ==============================
+    public void SetGameplayInput(bool enabled)
+    {
+        if (enabled)
+            controls.Gameplay.Enable();
+        else
+            controls.Gameplay.Disable();
+    }
 
-    // ================================
+    // ==============================
     // UNUSED INPUTS
-    // ================================
+    // ==============================
     public void OnMove(InputAction.CallbackContext ctx) { }
     public void OnSprint(InputAction.CallbackContext ctx) { }
     public void OnMap(InputAction.CallbackContext ctx) { }
@@ -6046,22 +6225,159 @@ public class MultiImageIntroController : MonoBehaviour
     }
 }
 using UnityEngine;
+using UnityEngine.InputSystem;
+using TMPro;
+using UnityEngine.UI;
+
+public class PipBoyController : MonoBehaviour
+{
+    public static PipBoyController Instance;
+
+    [Header("Root")]
+    public GameObject pipBoyPanel;
+    public bool IsOpen { get; private set; }
+
+
+    [Header("Pages")]
+    public GameObject inventoryPage;
+    public GameObject statsPage;
+    public GameObject radioPage;
+
+    [Header("UI")]
+    public TMP_Text titleText;
+
+    private int currentIndex;
+
+    private GameObject[] pages;
+    private string[] titles = { "INVENTORY", "STATUS", "RADIO" };
+
+    private PlayerControls controls;
+
+    private void Awake()
+    {
+        Instance = this;
+
+        pages = new GameObject[]
+        {
+            inventoryPage,
+            statsPage,
+            radioPage
+        };
+
+        controls = new PlayerControls();
+    }
+
+    private void OnEnable()
+    {
+        controls.UI.Navigate.performed += OnNavigate;
+        controls.UI.Escape.performed += OnEscape;
+    }
+
+    private void OnDisable()
+    {
+        controls.UI.Navigate.performed -= OnNavigate;
+        controls.UI.Escape.performed -= OnEscape;
+    }
+
+    // ================= OPEN / CLOSE =================
+    public void Open(int startIndex)
+{
+    IsOpen = true;
+
+    pipBoyPanel.SetActive(true);
+
+    currentIndex = Mathf.Clamp(startIndex, 0, pages.Length - 1);
+    RefreshPages();
+
+    GameStateManager.SetPaused(true);
+    controls.UI.Enable();
+
+    PlayerInputRouter.Instance.SetGameplayInput(false);
+}
+
+
+    public void Close()
+{
+    IsOpen = false;
+
+    pipBoyPanel.SetActive(false);
+
+    GameStateManager.SetPaused(false);
+    controls.UI.Disable();
+
+    PlayerInputRouter.Instance.SetGameplayInput(true);
+}
+
+
+    // ================= PAGE NAVIGATION =================
+    private void OnNavigate(InputAction.CallbackContext ctx)
+    {
+        Vector2 dir = ctx.ReadValue<Vector2>();
+
+        if (dir.x > 0.5f)
+            NextPage();
+        else if (dir.x < -0.5f)
+            PreviousPage();
+    }
+
+    private void NextPage()
+    {
+        currentIndex = (currentIndex + 1) % pages.Length;
+        RefreshPages();
+    }
+
+    private void PreviousPage()
+    {
+        currentIndex--;
+        if (currentIndex < 0)
+            currentIndex = pages.Length - 1;
+
+        RefreshPages();
+    }
+
+    private void RefreshPages()
+{
+    Debug.Log("RefreshPages CALLED");
+
+    for (int i = 0; i < pages.Length; i++)
+    {
+        Debug.Log($"Page {i}: {pages[i].name}");
+        pages[i].SetActive(i == currentIndex);
+    }
+
+    if (titleText != null)
+        titleText.text = titles[currentIndex];
+}
+
+    // ================= ESC =================
+    private void OnEscape(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed) return;
+        Close();
+    }
+}
+using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AudioSource))]
 public class PlayerFootsteps : MonoBehaviour
 {
-    [Header("Footstep Loop Clip")]
-    public AudioClip footstepLoop;
+    [Header("Footstep Loop Clips")]
+    public AudioClip walkLoop;
+    public AudioClip runLoop;
 
     [Header("Sound")]
-    public float volume = 0.9f;
+    public float walkVolume = 0.7f;
+    public float runVolume = 0.95f;
+
     public float minPitch = 0.95f;
     public float maxPitch = 1.05f;
 
     private AudioSource src;
     private Animator animator;
+
     private bool wasMovingLastFrame = false;
+    private bool wasRunningLastFrame = false;
 
     void Awake()
     {
@@ -6071,39 +6387,52 @@ public class PlayerFootsteps : MonoBehaviour
         src.playOnAwake = false;
         src.loop = true;
         src.spatialBlend = 0f; // 2D
-        src.volume = volume;
     }
 
     void Update()
     {
         if (animator == null) return;
 
-        // ğŸ”‘ GERÃ‡EK HAREKET KAYNAÄI
         bool isMoving = animator.GetBool("IsMoving");
+        bool isRunning = animator.GetBool("IsRunning");
 
-        // Hareket BAÅLADI
-        if (isMoving && !wasMovingLastFrame)
+        // â›” HAREKET YOK â†’ SES YOK
+        if (!isMoving)
         {
-            StartFootsteps();
-        }
-        // Hareket BÄ°TTÄ°
-        else if (!isMoving && wasMovingLastFrame)
-        {
-            StopFootsteps();
+            if (wasMovingLastFrame)
+                StopFootsteps();
+
+            wasMovingLastFrame = false;
+            wasRunningLastFrame = false;
+            return;
         }
 
-        wasMovingLastFrame = isMoving;
+        // â–¶ï¸ HAREKET BAÅLADI
+        if (!wasMovingLastFrame)
+        {
+            PlayFootsteps(isRunning);
+        }
+        // ğŸ” WALK â†” RUN GEÃ‡Ä°ÅÄ°
+        else if (wasRunningLastFrame != isRunning)
+        {
+            PlayFootsteps(isRunning);
+        }
+
+        wasMovingLastFrame = true;
+        wasRunningLastFrame = isRunning;
     }
 
-    void StartFootsteps()
+    void PlayFootsteps(bool running)
     {
-        if (footstepLoop == null) return;
-        if (src.isPlaying) return;
+        AudioClip targetClip = running ? runLoop : walkLoop;
+        if (targetClip == null) return;
 
-        src.clip = footstepLoop;
+        src.clip = targetClip;
         src.pitch = Random.Range(minPitch, maxPitch);
-        src.volume = volume;
-        src.Play();
+        src.volume = running ? runVolume : walkVolume;
+
+        if (!src.isPlaying)
+            src.Play();
     }
 
     void StopFootsteps()
@@ -6310,10 +6639,18 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void UpdateAnimation()
-    {
-        if (animator == null) return;
-        animator.SetBool("IsMoving", isMoving);
-    }
+{
+    if (animator == null) return;
+
+    animator.SetBool("IsMoving", isMoving);
+
+    // ğŸ”‘ EN KRÄ°TÄ°K SATIR
+    animator.SetBool(
+        "IsRunning",
+        isSprinting && stats.HasStamina()
+    );
+}
+
 
     private void UpdateRotation()
     {
@@ -6362,6 +6699,17 @@ using UnityEngine.UI;
 
 public class PlayerStats : MonoBehaviour
 {
+    [Header("Breathing Sound")]
+public AudioClip heavyBreathingLoop;
+
+[Tooltip("Stamina bu deÄŸerin ALTINA dÃ¼ÅŸerse nefes sesi baÅŸlar")]
+public float breathingStaminaThreshold = 25f;
+
+public float breathingVolume = 0.8f;
+public float breathingFadeSpeed = 2f;
+
+private AudioSource breathingSource;
+private bool isBreathingActive = false;
     // ------------------------------
     //   STAMINA (AÃ§lÄ±ÄŸa BaÄŸlÄ±)
     // ------------------------------
@@ -6482,6 +6830,15 @@ public class PlayerStats : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
 
         AudioManager.Instance?.RouteToSFX(audioSource);
+        breathingSource = gameObject.AddComponent<AudioSource>();
+breathingSource.clip = heavyBreathingLoop;
+breathingSource.loop = true;
+breathingSource.playOnAwake = false;
+breathingSource.spatialBlend = 0f; // 2D
+breathingSource.volume = 0f;
+
+AudioManager.Instance?.RouteToSFX(breathingSource);
+
     }
 
     void Start()
@@ -6518,6 +6875,47 @@ public class PlayerStats : MonoBehaviour
 
         UpdateHungerUI();
         UpdateStaminaUI();
+        if (heavyBreathingLoop == null || breathingSource == null)
+        return;
+
+    // ğŸ”´ STAMINA DÃœÅÃœK â†’ NEFES BAÅLASIN
+    if (currentStamina <= breathingStaminaThreshold)
+    {
+        if (!isBreathingActive)
+        {
+            isBreathingActive = true;
+            breathingSource.volume = 0f;
+
+            if (!breathingSource.isPlaying)
+                breathingSource.Play();
+        }
+    }
+    // ğŸŸ¢ STAMINA YETERLÄ° â†’ NEFES KESÄ°LSÄ°N
+    else
+    {
+        isBreathingActive = false;
+    }
+
+    // ğŸšï¸ FADE
+    if (isBreathingActive)
+    {
+        breathingSource.volume = Mathf.MoveTowards(
+            breathingSource.volume,
+            breathingVolume,
+            breathingFadeSpeed * Time.deltaTime
+        );
+    }
+    else
+    {
+        breathingSource.volume = Mathf.MoveTowards(
+            breathingSource.volume,
+            0f,
+            breathingFadeSpeed * Time.deltaTime
+        );
+
+        if (breathingSource.volume <= 0.01f && breathingSource.isPlaying)
+            breathingSource.Stop();
+    }
 
     }
 
@@ -8181,6 +8579,290 @@ public class StoryNote : MonoBehaviour
     public AudioClip[] radioClips; // Her metne karÅŸÄ±lÄ±k ses (opsiyonel)
 }
 using UnityEngine;
+
+public class NPCTradeInteract : MonoBehaviour
+{
+    [Header("Trade")]
+    public TradeUIController tradeUI;
+
+    private NPCTradeInventory tradeInventory;
+    private bool playerInRange;
+
+    private void Awake()
+    {
+        tradeInventory = GetComponent<NPCTradeInventory>();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+            playerInRange = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+            playerInRange = false;
+    }
+
+    private void Update()
+    {
+        if (!playerInRange)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            OpenTrade();
+        }
+    }
+
+    void OpenTrade()
+    {
+        if (tradeInventory == null)
+        {
+            Debug.LogWarning("NPCTradeInventory yok!");
+            return;
+        }
+
+        tradeUI.Open(tradeInventory);
+
+        // UI aÃ§Ä±kken oyunu durdurmak istersen
+        Time.timeScale = 0f;
+    }
+}
+using System.Collections.Generic;
+using UnityEngine;
+
+public class NPCTradeInventory : MonoBehaviour
+{
+    public List<TradeRecipe> tradeOffers = new();
+}
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class TradeOfferUI : MonoBehaviour
+{
+    public TradeRecipe recipe;
+    public Button tradeButton;
+
+    [Header("UI")]
+    public Image resultIcon;
+    public TMP_Text nameText;
+    public TMP_Text descriptionText;
+
+    [Header("Costs")]
+    public Transform costContainer;
+    public GameObject costRowPrefab;
+
+    private TradeUIController ui;
+
+    public void Setup(
+        TradeRecipe r,
+        TradeUIController controller
+    )
+    {
+        recipe = r;
+        ui = controller;
+
+        // ğŸ–¼ RESULT ICON
+        resultIcon.sprite = r.resultItem.icon;
+
+        // ğŸ“ TEXT
+        nameText.text = $"{r.resultItem.itemName} x{r.resultAmount}";
+        descriptionText.text = r.description;
+
+        // ğŸ§± COST LIST
+        SetupCosts();
+
+        // ğŸ”˜ BUTTON
+        tradeButton.onClick.RemoveAllListeners();
+        tradeButton.onClick.AddListener(() =>
+            ui.OnTradeButtonClicked(recipe)
+        );
+
+        // ğŸ”’ Aktiflik
+        tradeButton.interactable =
+            TradeSystem.Instance.CanTrade(recipe);
+    }
+
+    private void SetupCosts()
+    {
+        foreach (Transform child in costContainer)
+            Destroy(child.gameObject);
+
+        foreach (var cost in recipe.costs)
+        {
+            GameObject row =
+                Instantiate(costRowPrefab, costContainer);
+
+            CostRowUI rowUI = row.GetComponent<CostRowUI>();
+
+            int owned =
+                Inventory.Instance.GetItemCountByID(
+                    cost.item.itemID);
+
+            rowUI.Setup(
+                cost.item.icon,
+                cost.item.itemName,
+                owned,
+                cost.amount
+            );
+        }
+    }
+}
+using UnityEngine;
+using System.Collections.Generic;
+
+[CreateAssetMenu(
+    menuName = "Trade/Trade Recipe",
+    fileName = "trade_"
+)]
+public class TradeRecipe : ScriptableObject
+{
+    [Header("NPC Gives (Reward)")]
+    public ItemData resultItem;
+    public int resultAmount = 1;
+
+    [Header("Player Gives (Cost)")]
+    public List<ItemCost> costs = new();
+
+    [Header("Description")]
+    [TextArea]
+    public string description;
+}
+using UnityEngine;
+
+public class TradeSystem : MonoBehaviour
+{
+    public static TradeSystem Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    // ------------------------------------------------
+    // Trade yapÄ±labilir mi?
+    // ------------------------------------------------
+    public bool CanTrade(TradeRecipe recipe)
+    {
+        if (recipe == null) return false;
+
+        foreach (var cost in recipe.costs)
+        {
+            if (!Inventory.Instance.HasEnough(cost.item, cost.amount))
+                return false;
+        }
+
+        return true;
+    }
+
+    // ------------------------------------------------
+    // Trade dene
+    // ------------------------------------------------
+    public bool TryTrade(TradeRecipe recipe)
+{
+    if (!CanTrade(recipe))
+        return false;
+
+    // ğŸ”’ Ã–NCE sÄ±ÄŸÄ±yor mu kontrol et
+    if (!Inventory.Instance.CanAdd(
+        recipe.resultItem,
+        recipe.resultAmount))
+    {
+        Debug.Log("âŒ Envanter dolu â†’ trade iptal");
+        return false;
+    }
+
+    // ğŸ”¥ SONRA tÃ¼ket
+    foreach (var cost in recipe.costs)
+    {
+        Inventory.Instance.TryConsume(cost.item, cost.amount);
+    }
+
+    // ğŸ EN SON ver
+    Inventory.Instance.TryAdd(
+        recipe.resultItem,
+        recipe.resultAmount);
+
+    Debug.Log($"âœ” TRADE â†’ {recipe.resultItem.itemName}");
+    return true;
+}
+
+
+
+}
+using UnityEngine;
+
+public class TradeUIController : MonoBehaviour
+{
+    public NPCTradeInventory currentNPC;
+
+    [Header("UI Refs")]
+    public Transform offerContainer;
+    public GameObject tradeOfferPrefab;
+
+    public void Open(NPCTradeInventory npc)
+    {
+        currentNPC = npc;
+        gameObject.SetActive(true);
+        RefreshUI();
+    }
+
+    public void Close()
+    {
+        gameObject.SetActive(false);
+    }
+
+    // ------------------------------------------------
+    // ğŸ”„ UI Yenile
+    // ------------------------------------------------
+    public void RefreshUI()
+    {
+        if (currentNPC == null)
+            return;
+
+        // 1ï¸âƒ£ Eski kartlarÄ± temizle
+        for (int i = offerContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(offerContainer.GetChild(i).gameObject);
+        }
+
+        // 2ï¸âƒ£ Yeni trade tekliflerini oluÅŸtur
+        foreach (var recipe in currentNPC.tradeOffers)
+        {
+            GameObject go = Instantiate(
+                tradeOfferPrefab,
+                offerContainer
+            );
+
+            TradeOfferUI offerUI = go.GetComponent<TradeOfferUI>();
+            offerUI.Setup(recipe, this);
+
+            bool canTrade = TradeSystem.Instance.CanTrade(recipe);
+
+            offerUI.tradeButton.interactable = canTrade;
+
+            CanvasGroup cg = go.GetComponent<CanvasGroup>();
+            if (cg != null)
+                cg.alpha = canTrade ? 1f : 0.5f;
+        }
+
+    }
+
+    // ------------------------------------------------
+    // ğŸ”´ Button burayÄ± Ã§aÄŸÄ±rÄ±r
+    // ------------------------------------------------
+    public void OnTradeButtonClicked(TradeRecipe recipe)
+    {
+        bool success = TradeSystem.Instance.TryTrade(recipe);
+
+        if (success)
+            RefreshUI();
+    }
+}
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -9231,33 +9913,6 @@ public class WeaponBullet : MonoBehaviour
         if (!collision.isTrigger)
         Destroy(gameObject);
     }
-}
-using UnityEngine;
-using System;
-using System.Collections.Generic;
-
-[CreateAssetMenu(
-    menuName = "Crafting/Recipe/Weapon",
-    fileName = "recipe_wpn_"
-)]
-public class WeaponCraftRecipe : ScriptableObject
-{
-    [Header("Result")]
-    public WeaponItemData resultWeapon;
-
-    [Header("Description")]
-    [TextArea]
-    public string description;
-
-    [Header("Costs")]
-    public List<ItemCost> costs = new();
-}
-
-[Serializable]
-public class ItemCost
-{
-    public ItemData item;
-    public int amount = 1;
 }
 using UnityEngine;
 

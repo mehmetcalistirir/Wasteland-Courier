@@ -45,17 +45,15 @@ public class TradeUIController : MonoBehaviour
             TradeOfferUI offerUI = go.GetComponent<TradeOfferUI>();
             offerUI.Setup(recipe, this);
 
-            // 3️⃣ Trade yapılabilir mi?
             bool canTrade = TradeSystem.Instance.CanTrade(recipe);
 
-            // 4️⃣ Buton state
             offerUI.tradeButton.interactable = canTrade;
 
-            // (Opsiyonel) Görsel feedback
             CanvasGroup cg = go.GetComponent<CanvasGroup>();
             if (cg != null)
                 cg.alpha = canTrade ? 1f : 0.5f;
         }
+
     }
 
     // ------------------------------------------------

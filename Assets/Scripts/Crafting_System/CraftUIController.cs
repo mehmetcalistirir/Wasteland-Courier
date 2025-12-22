@@ -21,33 +21,48 @@ public class CraftUIController : MonoBehaviour
     // 🔄 UI Yenile
     // ------------------------------------------------
     public void RefreshUI()
+{
+    // 1️⃣ Temizle
+    for (int i = craftContainer.childCount - 1; i >= 0; i--)
+        Destroy(craftContainer.GetChild(i).gameObject);
+
+    // ===============================
+    // 🔫 WEAPON RECIPES
+    // ===============================
+    foreach (var recipe in CraftingSystem.Instance.recipes)
     {
-        // 1️⃣ Temizle
-        for (int i = craftContainer.childCount - 1; i >= 0; i--)
-        {
-            Destroy(craftContainer.GetChild(i).gameObject);
-        }
+        GameObject go = Instantiate(craftSlotPrefab, craftContainer);
+        CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
 
-        // 2️⃣ Tarifleri bas
-        foreach (var recipe in CraftingSystem.Instance.recipes)
-        {
-            GameObject go = Instantiate(
-                craftSlotPrefab,
-                craftContainer
-            );
+        slotUI.Setup(recipe, this);
 
-            CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
-            slotUI.Setup(recipe, this);
+        bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
+        slotUI.craftButton.interactable = canCraft;
 
-            bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
-
-            slotUI.craftButton.interactable = canCraft;
-
-            CanvasGroup cg = go.GetComponent<CanvasGroup>();
-            if (cg != null)
-                cg.alpha = canCraft ? 1f : 0.4f;
-        }
+        CanvasGroup cg = go.GetComponent<CanvasGroup>();
+        if (cg != null)
+            cg.alpha = canCraft ? 1f : 0.4f;
     }
+
+    // ===============================
+    // 📦 ITEM RECIPES
+    // ===============================
+    foreach (var recipe in CraftingSystem.Instance.itemRecipes)
+    {
+        GameObject go = Instantiate(craftSlotPrefab, craftContainer);
+        CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
+
+        slotUI.Setup(recipe, this);
+
+        bool canCraft = CraftingSystem.Instance.CanCraftItem(recipe);
+        slotUI.craftButton.interactable = canCraft;
+
+        CanvasGroup cg = go.GetComponent<CanvasGroup>();
+        if (cg != null)
+            cg.alpha = canCraft ? 1f : 0.4f;
+    }
+}
+
 
     // ------------------------------------------------
     // 🔴 Button burayı çağırır

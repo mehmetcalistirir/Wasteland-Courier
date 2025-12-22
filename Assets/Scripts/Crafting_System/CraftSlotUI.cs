@@ -1,41 +1,62 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class CraftSlotUI : MonoBehaviour
 {
-    public WeaponCraftRecipe recipe;
+    [Header("UI")]
+    public Image iconImage;
+    public TMP_Text nameText;
+    public TMP_Text descriptionText;
+    public Transform costContainer;
+    public GameObject costRowPrefab;
     public Button craftButton;
 
-    [Header("UI")]
-    public TextMeshProUGUI resultText;
-    public TextMeshProUGUI costText;
+    private WeaponCraftRecipe recipe;
+    private CraftUIController controller;
 
-    private CraftUIController ui;
-
-    public void Setup(
-        WeaponCraftRecipe r,
-        CraftUIController controller
-    )
+    public void Setup(WeaponCraftRecipe recipe, CraftUIController controller)
     {
-        recipe = r;
-        ui = controller;
+        
+        this.recipe = recipe;
+        this.controller = controller;
 
-        // 🎯 Sonuç
-        resultText.text = r.resultWeapon.itemName;
+        WeaponItemData weapon = recipe.resultWeapon;
 
-        // 📦 Cost listesi (ÖNEMLİ KISIM)
-        costText.text = "";
-        foreach (var cost in r.costs)
+        // 🖼 ICON
+        iconImage.sprite = weapon.icon;
+
+        // 📝 TEXT
+        nameText.text = weapon.itemName;
+        descriptionText.text = recipe.description;
+
+        // 🧱 COST LIST
+        foreach (Transform child in costContainer)
+            Destroy(child.gameObject);
+
+        foreach (var cost in recipe.costs)
         {
-            int have = Inventory.Instance.GetItemCountByID(cost.item.itemID);
-            costText.text +=
-                $"{cost.item.itemName} {have}/{cost.amount}\n";
+            GameObject row = Instantiate(costRowPrefab, costContainer);
+            CostRowUI rowUI = row.GetComponent<CostRowUI>();
+
+            int owned = Inventory.Instance.GetItemCountByID(cost.item.itemID);
+
+            rowUI.Setup(
+                cost.item.icon,
+                cost.item.itemName,
+                owned,
+                cost.amount
+            );
         }
 
+        // 🔘 BUTTON
         craftButton.onClick.RemoveAllListeners();
-        craftButton.onClick.AddListener(() =>
-            ui.OnCraftButtonClicked(recipe)
-        );
+        craftButton.onClick.AddListener(OnCraftPressed);
+    }
+
+    void OnCraftPressed()
+    {
+        CraftingSystem.Instance.TryCraft(recipe);
+        controller.RefreshUI();
     }
 }

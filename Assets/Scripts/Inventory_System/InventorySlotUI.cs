@@ -41,74 +41,61 @@ public class InventorySlotUI : MonoBehaviour,
     }
 
     // Envanterdeki slot verisini UI'a basar
-    public void Render(InventoryItem item)
+   public void Render(InventoryItem item)
+{
+    cached = item;
+
+    // 🔒 1️⃣ SLOT BOŞSA
+    if (item == null || item.data == null)
     {
-        cached = item;
+        icon.enabled = false;
+        countText.text = "";
 
-        // 🔫 MAGAZINE SLOT
-        if (item.magazineInstance != null)
-        {
-            var mag = item.magazineInstance;
+        if (highlightImage != null)
+            highlightImage.color = normalColor;
 
-            icon.enabled = true;
-            icon.sprite = mag.data.icon;
-            icon.preserveAspect = true;
+        return;
+    }
 
-            countText.text =
-                $"{mag.currentAmmo}/{mag.data.capacity}";
+    // 🔫 2️⃣ MAGAZINE SLOT
+    if (item.magazineInstance != null)
+    {
+        var mag = item.magazineInstance;
 
-            return;
-        }
+        icon.enabled = true;
+        icon.sprite = mag.data.icon;
+        icon.preserveAspect = true;
+
+        countText.text =
+            $"{mag.currentAmmo}/{mag.data.capacity}";
+
+        // ⭐ Equipped highlight
         if (highlightImage != null)
         {
             var pw = FindObjectOfType<PlayerWeapon>();
-
-            if (pw != null && pw.currentMagazine == item.magazineInstance)
+            if (pw != null && pw.currentMagazine == mag)
                 highlightImage.color = equippedColor;
             else
                 highlightImage.color = normalColor;
         }
 
-
-        // 🔫 ŞARJÖRSE → MERMİ GÖSTER
-        if (item.magazineInstance != null)
-        {
-            countText.text =
-                $"{item.magazineInstance.currentAmmo}/" +
-                $"{item.magazineInstance.data.capacity}";
-            return;
-        }
-
-        if (item == null || item.data == null)
-        {
-            icon.enabled = false;
-            countText.text = "";
-            return;
-        }
-
-        icon.enabled = true;
-        icon.sprite = item.data.icon;
-        icon.preserveAspect = true;
-
-        // 🔥 1️⃣ MAGAZINE HER ZAMAN ÖNCELİKLİ
-        if (item.magazineInstance != null)
-        {
-            countText.text =
-                $"{item.magazineInstance.currentAmmo}/{item.magazineInstance.data.capacity}";
-            return;
-        }
-
-        // 2️⃣ AMMO ITEM
-        if (item.data is AmmoItemData)
-        {
-            countText.text = $"x{item.count}";
-            return;
-        }
-
-
-        // 3️⃣ NORMAL ITEM
-        countText.text = $"x{item.count}";
+        return;
     }
+
+    // 📦 3️⃣ NORMAL ITEM / AMMO
+    icon.enabled = true;
+    icon.sprite = item.data.icon;
+    icon.preserveAspect = true;
+
+    if (item.data is AmmoItemData)
+        countText.text = $"x{item.count}";
+    else
+        countText.text = $"x{item.count}";
+
+    if (highlightImage != null)
+        highlightImage.color = normalColor;
+}
+
 
 
 

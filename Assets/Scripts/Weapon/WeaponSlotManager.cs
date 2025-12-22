@@ -49,6 +49,18 @@ public class WeaponSlotManager : MonoBehaviour
         controls.Gameplay.Disable();
     }
 
+public void SetWeaponToSlot(int slot, WeaponItemData weapon)
+{
+    if (slot < 0 || slot >= slots.Length)
+        return;
+
+    slots[slot] = weapon;
+
+    if (slot == activeSlotIndex)
+        SwitchSlot(slot);
+}
+
+
     // ----------------------------------------------------
     // SLOT BELİRLEME
     // ----------------------------------------------------
@@ -127,10 +139,14 @@ public class WeaponSlotManager : MonoBehaviour
         ActiveWeapon = handler;
 
         WeaponItemData item = slots[slot];
-        if (item != null && item.weaponDefinition != null)
-        {
-            handler.SetWeapon(item.weaponDefinition);
-        }
+        // 🔥 ÖNCE silahı yükle
+if (item != null && item.weaponDefinition != null)
+{
+    handler.SetWeapon(item.weaponDefinition);
+}
+
+// 🔒 SONRA input / state hazır olsun
+handler.enabled = true;
     }
 
     private PlayerWeapon GetHandler(int slot)

@@ -69,31 +69,29 @@ public class CraftingSystem : MonoBehaviour
     // Craft → Oyuncuya silahı VER
     // ------------------------------------------------------------
     public bool TryCraft(WeaponCraftRecipe recipe)
-    {
-        if (!CanCraft(recipe))
-        {
-            Debug.Log("Craft başarısız: Gereken koşullar sağlanmıyor.");
-            return false;
-        }
+{
+    if (!CanCraft(recipe))
+        return false;
 
-        WeaponItemData weaponItem = GetWeaponItem(recipe);
+    WeaponItemData weaponItem = recipe.resultWeapon;
 
-        // 1) Kaynakları tüket
-        foreach (var cost in recipe.costs)
-    Inventory.Instance.TryConsumeByID(cost.item.itemID, cost.amount);
+    // 1️⃣ Kaynakları tüket
+    foreach (var cost in recipe.costs)
+        Inventory.Instance.TryConsumeByID(
+            cost.item.itemID,
+            cost.amount);
 
+    // 2️⃣ Unlock
+    unlockedWeapons.Add(weaponItem.itemID);
 
-        // 2) Unlock et (ITEM ID)
-        unlockedWeapons.Add(GetKey(weaponItem));
+    // 3️⃣ Caravan'a ekle
+    CaravanInventory.Instance.StoreWeapon(weaponItem);
 
-        // 3) Silahı oyuncuya ver / tak
-        WeaponSlotManager.Instance.EquipWeapon(weaponItem);
+    Debug.Log($"✔ WEAPON CRAFT → {weaponItem.itemName} karavana eklendi");
 
+    return true;
+}
 
-        Debug.Log($"✔ CRAFT BAŞARILI → {weaponItem.itemName} oyuncuya takıldı!");
-
-        return true;
-    }
     public bool CanCraftItem(ItemCraftRecipe recipe)
 {
     if (recipe == null) return false;

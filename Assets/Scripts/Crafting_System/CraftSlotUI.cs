@@ -100,11 +100,61 @@ public class CraftSlotUI : MonoBehaviour
     // ------------------------------------------------
     // 🔘 BUTTON
     // ------------------------------------------------
-    private void SetupButton()
+   private void SetupButton()
+{
+    craftButton.onClick.RemoveAllListeners();
+
+    if (recipeType == CraftRecipeType.Weapon &&
+        CraftingSystem.Instance.IsUnlocked(weaponRecipe))
     {
-        craftButton.onClick.RemoveAllListeners();
+        craftButton.GetComponentInChildren<TMP_Text>().text = "SWAP";
+        craftButton.onClick.AddListener(OnSwapPressed);
+    }
+    else
+    {
+        craftButton.GetComponentInChildren<TMP_Text>().text = "CRAFT";
         craftButton.onClick.AddListener(OnCraftPressed);
     }
+}
+
+
+private void OnSwapPressed()
+{
+    WeaponItemData target = weaponRecipe.resultWeapon;
+
+    WeaponSlotManager slotManager = WeaponSlotManager.Instance;
+    CaravanInventory caravan = CaravanInventory.Instance;
+
+    int activeSlot = slotManager.activeSlotIndex;
+
+    // 1️⃣ Oyuncunun elindeki silahı al
+    WeaponItemData current =
+        slotManager.GetWeaponItemInSlot(activeSlot);
+
+    if (current != null)
+    {
+        caravan.StoreWeapon(current);
+    }
+
+    // 2️⃣ Karavandan seçilen silahı al
+    var list = caravan.GetWeapons(target.weaponType);
+    int index = list.FindIndex(w => w.itemID == target.itemID);
+
+    if (index < 0)
+    {
+        Debug.LogError("Swap başarısız: Karavanda silah yok!");
+        return;
+    }
+
+    WeaponItemData taken =
+        caravan.TakeWeapon(target.weaponType, index);
+
+    // 3️⃣ Oyuncunun aktif slotuna tak
+    slotManager.SetWeaponToSlot(activeSlot, taken);
+
+    controller.RefreshUI();
+}
+
 
     private void OnCraftPressed()
     {

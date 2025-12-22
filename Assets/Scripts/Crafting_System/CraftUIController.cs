@@ -29,20 +29,29 @@ public class CraftUIController : MonoBehaviour
     // ===============================
     // 🔫 WEAPON RECIPES
     // ===============================
-    foreach (var recipe in CraftingSystem.Instance.recipes)
-    {
-        GameObject go = Instantiate(craftSlotPrefab, craftContainer);
-        CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
+   foreach (var recipe in CraftingSystem.Instance.recipes)
+{
+    GameObject go = Instantiate(craftSlotPrefab, craftContainer);
+    CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
 
-        slotUI.Setup(recipe, this);
+    slotUI.Setup(recipe, this);
 
-        bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
-        slotUI.craftButton.interactable = canCraft;
+    WeaponItemData weapon = recipe.resultWeapon;
 
-        CanvasGroup cg = go.GetComponent<CanvasGroup>();
-        if (cg != null)
-            cg.alpha = canCraft ? 1f : 0.4f;
-    }
+    bool isUnlocked = CraftingSystem.Instance.IsUnlocked(recipe);
+    bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
+    bool canSwapHere = CanSwapThisWeapon(weapon);
+
+    // 🔑 BUTON AKTİFLİĞİ
+    slotUI.craftButton.interactable =
+        (!isUnlocked && canCraft) || (isUnlocked && canSwapHere);
+
+    // 🔍 GÖRSEL GERİ BİLDİRİM
+    CanvasGroup cg = go.GetComponent<CanvasGroup>();
+    if (cg != null)
+        cg.alpha = slotUI.craftButton.interactable ? 1f : 0.35f;
+}
+
 
     // ===============================
     // 📦 ITEM RECIPES
@@ -61,6 +70,18 @@ public class CraftUIController : MonoBehaviour
         if (cg != null)
             cg.alpha = canCraft ? 1f : 0.4f;
     }
+}
+private bool CanSwapThisWeapon(WeaponItemData weapon)
+{
+    if (weapon == null)
+        return false;
+
+    WeaponSlotManager sm = WeaponSlotManager.Instance;
+
+    WeaponSlotType slotForWeapon =
+        sm.GetSlotForWeapon(weapon.weaponType);
+
+    return (int)slotForWeapon == sm.activeSlotIndex;
 }
 
 

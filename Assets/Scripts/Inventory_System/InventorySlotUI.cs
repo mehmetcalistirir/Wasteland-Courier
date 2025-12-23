@@ -58,29 +58,40 @@ public class InventorySlotUI : MonoBehaviour,
     }
 
     // 🔫 2️⃣ MAGAZINE SLOT
-    if (item.magazineInstance != null)
+if (item.magazineInstance != null)
+{
+    var mag = item.magazineInstance;
+
+    // 🚨 DATA YOKSA GÜVENLİ ÇIKIŞ
+    if (mag.data == null)
     {
-        var mag = item.magazineInstance;
-
-        icon.enabled = true;
-        icon.sprite = mag.data.icon;
-        icon.preserveAspect = true;
-
-        countText.text =
-            $"{mag.currentAmmo}/{mag.data.capacity}";
-
-        // ⭐ Equipped highlight
+        icon.enabled = false;
+        countText.text = "";
         if (highlightImage != null)
-        {
-            var pw = FindObjectOfType<PlayerWeapon>();
-            if (pw != null && pw.currentMagazine == mag)
-                highlightImage.color = equippedColor;
-            else
-                highlightImage.color = normalColor;
-        }
-
+            highlightImage.color = normalColor;
         return;
     }
+
+    icon.enabled = true;
+    icon.sprite = mag.data.icon;
+    icon.preserveAspect = true;
+
+    countText.text =
+        $"{mag.currentAmmo}/{mag.data.capacity}";
+
+    // ⭐ Equipped highlight
+    if (highlightImage != null)
+    {
+        var pw = FindObjectOfType<PlayerWeapon>();
+        if (pw != null && pw.currentMagazine == mag)
+            highlightImage.color = equippedColor;
+        else
+            highlightImage.color = normalColor;
+    }
+
+    return;
+}
+
 
     // 📦 3️⃣ NORMAL ITEM / AMMO
     icon.enabled = true;

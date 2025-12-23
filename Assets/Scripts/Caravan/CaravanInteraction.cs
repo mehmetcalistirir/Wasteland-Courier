@@ -16,7 +16,7 @@ public class CaravanInteraction : MonoBehaviour
         // Craft panel AÇIKKEN prompt gösterme
         if (playerInRange && !PlayerInputRouter.Instance.craftPanel.activeSelf)
         {
-            InteractionPromptUI.Instance?.Show("Karavan Envanteri");
+            InteractionPromptUI.Instance?.Show("Craft Paneli");
         }
     }
 
@@ -25,7 +25,7 @@ public class CaravanInteraction : MonoBehaviour
         if (other.GetComponentInParent<PlayerMovement>() != null)
         {
             playerInRange = true;
-            InteractionPromptUI.Instance?.Show("Karavan Envanteri");
+            InteractionPromptUI.Instance?.Show("Craft Paneli");
         }
     }
 

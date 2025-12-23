@@ -4,14 +4,8 @@ using UnityEngine.InputSystem;
 public class PlayerInputRouter : MonoBehaviour
 {
     public static PlayerInputRouter Instance;
-    private NPCTradeInteract activeTradeNPC;
 
     private PlayerControls controls;
-
-    [Header("Trade")]
-public TradeUIController tradeUI;
-public NPCTradeInteract currentNPC;
-
 
     [Header("Panels")]
     public GameObject craftPanel;
@@ -21,8 +15,20 @@ public NPCTradeInteract currentNPC;
     [Header("References")]
     public CaravanInteraction caravan;
 
+    // Aktif NPC (trigger içinde olan)
+    private NPCTradeInteract activeTradeNPC;
+
+    // ======================================================
+    // LIFECYCLE
+    // ======================================================
     private void Awake()
     {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         controls = new PlayerControls();
     }
@@ -30,8 +36,7 @@ public NPCTradeInteract currentNPC;
     private void OnEnable()
     {
         controls.Gameplay.Inventory.performed += OnInventory;
-        controls.Gameplay.Interact.performed += OnInteract; // 🔴 BU ŞART
-        controls.Gameplay.Craft.performed += OnCraft;
+        controls.Gameplay.Interact.performed += OnInteract;
         controls.Gameplay.Escape.performed += OnEscape;
 
         controls.Gameplay.Enable();
@@ -40,224 +45,165 @@ public NPCTradeInteract currentNPC;
     private void OnDisable()
     {
         controls.Gameplay.Inventory.performed -= OnInventory;
-        controls.Gameplay.Interact.performed -= OnInteract; // 🔴 BU ŞART
-        controls.Gameplay.Craft.performed -= OnCraft;
+        controls.Gameplay.Interact.performed -= OnInteract;
         controls.Gameplay.Escape.performed -= OnEscape;
 
         controls.Gameplay.Disable();
     }
 
-    // ==============================
-    // INVENTORY (I) → PIPBOY
-    // ==============================
-   private void OnInventory(InputAction.CallbackContext ctx)
-{
-    if (!ctx.performed) return;
+    // ======================================================
+    // INPUT HANDLERS
+    // ======================================================
 
-    if (PipBoyController.Instance == null)
-        return;
+    // INVENTORY (I)
+    private void OnInventory(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed) return;
+        if (IsAnyBlockingPanelOpen()) return;
 
-    // 🔁 TOGGLE
-    if (PipBoyController.Instance.IsOpen)
-    {
-        PipBoyController.Instance.Close();
-        GameStateManager.SetPaused(false);
-    }
-    else
-    {
+        if (PipBoyController.Instance == null) return;
+        if (PipBoyController.Instance.IsOpen) return;
+
+        InteractionPromptUI.Instance?.Hide();
         PipBoyController.Instance.Open(0);
-        GameStateManager.SetPaused(true);
-    }
-}
-
-
-private void OnInteract(InputAction.CallbackContext ctx)
-{
-    if (!ctx.performed) return;
-    if (IsPauseOpen()) return;
-
-    // Trade açıksa → kapat
-    if (tradeUI != null && tradeUI.gameObject.activeSelf)
-    {
-        CloseTrade();
-        return;
     }
 
-    // Trade kapalıysa ve NPC uygunsa → aç
-    if (currentNPC != null && currentNPC.playerInRange)
-    {
-        OpenTrade(currentNPC.tradeInventory);
-    }
-}
-void OpenTrade(NPCTradeInventory inventory)
-{
-    tradeUI.Open(inventory);
-    GameStateManager.SetPaused(true);
-    
-}
-
-void CloseTrade()
-{
-    tradeUI.Close();
-    GameStateManager.SetPaused(false);
-    
-}
-
-
-    // ==============================
-    // CRAFT (C)
-    // ==============================
-    private void OnCraft(InputAction.CallbackContext ctx)
+    // INTERACT (E)
+    private void OnInteract(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
-        if (IsPauseOpen()) return;
 
-    // Interact basıldı → prompt kapanır
-    InteractionPromptUI.Instance?.Hide();
+        // Interact basıldı → prompt her zaman kapanır
+        InteractionPromptUI.Instance?.Hide();
 
-    // 1) Trade açıksa → Interact ile kapat
-    if (tradePanel != null && tradePanel.activeSelf)
-    {
-        tradePanel.SetActive(false);
-        Time.timeScale = 1f;
-        GameStateManager.SetPaused(false);
-        return;
-    }
-
-    // 2) Trade açılabiliyorsa (aktif NPC varsa) → aç
-    if (activeTradeNPC != null && activeTradeNPC.playerInRange)
-    {
-        // tradePanel referansın tradeUI paneliyle aynı olmalı (Inspector)
-        if (tradePanel != null) tradePanel.SetActive(true);
-
-        activeTradeNPC.OpenTrade();
-        return;
-    }
-
-    // 3) Caravan craft toggle
-    if (caravan != null && caravan.playerInRange)
-    {
-        ToggleCraft();
-        return;
-    }
-}
-
-
-public void SetActiveTradeNPC(NPCTradeInteract npc)
-{
-    activeTradeNPC = npc;
-}
-private bool TryOpenTrade()
-{
-    // Sahnedeki NPCTradeInteract’lerden oyuncu menzilde olan var mı?
-    NPCTradeInteract[] npcs = FindObjectsOfType<NPCTradeInteract>();
-    foreach (var npc in npcs)
-    {
-        if (npc != null && npc.playerInRange) // npc tarafında public bool playerInRange olmalı
-        {
-            // Trade panel aç
-            if (tradePanel != null)
-                tradePanel.SetActive(true);
-
-            GameStateManager.SetPaused(true);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-
-public PlayerControls GetControls()
-{
-    return controls;
-}
-
-
-    // ==============================
-    // ESC
-    // ==============================
-    private void OnEscape(InputAction.CallbackContext ctx)
-    {
-        // 0️⃣ Trade açıksa → kapat
-if (tradeUI != null && tradeUI.gameObject.activeSelf)
-{
-    CloseTrade();
-    return;
-}
-
-        if (!ctx.performed) return;
-        if (GameStateManager.IsGameOver) return;
-
-        // 1️⃣ Pause açıksa → kapat
-        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-        {
-            PauseMenu.Instance.HidePause();
-            GameStateManager.SetPaused(false);
-            return;
-        }
-
-        // 2️⃣ Trade açıksa → kapat
+        // 1️⃣ Trade açıksa → kapat
         if (tradePanel != null && tradePanel.activeSelf)
         {
             tradePanel.SetActive(false);
-            GameStateManager.SetPaused(false);
+            ResumeGame();
             return;
         }
 
-        // 3️⃣ Craft açıksa → kapat
+        // 2️⃣ Craft açıksa → kapat
         if (craftPanel != null && craftPanel.activeSelf)
         {
             craftPanel.SetActive(false);
-            GameStateManager.SetPaused(false);
+            ResumeGame();
             return;
         }
 
-        // 4️⃣ Hiçbiri açık değil → Pause aç
+        // 3️⃣ NPC Trade (öncelikli)
+        if (activeTradeNPC != null && activeTradeNPC.playerInRange)
+        {
+            OpenTrade();
+            return;
+        }
+
+        // 4️⃣ Caravan Craft
+        if (caravan != null && caravan.playerInRange)
+        {
+            ToggleCraft();
+            return;
+        }
+    }
+
+    // ESC
+    private void OnEscape(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed) return;
+        if (GameStateManager.IsGameOver) return;
+
+        // Önce açık panelleri kapat
+        if (tradePanel != null && tradePanel.activeSelf)
+        {
+            tradePanel.SetActive(false);
+            ResumeGame();
+            return;
+        }
+
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            craftPanel.SetActive(false);
+            ResumeGame();
+            return;
+        }
+
+        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+        {
+            PauseMenu.Instance.HidePause();
+            ResumeGame();
+            return;
+        }
+
+        // Hiçbiri açık değilse pause aç
         PauseMenu.Instance.ShowPause();
         GameStateManager.SetPaused(true);
     }
 
-    public void ForceCloseCraft()
-{
-    if (craftPanel != null && craftPanel.activeSelf)
+    // ======================================================
+    // TRADE
+    // ======================================================
+    private void OpenTrade()
     {
-        craftPanel.SetActive(false);
-        GameStateManager.SetPaused(false);
-    }
-}
+        if (activeTradeNPC == null) return;
 
+        if (tradePanel != null)
+            tradePanel.SetActive(true);
 
-    // ==============================
-    // HELPERS
-    // ==============================
-    private bool IsPauseOpen()
-    {
-        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
+        activeTradeNPC.OpenTrade();
+        GameStateManager.SetPaused(true);
     }
 
+    public void SetActiveTradeNPC(NPCTradeInteract npc)
+    {
+        activeTradeNPC = npc;
+    }
+
+    // ======================================================
+    // CRAFT
+    // ======================================================
     private void ToggleCraft()
     {
+        if (craftPanel == null) return;
+
         bool open = !craftPanel.activeSelf;
         craftPanel.SetActive(open);
         GameStateManager.SetPaused(open);
     }
 
-    // ==============================
-    // INPUT CONTROL (PipBoy çağırır)
-    // ==============================
-    public void SetGameplayInput(bool enabled)
+    public void ForceCloseCraft()
     {
-        if (enabled)
-            controls.Gameplay.Enable();
-        else
-            controls.Gameplay.Disable();
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            craftPanel.SetActive(false);
+            ResumeGame();
+        }
     }
 
-    // ==============================
-    // UNUSED INPUTS
-    // ==============================
+    // ======================================================
+    // HELPERS
+    // ======================================================
+    private bool IsAnyBlockingPanelOpen()
+    {
+        return (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+            || (tradePanel != null && tradePanel.activeSelf)
+            || (craftPanel != null && craftPanel.activeSelf);
+    }
+
+    private void ResumeGame()
+    {
+        GameStateManager.SetPaused(false);
+        Time.timeScale = 1f;
+    }
+
+    public PlayerControls GetControls()
+    {
+        return controls;
+    }
+
+    // ======================================================
+    // UNUSED INPUTS (Input System gereği)
+    // ======================================================
     public void OnMove(InputAction.CallbackContext ctx) { }
     public void OnSprint(InputAction.CallbackContext ctx) { }
     public void OnMap(InputAction.CallbackContext ctx) { }

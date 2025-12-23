@@ -159,4 +159,5 @@ public class CaravanInventory : MonoBehaviour
 
         Debug.Log("CaravanInventory yüklendi.");
     }
+    
 }

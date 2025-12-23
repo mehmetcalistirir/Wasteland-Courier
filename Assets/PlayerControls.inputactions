@@ -43,15 +43,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Craft",
-                    "type": "Button",
-                    "id": "9494e607-349a-4168-ab04-e72ea9023cea",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Reload",
                     "type": "Button",
                     "id": "e12ea45d-86cc-4953-ba85-4ebaeae503c7",
@@ -109,15 +100,6 @@
                     "name": "Escape",
                     "type": "Button",
                     "id": "a6222bc1-fc83-4910-bbf0-61aa05be2863",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "CaravanWeapons",
-                    "type": "Button",
-                    "id": "072c6dd8-4e70-479c-8364-2ec14dac14cf",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -233,17 +215,6 @@
                 },
                 {
                     "name": "",
-                    "id": "fcb1ac19-edbc-48ad-a882-268972a2f710",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Craft",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "071bb287-198d-43f5-9cba-ac00b998e654",
                     "path": "<Keyboard>/r",
                     "interactions": "",
@@ -327,17 +298,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Escape",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "090b3cef-12ec-4282-8458-b134a6089e59",
-                    "path": "<Keyboard>/v",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CaravanWeapons",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

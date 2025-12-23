@@ -1,0 +1,79 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class InteractionPromptUI : MonoBehaviour
+{
+    public static InteractionPromptUI Instance;
+
+    [SerializeField] private GameObject panel;
+    [SerializeField] private TextMeshProUGUI promptText;
+
+    private InputAction interactAction;
+
+    private void Awake()
+    {
+        Instance = this;
+        Hide();
+    }
+
+    private void Start()
+    {
+        if (PlayerInputRouter.Instance == null)
+        {
+            Debug.LogError("InteractionPromptUI: PlayerInputRouter yok!");
+            return;
+        }
+
+        interactAction = PlayerInputRouter.Instance
+            .GetControls()
+            .Gameplay
+            .Interact;
+    }
+
+
+    public void Show(string actionDescription)
+    {
+        if (!panel || promptText == null || interactAction == null)
+            return;
+
+        panel.SetActive(true);
+
+        string key = GetInteractBinding();
+        promptText.text = $"[{key}] {actionDescription}";
+    }
+
+
+    public void Hide()
+    {
+        if (panel == null)
+            return;
+
+        panel.SetActive(false);
+    }
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
+
+    private string GetInteractBinding()
+    {
+        foreach (var binding in interactAction.bindings)
+        {
+            if (binding.isComposite || binding.isPartOfComposite)
+                continue;
+
+            if (string.IsNullOrEmpty(binding.effectivePath))
+                continue;
+
+            return InputControlPath.ToHumanReadableString(
+                binding.effectivePath,
+                InputControlPath.HumanReadableStringOptions.OmitDevice
+            );
+        }
+
+        return "?";
+    }
+}

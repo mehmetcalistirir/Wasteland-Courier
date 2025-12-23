@@ -26,9 +26,10 @@ public class InteractionPromptUI : MonoBehaviour
         }
 
         interactAction = PlayerInputRouter.Instance
-            .GetControls()
-            .Gameplay
-            .Interact;
+            .inputActions
+            .FindActionMap("Gameplay")
+            .FindAction("Interact");
+
     }
 
 

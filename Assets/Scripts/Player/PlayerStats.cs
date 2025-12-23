@@ -14,6 +14,7 @@ public float breathingStaminaThreshold = 25f;
 
 public float breathingVolume = 0.8f;
 public float breathingFadeSpeed = 2f;
+    private InputAction consumeAction;
 
 private AudioSource breathingSource;
 private bool isBreathingActive = false;
@@ -168,6 +169,26 @@ AudioManager.Instance?.RouteToSFX(breathingSource);
         }
 
     }
+    void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
+
+    consumeAction = gameplay.FindAction("Consume");
+
+    if (consumeAction != null)
+        consumeAction.performed += OnConsume;
+}
+void OnDisable()
+{
+    if (consumeAction != null)
+        consumeAction.performed -= OnConsume;
+}
+private void OnConsume(InputAction.CallbackContext ctx)
+{
+    TryConsumeFood();
+}
 
     void Update()
     {
@@ -175,11 +196,6 @@ AudioManager.Instance?.RouteToSFX(breathingSource);
         UpdateStaminaByHunger();
         UpdateStaminaRegen();
         UpdateHealthByHunger();
-
-
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
-            TryConsumeFood();
-
         UpdateHungerUI();
         UpdateStaminaUI();
         if (heavyBreathingLoop == null || breathingSource == null)

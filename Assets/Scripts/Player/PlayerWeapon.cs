@@ -61,7 +61,8 @@ public class PlayerWeapon : MonoBehaviour
     public AudioClip emptyClipSound;
 
     // Input System
-    private PlayerControls controls;
+    private InputAction reloadAction;
+
 
     // State
     private bool isReloading = false;
@@ -90,7 +91,6 @@ public class PlayerWeapon : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         animator = GetComponentInChildren<Animator>();
-        controls = new PlayerControls();
 
         if (muzzleFlash != null)
         {
@@ -232,32 +232,39 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     // INPUT SYSTEM ONENABLE / OFF
     // ============================
-    private void OnEnable()
+private void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
+
+    reloadAction = gameplay.FindAction("Reload");
+
+    reloadAction.started += OnReloadStarted;
+    reloadAction.performed += OnReloadPerformed;
+    reloadAction.canceled += OnReloadCanceled;
+
+    if (Inventory.Instance != null)
+        Inventory.Instance.OnChanged += OnInventoryChanged;
+}
+
+
+
+
+
+private void OnDisable()
+{
+    if (reloadAction != null)
     {
-        controls.Gameplay.Enable();
-
-        controls.Gameplay.Reload.started += OnReloadStarted;
-        controls.Gameplay.Reload.performed += OnReloadPerformed;
-        controls.Gameplay.Reload.canceled += OnReloadCanceled;
-
-        if (Inventory.Instance != null)
-            Inventory.Instance.OnChanged += OnInventoryChanged;
+        reloadAction.started -= OnReloadStarted;
+        reloadAction.performed -= OnReloadPerformed;
+        reloadAction.canceled -= OnReloadCanceled;
     }
 
+    if (Inventory.Instance != null)
+        Inventory.Instance.OnChanged -= OnInventoryChanged;
+}
 
-
-
-    private void OnDisable()
-    {
-        controls.Gameplay.Reload.started -= OnReloadStarted;
-        controls.Gameplay.Reload.performed -= OnReloadPerformed;
-        controls.Gameplay.Reload.canceled -= OnReloadCanceled;
-
-        if (Inventory.Instance != null)
-            Inventory.Instance.OnChanged -= OnInventoryChanged;
-
-        controls.Gameplay.Disable();
-    }
 
     private void OnInventoryChanged()
     {

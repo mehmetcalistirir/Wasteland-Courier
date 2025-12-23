@@ -115,9 +115,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Collect",
+                    "name": "Consume",
                     "type": "Button",
-                    "id": "2f89435c-323b-41ff-b571-5c40891f56fd",
+                    "id": "22e1df4f-4439-4418-8a62-43e4fd421354",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -314,23 +314,12 @@
                 },
                 {
                     "name": "",
-                    "id": "013b8e7c-0efe-4c0f-9af3-2d1abb9a1875",
-                    "path": "",
+                    "id": "f756a444-b4c8-43c7-96ee-72ee8d9ebd3a",
+                    "path": "<Keyboard>/t",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Collect",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "725db07b-6780-46d8-b34e-e4761c353f11",
-                    "path": "<Keyboard>/e",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Collect",
+                    "action": "Consume",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

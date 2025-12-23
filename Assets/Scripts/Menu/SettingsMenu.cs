@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
+
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -20,9 +22,14 @@ public class SettingsMenu : MonoBehaviour
     public TMP_Dropdown qualityDropdown;
     public Toggle fullscreenToggle;
     public TMP_Dropdown resolutionDropdown;
-
     private bool initialized = false;
     private int lastResolutionIndex = -1;
+
+    [Header("Keybind UI")]
+    public Transform keybindContainer;
+    public GameObject keybindRowPrefab;
+    public InputActionAsset inputActions;
+
 
     // Sabit (retro / pixel-art uyumlu) çözünürlük listesi
     private readonly Vector2Int[] resolutions =
@@ -51,13 +58,92 @@ public class SettingsMenu : MonoBehaviour
     }
 
     private IEnumerator SetupMenuDeferred()
-{
-    yield return null;
+    {
+        yield return null;
 
-    InitResolutionDropdown();
-    InitQualityDropdown(); // 🔥 EKLENDİ
-    LoadPrefs();
+        
+        LoadRebinds();
+        InitKeybindUI();
+        InitResolutionDropdown();
+        InitQualityDropdown(); // 🔥 EKLENDİ
+        LoadPrefs();
+    }
+    void LoadRebinds()
+    {
+        if (!PlayerPrefs.HasKey("Rebinds")) return;
+
+        string json = PlayerPrefs.GetString("Rebinds");
+        inputActions.LoadBindingOverridesFromJson(json);
+    }
+    public void ResetKeybinds()
+{
+    if (inputActions == null)
+    {
+        Debug.LogError("ResetKeybinds: inputActions NULL");
+        return;
+    }
+
+    // 1) Override'ları sil
+    inputActions.RemoveAllBindingOverrides();
+
+    // 2) Kayıtlı json'u sil
+    PlayerPrefs.DeleteKey("Rebinds");
+    PlayerPrefs.Save();
+
+    // 3) UI'ı anında güncelle (en kritik kısım)
+    RefreshKeybindUI();
 }
+private void RefreshKeybindUI()
+{
+    // Mevcut satırları yok et
+    foreach (Transform child in keybindContainer)
+        Destroy(child.gameObject);
+
+    // Yeniden üret (override yok -> defaultlar görünür)
+    InitKeybindUI();
+
+    // Layout güncelle
+    Canvas.ForceUpdateCanvases();
+}
+void InitKeybindUI()
+{
+    var map = inputActions.FindActionMap("Gameplay");
+    if (map == null)
+    {
+        Debug.LogError("❌ Gameplay action map bulunamadı");
+        return;
+    }
+
+    foreach (Transform child in keybindContainer)
+        Destroy(child.gameObject);
+
+    foreach (var action in map.actions)
+    {
+        if (action.bindings.Count == 0)
+            continue;
+
+        int bindingIndex = -1;
+
+        for (int i = 0; i < action.bindings.Count; i++)
+        {
+            var binding = action.bindings[i];
+
+            if (!binding.isComposite && !binding.isPartOfComposite)
+            {
+                bindingIndex = i;
+                break;
+            }
+        }
+
+        if (bindingIndex == -1)
+            continue;
+
+        GameObject row = Instantiate(keybindRowPrefab, keybindContainer);
+        row.GetComponent<KeybindRowUI>().Setup(action, bindingIndex);
+    }
+}
+
+
 
 
     // -------------------------------------------------
@@ -219,30 +305,30 @@ public class SettingsMenu : MonoBehaviour
     }
 
     void InitQualityDropdown()
-{
-    if (qualityDropdown == null)
     {
-        Debug.LogError("❌ qualityDropdown NULL");
-        return;
+        if (qualityDropdown == null)
+        {
+            Debug.LogError("❌ qualityDropdown NULL");
+            return;
+        }
+
+        qualityDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+
+        foreach (string q in QualitySettings.names)
+            options.Add(q);
+
+        qualityDropdown.AddOptions(options);
+
+        int savedQuality = PlayerPrefs.GetInt(
+            "QualityLevel",
+            QualitySettings.GetQualityLevel()
+        );
+
+        qualityDropdown.SetValueWithoutNotify(savedQuality);
+        qualityDropdown.RefreshShownValue();
     }
-
-    qualityDropdown.ClearOptions();
-
-    List<string> options = new List<string>();
-
-    foreach (string q in QualitySettings.names)
-        options.Add(q);
-
-    qualityDropdown.AddOptions(options);
-
-    int savedQuality = PlayerPrefs.GetInt(
-        "QualityLevel",
-        QualitySettings.GetQualityLevel()
-    );
-
-    qualityDropdown.SetValueWithoutNotify(savedQuality);
-    qualityDropdown.RefreshShownValue();
-}
 
 
 }

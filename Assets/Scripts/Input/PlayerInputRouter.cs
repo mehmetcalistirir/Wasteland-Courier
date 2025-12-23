@@ -5,6 +5,9 @@ public class PlayerInputRouter : MonoBehaviour
 {
     public static PlayerInputRouter Instance;
 
+    public InputActionAsset inputActions;
+    private InputActionMap gameplay;
+
     private PlayerControls controls;
 
     [Header("Panels")]
@@ -30,26 +33,36 @@ public class PlayerInputRouter : MonoBehaviour
         }
 
         Instance = this;
-        controls = new PlayerControls();
-    }
+        gameplay = inputActions.FindActionMap("Gameplay");
 
-    private void OnEnable()
+    }
+private void Update()
+{
+    if (Input.GetKeyDown(KeyCode.F12))
     {
-        controls.Gameplay.Inventory.performed += OnInventory;
-        controls.Gameplay.Interact.performed += OnInteract;
-        controls.Gameplay.Escape.performed += OnEscape;
-
-        controls.Gameplay.Enable();
+        Debug.Log("Gameplay enabled: " +
+            inputActions.FindActionMap("Gameplay").enabled);
     }
+}
 
-    private void OnDisable()
-    {
-        controls.Gameplay.Inventory.performed -= OnInventory;
-        controls.Gameplay.Interact.performed -= OnInteract;
-        controls.Gameplay.Escape.performed -= OnEscape;
+private void OnEnable()
+{
+    gameplay.FindAction("Inventory").performed += OnInventory;
+    gameplay.FindAction("Interact").performed += OnInteract;
+    gameplay.FindAction("Escape").performed += OnEscape;
 
-        controls.Gameplay.Disable();
-    }
+    gameplay.Enable();
+}
+
+private void OnDisable()
+{
+    gameplay.FindAction("Inventory").performed -= OnInventory;
+    gameplay.FindAction("Interact").performed -= OnInteract;
+    gameplay.FindAction("Escape").performed -= OnEscape;
+
+    gameplay.Disable();
+}
+
 
     // ======================================================
     // INPUT HANDLERS
@@ -196,10 +209,7 @@ public class PlayerInputRouter : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public PlayerControls GetControls()
-    {
-        return controls;
-    }
+
 
     // ======================================================
     // UNUSED INPUTS (Input System gereği)

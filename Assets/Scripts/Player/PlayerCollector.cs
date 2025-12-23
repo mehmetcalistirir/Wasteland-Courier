@@ -8,25 +8,28 @@ public class PlayerCollector : MonoBehaviour
     public float collectRange = 1.5f;
 
     private List<Collectible> highlighted = new List<Collectible>();
-    private PlayerControls controls;
 
-    private void Awake()
-    {
-        // Input Actions instance
-        controls = new PlayerControls();
-    }
+    private InputAction interactAction;
 
-    private void OnEnable()
-    {
-        controls.Gameplay.Collect.performed += OnCollect;
-        controls.Gameplay.Enable();
-    }
 
-    private void OnDisable()
-    {
-        controls.Gameplay.Collect.performed -= OnCollect;
-        controls.Gameplay.Disable();
-    }
+private void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
+
+    interactAction = gameplay.FindAction("Interact");
+
+    interactAction.performed += OnInteract;
+}
+
+
+private void OnDisable()
+{
+    if (interactAction != null)
+        interactAction.performed -= OnInteract;
+}
+
 
     private void Update()
     {
@@ -56,16 +59,17 @@ public class PlayerCollector : MonoBehaviour
     }
 
     // ---------------- COLLECT ----------------
-    private void OnCollect(InputAction.CallbackContext context)
+private void OnInteract(InputAction.CallbackContext context)
+{
+    foreach (var c in highlighted)
     {
-        foreach (var c in highlighted)
+        if (c != null)
         {
-            if (c != null)
-            {
-                c.Collect();
-                break; // sadece en yakın / ilk item
-            }
+            c.Collect();
+            break; // sadece bir tane al
         }
     }
+}
+
 
 }

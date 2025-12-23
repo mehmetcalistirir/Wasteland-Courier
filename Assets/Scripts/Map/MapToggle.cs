@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class MapToggle : MonoBehaviour
 {
@@ -15,38 +14,36 @@ public class MapToggle : MonoBehaviour
 
     private bool isMapVisible = false;
     private Vector3 mapBottomLeft;
-    private PlayerControls controls; // Script kendi oluşturacak
 
-    private void Awake()
-    {
-        // PlayerControls örneğini oluştur
-        controls = new PlayerControls();
-    }
+    private InputAction mapAction;
 
-    private void OnEnable()
-    {
-        // Map tuşuna basıldığında çalışacak event’leri bağla
-        controls.Gameplay.Map.performed += OnMapPressed;
-        controls.Gameplay.Map.canceled += OnMapReleased;
-        controls.Gameplay.Enable();
 
-        if (mapPanel != null)
-            mapPanel.SetActive(false);
+private void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
 
-        if (mapRect != null)
-        {
-            Vector3[] corners = new Vector3[4];
-            mapRect.GetWorldCorners(corners);
-            mapBottomLeft = corners[0];
-        }
-    }
+    mapAction = gameplay.FindAction("Map");
 
-    private void OnDisable()
-    {
-        controls.Gameplay.Map.performed -= OnMapPressed;
-        controls.Gameplay.Map.canceled -= OnMapReleased;
-        controls.Gameplay.Disable();
-    }
+    mapAction.performed += OnMapPressed;
+    mapAction.canceled += OnMapReleased;
+
+    gameplay.Enable();
+
+    if (mapPanel != null)
+        mapPanel.SetActive(false);
+}
+
+
+private void OnDisable()
+{
+    if (mapAction == null) return;
+
+    mapAction.performed -= OnMapPressed;
+    mapAction.canceled -= OnMapReleased;
+}
+
 
     private void OnMapPressed(InputAction.CallbackContext context)
     {

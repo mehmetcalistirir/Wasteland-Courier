@@ -16,9 +16,10 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private Camera mainCamera;
     private PlayerWeapon weapon;
+    private InputAction moveAction;
+private InputAction sprintAction;
 
     // --- Input ---
-    private PlayerControls controls;
     private Vector2 moveInput;
 
     // --- Extra ---
@@ -33,33 +34,34 @@ public class PlayerMovement : MonoBehaviour
         stats = GetComponent<PlayerStats>();
         mainCamera = Camera.main;
 
-        controls = new PlayerControls();
     }
 
-    void OnEnable()
-    {
-        controls.Gameplay.Move.performed += OnMovePerformed;
-        controls.Gameplay.Move.canceled += OnMoveCanceled;
+void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
 
-        controls.Gameplay.Sprint.performed += ctx =>
-        {
-            if (weapon != null && weapon.IsBusy) return;
-            isSprinting = true;
-        };
+    moveAction = gameplay.FindAction("Move");
+    sprintAction = gameplay.FindAction("Sprint");
 
-        controls.Gameplay.Sprint.canceled += ctx =>
-        {
-            isSprinting = false;
-        };
+    moveAction.performed += OnMovePerformed;
+    moveAction.canceled += OnMoveCanceled;
 
-        controls.Gameplay.Enable();
-    }
+    sprintAction.performed += OnSprintPerformed;
+    sprintAction.canceled += OnSprintCanceled;
+}
 
-    void OnDisable()
-    {
-        controls.Gameplay.Disable();
-    }
 
+private void OnSprintPerformed(InputAction.CallbackContext ctx)
+{
+    if (weapon != null && weapon.IsBusy) return;
+    isSprinting = true;
+}
+private void OnSprintCanceled(InputAction.CallbackContext ctx)
+{
+    isSprinting = false;
+}
     // ---------------- INPUT ----------------
 
     private void OnMovePerformed(InputAction.CallbackContext context)

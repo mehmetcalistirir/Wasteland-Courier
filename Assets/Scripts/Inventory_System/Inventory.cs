@@ -19,9 +19,9 @@ public class Inventory : MonoBehaviour
     public void RaiseChanged() => OnChanged?.Invoke();
 
 
-    //envantere inspectordan ekleneleri siler
-    /*
-        void Awake()
+    //orjinal awake fonksinumuz bu, sorunsuz
+    
+/*         void Awake()
         {
             if (Instance != null)
             {
@@ -34,27 +34,45 @@ public class Inventory : MonoBehaviour
             slots = new InventoryItem[capacity];
             for (int i = 0; i < capacity; i++)
                 slots[i] = new InventoryItem();
-        }
-        */
-
+        } */
+        
+    
+    //test için bunu kullanıyoruz, envanter görselinde bug çıkartan kısım da burası
     void Awake()
+{
+    if (Instance != null)
     {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        Destroy(gameObject);
+        return;
+    }
 
-        Instance = this;
+    Instance = this;
 
-        // ❗ SADECE boşsa oluştur
-        if (slots == null || slots.Length == 0)
+    // 1️⃣ Slots array yoksa veya kapasite farklıysa → yeniden oluştur
+    if (slots == null || slots.Length != capacity)
+    {
+        InventoryItem[] oldSlots = slots;
+
+        slots = new InventoryItem[capacity];
+
+        for (int i = 0; i < capacity; i++)
         {
-            slots = new InventoryItem[capacity];
-            for (int i = 0; i < capacity; i++)
-                slots[i] = new InventoryItem();
+            if (oldSlots != null && i < oldSlots.Length && oldSlots[i] != null)
+                slots[i] = oldSlots[i];          // inspector / save'den gelen
+            else
+                slots[i] = new InventoryItem();  // güvenli boş slot
         }
     }
+
+    // 2️⃣ Array var ama içi null olabilir → GARANTİ ALTINA AL
+    for (int i = 0; i < slots.Length; i++)
+    {
+        if (slots[i] == null)
+            slots[i] = new InventoryItem();
+    }
+}
+
+   
 
     public bool IsMagazineEquipped(MagazineInstance mag)
     {

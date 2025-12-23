@@ -2,51 +2,55 @@ using UnityEngine;
 
 public class NPCTradeInteract : MonoBehaviour
 {
-    [Header("Trade")]
     public TradeUIController tradeUI;
 
     private NPCTradeInventory tradeInventory;
-    private bool playerInRange;
+    public bool playerInRange { get; private set; }
 
     private void Awake()
     {
         tradeInventory = GetComponent<NPCTradeInventory>();
     }
 
+    private void Update()
+    {
+        // Trade açıksa prompt gösterme
+        if (playerInRange && !PlayerInputRouter.Instance.tradePanel.activeSelf)
+        {
+            InteractionPromptUI.Instance?.Show("Ticaret Yap");
+        }
+    }
+
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = true;
+        if (!other.CompareTag("Player")) return;
+
+        playerInRange = true;
+        InteractionPromptUI.Instance?.Show("Ticaret Yap");
+        PlayerInputRouter.Instance?.SetActiveTradeNPC(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = false;
+        if (!other.CompareTag("Player")) return;
+
+        playerInRange = false;
+        InteractionPromptUI.Instance?.Hide();
+        PlayerInputRouter.Instance?.SetActiveTradeNPC(null);
     }
 
-    private void Update()
+
+    // ✅ Router buradan çağıracak
+    public void OpenTrade()
     {
-        if (!playerInRange)
-            return;
+        if (tradeUI == null || tradeInventory == null) return;
 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            OpenTrade();
-        }
-    }
-
-    void OpenTrade()
-    {
-        if (tradeInventory == null)
-        {
-            Debug.LogWarning("NPCTradeInventory yok!");
-            return;
-        }
-
+        InteractionPromptUI.Instance?.Hide();
         tradeUI.Open(tradeInventory);
 
-        // UI açıkken oyunu durdurmak istersen
+        // Senin eski davranışın buysa kalsın:
         Time.timeScale = 0f;
+        GameStateManager.SetPaused(true);
     }
 }

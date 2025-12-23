@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerInputRouter : MonoBehaviour
 {
     public static PlayerInputRouter Instance;
+    private NPCTradeInteract activeTradeNPC;
 
     private PlayerControls controls;
 
@@ -24,7 +25,8 @@ public class PlayerInputRouter : MonoBehaviour
     private void OnEnable()
     {
         controls.Gameplay.Inventory.performed += OnInventory;
-        controls.Gameplay.Craft.performed += OnCraft;
+        controls.Gameplay.Interact.performed += OnInteract;
+
         controls.Gameplay.Escape.performed += OnEscape;
 
         controls.Gameplay.Enable();
@@ -33,7 +35,8 @@ public class PlayerInputRouter : MonoBehaviour
     private void OnDisable()
     {
         controls.Gameplay.Inventory.performed -= OnInventory;
-        controls.Gameplay.Craft.performed -= OnCraft;
+        controls.Gameplay.Interact.performed -= OnInteract;
+
         controls.Gameplay.Escape.performed -= OnEscape;
 
         controls.Gameplay.Disable();
@@ -58,19 +61,73 @@ public class PlayerInputRouter : MonoBehaviour
 }
 
 
-    // ==============================
-    // CRAFT (C)
-    // ==============================
-    private void OnCraft(InputAction.CallbackContext ctx)
+private void OnInteract(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (IsPauseOpen()) return;
+
+    // Interact basıldı → prompt kapanır
+    InteractionPromptUI.Instance?.Hide();
+
+    // 1) Trade açıksa → Interact ile kapat
+    if (tradePanel != null && tradePanel.activeSelf)
     {
-        if (!ctx.performed) return;
-        if (IsPauseOpen()) return;
-
-        if (caravan == null || !caravan.playerInRange)
-            return;
-
-        ToggleCraft();
+        tradePanel.SetActive(false);
+        Time.timeScale = 1f;
+        GameStateManager.SetPaused(false);
+        return;
     }
+
+    // 2) Trade açılabiliyorsa (aktif NPC varsa) → aç
+    if (activeTradeNPC != null && activeTradeNPC.playerInRange)
+    {
+        // tradePanel referansın tradeUI paneliyle aynı olmalı (Inspector)
+        if (tradePanel != null) tradePanel.SetActive(true);
+
+        activeTradeNPC.OpenTrade();
+        return;
+    }
+
+    // 3) Caravan craft toggle
+    if (caravan != null && caravan.playerInRange)
+    {
+        ToggleCraft();
+        return;
+    }
+}
+
+
+public void SetActiveTradeNPC(NPCTradeInteract npc)
+{
+    activeTradeNPC = npc;
+}
+private bool TryOpenTrade()
+{
+    // Sahnedeki NPCTradeInteract’lerden oyuncu menzilde olan var mı?
+    NPCTradeInteract[] npcs = FindObjectsOfType<NPCTradeInteract>();
+    foreach (var npc in npcs)
+    {
+        if (npc != null && npc.playerInRange) // npc tarafında public bool playerInRange olmalı
+        {
+            // Trade panel aç
+            if (tradePanel != null)
+                tradePanel.SetActive(true);
+
+            GameStateManager.SetPaused(true);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+public PlayerControls GetControls()
+{
+    return controls;
+}
+
 
     // ==============================
     // ESC

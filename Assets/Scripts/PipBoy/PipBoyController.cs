@@ -66,7 +66,7 @@ public class PipBoyController : MonoBehaviour
     GameStateManager.SetPaused(true);
     controls.UI.Enable();
 
-    PlayerInputRouter.Instance.SetGameplayInput(false);
+    
 }
 
 
@@ -79,7 +79,7 @@ public class PipBoyController : MonoBehaviour
     GameStateManager.SetPaused(false);
     controls.UI.Disable();
 
-    PlayerInputRouter.Instance.SetGameplayInput(true);
+    
 }
 
 

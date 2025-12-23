@@ -7,6 +7,11 @@ public class PlayerInputRouter : MonoBehaviour
 
     private PlayerControls controls;
 
+    [Header("Trade")]
+public TradeUIController tradeUI;
+public NPCTradeInteract currentNPC;
+
+
     [Header("Panels")]
     public GameObject craftPanel;
     public GameObject tradePanel;
@@ -24,6 +29,7 @@ public class PlayerInputRouter : MonoBehaviour
     private void OnEnable()
     {
         controls.Gameplay.Inventory.performed += OnInventory;
+        controls.Gameplay.Interact.performed += OnInteract; // 🔴 BU ŞART
         controls.Gameplay.Craft.performed += OnCraft;
         controls.Gameplay.Escape.performed += OnEscape;
 
@@ -33,6 +39,7 @@ public class PlayerInputRouter : MonoBehaviour
     private void OnDisable()
     {
         controls.Gameplay.Inventory.performed -= OnInventory;
+        controls.Gameplay.Interact.performed -= OnInteract; // 🔴 BU ŞART
         controls.Gameplay.Craft.performed -= OnCraft;
         controls.Gameplay.Escape.performed -= OnEscape;
 
@@ -42,19 +49,57 @@ public class PlayerInputRouter : MonoBehaviour
     // ==============================
     // INVENTORY (I) → PIPBOY
     // ==============================
-    private void OnInventory(InputAction.CallbackContext ctx)
+   private void OnInventory(InputAction.CallbackContext ctx)
 {
     if (!ctx.performed) return;
-    if (IsPauseOpen()) return;
 
     if (PipBoyController.Instance == null)
         return;
 
-    // PipBoy zaten açıksa tekrar açma
+    // 🔁 TOGGLE
     if (PipBoyController.Instance.IsOpen)
-        return;
+    {
+        PipBoyController.Instance.Close();
+        GameStateManager.SetPaused(false);
+    }
+    else
+    {
+        PipBoyController.Instance.Open(0);
+        GameStateManager.SetPaused(true);
+    }
+}
 
-    PipBoyController.Instance.Open(0);
+
+private void OnInteract(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (IsPauseOpen()) return;
+
+    // Trade açıksa → kapat
+    if (tradeUI != null && tradeUI.gameObject.activeSelf)
+    {
+        CloseTrade();
+        return;
+    }
+
+    // Trade kapalıysa ve NPC uygunsa → aç
+    if (currentNPC != null && currentNPC.playerInRange)
+    {
+        OpenTrade(currentNPC.tradeInventory);
+    }
+}
+void OpenTrade(NPCTradeInventory inventory)
+{
+    tradeUI.Open(inventory);
+    GameStateManager.SetPaused(true);
+    
+}
+
+void CloseTrade()
+{
+    tradeUI.Close();
+    GameStateManager.SetPaused(false);
+    
 }
 
 
@@ -77,6 +122,13 @@ public class PlayerInputRouter : MonoBehaviour
     // ==============================
     private void OnEscape(InputAction.CallbackContext ctx)
     {
+        // 0️⃣ Trade açıksa → kapat
+if (tradeUI != null && tradeUI.gameObject.activeSelf)
+{
+    CloseTrade();
+    return;
+}
+
         if (!ctx.performed) return;
         if (GameStateManager.IsGameOver) return;
 

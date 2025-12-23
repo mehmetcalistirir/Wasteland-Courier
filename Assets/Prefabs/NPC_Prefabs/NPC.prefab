@@ -11,7 +11,9 @@ GameObject:
   - component: {fileID: 7927796770605860801}
   - component: {fileID: 7602325027930007479}
   - component: {fileID: 4836736757856030809}
-  - component: {fileID: 7667827809458824161}
+  - component: {fileID: 4915692296294648789}
+  - component: {fileID: 8309820407657222741}
+  - component: {fileID: 3274059474625537829}
   m_Layer: 0
   m_Name: NPC
   m_TagString: Untagged
@@ -54,6 +56,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -75,6 +79,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
@@ -123,7 +128,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.00000023841858, y: -0.057765722}
+  m_Offset: {x: 0.038663626, y: -0.026254177}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -133,9 +138,9 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.5671539, y: 1.5776567}
+  m_Size: {x: 3.8184443, y: 4.539772}
   m_EdgeRadius: 0
---- !u!114 &7667827809458824161
+--- !u!114 &4915692296294648789
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144,17 +149,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 7961123093159754099}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53151207d162fe74f899cc86f3f02261, type: 3}
+  m_Script: {fileID: 11500000, guid: c83519496a1bee64493a5bb8d748bd94, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCTradeInventory
   tradeOffers:
-  - {fileID: 11400000, guid: a9b7d0b94e7bccf4a95e701f576a68f3, type: 2}
-  - {fileID: 11400000, guid: f8228df20a4584b4ea31b29760ff21c5, type: 2}
-  - {fileID: 11400000, guid: ae7fd27fe2018194b803f1d4dc8fe58f, type: 2}
-  - {fileID: 11400000, guid: 8d51efcf5d959b246b53782c6944e5e5, type: 2}
-  - {fileID: 11400000, guid: 240f56c95a9256640815e786ef2825f8, type: 2}
-  - {fileID: 11400000, guid: 2ca3b4b2fda450e45b244b9c873879aa, type: 2}
-  tradeUIPanel: {fileID: 0}
-  interactPromptUI: {fileID: 0}
-  tradeOffersContainer: {fileID: 0}
-  tradeOfferButtonPrefab: {fileID: 4346082350058725167, guid: 2114c8c07bb03724d8dfcfc14bb9fce3, type: 3}
+  - {fileID: 11400000, guid: b193007099ed74b4d877cb42daa301a2, type: 2}
+--- !u!114 &8309820407657222741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7961123093159754099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 789e1c6c6d306ce4faa3a85fb1add9b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCTradeInteract
+--- !u!50 &3274059474625537829
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7961123093159754099}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

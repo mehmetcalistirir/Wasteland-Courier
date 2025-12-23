@@ -1452,28 +1452,37 @@ public class CaravanInteraction : MonoBehaviour
 
     private void Awake()
     {
-        // GÃ¼venlik: collider trigger olmak zorunda
         var col = GetComponent<Collider2D>();
         col.isTrigger = true;
     }
 
+    private void Update()
+    {
+        // Craft panel AÃ‡IKKEN prompt gÃ¶sterme
+        if (playerInRange && !PlayerInputRouter.Instance.craftPanel.activeSelf)
+        {
+            InteractionPromptUI.Instance?.Show("Craft Paneli");
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
-{
-    if (other.GetComponentInParent<PlayerMovement>() != null)
     {
-        playerInRange = true;
+        if (other.GetComponentInParent<PlayerMovement>() != null)
+        {
+            playerInRange = true;
+            InteractionPromptUI.Instance?.Show("Craft Paneli");
+        }
     }
-}
 
-private void OnTriggerExit2D(Collider2D other)
-{
-    if (other.GetComponentInParent<PlayerMovement>() != null)
+    private void OnTriggerExit2D(Collider2D other)
     {
-        playerInRange = false;
-        PlayerInputRouter.Instance?.ForceCloseCraft();
+        if (other.GetComponentInParent<PlayerMovement>() != null)
+        {
+            playerInRange = false;
+            InteractionPromptUI.Instance?.Hide();
+            PlayerInputRouter.Instance?.ForceCloseCraft();
+        }
     }
-}
-
 }
 using System.Collections.Generic;
 using UnityEngine;
@@ -1636,6 +1645,7 @@ public class CaravanInventory : MonoBehaviour
 
         Debug.Log("CaravanInventory yÃ¼klendi.");
     }
+    
 }
 using System.Collections.Generic;
 using UnityEngine;
@@ -2000,31 +2010,29 @@ public class CraftingSystem : MonoBehaviour
     // Craft â†’ Oyuncuya silahÄ± VER
     // ------------------------------------------------------------
     public bool TryCraft(WeaponCraftRecipe recipe)
-    {
-        if (!CanCraft(recipe))
-        {
-            Debug.Log("Craft baÅŸarÄ±sÄ±z: Gereken koÅŸullar saÄŸlanmÄ±yor.");
-            return false;
-        }
+{
+    if (!CanCraft(recipe))
+        return false;
 
-        WeaponItemData weaponItem = GetWeaponItem(recipe);
+    WeaponItemData weaponItem = recipe.resultWeapon;
 
-        // 1) KaynaklarÄ± tÃ¼ket
-        foreach (var cost in recipe.costs)
-    Inventory.Instance.TryConsumeByID(cost.item.itemID, cost.amount);
+    // 1ï¸âƒ£ KaynaklarÄ± tÃ¼ket
+    foreach (var cost in recipe.costs)
+        Inventory.Instance.TryConsumeByID(
+            cost.item.itemID,
+            cost.amount);
 
+    // 2ï¸âƒ£ Unlock
+    unlockedWeapons.Add(weaponItem.itemID);
 
-        // 2) Unlock et (ITEM ID)
-        unlockedWeapons.Add(GetKey(weaponItem));
+    // 3ï¸âƒ£ Caravan'a ekle
+    CaravanInventory.Instance.StoreWeapon(weaponItem);
 
-        // 3) SilahÄ± oyuncuya ver / tak
-        WeaponSlotManager.Instance.EquipWeapon(weaponItem);
+    Debug.Log($"âœ” WEAPON CRAFT â†’ {weaponItem.itemName} karavana eklendi");
 
+    return true;
+}
 
-        Debug.Log($"âœ” CRAFT BAÅARILI â†’ {weaponItem.itemName} oyuncuya takÄ±ldÄ±!");
-
-        return true;
-    }
     public bool CanCraftItem(ItemCraftRecipe recipe)
 {
     if (recipe == null) return false;
@@ -2174,11 +2182,61 @@ public class CraftSlotUI : MonoBehaviour
     // ------------------------------------------------
     // ğŸ”˜ BUTTON
     // ------------------------------------------------
-    private void SetupButton()
+   private void SetupButton()
+{
+    craftButton.onClick.RemoveAllListeners();
+
+    if (recipeType == CraftRecipeType.Weapon &&
+        CraftingSystem.Instance.IsUnlocked(weaponRecipe))
     {
-        craftButton.onClick.RemoveAllListeners();
+        craftButton.GetComponentInChildren<TMP_Text>().text = "SWAP";
+        craftButton.onClick.AddListener(OnSwapPressed);
+    }
+    else
+    {
+        craftButton.GetComponentInChildren<TMP_Text>().text = "CRAFT";
         craftButton.onClick.AddListener(OnCraftPressed);
     }
+}
+
+
+private void OnSwapPressed()
+{
+    WeaponItemData target = weaponRecipe.resultWeapon;
+
+    WeaponSlotManager slotManager = WeaponSlotManager.Instance;
+    CaravanInventory caravan = CaravanInventory.Instance;
+
+    int activeSlot = slotManager.activeSlotIndex;
+
+    // 1ï¸âƒ£ Oyuncunun elindeki silahÄ± al
+    WeaponItemData current =
+        slotManager.GetWeaponItemInSlot(activeSlot);
+
+    if (current != null)
+    {
+        caravan.StoreWeapon(current);
+    }
+
+    // 2ï¸âƒ£ Karavandan seÃ§ilen silahÄ± al
+    var list = caravan.GetWeapons(target.weaponType);
+    int index = list.FindIndex(w => w.itemID == target.itemID);
+
+    if (index < 0)
+    {
+        Debug.LogError("Swap baÅŸarÄ±sÄ±z: Karavanda silah yok!");
+        return;
+    }
+
+    WeaponItemData taken =
+        caravan.TakeWeapon(target.weaponType, index);
+
+    // 3ï¸âƒ£ Oyuncunun aktif slotuna tak
+    slotManager.SetWeaponToSlot(activeSlot, taken);
+
+    controller.RefreshUI();
+}
+
 
     private void OnCraftPressed()
     {
@@ -2230,20 +2288,29 @@ public class CraftUIController : MonoBehaviour
     // ===============================
     // ğŸ”« WEAPON RECIPES
     // ===============================
-    foreach (var recipe in CraftingSystem.Instance.recipes)
-    {
-        GameObject go = Instantiate(craftSlotPrefab, craftContainer);
-        CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
+   foreach (var recipe in CraftingSystem.Instance.recipes)
+{
+    GameObject go = Instantiate(craftSlotPrefab, craftContainer);
+    CraftSlotUI slotUI = go.GetComponent<CraftSlotUI>();
 
-        slotUI.Setup(recipe, this);
+    slotUI.Setup(recipe, this);
 
-        bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
-        slotUI.craftButton.interactable = canCraft;
+    WeaponItemData weapon = recipe.resultWeapon;
 
-        CanvasGroup cg = go.GetComponent<CanvasGroup>();
-        if (cg != null)
-            cg.alpha = canCraft ? 1f : 0.4f;
-    }
+    bool isUnlocked = CraftingSystem.Instance.IsUnlocked(recipe);
+    bool canCraft = CraftingSystem.Instance.CanCraft(recipe);
+    bool canSwapHere = CanSwapThisWeapon(weapon);
+
+    // ğŸ”‘ BUTON AKTÄ°FLÄ°ÄÄ°
+    slotUI.craftButton.interactable =
+        (!isUnlocked && canCraft) || (isUnlocked && canSwapHere);
+
+    // ğŸ” GÃ–RSEL GERÄ° BÄ°LDÄ°RÄ°M
+    CanvasGroup cg = go.GetComponent<CanvasGroup>();
+    if (cg != null)
+        cg.alpha = slotUI.craftButton.interactable ? 1f : 0.35f;
+}
+
 
     // ===============================
     // ğŸ“¦ ITEM RECIPES
@@ -2262,6 +2329,18 @@ public class CraftUIController : MonoBehaviour
         if (cg != null)
             cg.alpha = canCraft ? 1f : 0.4f;
     }
+}
+private bool CanSwapThisWeapon(WeaponItemData weapon)
+{
+    if (weapon == null)
+        return false;
+
+    WeaponSlotManager sm = WeaponSlotManager.Instance;
+
+    WeaponSlotType slotForWeapon =
+        sm.GetSlotForWeapon(weapon.weaponType);
+
+    return (int)slotForWeapon == sm.activeSlotIndex;
 }
 
 
@@ -3271,6 +3350,233 @@ public class FuelSpawner : MonoBehaviour
     }
 }
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerInputRouter : MonoBehaviour
+{
+    public static PlayerInputRouter Instance;
+
+    public InputActionAsset inputActions;
+    private InputActionMap gameplay;
+
+    private PlayerControls controls;
+
+    [Header("Panels")]
+    public GameObject craftPanel;
+    public GameObject tradePanel;
+    public GameObject pauseMenuPanel;
+
+    [Header("References")]
+    public CaravanInteraction caravan;
+
+    // Aktif NPC (trigger iÃ§inde olan)
+    private NPCTradeInteract activeTradeNPC;
+
+    // ======================================================
+    // LIFECYCLE
+    // ======================================================
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        gameplay = inputActions.FindActionMap("Gameplay");
+
+    }
+private void Update()
+{
+    if (Input.GetKeyDown(KeyCode.F12))
+    {
+        Debug.Log("Gameplay enabled: " +
+            inputActions.FindActionMap("Gameplay").enabled);
+    }
+}
+
+private void OnEnable()
+{
+    gameplay.FindAction("Inventory").performed += OnInventory;
+    gameplay.FindAction("Interact").performed += OnInteract;
+    gameplay.FindAction("Escape").performed += OnEscape;
+
+    gameplay.Enable();
+}
+
+private void OnDisable()
+{
+    gameplay.FindAction("Inventory").performed -= OnInventory;
+    gameplay.FindAction("Interact").performed -= OnInteract;
+    gameplay.FindAction("Escape").performed -= OnEscape;
+
+    gameplay.Disable();
+}
+
+
+    // ======================================================
+    // INPUT HANDLERS
+    // ======================================================
+
+    // INVENTORY (I)
+    private void OnInventory(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed) return;
+        if (IsAnyBlockingPanelOpen()) return;
+
+        if (PipBoyController.Instance == null) return;
+        if (PipBoyController.Instance.IsOpen) return;
+
+        InteractionPromptUI.Instance?.Hide();
+        PipBoyController.Instance.Open(0);
+    }
+
+    // INTERACT (E)
+    private void OnInteract(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed) return;
+
+        // Interact basÄ±ldÄ± â†’ prompt her zaman kapanÄ±r
+        InteractionPromptUI.Instance?.Hide();
+
+        // 1ï¸âƒ£ Trade aÃ§Ä±ksa â†’ kapat
+        if (tradePanel != null && tradePanel.activeSelf)
+        {
+            tradePanel.SetActive(false);
+            ResumeGame();
+            return;
+        }
+
+        // 2ï¸âƒ£ Craft aÃ§Ä±ksa â†’ kapat
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            craftPanel.SetActive(false);
+            ResumeGame();
+            return;
+        }
+
+        // 3ï¸âƒ£ NPC Trade (Ã¶ncelikli)
+        if (activeTradeNPC != null && activeTradeNPC.playerInRange)
+        {
+            OpenTrade();
+            return;
+        }
+
+        // 4ï¸âƒ£ Caravan Craft
+        if (caravan != null && caravan.playerInRange)
+        {
+            ToggleCraft();
+            return;
+        }
+    }
+
+    // ESC
+    private void OnEscape(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed) return;
+        if (GameStateManager.IsGameOver) return;
+
+        // Ã–nce aÃ§Ä±k panelleri kapat
+        if (tradePanel != null && tradePanel.activeSelf)
+        {
+            tradePanel.SetActive(false);
+            ResumeGame();
+            return;
+        }
+
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            craftPanel.SetActive(false);
+            ResumeGame();
+            return;
+        }
+
+        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+        {
+            PauseMenu.Instance.HidePause();
+            ResumeGame();
+            return;
+        }
+
+        // HiÃ§biri aÃ§Ä±k deÄŸilse pause aÃ§
+        PauseMenu.Instance.ShowPause();
+        GameStateManager.SetPaused(true);
+    }
+
+    // ======================================================
+    // TRADE
+    // ======================================================
+    private void OpenTrade()
+    {
+        if (activeTradeNPC == null) return;
+
+        if (tradePanel != null)
+            tradePanel.SetActive(true);
+
+        activeTradeNPC.OpenTrade();
+        GameStateManager.SetPaused(true);
+    }
+
+    public void SetActiveTradeNPC(NPCTradeInteract npc)
+    {
+        activeTradeNPC = npc;
+    }
+
+    // ======================================================
+    // CRAFT
+    // ======================================================
+    private void ToggleCraft()
+    {
+        if (craftPanel == null) return;
+
+        bool open = !craftPanel.activeSelf;
+        craftPanel.SetActive(open);
+        GameStateManager.SetPaused(open);
+    }
+
+    public void ForceCloseCraft()
+    {
+        if (craftPanel != null && craftPanel.activeSelf)
+        {
+            craftPanel.SetActive(false);
+            ResumeGame();
+        }
+    }
+
+    // ======================================================
+    // HELPERS
+    // ======================================================
+    private bool IsAnyBlockingPanelOpen()
+    {
+        return (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+            || (tradePanel != null && tradePanel.activeSelf)
+            || (craftPanel != null && craftPanel.activeSelf);
+    }
+
+    private void ResumeGame()
+    {
+        GameStateManager.SetPaused(false);
+        Time.timeScale = 1f;
+    }
+
+
+
+    // ======================================================
+    // UNUSED INPUTS (Input System gereÄŸi)
+    // ======================================================
+    public void OnMove(InputAction.CallbackContext ctx) { }
+    public void OnSprint(InputAction.CallbackContext ctx) { }
+    public void OnMap(InputAction.CallbackContext ctx) { }
+    public void OnReload(InputAction.CallbackContext ctx) { }
+    public void OnWeapon1(InputAction.CallbackContext ctx) { }
+    public void OnWeapon2(InputAction.CallbackContext ctx) { }
+    public void OnWeapon3(InputAction.CallbackContext ctx) { }
+    public void OnMelee(InputAction.CallbackContext ctx) { }
+    public void OnADS(InputAction.CallbackContext ctx) { }
+    public void OnCaravanWeapons(InputAction.CallbackContext ctx) { }
+}
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "Items/Consumable")]
 public class ConsumableItemData : ItemData
@@ -3318,23 +3624,61 @@ public class Inventory : MonoBehaviour
     public event Action OnChanged;
     public void RaiseChanged() => OnChanged?.Invoke();
 
-    // Yeni mermi depolama sistemi: ammoType(string) -> toplam mermi sayÄ±sÄ±
 
-
-    void Awake()
-    {
-        if (Instance != null)
+    //orjinal awake fonksinumuz bu, sorunsuz
+    
+/*         void Awake()
         {
-            Destroy(gameObject);
-            return;
-        }
+            if (Instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
 
-        Instance = this;
+            Instance = this;
+
+            slots = new InventoryItem[capacity];
+            for (int i = 0; i < capacity; i++)
+                slots[i] = new InventoryItem();
+        } */
+        
+    
+    //test iÃ§in bunu kullanÄ±yoruz, envanter gÃ¶rselinde bug Ã§Ä±kartan kÄ±sÄ±m da burasÄ±
+    void Awake()
+{
+    if (Instance != null)
+    {
+        Destroy(gameObject);
+        return;
+    }
+
+    Instance = this;
+
+    // 1ï¸âƒ£ Slots array yoksa veya kapasite farklÄ±ysa â†’ yeniden oluÅŸtur
+    if (slots == null || slots.Length != capacity)
+    {
+        InventoryItem[] oldSlots = slots;
 
         slots = new InventoryItem[capacity];
+
         for (int i = 0; i < capacity; i++)
+        {
+            if (oldSlots != null && i < oldSlots.Length && oldSlots[i] != null)
+                slots[i] = oldSlots[i];          // inspector / save'den gelen
+            else
+                slots[i] = new InventoryItem();  // gÃ¼venli boÅŸ slot
+        }
+    }
+
+    // 2ï¸âƒ£ Array var ama iÃ§i null olabilir â†’ GARANTÄ° ALTINA AL
+    for (int i = 0; i < slots.Length; i++)
+    {
+        if (slots[i] == null)
             slots[i] = new InventoryItem();
     }
+}
+
+   
 
     public bool IsMagazineEquipped(MagazineInstance mag)
     {
@@ -3963,74 +4307,72 @@ public class InventorySlotUI : MonoBehaviour,
     }
 
     // Envanterdeki slot verisini UI'a basar
-    public void Render(InventoryItem item)
+   public void Render(InventoryItem item)
+{
+    cached = item;
+
+    // ğŸ”’ 1ï¸âƒ£ SLOT BOÅSA
+    if (item == null || item.data == null)
     {
-        cached = item;
+        icon.enabled = false;
+        countText.text = "";
 
-        // ğŸ”« MAGAZINE SLOT
-        if (item.magazineInstance != null)
-        {
-            var mag = item.magazineInstance;
-
-            icon.enabled = true;
-            icon.sprite = mag.data.icon;
-            icon.preserveAspect = true;
-
-            countText.text =
-                $"{mag.currentAmmo}/{mag.data.capacity}";
-
-            return;
-        }
         if (highlightImage != null)
-        {
-            var pw = FindObjectOfType<PlayerWeapon>();
+            highlightImage.color = normalColor;
 
-            if (pw != null && pw.currentMagazine == item.magazineInstance)
-                highlightImage.color = equippedColor;
-            else
-                highlightImage.color = normalColor;
-        }
-
-
-        // ğŸ”« ÅARJÃ–RSE â†’ MERMÄ° GÃ–STER
-        if (item.magazineInstance != null)
-        {
-            countText.text =
-                $"{item.magazineInstance.currentAmmo}/" +
-                $"{item.magazineInstance.data.capacity}";
-            return;
-        }
-
-        if (item == null || item.data == null)
-        {
-            icon.enabled = false;
-            countText.text = "";
-            return;
-        }
-
-        icon.enabled = true;
-        icon.sprite = item.data.icon;
-        icon.preserveAspect = true;
-
-        // ğŸ”¥ 1ï¸âƒ£ MAGAZINE HER ZAMAN Ã–NCELÄ°KLÄ°
-        if (item.magazineInstance != null)
-        {
-            countText.text =
-                $"{item.magazineInstance.currentAmmo}/{item.magazineInstance.data.capacity}";
-            return;
-        }
-
-        // 2ï¸âƒ£ AMMO ITEM
-        if (item.data is AmmoItemData)
-        {
-            countText.text = $"x{item.count}";
-            return;
-        }
-
-
-        // 3ï¸âƒ£ NORMAL ITEM
-        countText.text = $"x{item.count}";
+        return;
     }
+
+    // ğŸ”« 2ï¸âƒ£ MAGAZINE SLOT
+if (item.magazineInstance != null)
+{
+    var mag = item.magazineInstance;
+
+    // ğŸš¨ DATA YOKSA GÃœVENLÄ° Ã‡IKIÅ
+    if (mag.data == null)
+    {
+        icon.enabled = false;
+        countText.text = "";
+        if (highlightImage != null)
+            highlightImage.color = normalColor;
+        return;
+    }
+
+    icon.enabled = true;
+    icon.sprite = mag.data.icon;
+    icon.preserveAspect = true;
+
+    countText.text =
+        $"{mag.currentAmmo}/{mag.data.capacity}";
+
+    // â­ Equipped highlight
+    if (highlightImage != null)
+    {
+        var pw = FindObjectOfType<PlayerWeapon>();
+        if (pw != null && pw.currentMagazine == mag)
+            highlightImage.color = equippedColor;
+        else
+            highlightImage.color = normalColor;
+    }
+
+    return;
+}
+
+
+    // ğŸ“¦ 3ï¸âƒ£ NORMAL ITEM / AMMO
+    icon.enabled = true;
+    icon.sprite = item.data.icon;
+    icon.preserveAspect = true;
+
+    if (item.data is AmmoItemData)
+        countText.text = $"x{item.count}";
+    else
+        countText.text = $"x{item.count}";
+
+    if (highlightImage != null)
+        highlightImage.color = normalColor;
+}
+
 
 
 
@@ -5253,168 +5595,6 @@ public class WanderArea : MonoBehaviour
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputRouter : MonoBehaviour
-{
-    public static PlayerInputRouter Instance;
-
-    private PlayerControls controls;
-
-    [Header("Panels")]
-    public GameObject craftPanel;
-    public GameObject tradePanel;
-    public GameObject pauseMenuPanel;
-
-    [Header("References")]
-    public CaravanInteraction caravan;
-
-    private void Awake()
-    {
-        Instance = this;
-        controls = new PlayerControls();
-    }
-
-    private void OnEnable()
-    {
-        controls.Gameplay.Inventory.performed += OnInventory;
-        controls.Gameplay.Craft.performed += OnCraft;
-        controls.Gameplay.Escape.performed += OnEscape;
-
-        controls.Gameplay.Enable();
-    }
-
-    private void OnDisable()
-    {
-        controls.Gameplay.Inventory.performed -= OnInventory;
-        controls.Gameplay.Craft.performed -= OnCraft;
-        controls.Gameplay.Escape.performed -= OnEscape;
-
-        controls.Gameplay.Disable();
-    }
-
-    // ==============================
-    // INVENTORY (I) â†’ PIPBOY
-    // ==============================
-    private void OnInventory(InputAction.CallbackContext ctx)
-{
-    if (!ctx.performed) return;
-    if (IsPauseOpen()) return;
-
-    if (PipBoyController.Instance == null)
-        return;
-
-    // PipBoy zaten aÃ§Ä±ksa tekrar aÃ§ma
-    if (PipBoyController.Instance.IsOpen)
-        return;
-
-    PipBoyController.Instance.Open(0);
-}
-
-
-    // ==============================
-    // CRAFT (C)
-    // ==============================
-    private void OnCraft(InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
-        if (IsPauseOpen()) return;
-
-        if (caravan == null || !caravan.playerInRange)
-            return;
-
-        ToggleCraft();
-    }
-
-    // ==============================
-    // ESC
-    // ==============================
-    private void OnEscape(InputAction.CallbackContext ctx)
-    {
-        if (!ctx.performed) return;
-        if (GameStateManager.IsGameOver) return;
-
-        // 1ï¸âƒ£ Pause aÃ§Ä±ksa â†’ kapat
-        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-        {
-            PauseMenu.Instance.HidePause();
-            GameStateManager.SetPaused(false);
-            return;
-        }
-
-        // 2ï¸âƒ£ Trade aÃ§Ä±ksa â†’ kapat
-        if (tradePanel != null && tradePanel.activeSelf)
-        {
-            tradePanel.SetActive(false);
-            GameStateManager.SetPaused(false);
-            return;
-        }
-
-        // 3ï¸âƒ£ Craft aÃ§Ä±ksa â†’ kapat
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            GameStateManager.SetPaused(false);
-            return;
-        }
-
-        // 4ï¸âƒ£ HiÃ§biri aÃ§Ä±k deÄŸil â†’ Pause aÃ§
-        PauseMenu.Instance.ShowPause();
-        GameStateManager.SetPaused(true);
-    }
-
-    public void ForceCloseCraft()
-{
-    if (craftPanel != null && craftPanel.activeSelf)
-    {
-        craftPanel.SetActive(false);
-        GameStateManager.SetPaused(false);
-    }
-}
-
-
-    // ==============================
-    // HELPERS
-    // ==============================
-    private bool IsPauseOpen()
-    {
-        return pauseMenuPanel != null && pauseMenuPanel.activeSelf;
-    }
-
-    private void ToggleCraft()
-    {
-        bool open = !craftPanel.activeSelf;
-        craftPanel.SetActive(open);
-        GameStateManager.SetPaused(open);
-    }
-
-    // ==============================
-    // INPUT CONTROL (PipBoy Ã§aÄŸÄ±rÄ±r)
-    // ==============================
-    public void SetGameplayInput(bool enabled)
-    {
-        if (enabled)
-            controls.Gameplay.Enable();
-        else
-            controls.Gameplay.Disable();
-    }
-
-    // ==============================
-    // UNUSED INPUTS
-    // ==============================
-    public void OnMove(InputAction.CallbackContext ctx) { }
-    public void OnSprint(InputAction.CallbackContext ctx) { }
-    public void OnMap(InputAction.CallbackContext ctx) { }
-    public void OnReload(InputAction.CallbackContext ctx) { }
-    public void OnWeapon1(InputAction.CallbackContext ctx) { }
-    public void OnWeapon2(InputAction.CallbackContext ctx) { }
-    public void OnWeapon3(InputAction.CallbackContext ctx) { }
-    public void OnMelee(InputAction.CallbackContext ctx) { }
-    public void OnADS(InputAction.CallbackContext ctx) { }
-    public void OnCaravanWeapons(InputAction.CallbackContext ctx) { }
-}
-using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
-
 public class MapToggle : MonoBehaviour
 {
     [Header("UI ReferanslarÄ±")]
@@ -5428,38 +5608,36 @@ public class MapToggle : MonoBehaviour
 
     private bool isMapVisible = false;
     private Vector3 mapBottomLeft;
-    private PlayerControls controls; // Script kendi oluÅŸturacak
 
-    private void Awake()
-    {
-        // PlayerControls Ã¶rneÄŸini oluÅŸtur
-        controls = new PlayerControls();
-    }
+    private InputAction mapAction;
 
-    private void OnEnable()
-    {
-        // Map tuÅŸuna basÄ±ldÄ±ÄŸÄ±nda Ã§alÄ±ÅŸacak eventâ€™leri baÄŸla
-        controls.Gameplay.Map.performed += OnMapPressed;
-        controls.Gameplay.Map.canceled += OnMapReleased;
-        controls.Gameplay.Enable();
 
-        if (mapPanel != null)
-            mapPanel.SetActive(false);
+private void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
 
-        if (mapRect != null)
-        {
-            Vector3[] corners = new Vector3[4];
-            mapRect.GetWorldCorners(corners);
-            mapBottomLeft = corners[0];
-        }
-    }
+    mapAction = gameplay.FindAction("Map");
 
-    private void OnDisable()
-    {
-        controls.Gameplay.Map.performed -= OnMapPressed;
-        controls.Gameplay.Map.canceled -= OnMapReleased;
-        controls.Gameplay.Disable();
-    }
+    mapAction.performed += OnMapPressed;
+    mapAction.canceled += OnMapReleased;
+
+    gameplay.Enable();
+
+    if (mapPanel != null)
+        mapPanel.SetActive(false);
+}
+
+
+private void OnDisable()
+{
+    if (mapAction == null) return;
+
+    mapAction.performed -= OnMapPressed;
+    mapAction.canceled -= OnMapReleased;
+}
+
 
     private void OnMapPressed(InputAction.CallbackContext context)
     {
@@ -5644,6 +5822,63 @@ public class CreditsBuilder : MonoBehaviour
     }
 
 
+}
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.InputSystem;
+
+public class KeybindRowUI : MonoBehaviour
+{
+    public TMP_Text actionNameText;
+    public Button rebindButton;
+    public TMP_Text bindingText;
+
+    private InputAction action;
+    private int bindingIndex;
+
+    public void Setup(InputAction action, int bindingIndex = 0)
+{
+    this.action = action;
+    this.bindingIndex = bindingIndex;
+
+    actionNameText.text = action.name;
+    UpdateBindingText();
+
+    rebindButton.onClick.RemoveAllListeners();
+    rebindButton.onClick.AddListener(StartRebind);
+}
+
+
+    void UpdateBindingText()
+    {
+        bindingText.text = action.GetBindingDisplayString(bindingIndex);
+    }
+
+    void StartRebind()
+    {
+        bindingText.text = "Press key...";
+
+        action.Disable();
+
+        action.PerformInteractiveRebinding(bindingIndex)
+            .WithControlsExcluding("Mouse")
+            .OnComplete(op =>
+            {
+                op.Dispose();
+                action.Enable();
+                UpdateBindingText();
+                SaveBindings();
+            })
+            .Start();
+    }
+
+    void SaveBindings()
+    {
+        string json = action.actionMap.asset.SaveBindingOverridesAsJson();
+        PlayerPrefs.SetString("Rebinds", json);
+        PlayerPrefs.Save();
+    }
 }
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5893,6 +6128,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
+
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -5910,9 +6147,14 @@ public class SettingsMenu : MonoBehaviour
     public TMP_Dropdown qualityDropdown;
     public Toggle fullscreenToggle;
     public TMP_Dropdown resolutionDropdown;
-
     private bool initialized = false;
     private int lastResolutionIndex = -1;
+
+    [Header("Keybind UI")]
+    public Transform keybindContainer;
+    public GameObject keybindRowPrefab;
+    public InputActionAsset inputActions;
+
 
     // Sabit (retro / pixel-art uyumlu) Ã§Ã¶zÃ¼nÃ¼rlÃ¼k listesi
     private readonly Vector2Int[] resolutions =
@@ -5941,13 +6183,92 @@ public class SettingsMenu : MonoBehaviour
     }
 
     private IEnumerator SetupMenuDeferred()
-{
-    yield return null;
+    {
+        yield return null;
 
-    InitResolutionDropdown();
-    InitQualityDropdown(); // ğŸ”¥ EKLENDÄ°
-    LoadPrefs();
+        
+        LoadRebinds();
+        InitKeybindUI();
+        InitResolutionDropdown();
+        InitQualityDropdown(); // ğŸ”¥ EKLENDÄ°
+        LoadPrefs();
+    }
+    void LoadRebinds()
+    {
+        if (!PlayerPrefs.HasKey("Rebinds")) return;
+
+        string json = PlayerPrefs.GetString("Rebinds");
+        inputActions.LoadBindingOverridesFromJson(json);
+    }
+    public void ResetKeybinds()
+{
+    if (inputActions == null)
+    {
+        Debug.LogError("ResetKeybinds: inputActions NULL");
+        return;
+    }
+
+    // 1) Override'larÄ± sil
+    inputActions.RemoveAllBindingOverrides();
+
+    // 2) KayÄ±tlÄ± json'u sil
+    PlayerPrefs.DeleteKey("Rebinds");
+    PlayerPrefs.Save();
+
+    // 3) UI'Ä± anÄ±nda gÃ¼ncelle (en kritik kÄ±sÄ±m)
+    RefreshKeybindUI();
 }
+private void RefreshKeybindUI()
+{
+    // Mevcut satÄ±rlarÄ± yok et
+    foreach (Transform child in keybindContainer)
+        Destroy(child.gameObject);
+
+    // Yeniden Ã¼ret (override yok -> defaultlar gÃ¶rÃ¼nÃ¼r)
+    InitKeybindUI();
+
+    // Layout gÃ¼ncelle
+    Canvas.ForceUpdateCanvases();
+}
+void InitKeybindUI()
+{
+    var map = inputActions.FindActionMap("Gameplay");
+    if (map == null)
+    {
+        Debug.LogError("âŒ Gameplay action map bulunamadÄ±");
+        return;
+    }
+
+    foreach (Transform child in keybindContainer)
+        Destroy(child.gameObject);
+
+    foreach (var action in map.actions)
+    {
+        if (action.bindings.Count == 0)
+            continue;
+
+        int bindingIndex = -1;
+
+        for (int i = 0; i < action.bindings.Count; i++)
+        {
+            var binding = action.bindings[i];
+
+            if (!binding.isComposite && !binding.isPartOfComposite)
+            {
+                bindingIndex = i;
+                break;
+            }
+        }
+
+        if (bindingIndex == -1)
+            continue;
+
+        GameObject row = Instantiate(keybindRowPrefab, keybindContainer);
+        row.GetComponent<KeybindRowUI>().Setup(action, bindingIndex);
+    }
+}
+
+
 
 
     // -------------------------------------------------
@@ -6109,30 +6430,30 @@ public class SettingsMenu : MonoBehaviour
     }
 
     void InitQualityDropdown()
-{
-    if (qualityDropdown == null)
     {
-        Debug.LogError("âŒ qualityDropdown NULL");
-        return;
+        if (qualityDropdown == null)
+        {
+            Debug.LogError("âŒ qualityDropdown NULL");
+            return;
+        }
+
+        qualityDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+
+        foreach (string q in QualitySettings.names)
+            options.Add(q);
+
+        qualityDropdown.AddOptions(options);
+
+        int savedQuality = PlayerPrefs.GetInt(
+            "QualityLevel",
+            QualitySettings.GetQualityLevel()
+        );
+
+        qualityDropdown.SetValueWithoutNotify(savedQuality);
+        qualityDropdown.RefreshShownValue();
     }
-
-    qualityDropdown.ClearOptions();
-
-    List<string> options = new List<string>();
-
-    foreach (string q in QualitySettings.names)
-        options.Add(q);
-
-    qualityDropdown.AddOptions(options);
-
-    int savedQuality = PlayerPrefs.GetInt(
-        "QualityLevel",
-        QualitySettings.GetQualityLevel()
-    );
-
-    qualityDropdown.SetValueWithoutNotify(savedQuality);
-    qualityDropdown.RefreshShownValue();
-}
 
 
 }
@@ -6292,7 +6613,7 @@ public class PipBoyController : MonoBehaviour
     GameStateManager.SetPaused(true);
     controls.UI.Enable();
 
-    PlayerInputRouter.Instance.SetGameplayInput(false);
+    
 }
 
 
@@ -6305,7 +6626,7 @@ public class PipBoyController : MonoBehaviour
     GameStateManager.SetPaused(false);
     controls.UI.Disable();
 
-    PlayerInputRouter.Instance.SetGameplayInput(true);
+    
 }
 
 
@@ -6451,25 +6772,28 @@ public class PlayerCollector : MonoBehaviour
     public float collectRange = 1.5f;
 
     private List<Collectible> highlighted = new List<Collectible>();
-    private PlayerControls controls;
 
-    private void Awake()
-    {
-        // Input Actions instance
-        controls = new PlayerControls();
-    }
+    private InputAction interactAction;
 
-    private void OnEnable()
-    {
-        controls.Gameplay.Collect.performed += OnCollect;
-        controls.Gameplay.Enable();
-    }
 
-    private void OnDisable()
-    {
-        controls.Gameplay.Collect.performed -= OnCollect;
-        controls.Gameplay.Disable();
-    }
+private void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
+
+    interactAction = gameplay.FindAction("Interact");
+
+    interactAction.performed += OnInteract;
+}
+
+
+private void OnDisable()
+{
+    if (interactAction != null)
+        interactAction.performed -= OnInteract;
+}
+
 
     private void Update()
     {
@@ -6499,17 +6823,18 @@ public class PlayerCollector : MonoBehaviour
     }
 
     // ---------------- COLLECT ----------------
-    private void OnCollect(InputAction.CallbackContext context)
+private void OnInteract(InputAction.CallbackContext context)
+{
+    foreach (var c in highlighted)
     {
-        foreach (var c in highlighted)
+        if (c != null)
         {
-            if (c != null)
-            {
-                c.Collect();
-                break; // sadece en yakÄ±n / ilk item
-            }
+            c.Collect();
+            break; // sadece bir tane al
         }
     }
+}
+
 
 }
 using UnityEngine;
@@ -6559,9 +6884,10 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private Camera mainCamera;
     private PlayerWeapon weapon;
+    private InputAction moveAction;
+private InputAction sprintAction;
 
     // --- Input ---
-    private PlayerControls controls;
     private Vector2 moveInput;
 
     // --- Extra ---
@@ -6576,33 +6902,34 @@ public class PlayerMovement : MonoBehaviour
         stats = GetComponent<PlayerStats>();
         mainCamera = Camera.main;
 
-        controls = new PlayerControls();
     }
 
-    void OnEnable()
-    {
-        controls.Gameplay.Move.performed += OnMovePerformed;
-        controls.Gameplay.Move.canceled += OnMoveCanceled;
+void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
 
-        controls.Gameplay.Sprint.performed += ctx =>
-        {
-            if (weapon != null && weapon.IsBusy) return;
-            isSprinting = true;
-        };
+    moveAction = gameplay.FindAction("Move");
+    sprintAction = gameplay.FindAction("Sprint");
 
-        controls.Gameplay.Sprint.canceled += ctx =>
-        {
-            isSprinting = false;
-        };
+    moveAction.performed += OnMovePerformed;
+    moveAction.canceled += OnMoveCanceled;
 
-        controls.Gameplay.Enable();
-    }
+    sprintAction.performed += OnSprintPerformed;
+    sprintAction.canceled += OnSprintCanceled;
+}
 
-    void OnDisable()
-    {
-        controls.Gameplay.Disable();
-    }
 
+private void OnSprintPerformed(InputAction.CallbackContext ctx)
+{
+    if (weapon != null && weapon.IsBusy) return;
+    isSprinting = true;
+}
+private void OnSprintCanceled(InputAction.CallbackContext ctx)
+{
+    isSprinting = false;
+}
     // ---------------- INPUT ----------------
 
     private void OnMovePerformed(InputAction.CallbackContext context)
@@ -6707,6 +7034,7 @@ public float breathingStaminaThreshold = 25f;
 
 public float breathingVolume = 0.8f;
 public float breathingFadeSpeed = 2f;
+    private InputAction consumeAction;
 
 private AudioSource breathingSource;
 private bool isBreathingActive = false;
@@ -6861,6 +7189,26 @@ AudioManager.Instance?.RouteToSFX(breathingSource);
         }
 
     }
+    void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
+
+    consumeAction = gameplay.FindAction("Consume");
+
+    if (consumeAction != null)
+        consumeAction.performed += OnConsume;
+}
+void OnDisable()
+{
+    if (consumeAction != null)
+        consumeAction.performed -= OnConsume;
+}
+private void OnConsume(InputAction.CallbackContext ctx)
+{
+    TryConsumeFood();
+}
 
     void Update()
     {
@@ -6868,11 +7216,6 @@ AudioManager.Instance?.RouteToSFX(breathingSource);
         UpdateStaminaByHunger();
         UpdateStaminaRegen();
         UpdateHealthByHunger();
-
-
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
-            TryConsumeFood();
-
         UpdateHungerUI();
         UpdateStaminaUI();
         if (heavyBreathingLoop == null || breathingSource == null)
@@ -7245,6 +7588,8 @@ public class PlayerWeapon : MonoBehaviour
     public event System.Action<string> OnAmmoCheckFeedback;
     // "Az mermi var", "Tam dolu" vs.
 
+    private float lastShotTime;
+
 
     [Header("Audio")]
     public AudioClip shootSound;
@@ -7252,7 +7597,8 @@ public class PlayerWeapon : MonoBehaviour
     public AudioClip emptyClipSound;
 
     // Input System
-    private PlayerControls controls;
+    private InputAction reloadAction;
+
 
     // State
     private bool isReloading = false;
@@ -7281,7 +7627,6 @@ public class PlayerWeapon : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         animator = GetComponentInChildren<Animator>();
-        controls = new PlayerControls();
 
         if (muzzleFlash != null)
         {
@@ -7423,32 +7768,39 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     // INPUT SYSTEM ONENABLE / OFF
     // ============================
-    private void OnEnable()
+private void OnEnable()
+{
+    var gameplay = PlayerInputRouter.Instance
+        .inputActions
+        .FindActionMap("Gameplay");
+
+    reloadAction = gameplay.FindAction("Reload");
+
+    reloadAction.started += OnReloadStarted;
+    reloadAction.performed += OnReloadPerformed;
+    reloadAction.canceled += OnReloadCanceled;
+
+    if (Inventory.Instance != null)
+        Inventory.Instance.OnChanged += OnInventoryChanged;
+}
+
+
+
+
+
+private void OnDisable()
+{
+    if (reloadAction != null)
     {
-        controls.Gameplay.Enable();
-
-        controls.Gameplay.Reload.started += OnReloadStarted;
-        controls.Gameplay.Reload.performed += OnReloadPerformed;
-        controls.Gameplay.Reload.canceled += OnReloadCanceled;
-
-        if (Inventory.Instance != null)
-            Inventory.Instance.OnChanged += OnInventoryChanged;
+        reloadAction.started -= OnReloadStarted;
+        reloadAction.performed -= OnReloadPerformed;
+        reloadAction.canceled -= OnReloadCanceled;
     }
 
+    if (Inventory.Instance != null)
+        Inventory.Instance.OnChanged -= OnInventoryChanged;
+}
 
-
-
-    private void OnDisable()
-    {
-        controls.Gameplay.Reload.started -= OnReloadStarted;
-        controls.Gameplay.Reload.performed -= OnReloadPerformed;
-        controls.Gameplay.Reload.canceled -= OnReloadCanceled;
-
-        if (Inventory.Instance != null)
-            Inventory.Instance.OnChanged -= OnInventoryChanged;
-
-        controls.Gameplay.Disable();
-    }
 
     private void OnInventoryChanged()
     {
@@ -7507,8 +7859,15 @@ public class PlayerWeapon : MonoBehaviour
         if (!weaponData.isAutomatic)
         {
             if (Input.GetMouseButtonDown(0))
-                Shoot();
+            {
+                if (Time.time - lastAutoFireTime >= (1f / weaponData.fireRate))
+                {
+                    lastAutoFireTime = Time.time;
+                    Shoot();
+                }
+            }
         }
+
 
         // 🔥 Otomatik atış
         if (weaponData.isAutomatic)
@@ -7631,6 +7990,16 @@ public class PlayerWeapon : MonoBehaviour
     // ============================
     public void Shoot()
     {
+        float cooldown =
+    weaponData.isShotgun
+    ? weaponData.shotgunCooldown
+    : (1f / weaponData.fireRate);
+
+        if (Time.time - lastShotTime < cooldown)
+            return;
+
+        lastShotTime = Time.time;
+
         if (currentMagazine == null)
         {
             PlayEmptyClipSound();
@@ -8106,13 +8475,12 @@ public class PlayerWeapon : MonoBehaviour
         }
         CollectMagazinesFromInventory();
 
-        currentMagazine = null;
-
-        if (inventoryMags.Count > 0)
+        if (currentMagazine == null && inventoryMags.Count > 0)
         {
             currentMagazine = SelectNextMagazine();
             inventoryMags.Remove(currentMagazine);
         }
+
 
     }
 
@@ -8580,54 +8948,88 @@ public class StoryNote : MonoBehaviour
 }
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class NPCTradeInteract : MonoBehaviour
 {
     [Header("Trade")]
     public TradeUIController tradeUI;
 
     private NPCTradeInventory tradeInventory;
-    private bool playerInRange;
 
+    public bool playerInRange { get; private set; }
+
+    // ======================================================
+    // LIFECYCLE
+    // ======================================================
     private void Awake()
     {
         tradeInventory = GetComponent<NPCTradeInventory>();
+
+        // GÃ¼venlik: collider trigger olmalÄ±
+        var col = GetComponent<Collider2D>();
+        col.isTrigger = true;
     }
 
+    // ======================================================
+    // PROMPT GÃ–STERME
+    // ======================================================
+    private void Update()
+    {
+        // Trade panel aÃ§Ä±kken prompt gÃ¶sterme
+        if (playerInRange && !PlayerInputRouter.Instance.tradePanel.activeSelf)
+        {
+            InteractionPromptUI.Instance?.Show("Ticaret Yap");
+        }
+    }
+
+    // ======================================================
+    // TRIGGER
+    // ======================================================
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = true;
+        if (!other.CompareTag("Player"))
+            return;
+
+        playerInRange = true;
+
+        // Router'a bu NPC'nin aktif olduÄŸunu bildir
+        PlayerInputRouter.Instance?.SetActiveTradeNPC(this);
+
+        // Ä°lk giriÅŸte prompt gÃ¶ster
+        InteractionPromptUI.Instance?.Show("Ticaret Yap");
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = false;
-    }
-
-    private void Update()
-    {
-        if (!playerInRange)
+        if (!other.CompareTag("Player"))
             return;
 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            OpenTrade();
-        }
+        playerInRange = false;
+
+        // Router'dan aktif NPC'yi temizle
+        PlayerInputRouter.Instance?.SetActiveTradeNPC(null);
+
+        // Prompt'u kapat
+        InteractionPromptUI.Instance?.Hide();
     }
 
-    void OpenTrade()
+    // ======================================================
+    // ROUTER TARAFINDAN Ã‡AÄRILIR
+    // ======================================================
+    public void OpenTrade()
     {
-        if (tradeInventory == null)
-        {
-            Debug.LogWarning("NPCTradeInventory yok!");
+        if (tradeUI == null || tradeInventory == null)
             return;
-        }
 
+        // Prompt kesin kapanÄ±r
+        InteractionPromptUI.Instance?.Hide();
+
+        // Trade UI aÃ§
         tradeUI.Open(tradeInventory);
 
-        // UI aÃ§Ä±kken oyunu durdurmak istersen
+        // Oyun duraklat
         Time.timeScale = 0f;
+        GameStateManager.SetPaused(true);
     }
 }
 using System.Collections.Generic;
@@ -9344,6 +9746,86 @@ public class DropdownStateController : MonoBehaviour,
         anim.SetBool("Open", dropdown.IsExpanded);
     }
 }
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class InteractionPromptUI : MonoBehaviour
+{
+    public static InteractionPromptUI Instance;
+
+    [SerializeField] private GameObject panel;
+    [SerializeField] private TextMeshProUGUI promptText;
+
+    private InputAction interactAction;
+
+    private void Awake()
+    {
+        Instance = this;
+        Hide();
+    }
+
+    private void Start()
+    {
+        if (PlayerInputRouter.Instance == null)
+        {
+            Debug.LogError("InteractionPromptUI: PlayerInputRouter yok!");
+            return;
+        }
+
+        interactAction = PlayerInputRouter.Instance
+            .inputActions
+            .FindActionMap("Gameplay")
+            .FindAction("Interact");
+
+    }
+
+
+    public void Show(string actionDescription)
+    {
+        if (!panel || promptText == null || interactAction == null)
+            return;
+
+        panel.SetActive(true);
+
+        string key = GetInteractBinding();
+        promptText.text = $"[{key}] {actionDescription}";
+    }
+
+
+    public void Hide()
+    {
+        if (panel == null)
+            return;
+
+        panel.SetActive(false);
+    }
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
+
+    private string GetInteractBinding()
+    {
+        foreach (var binding in interactAction.bindings)
+        {
+            if (binding.isComposite || binding.isPartOfComposite)
+                continue;
+
+            if (string.IsNullOrEmpty(binding.effectivePath))
+                continue;
+
+            return InputControlPath.ToHumanReadableString(
+                binding.effectivePath,
+                InputControlPath.HumanReadableStringOptions.OmitDevice
+            );
+        }
+
+        return "?";
+    }
+}
 using UnityEngine;
 using System.Collections;
 
@@ -9747,85 +10229,91 @@ using UnityEngine.Rendering.Universal;
 
 public class WeaponAim : MonoBehaviour
 {
-    [Header("Components")]
-    [Tooltip("SilahÃ„Â±n ve altÃ„Â±ndaki her Ã…Å¸eyin dÃƒÂ¶neceÃ„Å¸i ana pivot. Genellikle silahÃ„Â±n kendisidir.")]
+    [Header("References")]
+    [Tooltip("SilahÄ±n dÃ¶neceÄŸi ana pivot (weapon prefab root).")]
     public Transform weaponPivot;
 
-    [Tooltip("Bu silaha ait Light 2D objesi.")]
-    public Light2D flashlight;
+    [Tooltip("PlayerWeapon scripti (firePoint buradan alÄ±nÄ±r).")]
+    public PlayerWeapon playerWeapon;
 
-    [Tooltip("Merminin ÃƒÂ§Ã„Â±kacaÃ„Å¸Ã„Â± namlu ucu transformu.")]
-    public Transform firePoint;
+    [Tooltip("Silaha ait fener Ä±ÅŸÄ±ÄŸÄ±.")]
+    public Light2D flashlight;
 
     private SpriteRenderer weaponSpriteRenderer;
 
-    // FirePoint'in baÃ…Å¸langÃ„Â±ÃƒÂ§ lokal pozisyonu
     private Vector3 firePointDefaultLocalPos;
 
     private void Awake()
     {
         if (weaponPivot != null)
             weaponSpriteRenderer = weaponPivot.GetComponentInChildren<SpriteRenderer>();
-
-        if (firePoint != null)
-            firePointDefaultLocalPos = firePoint.localPosition; // ÃƒÂ¶rn: (0.05, 0.01, 0)
-    }
-
-    private void OnDisable()
-    {
-        if (flashlight != null) flashlight.gameObject.SetActive(false);
     }
 
     private void OnEnable()
     {
-        if (flashlight != null) flashlight.gameObject.SetActive(true);
+        if (flashlight != null)
+            flashlight.gameObject.SetActive(true);
+    }
+
+    private void OnDisable()
+    {
+        if (flashlight != null)
+            flashlight.gameObject.SetActive(false);
     }
 
     private void LateUpdate()
     {
-        if (GameStateManager.IsGamePaused ||GameStateManager.IsGameOver) return;
-        if (Camera.main == null || weaponPivot == null) return;
+        if (GameStateManager.IsGamePaused || GameStateManager.IsGameOver)
+            return;
 
-        // Fare hedefi
-        Vector3 mousePosition = Mouse.current.position.ReadValue();
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        Vector3 aimDirection = (worldPosition - weaponPivot.position).normalized;
-        float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
+        if (Camera.main == null || weaponPivot == null || playerWeapon == null)
+            return;
 
-        // SilahÃ„Â± dÃƒÂ¶ndÃƒÂ¼r
+        Transform firePoint = playerWeapon.firePoint;
+        if (firePoint == null)
+            return;
+
+        // Ä°lk frame'de firePoint referansÄ± geldiyse default pos al
+        if (firePointDefaultLocalPos == Vector3.zero)
+            firePointDefaultLocalPos = firePoint.localPosition;
+
+        // ğŸ–± Mouse world position
+        Vector3 mousePos = Mouse.current.position.ReadValue();
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        worldPos.z = 0f;
+
+        Vector3 dir = (worldPos - weaponPivot.position).normalized;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+        // ğŸ”„ Pivot rotation
         weaponPivot.rotation = Quaternion.Euler(0f, 0f, angle);
 
-        // Sprite flip (senin mantÃ„Â±Ã„Å¸Ã„Â±n)
-        float facingDirection = PlayerMovement.FacingDirection;
-        bool flip = (facingDirection < 0);
+        // ğŸ” Sprite flip (PlayerMovement yÃ¶nÃ¼ne gÃ¶re)
+        float facing = PlayerMovement.FacingDirection;
+        bool flip = facing < 0f;
 
         if (weaponSpriteRenderer != null)
         {
-            // Hem X hem Y flip
             weaponSpriteRenderer.flipX = flip;
             weaponSpriteRenderer.flipY = flip;
         }
 
-        // Fener yÃƒÂ¶nÃƒÂ¼
+        // ğŸ”¦ Fener yÃ¶nÃ¼
         if (flashlight != null)
-            flashlight.transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+            flashlight.transform.rotation =
+                Quaternion.Euler(0f, 0f, angle - 90f);
 
-        // FirePoint pozisyonu ve yÃƒÂ¶nÃƒÂ¼
-        if (firePoint != null)
-        {
-            // Hem X hem Y iÃ…Å¸aretini facing'e gÃƒÂ¶re deÃ„Å¸iÃ…Å¸tir
-            float sx = flip ? -1f : 1f;
-            float sy = flip ? -1f : 1f;
+        // ğŸ”« FirePoint local offset (flip'e gÃ¶re)
+        float sx = flip ? -1f : 1f;
+        float sy = flip ? -1f : 1f;
 
-            firePoint.localPosition = new Vector3(
-                firePointDefaultLocalPos.x * sx,
-                firePointDefaultLocalPos.y * sy,
-                firePointDefaultLocalPos.z
-            );
+        firePoint.localPosition = new Vector3(
+            firePointDefaultLocalPos.x * sx,
+            firePointDefaultLocalPos.y * sy,
+            firePointDefaultLocalPos.z
+        );
 
-            // Rotasyonu pivot'tan miras alsÃ„Â±n
-            firePoint.localRotation = Quaternion.identity;
-        }
+        firePoint.localRotation = Quaternion.identity;
     }
 }
 using UnityEngine;
@@ -10130,8 +10618,11 @@ public class WeaponSlotManager : MonoBehaviour
 
     [Header("Active Slot")]
     public int activeSlotIndex = 0;
+    private InputAction weapon1Action;
+    private InputAction weapon2Action;
+    private InputAction weapon3Action;
 
-    private PlayerControls controls;
+
 
     // ----------------------------------------------------
     void Awake()
@@ -10139,21 +10630,47 @@ public class WeaponSlotManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        controls = new PlayerControls();
     }
 
     private void OnEnable()
     {
-        controls.Gameplay.Weapon1.performed += _ => SwitchSlot(0);
-        controls.Gameplay.Weapon2.performed += _ => SwitchSlot(1);
-        controls.Gameplay.Weapon3.performed += _ => SwitchSlot(2);
-        controls.Gameplay.Enable();
+        var gameplay = PlayerInputRouter.Instance
+            .inputActions
+            .FindActionMap("Gameplay");
+
+        weapon1Action = gameplay.FindAction("Weapon1");
+        weapon2Action = gameplay.FindAction("Weapon2");
+        weapon3Action = gameplay.FindAction("Weapon3");
+
+        weapon1Action.performed += _ => SwitchSlot(0);
+        weapon2Action.performed += _ => SwitchSlot(1);
+        weapon3Action.performed += _ => SwitchSlot(2);
     }
+
 
     private void OnDisable()
     {
-        controls.Gameplay.Disable();
+        if (weapon1Action != null)
+            weapon1Action.performed -= _ => SwitchSlot(0);
+
+        if (weapon2Action != null)
+            weapon2Action.performed -= _ => SwitchSlot(1);
+
+        if (weapon3Action != null)
+            weapon3Action.performed -= _ => SwitchSlot(2);
     }
+
+    public void SetWeaponToSlot(int slot, WeaponItemData weapon)
+    {
+        if (slot < 0 || slot >= slots.Length)
+            return;
+
+        slots[slot] = weapon;
+
+        if (slot == activeSlotIndex)
+            SwitchSlot(slot);
+    }
+
 
     // ----------------------------------------------------
     // SLOT BELÄ°RLEME
@@ -10233,10 +10750,14 @@ public class WeaponSlotManager : MonoBehaviour
         ActiveWeapon = handler;
 
         WeaponItemData item = slots[slot];
+        // ğŸ”¥ Ã–NCE silahÄ± yÃ¼kle
         if (item != null && item.weaponDefinition != null)
         {
             handler.SetWeapon(item.weaponDefinition);
         }
+
+        // ğŸ”’ SONRA input / state hazÄ±r olsun
+        handler.enabled = true;
     }
 
     private PlayerWeapon GetHandler(int slot)

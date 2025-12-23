@@ -70,16 +70,27 @@ private void OnDisable()
 
     // INVENTORY (I)
     private void OnInventory(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (PipBoyController.Instance == null) return;
+
+    // Eğer envanter AÇIKSA → KAPAT
+    if (PipBoyController.Instance.IsOpen)
     {
-        if (!ctx.performed) return;
-        if (IsAnyBlockingPanelOpen()) return;
-
-        if (PipBoyController.Instance == null) return;
-        if (PipBoyController.Instance.IsOpen) return;
-
-        InteractionPromptUI.Instance?.Hide();
-        PipBoyController.Instance.Open(0);
+        PipBoyController.Instance.Close();
+        ResumeGame();
+        return;
     }
+
+    // Eğer başka bloklayıcı panel açıksa → açma
+    if (IsAnyBlockingPanelOpen()) return;
+
+    // Envanteri AÇ
+    InteractionPromptUI.Instance?.Hide();
+    PipBoyController.Instance.Open(0);
+    GameStateManager.SetPaused(true);
+}
+
 
     // INTERACT (E)
     private void OnInteract(InputAction.CallbackContext ctx)
@@ -122,36 +133,48 @@ private void OnDisable()
 
     // ESC
     private void OnEscape(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (GameStateManager.IsGameOver) return;
+
+    // 1️⃣ Inventory (PipBoy) AÇIKSA → KAPAT
+    if (PipBoyController.Instance != null &&
+        PipBoyController.Instance.IsOpen)
     {
-        if (!ctx.performed) return;
-        if (GameStateManager.IsGameOver) return;
-
-        // Önce açık panelleri kapat
-        if (tradePanel != null && tradePanel.activeSelf)
-        {
-            tradePanel.SetActive(false);
-            ResumeGame();
-            return;
-        }
-
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            ResumeGame();
-            return;
-        }
-
-        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-        {
-            PauseMenu.Instance.HidePause();
-            ResumeGame();
-            return;
-        }
-
-        // Hiçbiri açık değilse pause aç
-        PauseMenu.Instance.ShowPause();
-        GameStateManager.SetPaused(true);
+        PipBoyController.Instance.Close();
+        ResumeGame();
+        return;
     }
+
+    // 2️⃣ Trade AÇIKSA → KAPAT
+    if (tradePanel != null && tradePanel.activeSelf)
+    {
+        tradePanel.SetActive(false);
+        ResumeGame();
+        return;
+    }
+
+    // 3️⃣ Craft AÇIKSA → KAPAT
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        craftPanel.SetActive(false);
+        ResumeGame();
+        return;
+    }
+
+    // 4️⃣ Pause AÇIKSA → KAPAT
+    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+    {
+        PauseMenu.Instance.HidePause();
+        ResumeGame();
+        return;
+    }
+
+    // 5️⃣ Hiç panel yok → Pause AÇ
+    PauseMenu.Instance.ShowPause();
+    GameStateManager.SetPaused(true);
+}
+
 
     // ======================================================
     // TRADE

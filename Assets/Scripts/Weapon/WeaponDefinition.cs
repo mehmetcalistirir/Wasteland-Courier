@@ -47,4 +47,8 @@ public class WeaponDefinition : ScriptableObject
     public int burnDamage = 1;
     public float burnDuration = 5f;
     public float tickInterval = 1f;
+
+    // 🔥 YENİ EKLENEN KISIM
+    [Header("Animation")]
+    public AnimatorOverrideController animatorOverride;
 }

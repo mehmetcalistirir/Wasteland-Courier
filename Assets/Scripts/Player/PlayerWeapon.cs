@@ -90,7 +90,7 @@ public class PlayerWeapon : MonoBehaviour
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
-        animator = GetComponentInChildren<Animator>();
+         animator = GetComponentInParent<Animator>();
 
         if (muzzleFlash != null)
         {
@@ -315,33 +315,40 @@ private void OnDisable()
 
 
     private void Update()
+{
+    if (GameStateManager.IsGamePaused || weaponData == null)
+        return;
+
+    // 🔫 TEKLİ SİLAHLAR
+    if (!weaponData.isAutomatic)
     {
-        if (GameStateManager.IsGamePaused || weaponData == null)
-            return;
-
-        // 🔫 Tekli atış
-        if (!weaponData.isAutomatic)
+        if (Input.GetMouseButtonDown(0))
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (Time.time - lastAutoFireTime >= (1f / weaponData.fireRate))
-                {
-                    lastAutoFireTime = Time.time;
-                    Shoot();
-                }
-            }
+            animator.SetBool("IsFiring", true);
+            Shoot();
         }
 
-
-        // 🔥 Otomatik atış
-        if (weaponData.isAutomatic)
+        if (Input.GetMouseButtonUp(0))
         {
-            if (Input.GetMouseButton(0))
-                AutoFire();
+            animator.SetBool("IsFiring", false);
         }
-
-
     }
+
+    // 🔥 OTOMATİK SİLAHLAR
+    if (weaponData.isAutomatic)
+    {
+        if (Input.GetMouseButton(0))
+        {
+            animator.SetBool("IsFiring", true);
+            AutoFire();
+        }
+        else
+        {
+            animator.SetBool("IsFiring", false);
+        }
+    }
+}
+
 
     // ============================
     // MAGAZINE CHECK (HOLD R)
@@ -532,6 +539,21 @@ private void OnDisable()
 
 
     }
+
+    private void ApplyWeaponAnimation()
+{
+    if (animator == null)
+        animator = GetComponentInParent<Animator>(); // ❗ CHILD DEĞİL
+
+    if (weaponData?.animatorOverride == null)
+        return;
+
+    animator.runtimeAnimatorController =
+        weaponData.animatorOverride;
+}
+
+
+
     public MagazineInstance GetCurrentMagazine()
     {
         return currentMagazine;
@@ -550,19 +572,18 @@ private void OnDisable()
 
 
     private void RangedAttack()
-    {
-        if (shootSound != null)
-            audioSource.PlayOneShot(shootSound);
+{
+    if (shootSound != null)
+        audioSource.PlayOneShot(shootSound);
 
-        animator?.SetTrigger("Shoot");
+    if (weaponData.isShotgun)
+        FireShotgunPellets();
+    else
+        FireSingleBullet();
 
-        if (weaponData.isShotgun)
-            FireShotgunPellets();
-        else
-            FireSingleBullet();
+    TryMuzzleFlash();
+}
 
-        TryMuzzleFlash();
-    }
 
     private void FireSingleBullet()
     {
@@ -833,6 +854,7 @@ private void OnDisable()
     {
         WeaponItemData item =
             WeaponSlotManager.Instance.GetWeaponItemInSlot(slot);
+             ApplyWeaponAnimation(); // 🔥 EKLENDİ
 
         if (item == null || item.weaponDefinition == null)
             return;
@@ -881,6 +903,7 @@ private void OnDisable()
             if (fp != null)
                 firePoint = fp;
         }
+        ApplyWeaponAnimation(); // 🔥 EKLENDİ
 
         // 🔥 ŞARJÖR BAĞLAMA
         inventoryMags.Clear();

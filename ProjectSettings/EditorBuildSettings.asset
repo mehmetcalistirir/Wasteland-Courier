@@ -24,5 +24,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Bolum3.unity
     guid: d7bb3e37c5704004e8545ae6d2290030
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 4400d4e07a9c5c347bae86d2aa9700f4, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 167fa6a3c426dd842aedb10644949b77, type: 3}
+    com.unity.localization.settings: {fileID: 11400000, guid: 37a3b3ea851cbe64d9629ed6173dc3da, type: 2}
   m_UseUCBPForAssetBundles: 0

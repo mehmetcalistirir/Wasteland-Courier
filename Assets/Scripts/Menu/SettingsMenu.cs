@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization.Settings;
 
 
 public class SettingsMenu : MonoBehaviour
@@ -29,6 +30,10 @@ public class SettingsMenu : MonoBehaviour
     public Transform keybindContainer;
     public GameObject keybindRowPrefab;
     public InputActionAsset inputActions;
+
+    // ---------------- LANGUAGE ----------------
+    [Header("Language")]
+    public TMP_Dropdown languageDropdown;
 
 
     // Sabit (retro / pixel-art uyumlu) çözünürlük listesi
@@ -61,13 +66,14 @@ public class SettingsMenu : MonoBehaviour
     {
         yield return null;
 
-        
         LoadRebinds();
         InitKeybindUI();
         InitResolutionDropdown();
-        InitQualityDropdown(); // 🔥 EKLENDİ
+        InitQualityDropdown();
+        InitLanguageDropdown(); // 🔥 EKLE
         LoadPrefs();
     }
+
     void LoadRebinds()
     {
         if (!PlayerPrefs.HasKey("Rebinds")) return;
@@ -76,72 +82,72 @@ public class SettingsMenu : MonoBehaviour
         inputActions.LoadBindingOverridesFromJson(json);
     }
     public void ResetKeybinds()
-{
-    if (inputActions == null)
     {
-        Debug.LogError("ResetKeybinds: inputActions NULL");
-        return;
-    }
-
-    // 1) Override'ları sil
-    inputActions.RemoveAllBindingOverrides();
-
-    // 2) Kayıtlı json'u sil
-    PlayerPrefs.DeleteKey("Rebinds");
-    PlayerPrefs.Save();
-
-    // 3) UI'ı anında güncelle (en kritik kısım)
-    RefreshKeybindUI();
-}
-private void RefreshKeybindUI()
-{
-    // Mevcut satırları yok et
-    foreach (Transform child in keybindContainer)
-        Destroy(child.gameObject);
-
-    // Yeniden üret (override yok -> defaultlar görünür)
-    InitKeybindUI();
-
-    // Layout güncelle
-    Canvas.ForceUpdateCanvases();
-}
-void InitKeybindUI()
-{
-    var map = inputActions.FindActionMap("Gameplay");
-    if (map == null)
-    {
-        Debug.LogError("❌ Gameplay action map bulunamadı");
-        return;
-    }
-
-    foreach (Transform child in keybindContainer)
-        Destroy(child.gameObject);
-
-    foreach (var action in map.actions)
-    {
-        if (action.bindings.Count == 0)
-            continue;
-
-        int bindingIndex = -1;
-
-        for (int i = 0; i < action.bindings.Count; i++)
+        if (inputActions == null)
         {
-            var binding = action.bindings[i];
-
-            if (!binding.isComposite && !binding.isPartOfComposite)
-            {
-                bindingIndex = i;
-                break;
-            }
+            Debug.LogError("ResetKeybinds: inputActions NULL");
+            return;
         }
 
-        if (bindingIndex == -1)
-            continue;
+        // 1) Override'ları sil
+        inputActions.RemoveAllBindingOverrides();
 
-        GameObject row = Instantiate(keybindRowPrefab, keybindContainer);
-        row.GetComponent<KeybindRowUI>().Setup(action, bindingIndex);
+        // 2) Kayıtlı json'u sil
+        PlayerPrefs.DeleteKey("Rebinds");
+        PlayerPrefs.Save();
+
+        // 3) UI'ı anında güncelle (en kritik kısım)
+        RefreshKeybindUI();
     }
-}
+    private void RefreshKeybindUI()
+    {
+        // Mevcut satırları yok et
+        foreach (Transform child in keybindContainer)
+            Destroy(child.gameObject);
+
+        // Yeniden üret (override yok -> defaultlar görünür)
+        InitKeybindUI();
+
+        // Layout güncelle
+        Canvas.ForceUpdateCanvases();
+    }
+    void InitKeybindUI()
+    {
+        var map = inputActions.FindActionMap("Gameplay");
+        if (map == null)
+        {
+            Debug.LogError("❌ Gameplay action map bulunamadı");
+            return;
+        }
+
+        foreach (Transform child in keybindContainer)
+            Destroy(child.gameObject);
+
+        foreach (var action in map.actions)
+        {
+            if (action.bindings.Count == 0)
+                continue;
+
+            int bindingIndex = -1;
+
+            for (int i = 0; i < action.bindings.Count; i++)
+            {
+                var binding = action.bindings[i];
+
+                if (!binding.isComposite && !binding.isPartOfComposite)
+                {
+                    bindingIndex = i;
+                    break;
+                }
+            }
+
+            if (bindingIndex == -1)
+                continue;
+
+            GameObject row = Instantiate(keybindRowPrefab, keybindContainer);
+            row.GetComponent<KeybindRowUI>().Setup(action, bindingIndex);
+        }
+    }
 
 
 
@@ -154,6 +160,8 @@ void InitKeybindUI()
     {
         if (initialized) return;
         initialized = true;
+
+        languageDropdown.onValueChanged.AddListener(SetLanguage);
 
         masterSlider.onValueChanged.AddListener(v =>
         {
@@ -176,6 +184,46 @@ void InitKeybindUI()
         qualityDropdown.onValueChanged.AddListener(SetQuality);
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
         resolutionDropdown.onValueChanged.AddListener(SetResolution);
+    }
+    void InitLanguageDropdown()
+    {
+        if (languageDropdown == null)
+        {
+            Debug.LogError("❌ languageDropdown NULL");
+            return;
+        }
+
+        languageDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+
+        foreach (var locale in LocalizationSettings.AvailableLocales.Locales)
+        {
+            options.Add(locale.LocaleName); // English (en), Turkish (tr)
+        }
+
+        languageDropdown.AddOptions(options);
+
+        int savedLang = PlayerPrefs.GetInt("Language", 0);
+        languageDropdown.SetValueWithoutNotify(savedLang);
+        languageDropdown.RefreshShownValue();
+    }
+    void SetLanguage(int index)
+    {
+        PlayerPrefs.SetInt("Language", index);
+        PlayerPrefs.Save();
+
+        StartCoroutine(SetLocale(index));
+    }
+
+    IEnumerator SetLocale(int index)
+    {
+        yield return LocalizationSettings.InitializationOperation;
+
+        LocalizationSettings.SelectedLocale =
+            LocalizationSettings.AvailableLocales.Locales[index];
+
+        Debug.Log($"🌍 Language changed to: {LocalizationSettings.SelectedLocale.LocaleName}");
     }
 
     // -------------------------------------------------

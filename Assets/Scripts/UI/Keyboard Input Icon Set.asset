@@ -1,0 +1,465 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b69e76b0ace38964f981988941e59dc7, type: 3}
+  m_Name: Keyboard Input Icon Set
+  m_EditorClassIdentifier: Assembly-CSharp::InputIconSet
+  keyboardIcons:
+  - control: 0
+    icon: {fileID: 1084870471915973256, guid: d3625411728996d41b7ab43dbe7d9b24, type: 3}
+  - control: 0
+    icon: {fileID: -298569682275349766, guid: 50d286ff6eb12a0499d48dbd09e2ede4, type: 3}
+  - control: 0
+    icon: {fileID: -870846048720882870, guid: b093989829e46604eb3fea2439537c00, type: 3}
+  - control: 1
+    icon: {fileID: 2285120093584573513, guid: 7de389b574489b14587e1e1bfcab8ad4, type: 3}
+  - control: 1
+    icon: {fileID: 6184496068208369749, guid: b7a8a9b712464014687b0f1f96b4caed, type: 3}
+  - control: 2
+    icon: {fileID: -4842122482347598607, guid: 6e2a5e9d35a8f3b469c942540a1a039a, type: 3}
+  - control: 2
+    icon: {fileID: -4574316656175975559, guid: 749e1f47fa5970b44a9e937e13933c1a, type: 3}
+  - control: 3
+    icon: {fileID: -7699723923551181482, guid: 227517f4f1f88984c955571263893af5, type: 3}
+  - control: 3
+    icon: {fileID: -5123742556229323452, guid: d5504597cd10dd24f822d62b5d866707, type: 3}
+  - control: 4
+    icon: {fileID: 4871772481475680366, guid: f6dd376efb530fa489597702cdbd919a, type: 3}
+  - control: 4
+    icon: {fileID: 8737086354232196867, guid: 1c03168e76fe23a47a64dca69931a67d, type: 3}
+  - control: 5
+    icon: {fileID: 3284144849386901357, guid: d6624e7e005a3354785e9d944a0b31b2, type: 3}
+  - control: 5
+    icon: {fileID: -8962942515068954952, guid: 43cd472ee156ebf48bb298e3e8350ad3, type: 3}
+  - control: 6
+    icon: {fileID: -1550802614037358739, guid: b9f13fefba7880241969f1c226e0f7e5, type: 3}
+  - control: 6
+    icon: {fileID: 6826315050723519111, guid: 0386e92ed24315542847dadc05cec3a5, type: 3}
+  - control: 7
+    icon: {fileID: 3132562753328626587, guid: fa403bff980662b42861023bad3ba62b, type: 3}
+  - control: 7
+    icon: {fileID: -7536036234242795209, guid: 5aba90c9bed517a49bdb914c81b07e3e, type: 3}
+  - control: 8
+    icon: {fileID: 890350665705472834, guid: b4c1cfa55ec6fce40b6bccf0aa86f39c, type: 3}
+  - control: 8
+    icon: {fileID: -2920516772439436039, guid: f16245061a4b06845a22469db01b84a0, type: 3}
+  - control: 9
+    icon: {fileID: 4052524382370747962, guid: 256f3317a4257824badf377350f0540c, type: 3}
+  - control: 9
+    icon: {fileID: 7382431164420883962, guid: 7a17f4c0382c21a4886dfdd2198be885, type: 3}
+  - control: a
+    icon: {fileID: 1145220741083561907, guid: 4c0f990f8a69f63449b0d8040ec2440f, type: 3}
+  - control: a
+    icon: {fileID: 5628804153020374547, guid: 5bd6ea57c53b708469eea1c84f93e123, type: 3}
+  - control: alt
+    icon: {fileID: -8537438008601397705, guid: 64984357b05462045ba484ca50b70532, type: 3}
+  - control: alt
+    icon: {fileID: -2378878973290720388, guid: 27c7565b858dcc24f973799f6b2e4ac8, type: 3}
+  - control: any
+    icon: {fileID: 110552308490896519, guid: 834269179ec52ca47b6cef088412845a, type: 3}
+  - control: any
+    icon: {fileID: -3950267354211253721, guid: acb59d278255c1f44b324fedff42a614, type: 3}
+  - control: apostrophe
+    icon: {fileID: 2280661853197477181, guid: cdff1da9099bc0a4d9681ece718bab31, type: 3}
+  - control: apostrophe
+    icon: {fileID: 8193364989141200250, guid: e217a58d922a348468c1a478f0831a65, type: 3}
+  - control: arrow
+    icon: {fileID: 5154032583816780984, guid: bff35baeb4a51734cab6c5d1bf640c99, type: 3}
+  - control: arrow
+    icon: {fileID: 7538607853240362647, guid: 8cb6cf9b7b75db248be9304e6b597838, type: 3}
+  - control: arrow
+    icon: {fileID: -3607151359317351652, guid: 4edea892677add148aaebd7de2efbf38, type: 3}
+  - control: arrow
+    icon: {fileID: -4083143298681494050, guid: 1a43ff58933bb02469aa6353bc81edf2, type: 3}
+  - control: arrow
+    icon: {fileID: -4797783203767385232, guid: a472d60e2d9d9d6489cca42d48141436, type: 3}
+  - control: arrow
+    icon: {fileID: -625188912391450670, guid: c22437ac731bf084a953df8c5a5a6142, type: 3}
+  - control: arrow
+    icon: {fileID: 2349417091975035521, guid: c93c2b3c3a6c6b64786122b04e59630c, type: 3}
+  - control: arrow
+    icon: {fileID: -7376450374345124491, guid: df5b0ed8f3327154cad68941949bc723, type: 3}
+  - control: arrows
+    icon: {fileID: 6086589589933283350, guid: 840296222c2081d44b27b53aa72f73e6, type: 3}
+  - control: arrows
+    icon: {fileID: 1360536550632444352, guid: 6cce67447aca2f94c9e308b48015a916, type: 3}
+  - control: arrows
+    icon: {fileID: -5630076368062078552, guid: 2593f80c40efa9b44941d6ef69a2284a, type: 3}
+  - control: arrows
+    icon: {fileID: 5112170174658501564, guid: 3072f2db8d9ead1479d9f7893b891504, type: 3}
+  - control: arrows
+    icon: {fileID: 3264078252275744722, guid: 20dc25bae0fea1b49aebc4293d1744e1, type: 3}
+  - control: arrows
+    icon: {fileID: 8344365459245036522, guid: 2f18ab8cfa478a64cacb53e489d8891a, type: 3}
+  - control: arrows
+    icon: {fileID: -8898539689020471932, guid: c4604556a31aa9e4599bcd22713fc354, type: 3}
+  - control: arrows
+    icon: {fileID: 2696275017759222458, guid: 2761e3a0cada4614bae38a98c63d9169, type: 3}
+  - control: arrows
+    icon: {fileID: 8583076993036230165, guid: a2727661d1d89a2408b3c542691412bf, type: 3}
+  - control: arrows
+    icon: {fileID: -2554019606759150693, guid: 7e12dfea107f9344d870387b7dbb5acc, type: 3}
+  - control: arrows
+    icon: {fileID: 683280555646295740, guid: 44bedc7a35b092a4d8ab03b390f3427f, type: 3}
+  - control: arrows
+    icon: {fileID: 8401110117680403371, guid: fc52abdf3e502e340ac22675622bbac4, type: 3}
+  - control: arrows
+    icon: {fileID: -7849352408835771747, guid: 9223565f197d8434fba10a28805479fc, type: 3}
+  - control: arrows
+    icon: {fileID: -4695339392009892679, guid: cb60f7e12e0b05d48ba52a1ef2e31f07, type: 3}
+  - control: arrows
+    icon: {fileID: -1561624851510170220, guid: 942e0e9dd04bcbe45b852b374908a765, type: 3}
+  - control: asterisk
+    icon: {fileID: -8581236328691645878, guid: c6ae9500bc09f7b4ab0d30c65799276d, type: 3}
+  - control: asterisk
+    icon: {fileID: 3425424509153806620, guid: 27714c351ec0eb0468f093b02ad7c15b, type: 3}
+  - control: b
+    icon: {fileID: 4387665465535511833, guid: 329ecf64e66698044ad35e2b91918e90, type: 3}
+  - control: b
+    icon: {fileID: -986079501089025462, guid: b402a63831cf6e444b54b2d62120df62, type: 3}
+  - control: backspace
+    icon: {fileID: 8086792615903017955, guid: e1c9b437fe877f64cb497d9b73f97685, type: 3}
+  - control: backspace
+    icon: {fileID: -6245400481298800387, guid: 17d2ee17ce5653b4c9e7c0efaa70929a, type: 3}
+  - control: backspace
+    icon: {fileID: 8069215481502556915, guid: 4ada3bdb49a833846934f6ec79efd517, type: 3}
+  - control: backspace
+    icon: {fileID: 8672312309641984731, guid: 56ebe768e72072d41a73ee5ee773fc9c, type: 3}
+  - control: backspace
+    icon: {fileID: 3276203963791658525, guid: 628b67b59f5d5c546b3bc4b6ebe885d7, type: 3}
+  - control: backspace
+    icon: {fileID: 7724858847754134941, guid: 732c01c2bbec311428b918a74d4c401b, type: 3}
+  - control: bracket
+    icon: {fileID: 3681141240734532656, guid: e2b096397f820d24c911e302e93f44cc, type: 3}
+  - control: bracket
+    icon: {fileID: 1951384916067726855, guid: 6012665d09fd8ca4b8c442f380fbaba8, type: 3}
+  - control: bracket
+    icon: {fileID: -2803497073446838766, guid: 7e587a7aa1321bd4d9ab38bc2f88e333, type: 3}
+  - control: bracket
+    icon: {fileID: -8570019814209407062, guid: f94d21cd3ec321d4caf6c7d0e3da634d, type: 3}
+  - control: bracket
+    icon: {fileID: 5401366333984299681, guid: d4dd322623c1da948ab0272d97451385, type: 3}
+  - control: bracket
+    icon: {fileID: -7458493108890748374, guid: ff317a8dbdc8ce94e92ae31e98db46fe, type: 3}
+  - control: bracket
+    icon: {fileID: 6859698589740800194, guid: 714b04b6aaf40c54dbd482ac0fcba0f2, type: 3}
+  - control: bracket
+    icon: {fileID: 341684618895760549, guid: 7f5ab8a217e8dc944963dbaa8a97a2c9, type: 3}
+  - control: c
+    icon: {fileID: 7489297749385158885, guid: 10a6ff1b0dcdb974cb7867211c08432a, type: 3}
+  - control: c
+    icon: {fileID: 2075656974037526595, guid: 2bcac0d793413084a9b245b820d40444, type: 3}
+  - control: capslock
+    icon: {fileID: -8070800040580810078, guid: 39e8f6896ecc8c64999b904ccb515eba, type: 3}
+  - control: capslock
+    icon: {fileID: 8936476882985162233, guid: 2f3d4383b86ab124897fd197ec898988, type: 3}
+  - control: capslock
+    icon: {fileID: -1194136450819251577, guid: f06b9b3b71c360f4da73fada037141e8, type: 3}
+  - control: capslock
+    icon: {fileID: 8590100013797175239, guid: 8a8c641f55133cf4795f57a13a377935, type: 3}
+  - control: caret
+    icon: {fileID: -7815750370251883201, guid: 5c9a57a1091d5fe4397baaf033daab7d, type: 3}
+  - control: caret
+    icon: {fileID: 7793180194777439324, guid: 80bc3b9dcb84ca84f9f7a304837069c8, type: 3}
+  - control: colon
+    icon: {fileID: 3549821296341796415, guid: b108f93028d384c4e97225fd9410b846, type: 3}
+  - control: colon
+    icon: {fileID: 9048025288841602765, guid: b3cac1a546fb96e47832d64615961951, type: 3}
+  - control: comma
+    icon: {fileID: -6681133147278788448, guid: 01847649ec1d2b84194b24db5bad0cf7, type: 3}
+  - control: comma
+    icon: {fileID: 7051716513847524000, guid: 146c007c0ea72fb409fe26d2fb545c97, type: 3}
+  - control: command
+    icon: {fileID: -6860617701136312013, guid: 88b0117fca3597141b9f73dc57f40693, type: 3}
+  - control: command
+    icon: {fileID: -5218975855391809604, guid: 6a73f43a3baa73d43aa0b6c32cf36f5f, type: 3}
+  - control: ctrl
+    icon: {fileID: 3795127328408915156, guid: 8d5cb38498479654cad4112b55489ee8, type: 3}
+  - control: ctrl
+    icon: {fileID: 3930999876306290295, guid: cbf3e6f8756ab2d4fadba6bd9cdd7180, type: 3}
+  - control: d
+    icon: {fileID: -8387302115945079765, guid: 5ddb1d3e431f4fb479accb28261d2e60, type: 3}
+  - control: d
+    icon: {fileID: -1213849253474378864, guid: 9a75915dbed2118448542499ef91c884, type: 3}
+  - control: delete
+    icon: {fileID: 4774142277166468255, guid: 5f3df2db2fadfb440abc549bfee22bfe, type: 3}
+  - control: delete
+    icon: {fileID: 5947927726383020768, guid: 7849e477787217a448a9cb3ef1013a93, type: 3}
+  - control: e
+    icon: {fileID: 1622727937493990531, guid: 981e4c5f5975da248929b325740a3312, type: 3}
+  - control: e
+    icon: {fileID: 8762268269685377401, guid: 362e7669126496446b71a971d56a723f, type: 3}
+  - control: end
+    icon: {fileID: -8269448446418963542, guid: cad46d56519fd0542baa7fded9508eb6, type: 3}
+  - control: end
+    icon: {fileID: -1211267982179059740, guid: a983ae204ca4b574fa9596c074f43a23, type: 3}
+  - control: enter
+    icon: {fileID: -4761915745340555039, guid: 60f731e0b5866bc4c8e9526a099bc054, type: 3}
+  - control: enter
+    icon: {fileID: 6985477298336433365, guid: ad86f19a3d981084fad3a7c1bf54ea35, type: 3}
+  - control: equals
+    icon: {fileID: -5703737665441673626, guid: 4ddeae30a9951dc48ad54b40ed080c45, type: 3}
+  - control: equals
+    icon: {fileID: 2900579438797327093, guid: b6228620723e78d4b91dc9c78a7d4f32, type: 3}
+  - control: escape
+    icon: {fileID: 5161238624427270819, guid: df333375700f79746b7243b1e04c732a, type: 3}
+  - control: escape
+    icon: {fileID: 257814157185403840, guid: 1e0103a437edb5248acdebf36b005301, type: 3}
+  - control: exclamation
+    icon: {fileID: -8996718684511031986, guid: 4fc30565754bb0247afa4121a8f1f6b8, type: 3}
+  - control: exclamation
+    icon: {fileID: -1698358164764072582, guid: b04a219b730e3424b80d5f2022ff7002, type: 3}
+  - control: f
+    icon: {fileID: -9125861541802950594, guid: 8ea5b48b7747b6b4784bfa7916ce7534, type: 3}
+  - control: f1
+    icon: {fileID: -5276268084499866289, guid: 751e1f7654de9d84d92c99bacf80494b, type: 3}
+  - control: f1
+    icon: {fileID: 4628455815592262291, guid: c87d4a26f3ba19144bf57cbdb493a2c8, type: 3}
+  - control: f2
+    icon: {fileID: -8406788298635153352, guid: 18497a04c47a10648ba4d60d8a813478, type: 3}
+  - control: f2
+    icon: {fileID: -4681907933992147949, guid: 812b43b56b7685846b4c420a56d78366, type: 3}
+  - control: f3
+    icon: {fileID: 8009288347919174658, guid: 83e4d68e4147ba4408d0ac994c933146, type: 3}
+  - control: f3
+    icon: {fileID: -7560211229200462126, guid: f2d42cfe1d99da8449a3840bcf35c058, type: 3}
+  - control: f4
+    icon: {fileID: -1380453812768227926, guid: 98d42961ac8198944903090d7ee36d6d, type: 3}
+  - control: f4
+    icon: {fileID: 5191980233036066174, guid: e9147e52999fc264588c87fdd6961350, type: 3}
+  - control: f5
+    icon: {fileID: -5414126393478914263, guid: 62c9ce9805dc7d14d864d11815f3dffd, type: 3}
+  - control: f5
+    icon: {fileID: 390307470509716662, guid: a42968f80b562654a8e6c49b4f174aa8, type: 3}
+  - control: f6
+    icon: {fileID: -2478374994428999686, guid: 69ad5cfa01135bb4b8e580e69992af07, type: 3}
+  - control: f6
+    icon: {fileID: -2606032580050957289, guid: ce61fa6a8adbd5349986aea9cb57d549, type: 3}
+  - control: f7
+    icon: {fileID: -8021247133056268021, guid: b6dd44587c323db499d0092b4c20dfa3, type: 3}
+  - control: f7
+    icon: {fileID: -9106346780308723489, guid: ad52927c906d2604e8a796b1051a3b84, type: 3}
+  - control: f8
+    icon: {fileID: 5797952619067910518, guid: e21c6427d326ec84eac090e98a1983ed, type: 3}
+  - control: f8
+    icon: {fileID: -7406605414979480122, guid: 7b0fe05eb463b894d9b99f13225a8387, type: 3}
+  - control: f9
+    icon: {fileID: 6301311132233469706, guid: 7e380b8820d3a9946ba448733f2399a8, type: 3}
+  - control: f9
+    icon: {fileID: -28724047140917575, guid: 193c76b5d1167be4bab4a96c611173dd, type: 3}
+  - control: f10
+    icon: {fileID: 3344012895008649251, guid: 145484733f236d849badaa483d9236fb, type: 3}
+  - control: f10
+    icon: {fileID: 2094688706806765953, guid: f631b1a21800d0e4e8be9f625b22b71a, type: 3}
+  - control: f11
+    icon: {fileID: 5868078030359579539, guid: 4733140c10c51194c8789b1af73e1a0d, type: 3}
+  - control: f11
+    icon: {fileID: -5607168265959203104, guid: 11fb63ab8b554b540871e8f8758ad93f, type: 3}
+  - control: f12
+    icon: {fileID: -3131574434052127199, guid: 75b88328741bacd40a493f7d4bcf4360, type: 3}
+  - control: f12
+    icon: {fileID: -7418664357557115375, guid: 0860984a53e83014b96e1dc6221624bb, type: 3}
+  - control: f
+    icon: {fileID: -5972636825699385034, guid: 1f881dbf793f1a54ba879819e833c040, type: 3}
+  - control: function
+    icon: {fileID: -2270610884487199720, guid: 636272e503f615749bb6a1dd67e26d7f, type: 3}
+  - control: function
+    icon: {fileID: 2648644883344843385, guid: 45760dce8874cff4987efd784e73cce3, type: 3}
+  - control: g
+    icon: {fileID: -6228684978618632526, guid: 51d66cb36ab2f99459a0b32f82b000c2, type: 3}
+  - control: g
+    icon: {fileID: 4707502797770347351, guid: b72000a3dab168a449fa9a2ff172677d, type: 3}
+  - control: h
+    icon: {fileID: -9011578454848037910, guid: 777beca7875fe2f4b8771632e389d84c, type: 3}
+  - control: h
+    icon: {fileID: -7842739833239885896, guid: f5365e4570d80a24786ab64b5cb6930c, type: 3}
+  - control: home
+    icon: {fileID: -6980483413758840211, guid: 289d8f1cfa960394c8f288f7a01c890f, type: 3}
+  - control: home
+    icon: {fileID: 5351807981668006080, guid: ec910a9dca4b77a43a15af5658199ce7, type: 3}
+  - control: i
+    icon: {fileID: 6624163752006436703, guid: c9eb72a59ecb993499ae2aef7b4fb8c2, type: 3}
+  - control: i
+    icon: {fileID: -6837535890732518905, guid: 15343cf07da59a646a2fde33b119b185, type: 3}
+  - control: insert
+    icon: {fileID: 436866400090294973, guid: 8a78f5bb98b92ff4f85762d461e7c3ad, type: 3}
+  - control: insert
+    icon: {fileID: -3704627883538974127, guid: 4e9940140a1b6d948be2505e72f00135, type: 3}
+  - control: j
+    icon: {fileID: -2577820472799158749, guid: 71ba355b84155414bb335e30f7d733e5, type: 3}
+  - control: j
+    icon: {fileID: 1359505166285963490, guid: bc8cc107c7a038e418ef2faf9338e380, type: 3}
+  - control: k
+    icon: {fileID: 3290407570213495539, guid: a1a3fab10032ffc44a9c00589f185c63, type: 3}
+  - control: k
+    icon: {fileID: 2785905100816200124, guid: eb8ebc59abf789b4bac1888023973591, type: 3}
+  - control: l
+    icon: {fileID: 2711562684772605928, guid: 4e4cfa2e798fd664ab496f89c6ad94fa, type: 3}
+  - control: l
+    icon: {fileID: -8133952297499278860, guid: c6220afb39008ca4b901fd41ac43c479, type: 3}
+  - control: m
+    icon: {fileID: 8162251711410599823, guid: e6356903c034dbf46ab10fa3871b24a9, type: 3}
+  - control: m
+    icon: {fileID: 2886443980452683078, guid: 48b0187041f74a54a87d46b5986f99b5, type: 3}
+  - control: minus
+    icon: {fileID: -2999733867205281054, guid: 91574065d6d7cdd4fb3b1a84f63c5420, type: 3}
+  - control: minus
+    icon: {fileID: 3788802180311153950, guid: 8df5e67b770b92b429afc776a21d3725, type: 3}
+  - control: n
+    icon: {fileID: 1613905444216025894, guid: 89525151af11936418c3cee7b242b783, type: 3}
+  - control: n
+    icon: {fileID: 5921013151950920307, guid: ceb86af0d913e4049ab3cfad476d39a2, type: 3}
+  - control: numlock
+    icon: {fileID: -2151229654994512011, guid: 5189ff9475951af4f8168edbefa66b88, type: 3}
+  - control: numlock
+    icon: {fileID: 7453807494790270075, guid: cdd18995297b88d44982d0fa08009a8c, type: 3}
+  - control: numpad
+    icon: {fileID: -5228559535882919277, guid: bced015a9d3f52048a5b942a85c3a233, type: 3}
+  - control: numpad
+    icon: {fileID: 9007098663558625930, guid: 9219387f244e19348b7cefa9ea1801ca, type: 3}
+  - control: numpad
+    icon: {fileID: 3056828074748105826, guid: 2427241ca597e794ba92e47b7d50b281, type: 3}
+  - control: numpad
+    icon: {fileID: -3241160087991212466, guid: 32b6caad3c60cf54e8fd79690b92f7b5, type: 3}
+  - control: o
+    icon: {fileID: 5237277465588018485, guid: 4fb96efe5d8bc974a88260358c9b98b1, type: 3}
+  - control: o
+    icon: {fileID: -1072623936383575364, guid: 257c5f7b91084d94f82518851b475097, type: 3}
+  - control: option
+    icon: {fileID: 7871260147836645894, guid: 10965674cac80244c80764cc9c9816ff, type: 3}
+  - control: option
+    icon: {fileID: 7625309785386658011, guid: d1208534f5b3fae4db96bd537ab9fcee, type: 3}
+  - control: outline
+    icon: {fileID: 2276519425170552675, guid: 8a67240d8bd71654b8db890a3806e62d, type: 3}
+  - control: p
+    icon: {fileID: 7358378815127608425, guid: 812e856a707550c46aacdc193cd7404f, type: 3}
+  - control: p
+    icon: {fileID: 3261580950634116286, guid: f594a9024777c244387e5771249a8486, type: 3}
+  - control: page
+    icon: {fileID: 3705201507620354667, guid: c51dea916dc2f924e8f35967bca17291, type: 3}
+  - control: page
+    icon: {fileID: -4474414159824611067, guid: 303fc541656ed6e439a36d2d9c1fb344, type: 3}
+  - control: page
+    icon: {fileID: -1033187720645169652, guid: c2906fde8071d88458813c37ac0f43f0, type: 3}
+  - control: page
+    icon: {fileID: 2810645454245656666, guid: 356a90ababa722f4e8cd5ccc6f0d114b, type: 3}
+  - control: period
+    icon: {fileID: -7957453670165720738, guid: 9e145efabe2401d4c9442a73dba3d90f, type: 3}
+  - control: period
+    icon: {fileID: -6406930125751902107, guid: 711d582fd1f398a47b8dda6a342c2ab2, type: 3}
+  - control: plus
+    icon: {fileID: 8829701295740710013, guid: 533b7b1831a965b46aa1394dd869d60f, type: 3}
+  - control: plus
+    icon: {fileID: -1041840142165297688, guid: 3c4ac989fe7bd09439afcb688539113a, type: 3}
+  - control: printscreen
+    icon: {fileID: 3144470462153080845, guid: 59606ea2f4a8b284bbbb3793a36df80c, type: 3}
+  - control: printscreen
+    icon: {fileID: 3727804375788167959, guid: 4cfd8aaf856c4c846893e20154ec7596, type: 3}
+  - control: q
+    icon: {fileID: 1179216485070693450, guid: 791799627408618448339407b3b6e827, type: 3}
+  - control: q
+    icon: {fileID: 2037274648636611220, guid: f7f685c0ff85f4f4b87ee1e913afa6b8, type: 3}
+  - control: question
+    icon: {fileID: 6139993745154434426, guid: cd6344eba38665542b2cbf944fe2b226, type: 3}
+  - control: question
+    icon: {fileID: 7156943372030634480, guid: 79160e8d320a2134b9e324213d3db920, type: 3}
+  - control: quote
+    icon: {fileID: 785660994695051435, guid: d5955e3f4d7cbad43ad973546ef6d771, type: 3}
+  - control: quote
+    icon: {fileID: 3630629606117070400, guid: a3757781a80a2254795013021e80a3dc, type: 3}
+  - control: r
+    icon: {fileID: -6780523318993171746, guid: 6c7b7bc6bd2417547b50c646478b4cb6, type: 3}
+  - control: r
+    icon: {fileID: 6831102728419869490, guid: 63c741e40e021434d855d28180414816, type: 3}
+  - control: return
+    icon: {fileID: -4937721277393639676, guid: 76d1d5aede3ce744283dd9d836abe856, type: 3}
+  - control: return
+    icon: {fileID: 1778734483276501019, guid: 5a629c8f2a54ad3409d119201dde187f, type: 3}
+  - control: s
+    icon: {fileID: -3937758826142331281, guid: 4fea323602582874896876ef3d4a2b62, type: 3}
+  - control: s
+    icon: {fileID: 1899110491453617192, guid: 042b9f8010cf11e48a80ff07fb314261, type: 3}
+  - control: semicolon
+    icon: {fileID: 2062452209080724124, guid: 28fa306a74899c143b59dfabb5166d87, type: 3}
+  - control: semicolon
+    icon: {fileID: 4575863367258785945, guid: 9052638c1d513044ba3768c2bd9c5eff, type: 3}
+  - control: shift
+    icon: {fileID: -465843913026089529, guid: b403e3d8287f4974c9947d12f44b4160, type: 3}
+  - control: shift
+    icon: {fileID: 5446913131057820751, guid: c968a5071fd4b5e438a93e77997da635, type: 3}
+  - control: shift
+    icon: {fileID: -2600615584765267465, guid: 7f4adc211cd10ea4d969e9853ec571c1, type: 3}
+  - control: shift
+    icon: {fileID: -1044704265581600678, guid: a04da1033fbdc114a91e1429db9a6ce0, type: 3}
+  - control: slash
+    icon: {fileID: 2269918448686567404, guid: 988b01dc909e27f4dbee920fee1f5de1, type: 3}
+  - control: slash
+    icon: {fileID: -2981063652783949042, guid: db725dec2d283ed429c000aa8dff331f, type: 3}
+  - control: slash
+    icon: {fileID: 8558015319005732945, guid: 83d8b77727c65744e9aec46586346283, type: 3}
+  - control: slash
+    icon: {fileID: -5100193914132495961, guid: 60393b25ad1772548a5259db6817cb5e, type: 3}
+  - control: space
+    icon: {fileID: -557078281788634498, guid: cd57190d1e48c584c8375988accdf0b2, type: 3}
+  - control: space
+    icon: {fileID: 3458353323414804869, guid: 4c61adb3bfece2d4f831e356420944a3, type: 3}
+  - control: space
+    icon: {fileID: 1268660537247939660, guid: f63bc1123c7846d45bec3a00222f5911, type: 3}
+  - control: space
+    icon: {fileID: 8151018945953936088, guid: d663faa43083fb44a8c78fa6571cc25a, type: 3}
+  - control: t
+    icon: {fileID: 3804896374830911662, guid: f85c42b5179423146b0750b8ed9a3c79, type: 3}
+  - control: t
+    icon: {fileID: 7571824547623755304, guid: 981ed7c5fb1060e49898bc09a9774ed4, type: 3}
+  - control: tab
+    icon: {fileID: 2363609691092413705, guid: 62f4c0272c7d9234e8e94d0383de38e0, type: 3}
+  - control: tab
+    icon: {fileID: -3597005283767553125, guid: e750ad6bb28713046904852b2662e56a, type: 3}
+  - control: tab
+    icon: {fileID: -3230704815862875771, guid: ef51b3fef8b2cc84ca88c7ab5502e1df, type: 3}
+  - control: tab
+    icon: {fileID: 4806393180160698361, guid: 85b4cad1c32d83f478a79790bd9aa44d, type: 3}
+  - control: tab
+    icon: {fileID: 2387125215807078302, guid: 5fc8c49d807106b47b178ed8dc3a043e, type: 3}
+  - control: tab
+    icon: {fileID: -6553714960084530204, guid: 22bb736034249ba42910949bca974ecf, type: 3}
+  - control: tilde
+    icon: {fileID: -927971289186269160, guid: 94b197125866a614d94e94b413c248b6, type: 3}
+  - control: tilde
+    icon: {fileID: -2491995525283667177, guid: ed82dea8f2cb4e549913e5060e0fa9b5, type: 3}
+  - control: u
+    icon: {fileID: 1897869547920896223, guid: a903ba30846bf604ea131d3fccc31d3f, type: 3}
+  - control: u
+    icon: {fileID: 5116716462624687380, guid: 0d30317c86652fd4c8f12d1aeacae466, type: 3}
+  - control: v
+    icon: {fileID: -8655167945723465343, guid: fd326f3008a8f5f42be638db5f94335a, type: 3}
+  - control: v
+    icon: {fileID: 3513695690666218201, guid: 7088a30c592f0ab4caf67aa7cd75ca0e, type: 3}
+  - control: w
+    icon: {fileID: 6539619573780045288, guid: 882fa1d40f6ff1f44906fe23b0ad2254, type: 3}
+  - control: w
+    icon: {fileID: 8164263986603422570, guid: 9a1158b3eaedbd04dad8cebd592aea67, type: 3}
+  - control: win
+    icon: {fileID: -6181505624115334152, guid: 673e1abacd39b71468b3e9ad5384b70c, type: 3}
+  - control: win
+    icon: {fileID: -8816144444195154238, guid: 433cb1e2b5a6d124bb18f31522465ee5, type: 3}
+  - control: x
+    icon: {fileID: -1679339380555045785, guid: f0a2d908b6ec77f44b125403e673f9e2, type: 3}
+  - control: x
+    icon: {fileID: -318118851349933243, guid: da6ae0d0f039d274f986dc3b678f7fa0, type: 3}
+  - control: y
+    icon: {fileID: -2318533488985238692, guid: dbb7c250bdacef443999a93d0de0c955, type: 3}
+  - control: y
+    icon: {fileID: 5717771110271814227, guid: c6440b9e51a322540976a803fbf984f1, type: 3}
+  - control: z
+    icon: {fileID: 8988070500663906562, guid: 24b18271d5fca33479368f494ea07344, type: 3}
+  - control: z
+    icon: {fileID: -4383346106073238713, guid: b6552b7d885161f41b4ee5780c0d93f4, type: 3}

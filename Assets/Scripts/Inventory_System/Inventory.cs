@@ -343,6 +343,25 @@ public class Inventory : MonoBehaviour
         RaiseChanged();
         return true;
     }
+
+    public bool TryConsumeFromSlot(int slotIndex, int amount = 1)
+{
+    if (slotIndex < 0 || slotIndex >= slots.Length) return false;
+
+    var s = slots[slotIndex];
+    if (s == null || s.data == null) return false;
+    if (amount <= 0) return false;
+
+    if (s.count < amount) return false;
+
+    s.count -= amount;
+    if (s.count <= 0)
+        slots[slotIndex] = new InventoryItem();
+
+    RaiseChanged();
+    return true;
+}
+
     public bool TryAddMagazine(MagazineInstance mag)
     {
         if (mag == null || mag.data == null)

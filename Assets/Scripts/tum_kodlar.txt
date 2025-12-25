@@ -3421,16 +3421,27 @@ private void OnDisable()
 
     // INVENTORY (I)
     private void OnInventory(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (PipBoyController.Instance == null) return;
+
+    // EÄŸer envanter AÃ‡IKSA â†’ KAPAT
+    if (PipBoyController.Instance.IsOpen)
     {
-        if (!ctx.performed) return;
-        if (IsAnyBlockingPanelOpen()) return;
-
-        if (PipBoyController.Instance == null) return;
-        if (PipBoyController.Instance.IsOpen) return;
-
-        InteractionPromptUI.Instance?.Hide();
-        PipBoyController.Instance.Open(0);
+        PipBoyController.Instance.Close();
+        ResumeGame();
+        return;
     }
+
+    // EÄŸer baÅŸka bloklayÄ±cÄ± panel aÃ§Ä±ksa â†’ aÃ§ma
+    if (IsAnyBlockingPanelOpen()) return;
+
+    // Envanteri AÃ‡
+    InteractionPromptUI.Instance?.Hide();
+    PipBoyController.Instance.Open(0);
+    GameStateManager.SetPaused(true);
+}
+
 
     // INTERACT (E)
     private void OnInteract(InputAction.CallbackContext ctx)
@@ -3473,36 +3484,48 @@ private void OnDisable()
 
     // ESC
     private void OnEscape(InputAction.CallbackContext ctx)
+{
+    if (!ctx.performed) return;
+    if (GameStateManager.IsGameOver) return;
+
+    // 1ï¸âƒ£ Inventory (PipBoy) AÃ‡IKSA â†’ KAPAT
+    if (PipBoyController.Instance != null &&
+        PipBoyController.Instance.IsOpen)
     {
-        if (!ctx.performed) return;
-        if (GameStateManager.IsGameOver) return;
-
-        // Ã–nce aÃ§Ä±k panelleri kapat
-        if (tradePanel != null && tradePanel.activeSelf)
-        {
-            tradePanel.SetActive(false);
-            ResumeGame();
-            return;
-        }
-
-        if (craftPanel != null && craftPanel.activeSelf)
-        {
-            craftPanel.SetActive(false);
-            ResumeGame();
-            return;
-        }
-
-        if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
-        {
-            PauseMenu.Instance.HidePause();
-            ResumeGame();
-            return;
-        }
-
-        // HiÃ§biri aÃ§Ä±k deÄŸilse pause aÃ§
-        PauseMenu.Instance.ShowPause();
-        GameStateManager.SetPaused(true);
+        PipBoyController.Instance.Close();
+        ResumeGame();
+        return;
     }
+
+    // 2ï¸âƒ£ Trade AÃ‡IKSA â†’ KAPAT
+    if (tradePanel != null && tradePanel.activeSelf)
+    {
+        tradePanel.SetActive(false);
+        ResumeGame();
+        return;
+    }
+
+    // 3ï¸âƒ£ Craft AÃ‡IKSA â†’ KAPAT
+    if (craftPanel != null && craftPanel.activeSelf)
+    {
+        craftPanel.SetActive(false);
+        ResumeGame();
+        return;
+    }
+
+    // 4ï¸âƒ£ Pause AÃ‡IKSA â†’ KAPAT
+    if (pauseMenuPanel != null && pauseMenuPanel.activeSelf)
+    {
+        PauseMenu.Instance.HidePause();
+        ResumeGame();
+        return;
+    }
+
+    // 5ï¸âƒ£ HiÃ§ panel yok â†’ Pause AÃ‡
+    PauseMenu.Instance.ShowPause();
+    GameStateManager.SetPaused(true);
+}
+
 
     // ======================================================
     // TRADE
@@ -6129,6 +6152,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization.Settings;
 
 
 public class SettingsMenu : MonoBehaviour
@@ -6154,6 +6178,10 @@ public class SettingsMenu : MonoBehaviour
     public Transform keybindContainer;
     public GameObject keybindRowPrefab;
     public InputActionAsset inputActions;
+
+    // ---------------- LANGUAGE ----------------
+    [Header("Language")]
+    public TMP_Dropdown languageDropdown;
 
 
     // Sabit (retro / pixel-art uyumlu) Ã§Ã¶zÃ¼nÃ¼rlÃ¼k listesi
@@ -6186,13 +6214,14 @@ public class SettingsMenu : MonoBehaviour
     {
         yield return null;
 
-        
         LoadRebinds();
         InitKeybindUI();
         InitResolutionDropdown();
-        InitQualityDropdown(); // ğŸ”¥ EKLENDÄ°
+        InitQualityDropdown();
+        InitLanguageDropdown(); // ğŸ”¥ EKLE
         LoadPrefs();
     }
+
     void LoadRebinds()
     {
         if (!PlayerPrefs.HasKey("Rebinds")) return;
@@ -6201,72 +6230,72 @@ public class SettingsMenu : MonoBehaviour
         inputActions.LoadBindingOverridesFromJson(json);
     }
     public void ResetKeybinds()
-{
-    if (inputActions == null)
     {
-        Debug.LogError("ResetKeybinds: inputActions NULL");
-        return;
-    }
-
-    // 1) Override'larÄ± sil
-    inputActions.RemoveAllBindingOverrides();
-
-    // 2) KayÄ±tlÄ± json'u sil
-    PlayerPrefs.DeleteKey("Rebinds");
-    PlayerPrefs.Save();
-
-    // 3) UI'Ä± anÄ±nda gÃ¼ncelle (en kritik kÄ±sÄ±m)
-    RefreshKeybindUI();
-}
-private void RefreshKeybindUI()
-{
-    // Mevcut satÄ±rlarÄ± yok et
-    foreach (Transform child in keybindContainer)
-        Destroy(child.gameObject);
-
-    // Yeniden Ã¼ret (override yok -> defaultlar gÃ¶rÃ¼nÃ¼r)
-    InitKeybindUI();
-
-    // Layout gÃ¼ncelle
-    Canvas.ForceUpdateCanvases();
-}
-void InitKeybindUI()
-{
-    var map = inputActions.FindActionMap("Gameplay");
-    if (map == null)
-    {
-        Debug.LogError("âŒ Gameplay action map bulunamadÄ±");
-        return;
-    }
-
-    foreach (Transform child in keybindContainer)
-        Destroy(child.gameObject);
-
-    foreach (var action in map.actions)
-    {
-        if (action.bindings.Count == 0)
-            continue;
-
-        int bindingIndex = -1;
-
-        for (int i = 0; i < action.bindings.Count; i++)
+        if (inputActions == null)
         {
-            var binding = action.bindings[i];
-
-            if (!binding.isComposite && !binding.isPartOfComposite)
-            {
-                bindingIndex = i;
-                break;
-            }
+            Debug.LogError("ResetKeybinds: inputActions NULL");
+            return;
         }
 
-        if (bindingIndex == -1)
-            continue;
+        // 1) Override'larÄ± sil
+        inputActions.RemoveAllBindingOverrides();
 
-        GameObject row = Instantiate(keybindRowPrefab, keybindContainer);
-        row.GetComponent<KeybindRowUI>().Setup(action, bindingIndex);
+        // 2) KayÄ±tlÄ± json'u sil
+        PlayerPrefs.DeleteKey("Rebinds");
+        PlayerPrefs.Save();
+
+        // 3) UI'Ä± anÄ±nda gÃ¼ncelle (en kritik kÄ±sÄ±m)
+        RefreshKeybindUI();
     }
-}
+    private void RefreshKeybindUI()
+    {
+        // Mevcut satÄ±rlarÄ± yok et
+        foreach (Transform child in keybindContainer)
+            Destroy(child.gameObject);
+
+        // Yeniden Ã¼ret (override yok -> defaultlar gÃ¶rÃ¼nÃ¼r)
+        InitKeybindUI();
+
+        // Layout gÃ¼ncelle
+        Canvas.ForceUpdateCanvases();
+    }
+    void InitKeybindUI()
+    {
+        var map = inputActions.FindActionMap("Gameplay");
+        if (map == null)
+        {
+            Debug.LogError("âŒ Gameplay action map bulunamadÄ±");
+            return;
+        }
+
+        foreach (Transform child in keybindContainer)
+            Destroy(child.gameObject);
+
+        foreach (var action in map.actions)
+        {
+            if (action.bindings.Count == 0)
+                continue;
+
+            int bindingIndex = -1;
+
+            for (int i = 0; i < action.bindings.Count; i++)
+            {
+                var binding = action.bindings[i];
+
+                if (!binding.isComposite && !binding.isPartOfComposite)
+                {
+                    bindingIndex = i;
+                    break;
+                }
+            }
+
+            if (bindingIndex == -1)
+                continue;
+
+            GameObject row = Instantiate(keybindRowPrefab, keybindContainer);
+            row.GetComponent<KeybindRowUI>().Setup(action, bindingIndex);
+        }
+    }
 
 
 
@@ -6279,6 +6308,8 @@ void InitKeybindUI()
     {
         if (initialized) return;
         initialized = true;
+
+        languageDropdown.onValueChanged.AddListener(SetLanguage);
 
         masterSlider.onValueChanged.AddListener(v =>
         {
@@ -6301,6 +6332,46 @@ void InitKeybindUI()
         qualityDropdown.onValueChanged.AddListener(SetQuality);
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
         resolutionDropdown.onValueChanged.AddListener(SetResolution);
+    }
+    void InitLanguageDropdown()
+    {
+        if (languageDropdown == null)
+        {
+            Debug.LogError("âŒ languageDropdown NULL");
+            return;
+        }
+
+        languageDropdown.ClearOptions();
+
+        List<string> options = new List<string>();
+
+        foreach (var locale in LocalizationSettings.AvailableLocales.Locales)
+        {
+            options.Add(locale.LocaleName); // English (en), Turkish (tr)
+        }
+
+        languageDropdown.AddOptions(options);
+
+        int savedLang = PlayerPrefs.GetInt("Language", 0);
+        languageDropdown.SetValueWithoutNotify(savedLang);
+        languageDropdown.RefreshShownValue();
+    }
+    void SetLanguage(int index)
+    {
+        PlayerPrefs.SetInt("Language", index);
+        PlayerPrefs.Save();
+
+        StartCoroutine(SetLocale(index));
+    }
+
+    IEnumerator SetLocale(int index)
+    {
+        yield return LocalizationSettings.InitializationOperation;
+
+        LocalizationSettings.SelectedLocale =
+            LocalizationSettings.AvailableLocales.Locales[index];
+
+        Debug.Log($"ğŸŒ Language changed to: {LocalizationSettings.SelectedLocale.LocaleName}");
     }
 
     // -------------------------------------------------
@@ -7626,7 +7697,7 @@ public class PlayerWeapon : MonoBehaviour
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
-        animator = GetComponentInChildren<Animator>();
+         animator = GetComponentInParent<Animator>();
 
         if (muzzleFlash != null)
         {
@@ -7851,33 +7922,40 @@ private void OnDisable()
 
 
     private void Update()
+{
+    if (GameStateManager.IsGamePaused || weaponData == null)
+        return;
+
+    // 🔫 TEKLİ SİLAHLAR
+    if (!weaponData.isAutomatic)
     {
-        if (GameStateManager.IsGamePaused || weaponData == null)
-            return;
-
-        // 🔫 Tekli atış
-        if (!weaponData.isAutomatic)
+        if (Input.GetMouseButtonDown(0))
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (Time.time - lastAutoFireTime >= (1f / weaponData.fireRate))
-                {
-                    lastAutoFireTime = Time.time;
-                    Shoot();
-                }
-            }
+            animator.SetBool("IsFiring", true);
+            Shoot();
         }
 
-
-        // 🔥 Otomatik atış
-        if (weaponData.isAutomatic)
+        if (Input.GetMouseButtonUp(0))
         {
-            if (Input.GetMouseButton(0))
-                AutoFire();
+            animator.SetBool("IsFiring", false);
         }
-
-
     }
+
+    // 🔥 OTOMATİK SİLAHLAR
+    if (weaponData.isAutomatic)
+    {
+        if (Input.GetMouseButton(0))
+        {
+            animator.SetBool("IsFiring", true);
+            AutoFire();
+        }
+        else
+        {
+            animator.SetBool("IsFiring", false);
+        }
+    }
+}
+
 
     // ============================
     // MAGAZINE CHECK (HOLD R)
@@ -8068,6 +8146,21 @@ private void OnDisable()
 
 
     }
+
+    private void ApplyWeaponAnimation()
+{
+    if (animator == null)
+        animator = GetComponentInParent<Animator>(); // ❗ CHILD DEĞİL
+
+    if (weaponData?.animatorOverride == null)
+        return;
+
+    animator.runtimeAnimatorController =
+        weaponData.animatorOverride;
+}
+
+
+
     public MagazineInstance GetCurrentMagazine()
     {
         return currentMagazine;
@@ -8086,19 +8179,18 @@ private void OnDisable()
 
 
     private void RangedAttack()
-    {
-        if (shootSound != null)
-            audioSource.PlayOneShot(shootSound);
+{
+    if (shootSound != null)
+        audioSource.PlayOneShot(shootSound);
 
-        animator?.SetTrigger("Shoot");
+    if (weaponData.isShotgun)
+        FireShotgunPellets();
+    else
+        FireSingleBullet();
 
-        if (weaponData.isShotgun)
-            FireShotgunPellets();
-        else
-            FireSingleBullet();
+    TryMuzzleFlash();
+}
 
-        TryMuzzleFlash();
-    }
 
     private void FireSingleBullet()
     {
@@ -8369,6 +8461,7 @@ private void OnDisable()
     {
         WeaponItemData item =
             WeaponSlotManager.Instance.GetWeaponItemInSlot(slot);
+             ApplyWeaponAnimation(); // 🔥 EKLENDİ
 
         if (item == null || item.weaponDefinition == null)
             return;
@@ -8417,6 +8510,7 @@ private void OnDisable()
             if (fp != null)
                 firePoint = fp;
         }
+        ApplyWeaponAnimation(); // 🔥 EKLENDİ
 
         // 🔥 ŞARJÖR BAĞLAMA
         inventoryMags.Clear();
@@ -8486,6 +8580,287 @@ private void OnDisable()
 
 
 
+}
+using UnityEngine;
+
+
+public enum UnlockType
+{
+    Zone,
+    Story,
+    Item
+}
+
+[CreateAssetMenu(menuName = "Radio/Radio Station")]
+public class RadioStation : ScriptableObject
+{
+    [Header("Info")]
+    public string stationId;          // "wasteland_news"
+    public string displayName;        // "Wasteland News"
+
+    [Header("Unlock")]
+    public UnlockType unlockType;
+
+    [Header("Audio")]
+    public AudioClip[] audioClips;
+    public bool loopPlaylist = true;
+}
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class RadioStationButtonUI : MonoBehaviour
+{
+    public TMP_Text label;
+    private RadioStation station;
+
+    public void Setup(RadioStation stationData)
+    {
+        station = stationData;
+        label.text = station.displayName;
+
+        GetComponent<Button>().onClick.AddListener(OnClick);
+    }
+
+    void OnClick()
+    {
+        RadioSystem.Instance.PlayStation(station);
+    }
+}
+using System.Collections.Generic;
+using UnityEngine;
+
+public class RadioSystem : MonoBehaviour
+{
+    public static RadioSystem Instance;
+
+    [Header("Audio")]
+    public AudioSource audioSource;
+
+    [Header("Signal")]
+    [Range(0f, 1f)]
+    public float currentSignalStrength = 1f;
+
+    public AudioLowPassFilter lowPassFilter;
+
+    [Header("Runtime State")]
+    public List<RadioStation> activeStations = new(); // unlocked
+    public RadioStation currentStation;
+
+    private int currentClipIndex = 0;
+
+    private void Awake()
+{
+    if (Instance != null)
+    {
+        Destroy(gameObject);
+        return;
+    }
+
+    Instance = this;
+
+    // Low pass otomatik ekle
+    lowPassFilter = gameObject.GetComponent<AudioLowPassFilter>();
+    if (lowPassFilter == null)
+        lowPassFilter = gameObject.AddComponent<AudioLowPassFilter>();
+}
+
+public void SetSignalStrength(float strength)
+{
+    if (audioSource == null)
+        return;
+
+    currentSignalStrength = Mathf.Clamp01(strength);
+
+    audioSource.volume = Mathf.Lerp(0.2f, 1f, currentSignalStrength);
+
+    if (lowPassFilter != null)
+    {
+        lowPassFilter.cutoffFrequency =
+            Mathf.Lerp(800f, 22000f, currentSignalStrength);
+    }
+}
+
+
+    // ===============================
+    // UNLOCK
+    // ===============================
+    public void UnlockStation(RadioStation station)
+    {
+        if (!activeStations.Contains(station))
+        {
+            activeStations.Add(station);
+            Debug.Log($"ğŸ“» Radio unlocked: {station.displayName}");
+        }
+    }
+
+    // ===============================
+    // PLAY
+    // ===============================
+    public void PlayStation(RadioStation station)
+    {
+        if (!activeStations.Contains(station))
+        {
+            Debug.LogWarning("Station not unlocked!");
+            return;
+        }
+
+        currentStation = station;
+        currentClipIndex = 0;
+
+        PlayCurrentClip();
+    }
+
+    private void PlayCurrentClip()
+    {
+        if (currentStation == null || currentStation.audioClips.Length == 0)
+            return;
+
+        audioSource.clip = currentStation.audioClips[currentClipIndex];
+        audioSource.Play();
+
+        CancelInvoke();
+        Invoke(nameof(NextClip), audioSource.clip.length);
+    }
+
+    private void NextClip()
+    {
+        if (currentStation == null) return;
+
+        currentClipIndex++;
+
+        if (currentClipIndex >= currentStation.audioClips.Length)
+        {
+            if (!currentStation.loopPlaylist)
+                return;
+
+            currentClipIndex = 0;
+        }
+
+        PlayCurrentClip();
+    }
+
+    // ===============================
+    // STOP
+    // ===============================
+    public void StopRadio()
+    {
+        CancelInvoke();
+        audioSource.Stop();
+        currentStation = null;
+    }
+}
+using UnityEngine;
+using TMPro;
+
+public class RadioUI : MonoBehaviour
+{
+    [Header("UI")]
+    public Transform stationListParent;
+    public GameObject stationButtonPrefab;
+    public TMP_Text currentStationText;
+    public UnityEngine.UI.Slider signalSlider;
+
+    private void OnEnable()
+    {
+        RefreshStations();
+        UpdateSignal();
+    }
+
+    private void Update()
+    {
+        UpdateSignal();
+        UpdateCurrentStation();
+    }
+
+    void RefreshStations()
+    {
+        foreach (Transform c in stationListParent)
+            Destroy(c.gameObject);
+
+        foreach (var station in RadioSystem.Instance.activeStations)
+        {
+            GameObject btn = Instantiate(stationButtonPrefab, stationListParent);
+            btn.GetComponent<RadioStationButtonUI>().Setup(station);
+        }
+    }
+
+    void UpdateCurrentStation()
+    {
+        var current = RadioSystem.Instance.currentStation;
+        currentStationText.text = current != null
+            ? $"â–¶ {current.displayName}"
+            : "No Signal";
+    }
+
+    void UpdateSignal()
+    {
+        signalSlider.value = RadioSystem.Instance.currentSignalStrength;
+    }
+}
+using UnityEngine;
+
+[RequireComponent(typeof(Collider2D))]
+public class RadioZone : MonoBehaviour
+{
+    [Header("Zone Info")]
+    public string zoneId;
+
+    [Header("Stations")]
+    public RadioStation[] unlockStations;
+
+    [Header("Signal Source")]
+    public Transform signalSource;   // <<< Ã–NEMLÄ°
+    public float maxSignalDistance = 10f;
+
+    [Range(0f, 1f)]
+    public float maxSignalStrength = 1f;
+
+    private Transform player;
+    private bool playerInside = false;
+
+    private void Start()
+    {
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        if (signalSource == null)
+            Debug.LogWarning($"ğŸ“¡ RadioZone {zoneId} has no SignalSource!");
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        playerInside = true;
+
+        foreach (var station in unlockStations)
+            RadioSystem.Instance.UnlockStation(station);
+
+        Debug.Log($"ğŸ“¡ ENTER RadioZone: {zoneId}");
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        playerInside = false;
+        RadioSystem.Instance.SetSignalStrength(0f);
+
+        Debug.Log($"ğŸ“¡ EXIT RadioZone: {zoneId}");
+    }
+
+    private void Update()
+    {
+        if (!playerInside || player == null || signalSource == null)
+            return;
+
+        float distance = Vector2.Distance(player.position, signalSource.position);
+
+        float t = Mathf.Clamp01(1f - (distance / maxSignalDistance));
+        float signal = t * maxSignalStrength;
+
+        RadioSystem.Instance.SetSignalStrength(signal);
+    }
 }
 using System;
 using System.Collections.Generic;  // ğŸ”´ EKLE
@@ -10457,6 +10832,10 @@ public class WeaponDefinition : ScriptableObject
     public int burnDamage = 1;
     public float burnDuration = 5f;
     public float tickInterval = 1f;
+
+    // 🔥 YENİ EKLENEN KISIM
+    [Header("Animation")]
+    public AnimatorOverrideController animatorOverride;
 }
 using UnityEngine;
 

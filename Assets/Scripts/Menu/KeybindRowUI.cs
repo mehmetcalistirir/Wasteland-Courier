@@ -5,34 +5,56 @@ using UnityEngine.InputSystem;
 
 public class KeybindRowUI : MonoBehaviour
 {
+    [Header("Text")]
     public TMP_Text actionNameText;
+
+    [Header("Button")]
     public Button rebindButton;
-    public TMP_Text bindingText;
+
+    [Header("Icon")]
+    public Image bindingIcon;
+    public InputIconSet iconSet;
 
     private InputAction action;
     private int bindingIndex;
 
     public void Setup(InputAction action, int bindingIndex = 0)
-{
-    this.action = action;
-    this.bindingIndex = bindingIndex;
-
-    actionNameText.text = action.name;
-    UpdateBindingText();
-
-    rebindButton.onClick.RemoveAllListeners();
-    rebindButton.onClick.AddListener(StartRebind);
-}
-
-
-    void UpdateBindingText()
     {
-        bindingText.text = action.GetBindingDisplayString(bindingIndex);
+        this.action = action;
+        this.bindingIndex = bindingIndex;
+
+        // 🔤 Aksiyon adı görünür
+        actionNameText.text = action.name;
+
+        UpdateBindingUI();
+
+        rebindButton.onClick.RemoveAllListeners();
+        rebindButton.onClick.AddListener(StartRebind);
+    }
+
+    void UpdateBindingUI()
+    {
+        if (bindingIcon == null || iconSet == null || action == null)
+            return;
+
+        string path = action.bindings[bindingIndex].effectivePath;
+        Sprite icon = iconSet.GetIconFromPath(path);
+
+        if (icon != null)
+        {
+            bindingIcon.sprite = icon;
+            bindingIcon.enabled = true;
+        }
+        else
+        {
+            bindingIcon.enabled = false;
+        }
     }
 
     void StartRebind()
     {
-        bindingText.text = "Press key...";
+        if (bindingIcon != null)
+            bindingIcon.enabled = false;
 
         action.Disable();
 
@@ -42,7 +64,8 @@ public class KeybindRowUI : MonoBehaviour
             {
                 op.Dispose();
                 action.Enable();
-                UpdateBindingText();
+
+                UpdateBindingUI();   // 🔥 ICON REBIND SONRASI GÜNCELLENİR
                 SaveBindings();
             })
             .Start();

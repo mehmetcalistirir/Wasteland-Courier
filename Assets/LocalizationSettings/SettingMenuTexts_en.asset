@@ -10,32 +10,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
-  m_Name: GameTexts_tr
+  m_Name: SettingMenuTexts_en
   m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
   m_LocaleId:
-    m_Code: tr
-  m_SharedData: {fileID: 11400000, guid: c465ef08b28a72c489fb7b022928f6b1, type: 2}
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 1fa382f3dfabcfd4cae2bba93255d80c, type: 2}
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 66857783296
-    m_Localized: Oyna
+  - m_Id: 105646706688
+    m_Localized: General Sound
     m_Metadata:
       m_Items: []
-  - m_Id: 104065454080
-    m_Localized: Devam Et
+  - m_Id: 336136294400
+    m_Localized: Music Sound
     m_Metadata:
       m_Items: []
-  - m_Id: 181114818560
-    m_Localized: Ayarlar
+  - m_Id: 506051743744
+    m_Localized: Effect Sound
     m_Metadata:
       m_Items: []
-  - m_Id: 234252455936
-    m_Localized: "\xC7\u0131k\u0131\u015F"
+  - m_Id: 791692234752
+    m_Localized: Full Screen
     m_Metadata:
       m_Items: []
-  - m_Id: 1914150899712
-    m_Localized: "Eme\u011Fi Ge\xE7enler"
+  - m_Id: 908168056832
+    m_Localized: Reset Bindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1378966097920
+    m_Localized: Go To Main Menu
     m_Metadata:
       m_Items: []
   references:

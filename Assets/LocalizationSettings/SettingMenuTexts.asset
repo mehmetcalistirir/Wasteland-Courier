@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5be51871efa6c3e4eae1703925c8f5ac, type: 3}
-  m_Name: GameTexts
+  m_Name: SettingMenuTexts
   m_EditorClassIdentifier: Unity.Localization.Editor::UnityEditor.Localization.StringTableCollection
-  m_SharedTableData: {fileID: 11400000, guid: c465ef08b28a72c489fb7b022928f6b1, type: 2}
+  m_SharedTableData: {fileID: 11400000, guid: 1fa382f3dfabcfd4cae2bba93255d80c, type: 2}
   m_Tables:
-  - {fileID: 11400000, guid: c4fabdda64adb4a4e9f4a0dedb607ced, type: 2}
-  - {fileID: 11400000, guid: b13964e14524c15408ba8356b5fe97b0, type: 2}
+  - {fileID: 11400000, guid: bafff5b7a860a6644be5ecaa850f04b1, type: 2}
+  - {fileID: 11400000, guid: 202016fbaa0060d4c8eed497e6c1f153, type: 2}
   m_Extensions: []
   m_Group: String Table
   references:

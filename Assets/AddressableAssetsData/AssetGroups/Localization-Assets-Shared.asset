@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Localization-Assets-Shared
   m_GUID: 1ae55910efc27314da6a3bb087589190
   m_SerializeEntries:
+  - m_GUID: 1fa382f3dfabcfd4cae2bba93255d80c
+    m_Address: Assets/LocalizationSettings/SettingMenuTexts Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c465ef08b28a72c489fb7b022928f6b1
     m_Address: Assets/LocalizationSettings/GameTexts Shared Data.asset
     m_ReadOnly: 1

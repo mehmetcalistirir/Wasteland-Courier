@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(Image), typeof(Button))]
+[RequireComponent(typeof(Image))]
 public class ButtonStateController : MonoBehaviour,
     IPointerEnterHandler,
     IPointerExitHandler,
@@ -15,37 +15,41 @@ public class ButtonStateController : MonoBehaviour,
     public Sprite clickedSprite;
 
     private Image image;
-    private Button button;
+    private Selectable selectable; // Button, Dropdown, Toggle vs.
 
     void Awake()
     {
         image = GetComponent<Image>();
-        button = GetComponent<Button>();
+        selectable = GetComponent<Selectable>(); // varsa alır
 
-        image.sprite = normalSprite;
+        
     }
 
-    // 🔒 Button pasifse hiçbir şey yapma
     bool IsInteractable()
     {
-        return button != null && button.interactable;
+        // Button / Dropdown / Toggle vs. varsa onun interactable durumuna bak
+        if (selectable != null)
+            return selectable.interactable;
+
+        // Hiç Selectable yoksa her zaman etkileşime açık say
+        return true;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (!IsInteractable()) return;
+        if (!IsInteractable() || hoverSprite == null) return;
         image.sprite = hoverSprite;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (!IsInteractable()) return;
+        if (!IsInteractable() || normalSprite == null) return;
         image.sprite = normalSprite;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!IsInteractable()) return;
+        if (!IsInteractable() || clickedSprite == null) return;
         image.sprite = clickedSprite;
     }
 
@@ -53,22 +57,25 @@ public class ButtonStateController : MonoBehaviour,
     {
         if (!IsInteractable()) return;
 
+        // Hala butonun üzerindeysek hover’a dön
         if (RectTransformUtility.RectangleContainsScreenPoint(
-            transform as RectTransform,
-            Input.mousePosition))
+                transform as RectTransform,
+                Input.mousePosition))
         {
-            image.sprite = hoverSprite;
+            if (hoverSprite != null)
+                image.sprite = hoverSprite;
         }
         else
         {
-            image.sprite = normalSprite;
+            if (normalSprite != null)
+                image.sprite = normalSprite;
         }
     }
 
-    // 🔁 Button runtime'da disable edilirse sprite resetlensin
     void Update()
     {
-        if (!IsInteractable() && image.sprite != normalSprite)
+        // Runtime'da disable edilirse normal sprite'a dön
+        if (!IsInteractable() && image != null && normalSprite != null && image.sprite != normalSprite)
         {
             image.sprite = normalSprite;
         }

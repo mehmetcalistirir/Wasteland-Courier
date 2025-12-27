@@ -92,6 +92,7 @@ private void OnDisable()
 }
 
 
+
     // INTERACT (E)
     private void OnInteract(InputAction.CallbackContext ctx)
     {
@@ -232,6 +233,11 @@ private void OnDisable()
         Time.timeScale = 1f;
     }
 
+public void EnableGameplay()
+{
+    inputActions.FindActionMap("UI").Disable();
+    inputActions.FindActionMap("Gameplay").Enable();
+}
 
 
     // ======================================================
